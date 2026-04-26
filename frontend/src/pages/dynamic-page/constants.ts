@@ -1,0 +1,1 @@
+export const PAGE_COLLECTION_ID = 'ced793f7-414b-41a7-8693-1e94627227df';

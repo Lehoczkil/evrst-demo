@@ -1,0 +1,83 @@
+.root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transition:
+    background-color 200ms ease,
+    backdrop-filter 200ms ease,
+    border-color 200ms ease;
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.scrolled {
+  background-color: light-dark(
+    rgba(255, 255, 255, 0.6),
+    rgba(20, 21, 23, 0.6)
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: light-dark(
+    var(--mantine-color-gray-3),
+    var(--mantine-color-dark-4)
+  );
+}
+
+.navLink {
+  font-size: 14px !important;
+  white-space: nowrap;
+}
+
+.inner {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  transition: padding 200ms ease;
+}
+
+.scrolled .inner {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.column {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+}
+
+.logoColumn {
+  position: relative;
+}
+
+.logoWrap {
+  display: inline-flex;
+}
+
+.logoWrap img {
+  height: 80px;
+  width: auto;
+  margin-bottom: -40px;
+  transition:
+    height 200ms ease,
+    margin 200ms ease;
+}
+
+@media (max-width: $mantine-breakpoint-sm) {
+  .logoWrap img {
+    height: 56px;
+    margin-bottom: -28px;
+  }
+}
+
+.scrolled .logoWrap img {
+  height: 36px;
+  margin-bottom: 0;
+}
+
+@media (max-width: $mantine-breakpoint-sm) {
+  .scrolled .logoWrap img {
+    height: 28px;
+  }
+}

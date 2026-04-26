@@ -1,0 +1,24 @@
+.card {
+  cursor: pointer;
+  position: relative;
+  transition:
+    border-color 150ms ease,
+    transform 150ms ease,
+    box-shadow 150ms ease;
+
+  @mixin hover {
+    z-index: 1;
+    transform: scale(1.01);
+    box-shadow: var(--mantine-shadow-md);
+  }
+}
+
+.date {
+  text-transform: uppercase;
+}
+
+.title {
+  font-weight: 500;
+  font-size: var(--mantine-font-size-lg);
+  color: var(--mantine-color-bright);
+}

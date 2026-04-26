@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Auth;
+
+/**
+ * Permission key constants. Use these everywhere instead of typing the
+ * string literals — keeps grepability + autocomplete + cuts down typos.
+ */
+final class Perm
+{
+    public const EVENTS_CREATE = 'events.create';
+    public const EVENTS_EDIT   = 'events.edit';
+    public const EVENTS_DELETE = 'events.delete';
+
+    public const SPONSORS_CREATE = 'sponsors.create';
+    public const SPONSORS_EDIT   = 'sponsors.edit';
+    public const SPONSORS_DELETE = 'sponsors.delete';
+
+    public const TEAM_CREATE = 'team.create';
+    public const TEAM_EDIT   = 'team.edit';
+    public const TEAM_DELETE = 'team.delete';
+
+    public const CONTENT_CREATE = 'content.create';
+    public const CONTENT_EDIT   = 'content.edit';
+    public const CONTENT_DELETE = 'content.delete';
+
+    public const PROJECTS_CREATE = 'projects.create';
+    public const PROJECTS_EDIT   = 'projects.edit';
+    public const PROJECTS_DELETE = 'projects.delete';
+
+    public const GOALS_CREATE = 'goals.create';
+    public const GOALS_EDIT   = 'goals.edit';
+    public const GOALS_DELETE = 'goals.delete';
+
+    public const APPLICATIONS_ACCEPT = 'applications.accept';
+    public const APPLICATIONS_REFUSE = 'applications.refuse';
+    public const APPLICATIONS_EDIT   = 'applications.edit';
+
+    public const TASKS_CREATE = 'tasks.create';
+    public const TASKS_EDIT   = 'tasks.edit';
+    public const TASKS_DELETE = 'tasks.delete';
+
+    public const NOTIFICATIONS_SEE = 'notifications.see';
+
+    public const ROLE_ADMIN   = 'admin';
+    public const ROLE_MANAGER = 'manager';
+    public const ROLE_MEMBER  = 'member';
+
+    /** @return array<int, array{key: string, label: string}> */
+    public static function catalog(): array
+    {
+        return [
+            ['key' => self::EVENTS_CREATE,       'label' => 'Create events'],
+            ['key' => self::EVENTS_EDIT,         'label' => 'Edit events'],
+            ['key' => self::EVENTS_DELETE,       'label' => 'Delete events'],
+            ['key' => self::SPONSORS_CREATE,     'label' => 'Create sponsors'],
+            ['key' => self::SPONSORS_EDIT,       'label' => 'Edit sponsors'],
+            ['key' => self::SPONSORS_DELETE,     'label' => 'Delete sponsors'],
+            ['key' => self::TEAM_CREATE,         'label' => 'Create team members'],
+            ['key' => self::TEAM_EDIT,           'label' => 'Edit team members'],
+            ['key' => self::TEAM_DELETE,         'label' => 'Delete team members'],
+            ['key' => self::CONTENT_CREATE,      'label' => 'Create content'],
+            ['key' => self::CONTENT_EDIT,        'label' => 'Edit content'],
+            ['key' => self::CONTENT_DELETE,      'label' => 'Delete content'],
+            ['key' => self::PROJECTS_CREATE,     'label' => 'Create projects'],
+            ['key' => self::PROJECTS_EDIT,       'label' => 'Edit projects'],
+            ['key' => self::PROJECTS_DELETE,     'label' => 'Delete projects'],
+            ['key' => self::GOALS_CREATE,        'label' => 'Create goals'],
+            ['key' => self::GOALS_EDIT,          'label' => 'Edit goals'],
+            ['key' => self::GOALS_DELETE,        'label' => 'Delete goals'],
+            ['key' => self::APPLICATIONS_ACCEPT, 'label' => 'Accept new member entries'],
+            ['key' => self::APPLICATIONS_REFUSE, 'label' => 'Refuse new member entries'],
+            ['key' => self::APPLICATIONS_EDIT,   'label' => 'Edit new member entries'],
+            ['key' => self::TASKS_CREATE,        'label' => 'Create tasks'],
+            ['key' => self::TASKS_EDIT,          'label' => 'Edit tasks'],
+            ['key' => self::TASKS_DELETE,        'label' => 'Delete tasks'],
+            ['key' => self::NOTIFICATIONS_SEE,   'label' => 'See notifications about new member entries'],
+        ];
+    }
+
+    /** @return array<int, string> */
+    public static function adminPermissions(): array
+    {
+        return array_map(fn ($p) => $p['key'], self::catalog());
+    }
+
+    /**
+     * Manager: every permission except sponsors, applications, notifications.
+     *
+     * @return array<int, string>
+     */
+    public static function managerPermissions(): array
+    {
+        return array_values(array_filter(self::adminPermissions(), function (string $key) {
+            return ! str_starts_with($key, 'sponsors.')
+                && ! str_starts_with($key, 'applications.')
+                && $key !== self::NOTIFICATIONS_SEE;
+        }));
+    }
+
+    /**
+     * Member: read-only — no permissions.
+     *
+     * @return array<int, string>
+     */
+    public static function memberPermissions(): array
+    {
+        return [];
+    }
+}

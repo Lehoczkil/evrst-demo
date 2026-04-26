@@ -1,0 +1,14 @@
+.titleColumn {
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  width: 100%;
+}
+
+@media (min-width: $mantine-breakpoint-md) {
+  .titleColumn {
+    flex-basis: 50%;
+    flex-shrink: 0;
+    width: auto;
+  }
+}
