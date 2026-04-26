@@ -1,0 +1,51 @@
+# Fly.io app config — read by `fly deploy` from inside backend/.
+# App name is set on first `fly launch`; replace `evrst-admin` here and
+# in any URLs once you pick yours.
+
+app = "evrst-admin"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  APACHE_DOCUMENT_ROOT = "/var/www/html/public"
+  LOG_CHANNEL = "stderr"
+  LOG_STDERR_FORMATTER = "Monolog\\Formatter\\JsonFormatter"
+
+# Two process groups share one image.
+#   `app`    — Apache fronting Laravel + Filament.
+#   `worker` — queue:work for notifications + Discord webhooks.
+[processes]
+  app = "apache2-foreground"
+  worker = "php artisan queue:work --tries=3 --sleep=3 --timeout=60"
+
+[[mounts]]
+  source = "evrst_data"
+  destination = "/persistent"
+  processes = ["app", "worker"]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  processes = ["worker"]

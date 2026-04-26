@@ -1,0 +1,26 @@
+# Files / dirs the Docker build context shouldn't copy into the image.
+.git
+.gitignore
+.github
+.idea
+.vscode
+.fleet
+.nova
+.phpactor.json
+.phpunit.result.cache
+node_modules
+storage/logs/*.log
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+bootstrap/cache/*.php
+.env
+.env.*
+!.env.example
+test-trace.php
+server.php
+tests
+docker/local
+*.md
+!README.md
