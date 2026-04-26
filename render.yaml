@@ -1,0 +1,58 @@
+# Render.com free-tier blueprint. Push this repo to GitHub, then on
+# Render → New → Blueprint → pick this repo and Render reads everything
+# from here. No credit card required for the Free plan.
+#
+# Free-tier constraints we work around:
+#  - No persistent disk → SQLite resets on each deploy. Entrypoint
+#    re-seeds when the DB is empty so the admin user always exists.
+#  - One service only (no background worker) → QUEUE_CONNECTION=sync
+#    so notifications + Discord webhooks fire inline with the request.
+#  - Sleeps after 15 min idle, ~30s cold start. Acceptable for a demo.
+
+services:
+  - type: web
+    name: evrst-admin
+    runtime: docker
+    plan: free
+    region: frankfurt          # or oregon / virginia / singapore — pick yours
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /admin/login
+    autoDeploy: true
+    envVars:
+      - key: APP_KEY
+        generateValue: true     # Render auto-generates a 32-byte key on first deploy
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: https://evrst-admin.onrender.com
+      - key: ADMIN_URL
+        value: https://evrst-admin.onrender.com/admin
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/html/database/database.sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: SESSION_SAME_SITE
+        value: lax
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync               # No worker on free tier → run jobs inline
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: MAIL_MAILER
+        value: log                # Switch to resend/postmark + add the API key when ready
+      - key: MAIL_FROM_ADDRESS
+        value: admin@evrst.demo
+      - key: MAIL_FROM_NAME
+        value: EVRST Admin
+      - key: DISCORD_WEBHOOK_URL
+        sync: false               # Set in the Render dashboard so the URL doesn't sit in git
+      - key: RESEND_API_KEY
+        sync: false               # Same — secret added via dashboard when you switch mailer
