@@ -15,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             \App\Http\Middleware\SetLocale::class,
         ]);
+        // Render / Fly / any PaaS terminates TLS in front of the
+        // container. Trust everything so Laravel reads the correct
+        // scheme + client IP from X-Forwarded-* headers — otherwise
+        // Filament generates http:// URLs that the browser blocks
+        // because the page itself was served over https://.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

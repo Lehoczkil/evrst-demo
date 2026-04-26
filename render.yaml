@@ -21,7 +21,9 @@ services:
     autoDeploy: true
     envVars:
       - key: APP_KEY
-        generateValue: true     # Render auto-generates a 32-byte key on first deploy
+        sync: false             # set manually: base64:$(openssl rand -base64 32)
+                                # Render's generateValue produces a hex string,
+                                # but Laravel requires the "base64:..." prefix.
       - key: APP_ENV
         value: production
       - key: APP_DEBUG

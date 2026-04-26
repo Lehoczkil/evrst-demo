@@ -22,6 +22,20 @@ fi
 
 cd /var/www/html
 
+# Refuse to boot without APP_KEY in the right shape. Catches the case
+# where Render's `generateValue: true` produced raw bytes instead of
+# the `base64:<base64>` prefix Laravel needs.
+if [ -z "${APP_KEY:-}" ]; then
+    echo "FATAL: APP_KEY is empty. Set it in Render → Environment to base64:\$(openssl rand -base64 32)"
+    exit 1
+fi
+case "$APP_KEY" in
+    base64:*|*:* ) ;;  # Laravel-shaped or driver:key
+    *) echo "FATAL: APP_KEY must start with 'base64:' followed by base64 of 32 random bytes."
+       echo "       Generate one with: php -r 'echo \"base64:\".base64_encode(random_bytes(32));'"
+       exit 1;;
+esac
+
 # Bind Apache to whatever port the host injected ($PORT). Render sets
 # 10000 on free tier, Fly uses 8080. Default 8080 covers local docker run.
 PORT="${PORT:-8080}"
