@@ -56,11 +56,13 @@ COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+# PORT is whatever the host injects at runtime — Render sets 10000 by
+# default for free-tier web services; Fly uses 8080 (its `internal_port`).
+# The entrypoint substitutes it into Apache's config on boot, so this
+# image works on either platform without rebuilding. EXPOSE is purely
+# documentation; container hosts ignore it.
 EXPOSE 8080
-
-# Apache listens on 8080 to match fly.toml's internal_port.
-RUN sed -ri 's!Listen 80!Listen 8080!g' /etc/apache2/ports.conf \
-    && sed -ri 's!:80!:8080!g' /etc/apache2/sites-available/000-default.conf
+EXPOSE 10000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"]

@@ -22,6 +22,12 @@ fi
 
 cd /var/www/html
 
+# Bind Apache to whatever port the host injected ($PORT). Render sets
+# 10000 on free tier, Fly uses 8080. Default 8080 covers local docker run.
+PORT="${PORT:-8080}"
+sed -ri "s!^Listen [0-9]+!Listen ${PORT}!g" /etc/apache2/ports.conf
+sed -ri "s!:[0-9]+>!:${PORT}>!g" /etc/apache2/sites-available/000-default.conf
+
 # Make sure the framework directories exist before any artisan call —
 # `realpath(storage_path('framework/views'))` returns false otherwise
 # and the view compiler throws "Please provide a valid cache path".
