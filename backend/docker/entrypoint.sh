@@ -22,10 +22,22 @@ fi
 
 cd /var/www/html
 
-# Make sure the SQLite file exists locally even without a volume.
-mkdir -p /var/www/html/database
-[ -f /var/www/html/database/database.sqlite ] || touch /var/www/html/database/database.sqlite
-chown -R www-data:www-data /var/www/html/database /var/www/html/storage
+# Make sure the framework directories exist before any artisan call —
+# `realpath(storage_path('framework/views'))` returns false otherwise
+# and the view compiler throws "Please provide a valid cache path".
+mkdir -p \
+    storage/app/public \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/framework/testing \
+    storage/logs \
+    bootstrap/cache \
+    database
+
+[ -f database/database.sqlite ] || touch database/database.sqlite
+chown -R www-data:www-data storage bootstrap/cache database
+chmod -R ug+rwX storage bootstrap/cache
 
 # Build the package manifest now that real APP_KEY etc. are set in env.
 # (Skipped at build time via composer --no-scripts to avoid the chicken-

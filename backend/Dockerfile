@@ -38,7 +38,14 @@ COPY . .
 # time (it would need APP_KEY + DB to boot). The entrypoint runs
 # `package:discover` at runtime, where real env vars from Render are set.
 RUN composer dump-autoload --optimize --no-dev --no-scripts \
-    && mkdir -p storage/framework/{cache/data,sessions,views,testing} storage/logs bootstrap/cache \
+    && mkdir -p \
+        storage/app/public \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/framework/testing \
+        storage/logs \
+        bootstrap/cache \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R ug+rwX storage bootstrap/cache
 
