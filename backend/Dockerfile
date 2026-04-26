@@ -34,7 +34,21 @@ RUN --mount=type=cache,target=/root/.composer/cache \
 # App source
 COPY . .
 
-# Finalise composer (now that artisan is present), build caches, ensure perms.
+# Build-time dummy APP_KEY so artisan's `package:discover` (run as a
+# composer post-autoload-dump script) can boot the framework. Render's
+# real APP_KEY is injected at runtime via env vars and overrides this.
+ENV APP_KEY=base64:dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXN0dGVzdHRlc3R0ZXM=
+ENV APP_ENV=production
+ENV DB_CONNECTION=sqlite
+ENV DB_DATABASE=:memory:
+ENV CACHE_STORE=array
+ENV SESSION_DRIVER=array
+ENV QUEUE_CONNECTION=sync
+ENV LOG_CHANNEL=stderr
+
+# Finalise composer (now that artisan is present), build caches, ensure
+# perms. `composer dump-autoload` triggers `php artisan package:discover`
+# via the post-autoload-dump script — needs the env vars above.
 RUN composer dump-autoload --optimize --no-dev \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R ug+rwX storage bootstrap/cache
