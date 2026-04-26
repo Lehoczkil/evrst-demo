@@ -29,6 +29,24 @@ class KanbanBoard extends Page
         return 'Kanban';
     }
 
+    /**
+     * Header actions on the kanban page — currently just a quick-create
+     * shortcut so admins don't have to bounce back to the list view to
+     * add a new card.
+     */
+    protected function getHeaderActions(): array
+    {
+        $actions = [];
+        if (auth()->user()?->can(Perm::TASKS_CREATE)) {
+            $actions[] = \Filament\Actions\Action::make('newTask')
+                ->label('New task')
+                ->icon('heroicon-o-plus')
+                ->color('primary')
+                ->url(TaskResource::getUrl('create'));
+        }
+        return $actions;
+    }
+
     public function clearFilters(): void
     {
         $this->filterAssigneeId = null;

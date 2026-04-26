@@ -48,7 +48,6 @@ class TeamMemberForm
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('photo')
                     ->image()
-                    ->imageEditor()
                     ->directory('team-members')
                     ->visibility('public')
                     ->disk('public')

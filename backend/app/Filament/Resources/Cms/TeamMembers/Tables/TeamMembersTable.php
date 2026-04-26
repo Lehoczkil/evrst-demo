@@ -38,7 +38,9 @@ class TeamMembersTable
                     ->toggleable(),
                 TextColumn::make('main_position_id')
                     ->label('Main position')
-                    ->state(fn ($record) => $record->payload['main_position']['payload']['name'] ?? '—')
+                    ->state(fn ($record) => \App\Models\Cms\CollectionResource::pickLocale(
+                        $record->payload['main_position']['payload']['name'] ?? null
+                    ) ?? '—')
                     ->badge()
                     ->color('primary'),
                 TextColumn::make('position_ids')
@@ -47,7 +49,7 @@ class TeamMembersTable
                         $positions = $record->payload['positions'] ?? [];
                         if (! is_array($positions)) return [];
                         return array_values(array_filter(array_map(
-                            fn ($p) => $p['payload']['name'] ?? null,
+                            fn ($p) => \App\Models\Cms\CollectionResource::pickLocale($p['payload']['name'] ?? null),
                             $positions,
                         )));
                     })

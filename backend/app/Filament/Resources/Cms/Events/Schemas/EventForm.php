@@ -60,7 +60,6 @@ class EventForm
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('image')
                     ->image()
-                    ->imageEditor()
                     ->directory('events')
                     ->visibility('public')
                     ->disk('public')

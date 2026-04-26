@@ -44,7 +44,6 @@ class SponsorForm
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('logo')
                     ->image()
-                    ->imageEditor()
                     ->directory('sponsors')
                     ->visibility('public')
                     ->disk('public')

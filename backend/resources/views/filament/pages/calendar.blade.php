@@ -55,6 +55,33 @@
         }
         .dark .cal-weekday { color: rgb(148 163 184); }
 
+        @media (max-width: 720px) {
+            .cal-grid { grid-template-columns: 1fr; gap: 6px; }
+            .cal-weekday { display: none; }
+            .cal-day {
+                min-height: 0;
+                padding: 10px 12px;
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .cal-day--out { display: none; }
+            .cal-day__num {
+                min-width: 36px;
+                font-size: .85rem;
+                margin: 0;
+                flex-shrink: 0;
+            }
+            .cal-day > a, .cal-day > .cal-day__cards { flex: 1; min-width: 0; }
+            .cal-day:not(:has(.cal-card)) { display: none; }   /* hide empty days on mobile */
+        }
+        @supports not selector(:has(*)) {
+            /* Fallback for older mobile browsers without :has() */
+            @media (max-width: 720px) {
+                .cal-day:empty { display: none; }
+            }
+        }
+
         .cal-day {
             background: white;
             border-radius: 10px;

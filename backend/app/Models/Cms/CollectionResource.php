@@ -69,6 +69,25 @@ abstract class CollectionResource extends Resource
     }
 
     /**
+     * Pick a single string out of a `{en, hu, …}` translation map (or
+     * pass through a plain scalar untouched). Static so callers like
+     * Filament tables / the kanban / the calendar can normalise the
+     * snapshot fields without owning a CollectionResource instance.
+     */
+    public static function pickLocale(mixed $value, ?string $lang = null): mixed
+    {
+        if (! is_array($value)) return $value;
+        if ($value === []) return null;
+        $isLocaleMap = true;
+        foreach (array_keys($value) as $k) {
+            if (! is_string($k) || strlen($k) > 5) { $isLocaleMap = false; break; }
+        }
+        if (! $isLocaleMap) return $value;
+        $lang = $lang ?? app()->getLocale();
+        return $value[$lang] ?? $value['en'] ?? $value['hu'] ?? array_values($value)[0] ?? null;
+    }
+
+    /**
      * Wrap a fully-built payload array in the `['payload' => …]` shape
      * Eloquent's Attribute::set callback expects, JSON-encoding it so
      * subsequent reads through the 'array' cast keep working when the

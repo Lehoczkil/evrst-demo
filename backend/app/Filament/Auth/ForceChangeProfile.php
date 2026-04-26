@@ -25,7 +25,6 @@ class ForceChangeProfile extends EditProfile
                             ->label('Profile picture')
                             ->avatar()
                             ->image()
-                            ->imageEditor()
                             ->imageCropAspectRatio('1:1')
                             ->disk('public')
                             ->directory('avatars')

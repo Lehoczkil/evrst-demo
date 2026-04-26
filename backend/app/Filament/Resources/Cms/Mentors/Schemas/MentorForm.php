@@ -27,7 +27,6 @@ class MentorForm
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('photo')
                     ->image()
-                    ->imageEditor()
                     ->directory('mentors')
                     ->visibility('public')
                     ->disk('public')
