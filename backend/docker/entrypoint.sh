@@ -27,6 +27,11 @@ mkdir -p /var/www/html/database
 [ -f /var/www/html/database/database.sqlite ] || touch /var/www/html/database/database.sqlite
 chown -R www-data:www-data /var/www/html/database /var/www/html/storage
 
+# Build the package manifest now that real APP_KEY etc. are set in env.
+# (Skipped at build time via composer --no-scripts to avoid the chicken-
+# and-egg of needing APP_KEY before secrets are injected.)
+php artisan package:discover --ansi --no-interaction || true
+
 # Public storage symlink — no-op if it already exists.
 php artisan storage:link --quiet 2>/dev/null || true
 
