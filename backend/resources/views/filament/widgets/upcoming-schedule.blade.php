@@ -7,27 +7,26 @@
         <x-slot name="heading">{{ __('admin.widgets.upcoming') }}</x-slot>
 
         @if ($items->isEmpty())
-            <p style="color: rgb(100 116 139); font-size: .85rem;">{{ __('admin.widgets.no_upcoming') }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('admin.widgets.no_upcoming') }}</p>
         @else
-            <div style="display: flex; flex-direction: column; gap: .55rem;">
+            <div class="flex flex-col gap-2">
                 @foreach ($items as $item)
                     @php
                         $when = \Carbon\Carbon::parse($item['when']);
                     @endphp
                     <a
                         href="{{ $item['url'] }}"
-                        style="display: flex; align-items: center; gap: .8rem; padding: .55rem .75rem; border-radius: 10px; text-decoration: none; background: rgba(15,23,42,.04); transition: background .15s ease; border-left: 3px solid {{ $item['color'] }};"
-                        onmouseover="this.style.background='rgba(15,23,42,.08)'"
-                        onmouseout="this.style.background='rgba(15,23,42,.04)'"
+                        class="flex items-center gap-3 px-3 py-2 rounded-[10px] no-underline transition bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10"
+                        style="border-left: 3px solid {{ $item['color'] }};"
                     >
-                        <div style="min-width: 56px; text-align: center;">
-                            <div style="font-size: .65rem; text-transform: uppercase; color: rgb(100 116 139); font-weight: 700;">{{ $when->format('M') }}</div>
-                            <div style="font-size: 1.2rem; font-weight: 700; line-height: 1;">{{ $when->format('d') }}</div>
-                            <div style="font-size: .65rem; color: rgb(100 116 139);">{{ $when->format('H:i') }}</div>
+                        <div class="text-center" style="min-width: 56px;">
+                            <div class="text-[.65rem] uppercase font-bold text-gray-500 dark:text-gray-400">{{ $when->format('M') }}</div>
+                            <div class="text-xl font-bold leading-none text-gray-900 dark:text-white">{{ $when->format('d') }}</div>
+                            <div class="text-[.65rem] text-gray-500 dark:text-gray-400">{{ $when->format('H:i') }}</div>
                         </div>
-                        <div style="flex: 1; min-width: 0;">
-                            <div style="font-size: .65rem; text-transform: uppercase; letter-spacing: .04em; color: {{ $item['color'] }}; font-weight: 700;">{{ $item['type'] }}</div>
-                            <div style="font-weight: 600; color: rgb(15 23 42); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $item['title'] }}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[.65rem] uppercase tracking-wide font-bold" style="color: {{ $item['color'] }};">{{ $item['type'] }}</div>
+                            <div class="font-semibold text-gray-900 dark:text-white truncate">{{ $item['title'] }}</div>
                         </div>
                     </a>
                 @endforeach

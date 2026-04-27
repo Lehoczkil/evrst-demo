@@ -56,11 +56,11 @@
     >
         <div
             @click.stop
+            class="bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 dark:border dark:border-white/10"
             style="
                 position: fixed;
                 top: 50%; left: 50%;
                 transform: translate(-50%, -50%);
-                background: white; color: rgb(15 23 42);
                 border-radius: 14px;
                 width: calc(100vw - 2rem); max-width: 560px;
                 max-height: calc(100vh - 4rem);
@@ -69,14 +69,13 @@
                 overflow: hidden;
                 z-index: 10000;
             "
-            class="dark:!bg-gray-900 dark:!text-gray-100 dark:!border dark:!border-white/10"
         >
-            <div style="padding: 1rem 1.25rem; border-bottom: 1px solid rgba(15,23,42,.08); display:flex; align-items:center; justify-content:space-between; flex: 0 0 auto;">
-                <div style="font-size: 1rem; font-weight: 700;" x-text="title"></div>
-                <button type="button" @click="open = false" style="background:transparent; border:0; cursor:pointer; font-size: 1.1rem; color: rgb(100 116 139); padding: 0;">✕</button>
+            <div class="border-b border-gray-200 dark:border-white/10" style="padding: 1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; flex: 0 0 auto;">
+                <div class="text-base font-bold" x-text="title"></div>
+                <button type="button" @click="open = false" class="text-gray-500 hover:text-gray-900 dark:hover:text-white" style="background:transparent; border:0; cursor:pointer; font-size: 1.1rem; padding: 0;">✕</button>
             </div>
-            <div style="padding: 1.25rem; font-size: .9rem; line-height: 1.55; overflow-y: auto; flex: 1 1 auto;" x-html="body"></div>
-            <div style="padding: 1rem 1.25rem; border-top: 1px solid rgba(15,23,42,.08); display:flex; justify-content:flex-end; background: rgba(15,23,42,.02); flex: 0 0 auto;">
+            <div class="text-sm leading-relaxed" style="padding: 1.25rem; overflow-y: auto; flex: 1 1 auto;" x-html="body"></div>
+            <div class="border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5" style="padding: 1rem 1.25rem; display:flex; justify-content:flex-end; flex: 0 0 auto;">
                 <button type="button" @click="open = false" style="background: rgb(245 158 11); color: rgb(120 53 15); border: 0; border-radius: .5rem; padding: .45rem .85rem; font-size: .85rem; font-weight: 600; cursor: pointer;">{{ __('admin.help.close') }}</button>
             </div>
         </div>
