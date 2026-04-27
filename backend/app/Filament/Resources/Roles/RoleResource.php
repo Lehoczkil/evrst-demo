@@ -19,19 +19,19 @@ class RoleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLockClosed;
 
-    protected static ?string $navigationLabel = 'Roles & permissions';
-
-    protected static ?string $modelLabel = 'role';
-
-    protected static ?string $pluralModelLabel = 'roles';
-
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Membership';
 
+    public static function getNavigationLabel(): string { return __('admin.resources.role.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.role.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.role.p'); }
+
     protected static ?int $navigationSort = 40;
 
     public static function canViewAny(): bool { return auth()->user()?->isAdmin() ?? false; }
+    public static function canAccess(): bool { return static::canViewAny(); }
+    public static function shouldRegisterNavigation(): bool { return static::canViewAny(); }
     public static function canCreate(): bool { return false; } // seeded only
     public static function canEdit($record): bool { return static::canViewAny(); }
     public static function canDelete($record): bool { return false; }

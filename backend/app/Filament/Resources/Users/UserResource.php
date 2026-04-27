@@ -20,21 +20,29 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static ?string $navigationLabel = 'Users';
-
-    protected static ?string $modelLabel = 'user';
-
-    protected static ?string $pluralModelLabel = 'users';
-
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Membership';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.user.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.user.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.user.p'); }
 
     protected static ?int $navigationSort = 30;
 
     public static function canViewAny(): bool
     {
         return auth()->user()?->isAdmin() ?? false;
+    }
+
+    public static function canAccess(): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
     }
 
     public static function canCreate(): bool
