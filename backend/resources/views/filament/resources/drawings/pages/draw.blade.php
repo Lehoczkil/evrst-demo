@@ -36,10 +36,13 @@
            fixed bottom bar. Breakpoint is 900px so phones in landscape
            and small tablets all get the mobile layout. */
         @media (max-width: 900px) {
+            /* On mobile, every visible piece of text sits between 12px
+               and 20px — readable on a phone, never tiny. */
             .ds-shell {
                 grid-template-columns: 1fr !important;
                 min-height: auto;
                 padding-bottom: 5.5rem; /* clear the fixed bottom bar */
+                font-size: 14px;
             }
             .ds-tools {
                 flex-direction: row !important;
@@ -53,9 +56,9 @@
             }
             .ds-tools .ds-tool {
                 flex: 0 0 auto;
-                width: 40px; height: 40px;
+                width: 44px; height: 44px;
             }
-            .ds-tools .ds-tool svg { width: 18px; height: 18px; }
+            .ds-tools .ds-tool svg { width: 20px; height: 20px; }
             .ds-tools .ds-tool__hot { display: none; }
 
             .ds-properties { display: none !important; }
@@ -67,7 +70,7 @@
             .ds-topbar {
                 position: static !important;
                 padding: .4rem .55rem;
-                gap: .35rem;
+                gap: .4rem;
                 margin-bottom: .5rem;
                 flex-wrap: wrap;
             }
@@ -75,39 +78,59 @@
             .ds-topbar .ds-mobile-hide {
                 display: none !important;
             }
-            .ds-topbar .ds-btn { padding: .35rem .5rem; font-size: .75rem; }
-            .ds-topbar .ds-btn svg { width: 14px; height: 14px; }
+            .ds-topbar .ds-btn { padding: .4rem .6rem; font-size: 13px; }
+            .ds-topbar .ds-btn svg { width: 16px; height: 16px; }
             .ds-topbar .ds-select,
             .ds-topbar .ds-input {
-                font-size: .72rem; padding: .3rem .45rem;
+                font-size: 14px; padding: .35rem .55rem;
             }
-            .ds-title-input { flex: 1 1 100%; font-size: .9rem; }
+            .ds-title-input { flex: 1 1 100%; font-size: 16px; }
 
+            /* Canvas grows to fill the available portrait space — the
+               4:5 default keeps its aspect ratio, but the height +
+               width constraints both lift so the canvas takes the
+               whole frame between the topbar and the bottom bar. */
             .ds-canvas-wrap {
                 min-height: auto;
-                padding: .5rem;
+                padding: .35rem;
+                background-size: 14px 14px;
+            }
+            .ds-canvas-stage {
+                /* Stage sizes to whichever dimension hits its max first;
+                   children (canvas + overlay) use auto sizing so the
+                   intrinsic aspect ratio of the canvas is preserved. */
+                max-width: 100%;
+                max-height: calc(100vh - 14rem);
+                width: auto;
+                height: auto;
             }
             #ds-canvas, #ds-overlay {
-                max-height: calc(100vh - 22rem);
                 width: auto !important;
+                height: auto !important;
+                max-width: 100%;
+                max-height: calc(100vh - 14rem);
             }
-            .ds-status { bottom: 5.5rem; right: .5rem; font-size: .6rem; }
+            .ds-status {
+                bottom: 5.75rem; right: .5rem;
+                font-size: 12px; padding: .25rem .5rem;
+            }
 
             .ds-mobile-bar {
                 position: fixed;
                 left: 0; right: 0; bottom: 0;
                 z-index: 30;
-                padding: .5rem .55rem calc(.5rem + env(safe-area-inset-bottom, 0px));
+                padding: .55rem .6rem calc(.55rem + env(safe-area-inset-bottom, 0px));
                 background: var(--ds-bg-strong);
                 border-top: 1px solid var(--ds-border);
                 box-shadow: 0 -8px 24px rgba(15,23,42,.18);
-                display: flex; align-items: center; gap: .4rem;
+                display: flex; align-items: center; gap: .45rem;
                 /* No scroll — children must fit in one row. */
                 overflow: hidden;
                 max-width: 100vw;
+                font-size: 14px;
             }
             .ds-mobile-bar input[type="color"] {
-                width: 36px; height: 36px; padding: 0;
+                width: 40px; height: 40px; padding: 0;
                 border: 1px solid var(--ds-border); border-radius: .5rem;
                 background: var(--ds-input);
                 flex: 0 0 auto;
@@ -117,7 +140,7 @@
             }
             .ds-mobile-bar .ds-mobile-icon {
                 flex: 0 0 auto;
-                width: 36px; height: 36px;
+                width: 40px; height: 40px;
                 display: inline-flex; align-items: center; justify-content: center;
                 border-radius: .5rem;
                 border: 1px solid var(--ds-border);
@@ -126,17 +149,17 @@
                 cursor: pointer;
                 padding: 0;
             }
-            .ds-mobile-bar .ds-mobile-icon svg { width: 16px; height: 16px; }
+            .ds-mobile-bar .ds-mobile-icon svg { width: 18px; height: 18px; }
             .ds-mobile-bar .ds-mobile-icon[disabled] { opacity: .4; }
             .ds-mobile-bar .ds-mobile-save {
                 flex: 0 0 auto;
-                width: 36px; height: 36px;
+                width: 40px; height: 40px;
                 display: inline-flex; align-items: center; justify-content: center;
                 border-radius: .5rem; border: 0;
                 background: var(--ds-accent); color: var(--ds-accent-strong);
                 cursor: pointer; padding: 0;
             }
-            .ds-mobile-bar .ds-mobile-save svg { width: 18px; height: 18px; }
+            .ds-mobile-bar .ds-mobile-save svg { width: 20px; height: 20px; }
             .ds-mobile-bar .ds-mobile-save[disabled] { opacity: .6; cursor: progress; }
         }
         @media (min-width: 901px) {
