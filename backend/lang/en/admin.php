@@ -52,6 +52,18 @@ return [
         'no_link'          => 'No Onshape link saved yet.',
         'empty_heading'    => 'No 3D models yet',
         'empty_body'       => 'Add one with the “New 3D model” button.',
+        'export_glb'       => 'Re-export GLB',
+        'export_queued'    => 'Export queued',
+        'export_queued_body' => 'We\'re asking Onshape to translate the document. Refresh in a few seconds — the viewer takes over once the GLB lands.',
+        'export_running'   => 'Translating the document on Onshape — this usually takes 5–30 seconds.',
+        'export_failed'    => 'Export failed: :reason',
+        'no_glb_yet'       => 'No 3D preview cached yet. Hit “Re-export GLB” to ask Onshape for one.',
+        'glb_status'       => 'Preview',
+        'glb_ready'        => 'Ready',
+        'glb_running'      => 'Exporting…',
+        'glb_failed'       => 'Failed',
+        'glb_not_exported' => 'Not exported',
+        'glb_exported_at'  => 'Cached :date · :size',
     ],
 
     'common' => [

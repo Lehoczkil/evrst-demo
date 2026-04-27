@@ -6,10 +6,16 @@ use App\Concerns\LogsActivity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class OnshapeModel extends Model
 {
     use LogsActivity;
+
+    public const GLB_IDLE    = 'idle';
+    public const GLB_QUEUED  = 'queued';
+    public const GLB_RUNNING = 'running';
+    public const GLB_FAILED  = 'failed';
 
     protected $fillable = [
         'user_id',
@@ -20,6 +26,17 @@ class OnshapeModel extends Model
         'element_id',
         'share_url',
         'thumbnail_path',
+        'glb_disk',
+        'glb_path',
+        'glb_size',
+        'glb_exported_at',
+        'glb_status',
+        'glb_error',
+    ];
+
+    protected $casts = [
+        'glb_size' => 'integer',
+        'glb_exported_at' => 'datetime',
     ];
 
     public function labelForLog(): string
@@ -60,6 +77,36 @@ class OnshapeModel extends Model
      *
      * @return array{document_id: ?string, workspace_id: ?string, element_id: ?string}
      */
+    /** Public URL of the cached GLB on the public disk, or null if none. */
+    protected function glbUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (! $this->glb_path) return null;
+                try {
+                    return Storage::disk($this->glb_disk ?: 'public')->url($this->glb_path);
+                } catch (\Throwable) {
+                    return null;
+                }
+            },
+        );
+    }
+
+    public function hasGlb(): bool
+    {
+        return (bool) $this->glb_path;
+    }
+
+    public function deleteGlbFile(): void
+    {
+        if (! $this->glb_path) return;
+        try {
+            Storage::disk($this->glb_disk ?: 'public')->delete($this->glb_path);
+        } catch (\Throwable) {
+            // best-effort
+        }
+    }
+
     public static function parseShareUrl(?string $url): array
     {
         $out = ['document_id' => null, 'workspace_id' => null, 'element_id' => null];

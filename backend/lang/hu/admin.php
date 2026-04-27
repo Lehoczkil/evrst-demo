@@ -52,6 +52,18 @@ return [
         'no_link'          => 'Nincs Onshape link mentve.',
         'empty_heading'    => 'Még nincs 3D modell',
         'empty_body'       => 'Adj hozzá egyet az „Új 3D modell” gombbal.',
+        'export_glb'       => 'GLB újraexportálása',
+        'export_queued'    => 'Export elindítva',
+        'export_queued_body' => 'Az Onshape elkezdi a dokumentum konvertálását. Frissítsd pár másodperc múlva — a megjelenítő automatikusan átveszi, amint a GLB megérkezik.',
+        'export_running'   => 'Az Onshape konvertálja a dokumentumot — általában 5–30 másodperc.',
+        'export_failed'    => 'Export hiba: :reason',
+        'no_glb_yet'       => 'Még nincs gyorsítótárazott 3D előnézet. A „GLB újraexportálása” gombbal kérhetsz egyet az Onshape-től.',
+        'glb_status'       => 'Előnézet',
+        'glb_ready'        => 'Kész',
+        'glb_running'      => 'Exportálás…',
+        'glb_failed'       => 'Sikertelen',
+        'glb_not_exported' => 'Nincs exportálva',
+        'glb_exported_at'  => ':date · :size',
     ],
 
     'common' => [

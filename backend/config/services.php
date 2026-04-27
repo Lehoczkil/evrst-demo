@@ -39,4 +39,14 @@ return [
         'webhook' => env('DISCORD_WEBHOOK_URL'),
     ],
 
+    'onshape' => [
+        // API keys generated at https://dev-portal.onshape.com → API keys.
+        // Translation requests run as the owner of these keys, so the keys
+        // need to belong to a user with read access to the documents being
+        // exported.
+        'access_key' => env('ONSHAPE_ACCESS_KEY'),
+        'secret_key' => env('ONSHAPE_SECRET_KEY'),
+        'base_url'   => env('ONSHAPE_BASE_URL', 'https://cad.onshape.com/api/v6'),
+    ],
+
 ];
