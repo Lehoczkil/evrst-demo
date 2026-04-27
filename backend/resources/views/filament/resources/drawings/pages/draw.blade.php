@@ -31,27 +31,25 @@
             .ds-shell { grid-template-columns: 56px 1fr; }
             .ds-properties { display: none; }
         }
-        /* Mobile layout — single column with a fixed bottom toolbar that
-           exposes the small set of controls users actually need on a
-           phone. The canvas stops above the toolbar instead of being
-           covered by it. */
-        @media (max-width: 720px) {
+        /* Mobile / tablet portrait — collapse to a single column, drop
+           the desktop side panels, and surface the essentials in a
+           fixed bottom bar. Breakpoint is 900px so phones in landscape
+           and small tablets all get the mobile layout. */
+        @media (max-width: 900px) {
             .ds-shell {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
                 min-height: auto;
-                padding-bottom: 5.5rem; /* room for the fixed bottom bar */
+                padding-bottom: 5.5rem; /* clear the fixed bottom bar */
             }
             .ds-tools {
-                flex-direction: row;
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                overflow-y: hidden;
-                position: static;
-                top: auto;
-                gap: .25rem;
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                overflow: visible !important;
+                position: static !important;
+                top: auto !important;
+                gap: .3rem;
                 padding: .35rem;
-                scrollbar-width: thin;
-                -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
             }
             .ds-tools .ds-tool {
                 flex: 0 0 auto;
@@ -60,47 +58,88 @@
             .ds-tools .ds-tool svg { width: 18px; height: 18px; }
             .ds-tools .ds-tool__hot { display: none; }
 
-            .ds-properties { display: none; }
+            .ds-properties { display: none !important; }
 
-            .ds-canvas-wrap {
-                min-height: 50vh;
-                padding: .5rem;
-            }
-            .ds-status { bottom: 6rem; right: .5rem; font-size: .65rem; }
-
+            /* Top toolbar — drop everything except the title + new-drawing
+               size preset; image upload, export, and save move to the
+               bottom bar. The desktop dimension inputs / undo / redo also
+               vanish here because they're awkward on a phone. */
             .ds-topbar {
-                position: static; /* no overlap with canvas while scrolling */
-                padding: .35rem .5rem;
+                position: static !important;
+                padding: .4rem .55rem;
                 gap: .35rem;
                 margin-bottom: .5rem;
+                flex-wrap: wrap;
             }
-            .ds-topbar .ds-divider { display: none; }
+            .ds-topbar .ds-divider,
+            .ds-topbar .ds-mobile-hide {
+                display: none !important;
+            }
             .ds-topbar .ds-btn { padding: .35rem .5rem; font-size: .75rem; }
             .ds-topbar .ds-btn svg { width: 14px; height: 14px; }
-            .ds-topbar .ds-select, .ds-topbar .ds-input { font-size: .72rem; padding: .3rem .45rem; }
+            .ds-topbar .ds-select,
+            .ds-topbar .ds-input {
+                font-size: .72rem; padding: .3rem .45rem;
+            }
+            .ds-title-input { flex: 1 1 100%; font-size: .9rem; }
+
+            .ds-canvas-wrap {
+                min-height: auto;
+                padding: .5rem;
+            }
+            #ds-canvas, #ds-overlay {
+                max-height: calc(100vh - 22rem);
+                width: auto !important;
+            }
+            .ds-status { bottom: 5.5rem; right: .5rem; font-size: .6rem; }
 
             .ds-mobile-bar {
                 position: fixed;
                 left: 0; right: 0; bottom: 0;
                 z-index: 30;
-                padding: .55rem .65rem calc(.55rem + env(safe-area-inset-bottom, 0px));
+                padding: .5rem .55rem calc(.5rem + env(safe-area-inset-bottom, 0px));
                 background: var(--ds-bg-strong);
                 border-top: 1px solid var(--ds-border);
-                box-shadow: 0 -8px 24px rgba(15,23,42,.12);
-                display: flex; align-items: center; gap: .5rem;
-                overflow-x: auto;
+                box-shadow: 0 -8px 24px rgba(15,23,42,.18);
+                display: flex; align-items: center; gap: .4rem;
+                /* No scroll — children must fit in one row. */
+                overflow: hidden;
+                max-width: 100vw;
             }
             .ds-mobile-bar input[type="color"] {
-                width: 38px; height: 36px; padding: 0;
+                width: 36px; height: 36px; padding: 0;
                 border: 1px solid var(--ds-border); border-radius: .5rem;
                 background: var(--ds-input);
+                flex: 0 0 auto;
             }
             .ds-mobile-bar input[type="range"] {
-                flex: 1 1 100px; min-width: 100px;
+                flex: 1 1 0; min-width: 0;
             }
-            .ds-mobile-bar .ds-btn { padding: .4rem .55rem; }
+            .ds-mobile-bar .ds-mobile-icon {
+                flex: 0 0 auto;
+                width: 36px; height: 36px;
+                display: inline-flex; align-items: center; justify-content: center;
+                border-radius: .5rem;
+                border: 1px solid var(--ds-border);
+                background: var(--ds-bg-strong);
+                color: var(--ds-text);
+                cursor: pointer;
+                padding: 0;
+            }
+            .ds-mobile-bar .ds-mobile-icon svg { width: 16px; height: 16px; }
+            .ds-mobile-bar .ds-mobile-icon[disabled] { opacity: .4; }
+            .ds-mobile-bar .ds-mobile-save {
+                flex: 0 0 auto;
+                width: 36px; height: 36px;
+                display: inline-flex; align-items: center; justify-content: center;
+                border-radius: .5rem; border: 0;
+                background: var(--ds-accent); color: var(--ds-accent-strong);
+                cursor: pointer; padding: 0;
+            }
+            .ds-mobile-bar .ds-mobile-save svg { width: 18px; height: 18px; }
+            .ds-mobile-bar .ds-mobile-save[disabled] { opacity: .6; cursor: progress; }
         }
-        @media (min-width: 721px) {
+        @media (min-width: 901px) {
             .ds-mobile-bar { display: none; }
         }
 
@@ -439,38 +478,38 @@
                 <option value="a4-landscape">A4 landscape 1754×1240</option>
             </select>
 
-            <input type="number" class="ds-input" style="width:80px" x-model.number="width"  @change="resizeCanvas()" min="64" max="4096" data-tip="{{ __('admin.drawing.tip.width') }}" data-tip-pos="bottom" />
-            <span style="color: var(--ds-muted); font-size: .8rem;">×</span>
-            <input type="number" class="ds-input" style="width:80px" x-model.number="height" @change="resizeCanvas()" min="64" max="4096" data-tip="{{ __('admin.drawing.tip.height') }}" data-tip-pos="bottom" />
+            <input type="number" class="ds-input ds-mobile-hide" style="width:80px" x-model.number="width"  @change="resizeCanvas()" min="64" max="4096" data-tip="{{ __('admin.drawing.tip.width') }}" data-tip-pos="bottom" />
+            <span class="ds-mobile-hide" style="color: var(--ds-muted); font-size: .8rem;">×</span>
+            <input type="number" class="ds-input ds-mobile-hide" style="width:80px" x-model.number="height" @change="resizeCanvas()" min="64" max="4096" data-tip="{{ __('admin.drawing.tip.height') }}" data-tip-pos="bottom" />
 
             <div class="ds-divider"></div>
 
-            <button type="button" class="ds-btn ds-btn--ghost" @click="undo()" :disabled="undoStack.length <= 1" data-tip="{{ __('admin.drawing.tip.undo') }}" data-tip-pos="bottom" aria-label="Undo">
+            <button type="button" class="ds-btn ds-btn--ghost ds-mobile-hide" @click="undo()" :disabled="undoStack.length <= 1" data-tip="{{ __('admin.drawing.tip.undo') }}" data-tip-pos="bottom" aria-label="Undo">
                 <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l-4-4 4-4M5 10h9a5 5 0 010 10h-3"/></svg>
             </button>
-            <button type="button" class="ds-btn ds-btn--ghost" @click="redo()" :disabled="redoStack.length === 0" data-tip="{{ __('admin.drawing.tip.redo') }}" data-tip-pos="bottom" aria-label="Redo">
+            <button type="button" class="ds-btn ds-btn--ghost ds-mobile-hide" @click="redo()" :disabled="redoStack.length === 0" data-tip="{{ __('admin.drawing.tip.redo') }}" data-tip-pos="bottom" aria-label="Redo">
                 <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 14l4-4-4-4M19 10h-9a5 5 0 000 10h3"/></svg>
             </button>
 
             <div class="ds-divider"></div>
 
-            <button type="button" class="ds-btn" @click="$refs.fileInput.click()" data-tip="{{ __('admin.drawing.tip.image') }}" data-tip-pos="bottom">
+            <button type="button" class="ds-btn ds-mobile-hide" @click="$refs.fileInput.click()" data-tip="{{ __('admin.drawing.tip.image') }}" data-tip-pos="bottom">
                 <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2 2 0 002 2h14a2 2 0 002-2v-1.5M16 10l-4-4m0 0l-4 4m4-4v12"/></svg>
                 {{ __('admin.drawing.image') }}
             </button>
             <input type="file" x-ref="fileInput" accept="image/*" class="hidden" style="display:none" @change="onImageFile($event)" />
 
-            <div style="flex:1"></div>
+            <div style="flex:1" class="ds-mobile-hide"></div>
 
-            <select class="ds-select" x-model="exportFormat" data-tip="{{ __('admin.drawing.tip.export_fmt') }}" data-tip-pos="bottom">
+            <select class="ds-select ds-mobile-hide" x-model="exportFormat" data-tip="{{ __('admin.drawing.tip.export_fmt') }}" data-tip-pos="bottom">
                 <option value="png">PNG</option>
                 <option value="jpeg">JPG</option>
             </select>
-            <button type="button" class="ds-btn" @click="downloadLocal()" data-tip="{{ __('admin.drawing.tip.export') }}" data-tip-pos="bottom">
+            <button type="button" class="ds-btn ds-mobile-hide" @click="downloadLocal()" data-tip="{{ __('admin.drawing.tip.export') }}" data-tip-pos="bottom">
                 <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2 2 0 002 2h14a2 2 0 002-2v-1.5M7 10l5 5 5-5M12 15V3"/></svg>
                 {{ __('admin.drawing.export') }}
             </button>
-            <button type="button" class="ds-btn ds-btn--accent" @click="save()" :disabled="saving" data-tip="{{ __('admin.drawing.tip.save') }}" data-tip-pos="bottom" x-text="saving ? @js(__('admin.drawing.saving')) : @js(__('admin.drawing.save_to_gallery'))"></button>
+            <button type="button" class="ds-btn ds-btn--accent ds-mobile-hide" @click="save()" :disabled="saving" data-tip="{{ __('admin.drawing.tip.save') }}" data-tip-pos="bottom" x-text="saving ? @js(__('admin.drawing.saving')) : @js(__('admin.drawing.save_to_gallery'))"></button>
         </div>
 
         <div class="ds-shell">
@@ -591,20 +630,26 @@
             </aside>
         </div>
 
-        {{-- Mobile-only bottom bar: shown via CSS media query, gives
-             phone users the essentials (color, brush size, undo / redo,
-             clear, save) without needing the desktop right panel. --}}
+        {{-- Mobile bottom bar: icon-only so the row fits any phone width.
+             Single layout across portrait + landscape; never scrolls. --}}
         <div class="ds-mobile-bar">
             <input type="color" x-model="color" aria-label="Color" />
             <input type="range" min="1" max="80" x-model.number="size" aria-label="Brush size" />
-            <button type="button" class="ds-btn ds-btn--ghost" @click="undo()" :disabled="undoStack.length <= 1" aria-label="Undo">
-                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l-4-4 4-4M5 10h9a5 5 0 010 10h-3"/></svg>
+            <button type="button" class="ds-mobile-icon" @click="undo()" :disabled="undoStack.length <= 1" aria-label="Undo">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l-4-4 4-4M5 10h9a5 5 0 010 10h-3"/></svg>
             </button>
-            <button type="button" class="ds-btn ds-btn--ghost" @click="redo()" :disabled="redoStack.length === 0" aria-label="Redo">
-                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 14l4-4-4-4M19 10h-9a5 5 0 000 10h3"/></svg>
+            <button type="button" class="ds-mobile-icon" @click="redo()" :disabled="redoStack.length === 0" aria-label="Redo">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 14l4-4-4-4M19 10h-9a5 5 0 000 10h3"/></svg>
             </button>
-            <button type="button" class="ds-btn" @click="clearCanvas()" aria-label="{{ __('admin.drawing.clear_canvas') }}" style="white-space:nowrap;">⌫</button>
-            <button type="button" class="ds-btn ds-btn--accent" @click="save()" :disabled="saving" style="margin-left:auto; white-space:nowrap;" x-text="saving ? @js(__('admin.drawing.saving')) : @js(__('admin.drawing.save_to_gallery'))"></button>
+            <button type="button" class="ds-mobile-icon" @click="$refs.fileInput.click()" aria-label="{{ __('admin.drawing.image') }}">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2 2 0 002 2h14a2 2 0 002-2v-1.5M16 10l-4-4m0 0l-4 4m4-4v12"/></svg>
+            </button>
+            <button type="button" class="ds-mobile-icon" @click="clearCanvas()" aria-label="{{ __('admin.drawing.clear_canvas') }}">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H8a2 2 0 01-2-2V6h12z"/></svg>
+            </button>
+            <button type="button" class="ds-mobile-save" @click="save()" :disabled="saving" :aria-label="@js(__('admin.drawing.save_to_gallery'))">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM7 3v6h10V3M7 21v-7h10v7"/></svg>
+            </button>
         </div>
 
         <div class="ds-toast" x-show="toast" x-transition x-text="toast" style="display:none;"></div>
@@ -656,6 +701,16 @@
                 octx: null,
 
                 init() {
+                    // On mobile, drop to a portrait 1080×1350 default
+                    // (4:5, fits the screen well, sensible for stories /
+                    // social) unless the user is continuing an existing
+                    // drawing that already has its own dimensions.
+                    if (!sourceUrl && window.innerWidth < 720) {
+                        this.width = 1080;
+                        this.height = 1350;
+                        this.preset = 'custom';
+                    }
+
                     this.ctx = this.$refs.canvas.getContext('2d');
                     this.octx = this.$refs.overlay.getContext('2d');
                     this.ctx.fillStyle = this.bgColor;
