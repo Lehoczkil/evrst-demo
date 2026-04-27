@@ -55,7 +55,10 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Advanced')  ->label(fn () => __('admin.nav.advanced')),
             ])
             ->databaseNotifications(fn () => auth()->user()?->can(Perm::NOTIFICATIONS_SEE) ?? false)
-            ->databaseNotificationsPolling('30s')
+            // 30 s polling on every open tab, every user, was the largest
+            // background load on the panel; 2 min is plenty for human-paced
+            // notifications and cuts the request volume by 4x.
+            ->databaseNotificationsPolling('2m')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

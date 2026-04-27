@@ -8,22 +8,34 @@ use App\Models\Task;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Cache;
 
 class AdminStatsOverview extends BaseWidget
 {
     protected ?string $heading = null;
+
+    // Render after the dashboard chrome paints — see ::isLazy() below.
+    protected static bool $isLazy = true;
 
     // Stats refresh on page revisit; no need to hammer the DB every 30s.
     protected ?string $pollingInterval = null;
 
     protected function getStats(): array
     {
-        $pendingApps = MemberApplication::where('status', MemberApplication::STATUS_PENDING)->count();
-        $openTasks = Task::whereIn('status', [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS])->count();
-        $upcomingEvents = Event::whereNotNull('payload->start_at')
-            ->where('payload->start_at', '>=', now()->toDateTimeString())
-            ->count();
-        $teamSize = User::whereHas('role')->count();
+        // 60 s remember keeps the dashboard sub-millisecond on revisits;
+        // bursting tabs from multiple admins now hit the cache, not the DB.
+        [$pendingApps, $openTasks, $upcomingEvents, $teamSize] = Cache::remember(
+            'widgets:admin-stats',
+            60,
+            fn () => [
+                MemberApplication::where('status', MemberApplication::STATUS_PENDING)->count(),
+                Task::whereIn('status', [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS])->count(),
+                Event::whereNotNull('payload->start_at')
+                    ->where('payload->start_at', '>=', now()->toDateTimeString())
+                    ->count(),
+                User::whereHas('role')->count(),
+            ],
+        );
 
         return [
             Stat::make(__('admin.widgets.pending_apps'), (string) $pendingApps)
