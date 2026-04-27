@@ -48,6 +48,7 @@ return [
         'element_id'       => 'Element ID',
         'view_in_onshape'  => 'Megnyitás az Onshape-en',
         'embed_help'       => 'Jelentkezz be az Onshape-be a beágyazott szerkesztéshez — egyébként csak olvasható.',
+        'embed_unavailable'=> 'Az Onshape biztonsági szabályai miatt a dokumentum nem ágyazható be — új lapon nyílik meg. A szerkesztések automatikusan szinkronizálódnak.',
         'no_link'          => 'Nincs Onshape link mentve.',
         'empty_heading'    => 'Még nincs 3D modell',
         'empty_body'       => 'Adj hozzá egyet az „Új 3D modell” gombbal.',
@@ -246,15 +247,15 @@ return [
             ],
             'resources.onshape-models.index' => [
                 'title' => '3D modellek',
-                'body' => '<p>Onshape dokumentum-beágyazások. Aki belépett az Onshape-be, panozhat / nagyíthat / szerkeszthet az iframe-ben; mindenki más csak megtekintheti.</p><p>A megjelenítőt közvetlenül az Onshape rendereli — a mi szerverünk csak a dokumentum-azonosítókat tárolja, sávszélességet és CPU-t nem fizet a 3D-ért.</p>',
+                'body' => '<p>Mutatók Onshape dokumentumokra. Itt csak a cím, leírás és a dokumentum / workspace / element azonosítók tárolódnak; maga a modell az Onshape-en él.</p><p>Az <em>Megnyitás az Onshape-en</em> új lapon nyitja a dokumentumot — az Onshape biztonsági szabályai miatt nem ágyazható be, a szerkesztés ott történik.</p>',
             ],
             'resources.onshape-models.create' => [
                 'title' => '3D modell hozzáadása',
-                'body' => '<p>Illeszd be bármelyik Onshape dokumentum URL-jét a <em>Megosztási URL</em> mezőbe — a dokumentum-, workspace- és element-ID-k automatikusan kinyerésre kerülnek.</p><p>Mentés után a sor megnyitásakor látod a beágyazott megjelenítőt. Az <em>Megnyitás az Onshape-en</em> új lapon a teljes szerkesztőt indítja.</p>',
+                'body' => '<p>Illeszd be bármelyik Onshape dokumentum URL-jét a <em>Megosztási URL</em> mezőbe — a dokumentum-, workspace- és element-ID-k automatikusan kinyerésre kerülnek.</p><p>Mentés után az <em>Megnyitás az Onshape-en</em> gombbal indíthatod a szerkesztést a cad.onshape.com-on.</p>',
             ],
             'resources.onshape-models.edit' => [
                 'title' => '3D modell szerkesztése',
-                'body' => '<p>A form alatti beágyazott megjelenítő élő — panozható, nagyítható és (ha be vagy lépve) szerkeszthető. A változások az Onshape oldalán maradnak.</p>',
+                'body' => '<p>Itt csak a cím / leírást szerkesztheted. Magát a dokumentumot a cad.onshape.com-on lehet — kattints az <em>Megnyitás az Onshape-en</em> gombra új lapon való indításhoz.</p>',
             ],
             'pages.calendar' => [
                 'title' => 'Naptár',

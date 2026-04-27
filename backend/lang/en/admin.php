@@ -48,6 +48,7 @@ return [
         'element_id'       => 'Element ID',
         'view_in_onshape'  => 'Open in Onshape',
         'embed_help'       => 'Sign in to Onshape to enable editing inside the iframe — read-only otherwise.',
+        'embed_unavailable'=> 'Onshape blocks inline embeds from third-party sites, so the document opens in a new tab. Edits there sync back to this record automatically.',
         'no_link'          => 'No Onshape link saved yet.',
         'empty_heading'    => 'No 3D models yet',
         'empty_body'       => 'Add one with the “New 3D model” button.',
@@ -246,15 +247,15 @@ return [
             ],
             'resources.onshape-models.index' => [
                 'title' => '3D models',
-                'body' => '<p>Onshape document embeds. Anyone signed in to Onshape can pan/zoom/edit inside the iframe; everyone else gets a read-only viewer.</p><p>The viewer is rendered by Onshape directly — our server only stores the document IDs and pays no bandwidth or CPU cost for the 3D scene.</p>',
+                'body' => '<p>Pointers to Onshape documents. Each record stores the title, description, and the document / workspace / element IDs; the actual model lives on Onshape.</p><p>Click <em>Open in Onshape</em> on any row to launch the document in a new tab — Onshape blocks inline embeds from third-party sites, so editing happens there.</p>',
             ],
             'resources.onshape-models.create' => [
                 'title' => 'Add a 3D model',
-                'body' => '<p>Paste any Onshape document URL into the <em>Share URL</em> field — the document, workspace, and element IDs are extracted automatically.</p><p>Once saved, open the row to see the embedded viewer. Click <em>Open in Onshape</em> to jump to the full editor in a new tab.</p>',
+                'body' => '<p>Paste any Onshape document URL into the <em>Share URL</em> field — the document, workspace, and element IDs are extracted automatically.</p><p>Save, then click <em>Open in Onshape</em> to start editing the document on Onshape itself.</p>',
             ],
             'resources.onshape-models.edit' => [
                 'title' => 'Edit 3D model',
-                'body' => '<p>The embedded viewer below the form is live — pan, zoom, and (if you\'re signed in) edit. Changes persist on Onshape\'s side.</p>',
+                'body' => '<p>Edit the title / description here. The Onshape document itself is edited on cad.onshape.com — click <em>Open in Onshape</em> to launch it in a new tab.</p>',
             ],
             'pages.calendar' => [
                 'title' => 'Calendar',
