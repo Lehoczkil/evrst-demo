@@ -45,7 +45,16 @@ The harness may block long-running web servers (`php artisan serve`, `queue:work
 | `collections`, `resources`, `object_files` | CMS payload-JSON store (events, sponsors, team, mentors, projects, goals, views) | `2026_04_25_230659_*` |
 | `member_applications` | Join-us submissions under review | `2026_04_27_000000_create_member_applications_table.php` |
 | `tasks`, `task_user`, `task_comments` | Trello-style task system | `2026_04_29_000000_create_tasks_tables.php` |
+| `task_proofs` | Per-task documentation (image / file / link / note) — gates the TESTING + DONE transitions | `2026_05_03_000006_create_task_proofs_table.php` |
+| `activity_logs` | Auto-logged create/update/delete + custom events (accepted, rejected) | `2026_05_02_000000_create_activity_logs_table.php` |
+| `drawings` | Outputs of the in-panel drawing studio (PNG on the public disk) | `2026_05_03_000000_create_drawings_table.php` |
+| `calendar_events` | Admin-only calendar entries (separate from CMS Events) | `2026_05_03_000001_create_calendar_events_table.php` |
+| `onshape_models` | Onshape document pointers + cached GLB metadata (`glb_*` columns) | `2026_05_03_000005_*` + `2026_05_03_000008_add_glb_columns_to_onshape_models.php` |
 | Standard Laravel | `cache`, `cache_locks`, `sessions`, `jobs`, `failed_jobs`, `job_batches`, `password_reset_tokens`, `personal_access_tokens` | `0001_01_01_*` + `2026_04_25_230643_create_personal_access_tokens_table.php` |
+
+The `users` table also gained `locale` (5-char nullable) for the EN/HU language preference, and `resources` gained `start_at`, `end_at`, `event_status` columns (promoted out of `payload` for Calendar / dashboard query speed; the JSON copy is dual-written for SPA compatibility).
+
+Indexes worth knowing about: `tasks(status, position)`, `tasks(due_date)`, `tasks(supervisor_id)`, `member_applications(status, created_at)`, `activity_logs(subject_type, subject_id, created_at)`, `resources(collection_id, position)`, `resources(event_status, start_at)` — all installed by `2026_05_03_000003_add_performance_indexes.php` and the column-promotion migration.
 
 UUIDs are used by `Resource`, `Collection`, `ObjectFile`, and `MemberApplication`. Tasks + Users + Roles + Permissions use auto-increment IDs.
 
@@ -78,15 +87,26 @@ Resources live under `app/Filament/Resources/`:
 - `Cms/Events`, `Cms/Sponsors`, `Cms/AboutGoals`, `Cms/AboutProjects`, `Cms/Mentors`, `Cms/TeamMembers`, `Cms/TeamMemberGroups` — CMS content backed by the `resources` JSON-payload store (each binds to a fixed `collectionId`).
 - `MemberApplications` — typed table; review/edit/accept/reject flow.
 - `Tasks` — typed table; list grouped by status + custom Kanban page.
-- `Users` — admin-only management of accounts and roles.
+- `Users`, `Roles` — admin-only management of accounts and roles. Both gated through `canViewAny()` + `canAccess()` + `shouldRegisterNavigation()` returning `isAdmin()`.
+- `ActivityLogs` — admin-only audit table.
+- `Drawings` — gallery of in-panel canvas drawings.
+- `OnshapeModels` — Onshape document pointers with optional cached GLB previews.
 - `Collections`, `Resources` (under `app/Filament/Resources/{Collections,Resources}`) — raw-data inspectors, hidden from nav.
 
 Custom Filament `Page`s in `app/Filament/Pages/`:
 - `AboutContent` — singleton blob editor for the home About text.
+- `Calendar` — admin-only month grid backed by the `calendar_events` table; click a day to spawn an event modal, click a card to edit. Tasks (by `due_date`) and AboutProjects (by `start_at`) overlay as read-only badges.
+- `DatabaseInspector` — `/admin/database-inspector` (Advanced group), admin-only schema browser using `Schema::getTables/getColumns/getIndexes/getForeignKeys`.
 
 Custom resource pages:
 - `MemberApplications/Pages/AcceptMemberApplication` — provisions a User (Member role, temp password) + a TeamMember + emails the credentials.
-- `Tasks/Pages/KanbanBoard` — Trello-style drag-and-drop board with SortableJS, persists position + status changes via Livewire `reorder()`.
+- `Tasks/Pages/KanbanBoard` — Trello-style drag-and-drop board with SortableJS, persists position + status changes via Livewire `reorder()`. Validates each card's status transition against `Task::canTransitionTo()` before saving and snaps illegal moves back.
+- `Drawings/Pages/Draw` — vanilla-JS canvas studio at `/admin/drawings/draw`. Pen / line / arrow / rect / ellipse / polygon / text / bucket fill / eyedropper / eraser, image insertion (file picker + `window:paste`), 40-step undo/redo, PNG/JPG export. Mobile breakpoint at 900 px collapses to single column with a fixed bottom toolbar; defaults to 1080×1350 portrait on first mobile mount. Save POSTs a base64 PNG data URL to a Livewire `save()` action.
+- `OnshapeModels/Pages/EditOnshapeModel` — header action **Re-export GLB** runs `App\Jobs\ExportOnshapeModelToGlb` synchronously (so the demo works without a queue worker), then redirects to itself so the embed Section gets a fresh schema render. **Test connection** action on the list page hits `/users/sessioninfo` for a cheap pre-flight check.
+
+RelationManagers:
+- `Tasks/RelationManagers/CommentsRelationManager` — threaded comments per task.
+- `Tasks/RelationManagers/ProofsRelationManager` — `task_proofs` documentation (kind: image | file | link | note). Required to move a task to TESTING or DONE.
 
 ## Roles + permissions
 
@@ -151,6 +171,23 @@ The kanban Blade view at `resources/views/filament/resources/tasks/pages/kanban-
 
 Default admin: `admin@evrst.test` / `password`, role=Admin, `password_changed_at` pre-stamped.
 
+## Recent admin features (cheat sheet)
+
+- **Drawings** (`/admin/drawings`, `/admin/drawings/draw`): vanilla-JS canvas studio (no React, no build step). Saves PNG to `storage/app/public/drawings/{ulid}.png`. Mobile breakpoint at 900 px collapses to single column with a fixed bottom toolbar.
+- **Calendar** (`/admin/calendar`): admin-only month grid backed by `calendar_events`. Click-day-to-create / click-event-to-edit modal. Tasks + Projects overlay as read-only badges.
+- **Onshape models** (`/admin/onshape-models`): document pointers with cached GLB previews. `App\Services\Onshape\Client` wraps the REST API; `App\Jobs\ExportOnshapeModelToGlb` (dispatchSync — runs without a queue worker) translates the document, downloads the GLB, writes it to `storage/app/public/onshape/{ulid}.glb`. Viewer is vanilla Three.js v0.161 from unpkg via `<script type="importmap">`. **Onshape blocks third-party iframe embedding via CSP** so the GLB pipeline is the only viable path. Requires `ONSHAPE_ACCESS_KEY` + `ONSHAPE_SECRET_KEY`.
+- **Task proofs / state machine**: `task_proofs` child table (kind: image | file | link | note) + `ProofsRelationManager`. `Task::canTransitionTo($user, $next)` is the gate; `Task::booted()` enforces it on every save. Assignees → TESTING (with proof), supervisors / admins → DONE (proof always required). Kanban drag validates per-card and snaps illegal moves back.
+- **Activity log retention**: `php artisan activity-log:prune --days=90` runs nightly at 03:15 (`routes/console.php`). The trait now exposes `logActivity($event, $changes)` for hand-shaped entries (e.g. `'accepted'` / `'rejected'`) and `withoutActivityLog($cb)` to suppress the auto-log on a single save.
+- **EN/HU locale switcher**: persistent on `users.locale`, mirrored in `session('locale')` so the login form remembers the previous pick. `App\Http\Middleware\SetLocale` resolves `?lang → X-Lang → user->locale → session('locale') → Accept-Language`. Translations in `lang/{en,hu}/admin.php` (~25 KB each).
+- **Help system**: `?` icons next to every page heading + every sidebar nav item that has copy. Single global modal mounted via `BODY_END` render hook, dispatched through `window.evrstOpenHelp(key)`. Page copy is keyed by route name (with `filament.admin.` stripped). The keys are **literal dotted strings**, so use `trans('admin.help.pages')` + array-key lookup — `__('admin.help.pages.…')` would treat dots as nested-array traversal and fail silently.
+- **Database inspector** (`/admin/database-inspector`): admin-only schema browser using portable `Schema::getTables/getColumns/getIndexes/getForeignKeys`. Same code works on SQLite / MySQL / Postgres.
+- **Performance baseline**: dashboard widgets `Cache::remember(60s)` + `isLazy = true`. Reusable Select options (users / roles / team-member-groups / assignees) cached for 5 min with auto-invalidation in `AppServiceProvider`. Notification polling lifted to 2 min. Hot-path indexes on `tasks(status, position)`, `tasks(due_date)`, `tasks(supervisor_id)`, `member_applications(status, created_at)`, `activity_logs(subject_type, subject_id, created_at)`, `resources(collection_id, position)`, `resources(event_status, start_at)`. Event JSON keys (`start_at` / `end_at` / `event_status`) promoted to indexed columns with dual-write to `payload` for SPA back-compat.
+
+## Shared traits (`app/Concerns/`)
+
+- **`LogsActivity`** — auto-writes `activity_logs` rows on `created` / `updated` / `deleted`. `logActivity($event, $changes)` for custom events. `$skipActivityLog = true` (or `withoutActivityLog($cb)`) to suppress the auto-write for a single save. Used by `Resource` (so every CMS subclass logs), `Task`, `MemberApplication`, `Drawing`, `OnshapeModel`, `CalendarEvent`, `TaskProof`.
+- **`HasFileUrl`** — `file_url` accessor + `deleteFile()` helper for any model that stores one file on a disk. Override `fileDiskAttribute()` / `filePathAttribute()` if your column names aren't `disk` / `path` (OnshapeModel uses `glb_*`, TaskProof uses `file_*`). Existing accessor aliases (`Drawing::url`, `OnshapeModel::glb_url`) defer to `file_url` so callers don't change. Use this trait on **every new model that owns a file** instead of re-implementing the disk + try/catch dance.
+
 ## Conventions / quirks
 
 - `app/Models/Resource.php` collides with PHP's reserved `resource` pseudo-type only as a name — Laravel still accepts it. Always use `App\Models\Resource as ResourceModel` (or fully-qualified) in controllers/Filament to avoid shadowing.
@@ -170,4 +207,9 @@ Default admin: `admin@evrst.test` / `password`, role=Admin, `password_changed_at
 - Don't drop the SQLite file via `migrate:fresh` without confirming with the user — the seeded admin user, applications, tasks, and any manually edited content will be wiped.
 - Don't run `composer require` for unscoped Filament plugins without checking compat with Filament v4 (the API differs from v3).
 - Don't enable `auth:sanctum` on `/api/resource` — that endpoint is public-read for the SPA. Same for `POST /api/member-applications` — the public Join-us form must reach it.
-- Don't reintroduce the Advanced sidebar group — Collections + Resources are deliberately hidden via `shouldRegisterNavigation()=false`.
+- Don't reintroduce the Advanced sidebar group — Collections + Resources are deliberately hidden via `shouldRegisterNavigation()=false`. The Database inspector + the All-resources / Collections raw inspectors all live under that group on purpose.
+- **Don't add a new `Perm::*` key without a backfill migration.** `RoleSeeder` runs once at install; existing seeded Admin / Manager rows do not pick up new keys from `Perm::catalog()` automatically. Mirror `2026_05_03_000007_attach_models_permissions.php`: insert the row into `permissions` and the pivot row into `permission_role` for every role that should have it.
+- **Don't queue the Onshape export with `dispatch()`.** It must be `dispatchSync()` so the action works without `php artisan queue:work` running (the local + Render dev setups don't run a worker). The Filament action then redirects to itself so the embed Section re-renders with the new `glb_url`.
+- **Don't put the Three.js `<script type="module">` inside an `@if` branch.** Livewire DOM diffs do not re-execute module scripts, so `window.evrstMountOnshapeViewer` would never get defined when the `@if` flips. The viewer Blade renders the importmap + module unconditionally for that reason.
+- **Don't call `__('admin.help.pages.<dotted-key>.title')`** — the lang file uses literal dotted strings as array keys (e.g. `'resources.cms.events.index' => […]`) and Laravel's `__()` would split on the dots. Use `trans('admin.help.pages')` and array-lookup.
+- **Don't write a new file-handling model from scratch.** Add `use HasFileUrl;` and (if the columns aren't named `disk` / `path`) override `fileDiskAttribute()` / `filePathAttribute()`. Filament tables hook the cleanup via `DeleteAction::make()->before(fn ($r) => $r->deleteFile())`.

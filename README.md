@@ -108,6 +108,111 @@ The kanban board (`/admin/tasks/kanban`) is a Trello-style 4-column
 drag-and-drop view backed by SortableJS, with avatar chips for
 supervisor + assignees.
 
+#### Required fields + state machine
+
+A task can no longer be created without a title, a description (≥10
+characters), a supervisor, at least one assignee, and a due date —
+all enforced server-side. The status workflow is a real state
+machine (`Task::canTransitionTo()`):
+
+- An assignee can move a card as far as **Testing**, but only if at
+  least one **Documentation** entry has been attached.
+- Only the **supervisor** (or an admin) can mark a task **Done**;
+  Done always requires at least one proof.
+- The kanban board validates each card before the save, and snaps
+  illegal moves back to the source column with a localised toast.
+
+#### Documentation / proofs
+
+`task_proofs` is a child table on every task. Each entry is one of:
+
+- **Image** — a screenshot or photo (max 8 MB, HEIC accepted).
+- **File** — a 3D model (GLB / STL / STEP), PDF, or zip (max 20 MB).
+- **Link** — an external URL (GitHub, Onshape, Drive, …).
+- **Note** — a written summary, no attachment.
+
+Authors / supervisors / admins can post or edit proofs; bulk delete
+is admin-only. Posting a proof is the gate that lets an assignee
+move the task to **Testing**, and the supervisor sees it before
+ticking it off as Done.
+
+### Drawing studio (`/admin/drawings`)
+
+In-panel canvas with pen, line, arrow, rectangle, ellipse, n-sided
+polygon, text, bucket fill, eyedropper, and eraser. Image insertion
+via file picker or `⌘/Ctrl+V` paste — drag to position, corner handle
+to resize, Enter to commit. 40-step undo/redo, canvas-size presets
+(square / HD / story / banner / A4), PNG/JPG export, "Continue
+editing" clones an existing drawing as the starting layer.
+
+The studio is plain Blade + vanilla JS (no React, no build step).
+Outputs are PNGs on the public disk; mobile breakpoint at 900 px
+collapses to a single column with a fixed bottom toolbar.
+
+### 3D models (`/admin/onshape-models`)
+
+Onshape document pointers with cached GLB previews rendered in-panel
+by Three.js. Paste any Onshape URL — the form auto-extracts the
+document / workspace / element IDs. Click **Re-export GLB** and the
+admin calls Onshape's REST translation API, downloads the binary
+GLB to `storage/app/public/onshape/`, and the embed component renders
+it via `@react-three/drei`-style orbit controls (vanilla, loaded as
+ES modules from unpkg).
+
+Onshape blocks third-party iframe embedding via CSP, so direct
+cad.onshape.com iframes will never work — the GLB pipeline is the
+right path. Editing happens on cad.onshape.com (one click via the
+**Open in Onshape** action). Requires `ONSHAPE_ACCESS_KEY` +
+`ONSHAPE_SECRET_KEY` from `dev-portal.onshape.com`.
+
+### Calendar (`/admin/calendar`)
+
+Admin-only month grid backed by the new `calendar_events` table —
+deliberately separate from the public-facing CMS `Event` collection
+so admin scheduling doesn't leak to the API. Click any day to spawn
+a create modal; click an event card to edit. Tasks (by `due_date`)
+and Projects (by `start_at`) overlay as read-only badges.
+
+### Activity log
+
+Every create / update / delete on the high-traffic models writes a
+row to `activity_logs` (via the `LogsActivity` trait on `Resource`,
+`Task`, `MemberApplication`, `Drawing`, `OnshapeModel`,
+`CalendarEvent`, `TaskProof`). Application accept / reject also
+write a dedicated event type. Admin-only, visible at
+`/admin/activity-logs`. Entries older than 90 days are pruned each
+night by `php artisan activity-log:prune --days=90` (scheduled in
+`routes/console.php` at 03:15).
+
+### Database inspector (`/admin/database-inspector`)
+
+Admin-only schema browser using Laravel's portable
+`Schema::getTables/getColumns/getIndexes/getForeignKeys`. Two-pane
+layout: every table on the left with row counts, the selected
+table's columns / indexes / foreign keys / driver / row-count badge
+on the right. Same code works against SQLite, MySQL, and Postgres.
+
+### EN / HU language switcher
+
+Compact pill toggle in the topbar (next to the user avatar). Stores
+the choice on `users.locale` and mirrors it into `session('locale')`
+so the login form remembers the previous pick. Translation keys
+cover every resource label, table column, form field, status badge,
+widget heading, help-modal copy, and notification body — Filament's
+own panel chrome (search, pagination, "Are you sure?" confirms,
+login form, table filters) is already shipped in `hu` by the vendor
+packages, so flipping the locale flips everything in one go.
+
+### Help system
+
+A small `?` icon next to every page heading and every sidebar nav
+item that has copy. Click → modal explaining the page's purpose,
+the actions available, and any non-obvious gotchas. Inline `?`
+icons on form fields show a hover tooltip with field-specific
+guidance. Copy lives in `lang/{en,hu}/admin.php` under
+`admin.help.pages.*` (page modals) and `admin.help.fields.*` (field
+hints) — adding help for a new page is a one-line lang edit.
+
 ### Public REST API
 
 | Method | Path                        | Purpose                                    |
@@ -135,6 +240,11 @@ All schema lives in `backend/database/migrations/` and ships seeded.
 | `collections`, `resources`, `object_files` | CMS content store (events / sponsors / team / mentors / projects / goals / views). |
 | `member_applications` | Join-us submissions awaiting review. |
 | `tasks`, `task_user`, `task_comments` | Trello-style task management. |
+| `task_proofs` | Per-task documentation (image / file / link / note) — gates the TESTING / DONE transitions. |
+| `activity_logs` | Auto-logged create / update / delete + custom events (accepted / rejected). |
+| `drawings` | Outputs of the in-panel drawing studio (PNG on the public disk). |
+| `calendar_events` | Admin-only calendar entries (separate from the public CMS Events). |
+| `onshape_models` | Onshape document pointers + cached GLB metadata. |
 | `cache`, `cache_locks`, `sessions`, `jobs`, `failed_jobs`, `job_batches`, `password_reset_tokens`, `personal_access_tokens` | Standard Laravel scaffolding. |
 
 ## Configuration / env
@@ -150,6 +260,11 @@ Key settings in `backend/.env.example`:
   pings. Leave blank in dev to skip.
 - `ADMIN_URL` — public URL of the Filament admin, used inside Discord
   webhook payloads.
+- `ONSHAPE_ACCESS_KEY`, `ONSHAPE_SECRET_KEY` — generate at
+  `dev-portal.onshape.com → API keys`. Required for the
+  `/admin/onshape-models` re-export pipeline. The "Test connection"
+  action on the model list verifies they work without spending a
+  translation request.
 
 ## Deploy
 
