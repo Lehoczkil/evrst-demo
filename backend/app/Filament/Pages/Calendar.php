@@ -3,32 +3,40 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Resources\Cms\AboutProjects\AboutProjectResource;
-use App\Filament\Resources\Cms\Events\EventResource;
 use App\Filament\Resources\Tasks\TaskResource;
+use App\Models\CalendarEvent;
 use App\Models\Cms\AboutProject;
-use App\Models\Cms\Event;
 use App\Models\Task;
 use App\Models\User;
 use BackedEnum;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * Cross-entity month calendar — events, projects (date ranges), and
- * tasks (due dates) on a single grid. Filterable by entity type and by
- * an assignee user.
+ * Admin-only month calendar — shows {@see CalendarEvent} entries created
+ * inside the panel (separate from the public-facing CMS Event collection),
+ * plus project ranges and task due dates.
+ *
+ * Days are clickable to spawn a new event; events are clickable to edit.
  */
 class Calendar extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static ?string $navigationLabel = 'Calendar';
-
-    protected static ?string $title = 'Calendar';
-
     protected static string|\UnitEnum|null $navigationGroup = 'Tasks';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.calendar.title');
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.calendar.title');
+    }
 
     protected static ?int $navigationSort = 5;
 
@@ -39,6 +47,17 @@ class Calendar extends Page
     public bool $showProjects = true;
     public bool $showTasks = true;
     public ?int $assigneeId = null;
+
+    // Modal form state
+    public bool $showFormModal = false;
+    public ?int $editingId = null;
+    public string $eventTitle = '';
+    public string $eventDescription = '';
+    public string $eventLocation = '';
+    public string $eventStart = '';
+    public string $eventEnd = '';
+    public bool $eventAllDay = false;
+    public string $eventColor = '#0ea5e9';
 
     public function mount(): void
     {
@@ -86,7 +105,6 @@ class Calendar extends Page
         $start = Carbon::parse($this->cursor)->startOfMonth();
         $end = $start->copy()->endOfMonth();
 
-        // Calendar window — extended to fill the grid (Mon-aligned).
         $gridStart = $start->copy()->startOfWeek(CarbonInterface::MONDAY);
         $gridEnd = $end->copy()->endOfWeek(CarbonInterface::SUNDAY);
 
@@ -118,7 +136,9 @@ class Calendar extends Page
 
     /**
      * Pull every visible item in the window. Each item is normalised to
-     * `{ type, title, date, end?, color, url, badges[] }`.
+     * `{ id, kind, type, title, date, end?, color, badges[] }`. `kind` is
+     * 'event'|'project'|'task' for click-handling; 'type' is the human
+     * label rendered on the card.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -127,22 +147,23 @@ class Calendar extends Page
         $items = [];
 
         if ($this->showEvents) {
-            $events = Event::query()
-                ->whereNotNull('payload->start_at')
-                ->where('payload->start_at', '>=', $from->toDateTimeString())
-                ->where('payload->start_at', '<=', $to->toDateTimeString())
+            $events = CalendarEvent::query()
+                ->whereBetween('start_at', [$from->toDateTimeString(), $to->toDateTimeString()])
                 ->get();
             foreach ($events as $event) {
-                $start = $event->payload['start_at'] ?? null;
-                if (! $start) continue;
                 $items[] = [
-                    'type' => 'event',
-                    'title' => $event->title ?? 'Event',
-                    'date' => $start,
-                    'end' => $event->payload['end_at'] ?? null,
-                    'color' => '#0ea5e9',
-                    'url' => EventResource::getUrl('edit', ['record' => $event->id]),
-                    'badges' => [],
+                    'id' => $event->id,
+                    'kind' => 'event',
+                    'type' => 'Event',
+                    'title' => $event->title,
+                    'date' => $event->start_at?->toDateTimeString(),
+                    'end' => $event->end_at?->toDateTimeString(),
+                    'all_day' => (bool) $event->all_day,
+                    'color' => $event->color ?: '#0ea5e9',
+                    'location' => $event->location,
+                    'badges' => array_values(array_filter([
+                        $event->location ? '📍 ' . $event->location : null,
+                    ])),
                 ];
             }
         }
@@ -157,7 +178,9 @@ class Calendar extends Page
                 $start = $project->payload['start_at'] ?? null;
                 if (! $start) continue;
                 $items[] = [
-                    'type' => 'project',
+                    'id' => $project->id,
+                    'kind' => 'project',
+                    'type' => 'Project',
                     'title' => $project->title ?? 'Project',
                     'date' => $start,
                     'end' => $project->payload['end_at'] ?? null,
@@ -179,7 +202,9 @@ class Calendar extends Page
                     continue;
                 }
                 $items[] = [
-                    'type' => 'task',
+                    'id' => $task->id,
+                    'kind' => 'task',
+                    'type' => 'Task',
                     'title' => $task->title,
                     'date' => $task->due_date->toDateTimeString(),
                     'end' => null,
@@ -199,12 +224,121 @@ class Calendar extends Page
             }
         }
 
-        usort($items, fn ($a, $b) => strcmp($a['date'], $b['date']));
+        usort($items, fn ($a, $b) => strcmp((string) $a['date'], (string) $b['date']));
         return $items;
     }
 
-    public function canCreateEvents(): bool
+    public function openCreateModal(string $date): void
     {
-        return auth()->user()?->can(\App\Auth\Perm::EVENTS_CREATE) ?? false;
+        $this->resetEventForm();
+        $this->editingId = null;
+        // Default to a 1-hour slot at 09:00 on the clicked date.
+        $this->eventStart = $date . 'T09:00';
+        $this->eventEnd = $date . 'T10:00';
+        $this->eventColor = '#0ea5e9';
+        $this->eventTitle = '';
+        $this->showFormModal = true;
+    }
+
+    public function openEditModal(int $id): void
+    {
+        $event = CalendarEvent::find($id);
+        if (! $event) {
+            Notification::make()->title('Event not found')->danger()->send();
+            return;
+        }
+        $this->editingId = $event->id;
+        $this->eventTitle = (string) $event->title;
+        $this->eventDescription = (string) ($event->description ?? '');
+        $this->eventLocation = (string) ($event->location ?? '');
+        $this->eventStart = $event->start_at?->format('Y-m-d\TH:i') ?? '';
+        $this->eventEnd = $event->end_at?->format('Y-m-d\TH:i') ?? '';
+        $this->eventAllDay = (bool) $event->all_day;
+        $this->eventColor = $event->color ?: '#0ea5e9';
+        $this->showFormModal = true;
+    }
+
+    public function closeFormModal(): void
+    {
+        $this->showFormModal = false;
+        $this->resetEventForm();
+    }
+
+    private function resetEventForm(): void
+    {
+        $this->editingId = null;
+        $this->eventTitle = '';
+        $this->eventDescription = '';
+        $this->eventLocation = '';
+        $this->eventStart = '';
+        $this->eventEnd = '';
+        $this->eventAllDay = false;
+        $this->eventColor = '#0ea5e9';
+    }
+
+    public function saveEvent(): void
+    {
+        $title = trim($this->eventTitle);
+        if ($title === '') {
+            Notification::make()->title(__('admin.calendar.modal.title_req'))->danger()->send();
+            return;
+        }
+        if ($this->eventStart === '') {
+            Notification::make()->title(__('admin.calendar.modal.start_req'))->danger()->send();
+            return;
+        }
+
+        try {
+            $start = Carbon::parse($this->eventStart);
+            $end = $this->eventEnd !== '' ? Carbon::parse($this->eventEnd) : null;
+        } catch (\Throwable) {
+            Notification::make()->title(__('admin.calendar.modal.invalid_date'))->danger()->send();
+            return;
+        }
+
+        if ($end && $end->lt($start)) {
+            Notification::make()->title(__('admin.calendar.modal.end_after'))->danger()->send();
+            return;
+        }
+
+        $payload = [
+            'user_id' => auth()->id(),
+            'title' => mb_substr($title, 0, 200),
+            'description' => $this->eventDescription !== '' ? $this->eventDescription : null,
+            'location' => $this->eventLocation !== '' ? mb_substr($this->eventLocation, 0, 200) : null,
+            'start_at' => $start,
+            'end_at' => $end,
+            'all_day' => $this->eventAllDay,
+            'color' => preg_match('/^#[0-9a-fA-F]{6}$/', $this->eventColor) ? $this->eventColor : '#0ea5e9',
+        ];
+
+        if ($this->editingId) {
+            $event = CalendarEvent::find($this->editingId);
+            if (! $event) {
+                Notification::make()->title(__('admin.calendar.modal.deleted'))->danger()->send();
+                $this->closeFormModal();
+                return;
+            }
+            $event->update($payload);
+            Notification::make()->title(__('admin.calendar.modal.updated'))->success()->send();
+        } else {
+            CalendarEvent::create($payload);
+            Notification::make()->title(__('admin.calendar.modal.created'))->success()->send();
+        }
+
+        $this->closeFormModal();
+    }
+
+    public function deleteEvent(): void
+    {
+        if (! $this->editingId) return;
+        $event = CalendarEvent::find($this->editingId);
+        if (! $event) {
+            $this->closeFormModal();
+            return;
+        }
+        $event->delete();
+        Notification::make()->title(__('admin.calendar.modal.deleted'))->warning()->send();
+        $this->closeFormModal();
     }
 }
