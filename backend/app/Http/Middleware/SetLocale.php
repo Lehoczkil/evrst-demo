@@ -26,8 +26,14 @@ class SetLocale
     private function resolve(Request $request): ?string
     {
         $candidates = [
+            // Explicit ?lang= wins so users can preview the other locale.
             $request->query('lang'),
             $request->header('X-Lang'),
+            // Authenticated admin's saved preference (highest-trust signal
+            // when logged in). Falls back to a session cookie so the login
+            // form respects a previous choice even before sign-in.
+            optional($request->user())->locale,
+            $request->hasSession() ? $request->session()->get('locale') : null,
             $this->primaryLanguage($request->header('Accept-Language')),
         ];
 
