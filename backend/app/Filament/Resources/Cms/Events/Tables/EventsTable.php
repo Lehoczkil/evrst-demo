@@ -56,7 +56,8 @@ class EventsTable
                     ->query(function ($query, array $data) {
                         $value = $data['value'] ?? null;
                         if (! $value) return;
-                        $query->whereRaw("json_extract(payload, '$.status') = ?", [$value]);
+                        // Indexed since the column was promoted out of payload.
+                        $query->where('event_status', $value);
                     }),
             ])
             ->recordActions([

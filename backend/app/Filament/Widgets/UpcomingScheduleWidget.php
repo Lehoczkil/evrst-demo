@@ -28,12 +28,11 @@ class UpcomingScheduleWidget extends Widget
             $to = now()->addDays(7);
 
             $events = Event::query()
-                ->whereNotNull('payload->start_at')
-                ->where('payload->start_at', '>=', $from->toDateTimeString())
-                ->where('payload->start_at', '<=', $to->toDateTimeString())
-                ->get(['id', 'payload'])
+                ->whereNotNull('start_at')
+                ->whereBetween('start_at', [$from, $to])
+                ->get(['id', 'payload', 'start_at'])
                 ->map(fn (Event $e) => [
-                    'when' => $e->payload['start_at'] ?? null,
+                    'when' => $e->start_at?->toDateTimeString(),
                     'type' => __('admin.resources.event.s'),
                     'color' => '#0ea5e9',
                     'title' => $e->title ?? __('admin.resources.event.s'),

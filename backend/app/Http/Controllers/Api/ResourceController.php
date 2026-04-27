@@ -26,22 +26,23 @@ class ResourceController extends Controller
             $this->applyWhere($query, (array) $where);
         }
 
-        // ?past=true filters rows whose payload.start_at / .end_at is in
-        // the past. Legacy events with only a free-text payload.date
-        // (e.g. "September 2025") are kept and assumed past — that field
-        // isn't datetime-comparable so we can't do better than a pass-through.
+        // ?past=true filters rows whose start_at / end_at column is in the
+        // past. The columns were promoted out of `payload` (see migration
+        // 2026_05_03_000004) and are indexed, so this is a single B-tree
+        // scan instead of the previous full-table json_extract walk.
+        // Legacy events with only a free-text payload.date (e.g.
+        // "September 2025") still slip through — that field isn't
+        // datetime-comparable so we can't do better than a pass-through.
         if ($request->boolean('past')) {
-            $now = now()->toDateTimeString();
+            $now = now();
             $query->where(function ($q) use ($now) {
-                $q->where('payload->end_at', '<=', $now)
+                $q->where('end_at', '<=', $now)
                   ->orWhere(function ($q2) use ($now) {
-                      $q2->whereNull('payload->end_at')
-                         ->where('payload->start_at', '<=', $now);
+                      $q2->whereNull('end_at')
+                         ->where('start_at', '<=', $now);
                   })
                   ->orWhere(function ($q3) {
-                      // Legacy rows with no start_at fall through.
-                      $q3->whereNull('payload->start_at')
-                         ->whereNull('payload->end_at');
+                      $q3->whereNull('start_at')->whereNull('end_at');
                   });
             });
         }

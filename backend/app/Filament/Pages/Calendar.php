@@ -174,20 +174,18 @@ class Calendar extends Page
 
         if ($this->showProjects) {
             $projects = AboutProject::query()
-                ->whereNotNull('payload->start_at')
-                ->where('payload->start_at', '>=', $from->toDateTimeString())
-                ->where('payload->start_at', '<=', $to->toDateTimeString())
+                ->whereNotNull('start_at')
+                ->whereBetween('start_at', [$from, $to])
                 ->get();
             foreach ($projects as $project) {
-                $start = $project->payload['start_at'] ?? null;
-                if (! $start) continue;
+                if (! $project->start_at) continue;
                 $items[] = [
                     'id' => $project->id,
                     'kind' => 'project',
                     'type' => 'Project',
                     'title' => $project->title ?? 'Project',
-                    'date' => $start,
-                    'end' => $project->payload['end_at'] ?? null,
+                    'date' => $project->start_at->toDateTimeString(),
+                    'end' => $project->end_at?->toDateTimeString(),
                     'color' => '#a855f7',
                     'url' => AboutProjectResource::getUrl('edit', ['record' => $project->id]),
                     'badges' => [],

@@ -8,6 +8,13 @@ class AboutProject extends CollectionResource
 {
     protected static string $collectionId = 'b9b3d531-12cf-4d83-9c39-90a86b4d7c74';
 
+    /** Promoted columns share the resources table; cast for date math. */
+    protected $casts = [
+        'payload' => 'array',
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
+    ];
+
     protected function title(): Attribute
     {
         return Attribute::make(
@@ -59,16 +66,36 @@ class AboutProject extends CollectionResource
     protected function startAt(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->readPayload('start_at'),
-            set: fn ($value) => $this->writePayload('start_at', $value ? (string) $value : null),
+            // Accessors short-circuit the datetime cast, so re-parse here.
+            // Falls back to the JSON payload for legacy rows pre-promotion.
+            get: function ($value) {
+                $raw = $value ?? $this->readPayload('start_at');
+                return $raw ? \Carbon\Carbon::parse($raw) : null;
+            },
+            set: function ($value) {
+                $string = $value ? (is_string($value) ? $value : $value->format('Y-m-d H:i:s')) : null;
+                return array_merge(
+                    $this->writePayload('start_at', $string),
+                    ['start_at' => $string],
+                );
+            },
         );
     }
 
     protected function endAt(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->readPayload('end_at'),
-            set: fn ($value) => $this->writePayload('end_at', $value ? (string) $value : null),
+            get: function ($value) {
+                $raw = $value ?? $this->readPayload('end_at');
+                return $raw ? \Carbon\Carbon::parse($raw) : null;
+            },
+            set: function ($value) {
+                $string = $value ? (is_string($value) ? $value : $value->format('Y-m-d H:i:s')) : null;
+                return array_merge(
+                    $this->writePayload('end_at', $string),
+                    ['end_at' => $string],
+                );
+            },
         );
     }
 }

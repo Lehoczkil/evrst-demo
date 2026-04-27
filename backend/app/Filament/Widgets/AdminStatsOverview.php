@@ -30,8 +30,8 @@ class AdminStatsOverview extends BaseWidget
             fn () => [
                 MemberApplication::where('status', MemberApplication::STATUS_PENDING)->count(),
                 Task::whereIn('status', [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS])->count(),
-                Event::whereNotNull('payload->start_at')
-                    ->where('payload->start_at', '>=', now()->toDateTimeString())
+                Event::whereNotNull('start_at')
+                    ->where('start_at', '>=', now())
                     ->count(),
                 User::whereHas('role')->count(),
             ],
