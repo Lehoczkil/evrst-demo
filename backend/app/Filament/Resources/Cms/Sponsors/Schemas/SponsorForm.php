@@ -14,39 +14,58 @@ class SponsorForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('admin.common.name'))
                     ->required()
-                    ->helperText('Company / org name — not translated.')
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('url')
-                    ->label('Website')
+                    ->label(__('admin.common.website'))
                     ->url()
                     ->placeholder('https://example.com')
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('year')
+                    ->label(__('admin.common.year'))
                     ->numeric()
                     ->placeholder('e.g. 2025')
                     ->columnSpan(['default' => 6, 'md' => 3]),
                 TextInput::make('position')
-                    ->label('Sort order')
+                    ->label(__('admin.sponsors.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->columnSpan(['default' => 6, 'md' => 3]),
                 Textarea::make('description_en')
-                    ->label('Description (EN)')
+                    ->label(__('admin.common.description') . ' (EN)')
                     ->rows(3)
                     ->maxLength(500)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Textarea::make('description_hu')
-                    ->label('Description (HU)')
+                    ->label(__('admin.common.description') . ' (HU)')
                     ->rows(3)
                     ->maxLength(500)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('logo')
+                    ->label(__('admin.sponsors.logo'))
                     ->image()
+                    // iPhone Safari uploads as image/heic and Android sometimes as
+                    // image/* with no extension; Filament's ->image() helper rejects
+                    // both, so spell out the full mobile-friendly accept list.
+                    ->acceptedFileTypes([
+                        'image/jpeg',
+                        'image/png',
+                        'image/svg+xml',
+                        'image/webp',
+                        'image/gif',
+                        'image/heic',
+                        'image/heif',
+                    ])
+                    ->maxSize(8192)
+                    ->openable()
+                    ->downloadable()
                     ->directory('sponsors')
                     ->visibility('public')
                     ->disk('public')
+                    ->panelLayout('integrated')
+                    ->helperText(__('admin.sponsors.logo_help'))
                     ->columnSpanFull(),
             ])
             ->columns(12);
