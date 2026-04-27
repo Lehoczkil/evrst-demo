@@ -25,15 +25,83 @@
             grid-template-columns: 64px 1fr 280px;
             gap: .75rem;
             min-height: 78vh;
+            position: relative;
         }
         @media (max-width: 1100px) {
             .ds-shell { grid-template-columns: 56px 1fr; }
             .ds-properties { display: none; }
         }
+        /* Mobile layout — single column with a fixed bottom toolbar that
+           exposes the small set of controls users actually need on a
+           phone. The canvas stops above the toolbar instead of being
+           covered by it. */
         @media (max-width: 720px) {
-            .ds-shell { grid-template-columns: 1fr; }
-            .ds-tools { flex-direction: row; flex-wrap: wrap; }
-            .ds-tools .ds-tool { flex: 0 0 auto; }
+            .ds-shell {
+                grid-template-columns: 1fr;
+                min-height: auto;
+                padding-bottom: 5.5rem; /* room for the fixed bottom bar */
+            }
+            .ds-tools {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                position: static;
+                top: auto;
+                gap: .25rem;
+                padding: .35rem;
+                scrollbar-width: thin;
+                -webkit-overflow-scrolling: touch;
+            }
+            .ds-tools .ds-tool {
+                flex: 0 0 auto;
+                width: 40px; height: 40px;
+            }
+            .ds-tools .ds-tool svg { width: 18px; height: 18px; }
+            .ds-tools .ds-tool__hot { display: none; }
+
+            .ds-properties { display: none; }
+
+            .ds-canvas-wrap {
+                min-height: 50vh;
+                padding: .5rem;
+            }
+            .ds-status { bottom: 6rem; right: .5rem; font-size: .65rem; }
+
+            .ds-topbar {
+                position: static; /* no overlap with canvas while scrolling */
+                padding: .35rem .5rem;
+                gap: .35rem;
+                margin-bottom: .5rem;
+            }
+            .ds-topbar .ds-divider { display: none; }
+            .ds-topbar .ds-btn { padding: .35rem .5rem; font-size: .75rem; }
+            .ds-topbar .ds-btn svg { width: 14px; height: 14px; }
+            .ds-topbar .ds-select, .ds-topbar .ds-input { font-size: .72rem; padding: .3rem .45rem; }
+
+            .ds-mobile-bar {
+                position: fixed;
+                left: 0; right: 0; bottom: 0;
+                z-index: 30;
+                padding: .55rem .65rem calc(.55rem + env(safe-area-inset-bottom, 0px));
+                background: var(--ds-bg-strong);
+                border-top: 1px solid var(--ds-border);
+                box-shadow: 0 -8px 24px rgba(15,23,42,.12);
+                display: flex; align-items: center; gap: .5rem;
+                overflow-x: auto;
+            }
+            .ds-mobile-bar input[type="color"] {
+                width: 38px; height: 36px; padding: 0;
+                border: 1px solid var(--ds-border); border-radius: .5rem;
+                background: var(--ds-input);
+            }
+            .ds-mobile-bar input[type="range"] {
+                flex: 1 1 100px; min-width: 100px;
+            }
+            .ds-mobile-bar .ds-btn { padding: .4rem .55rem; }
+        }
+        @media (min-width: 721px) {
+            .ds-mobile-bar { display: none; }
         }
 
         /* Top toolbar */
@@ -521,6 +589,22 @@
                     <button type="button" class="ds-btn" @click="clearCanvas()" data-tip="{{ __('admin.drawing.tip.clear') }}" data-tip-pos="left">{{ __('admin.drawing.clear_canvas') }}</button>
                 </div>
             </aside>
+        </div>
+
+        {{-- Mobile-only bottom bar: shown via CSS media query, gives
+             phone users the essentials (color, brush size, undo / redo,
+             clear, save) without needing the desktop right panel. --}}
+        <div class="ds-mobile-bar">
+            <input type="color" x-model="color" aria-label="Color" />
+            <input type="range" min="1" max="80" x-model.number="size" aria-label="Brush size" />
+            <button type="button" class="ds-btn ds-btn--ghost" @click="undo()" :disabled="undoStack.length <= 1" aria-label="Undo">
+                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l-4-4 4-4M5 10h9a5 5 0 010 10h-3"/></svg>
+            </button>
+            <button type="button" class="ds-btn ds-btn--ghost" @click="redo()" :disabled="redoStack.length === 0" aria-label="Redo">
+                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 14l4-4-4-4M19 10h-9a5 5 0 000 10h3"/></svg>
+            </button>
+            <button type="button" class="ds-btn" @click="clearCanvas()" aria-label="{{ __('admin.drawing.clear_canvas') }}" style="white-space:nowrap;">⌫</button>
+            <button type="button" class="ds-btn ds-btn--accent" @click="save()" :disabled="saving" style="margin-left:auto; white-space:nowrap;" x-text="saving ? @js(__('admin.drawing.saving')) : @js(__('admin.drawing.save_to_gallery'))"></button>
         </div>
 
         <div class="ds-toast" x-show="toast" x-transition x-text="toast" style="display:none;"></div>
