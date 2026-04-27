@@ -6,6 +6,7 @@ use App\Models\Role;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Cache;
 
 class UserForm
 {
@@ -28,7 +29,11 @@ class UserForm
                 Select::make('role_id')
                     ->label(__('admin.common.role'))
                     ->required()
-                    ->options(fn () => Role::orderBy('name')->pluck('name', 'id')->all())
+                    ->options(fn () => Cache::remember(
+                        'options:roles',
+                        300,
+                        fn () => Role::orderBy('name')->pluck('name', 'id')->all(),
+                    ))
                     ->native(false)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('password')

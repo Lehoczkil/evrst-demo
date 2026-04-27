@@ -82,10 +82,14 @@ class Calendar extends Page
     /** @return array<int, array{id: int, name: string}> */
     public function getAssigneeOptions(): array
     {
-        return User::orderBy('name')->get(['id', 'name'])->map(fn ($u) => [
-            'id' => $u->id,
-            'name' => $u->name,
-        ])->all();
+        return \Illuminate\Support\Facades\Cache::remember(
+            'options:assignees',
+            300,
+            fn () => User::orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])
+                ->all(),
+        );
     }
 
     public function getMonthLabel(): string

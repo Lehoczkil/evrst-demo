@@ -64,7 +64,11 @@ class TasksTable
                     ->options(fn () => collect(Task::statuses())->mapWithKeys(fn ($s) => [$s => __('admin.tasks.statuses.' . $s)])->all()),
                 SelectFilter::make('supervisor_id')
                     ->label(__('admin.tasks.supervisor'))
-                    ->options(fn () => User::orderBy('name')->pluck('name', 'id')->all()),
+                    ->options(fn () => \Illuminate\Support\Facades\Cache::remember(
+                        'options:users',
+                        300,
+                        fn () => User::orderBy('name')->pluck('name', 'id')->all(),
+                    )),
                 SelectFilter::make('assignees')
                     ->relationship('assignees', 'name')
                     ->label(__('admin.tasks.assignees')),

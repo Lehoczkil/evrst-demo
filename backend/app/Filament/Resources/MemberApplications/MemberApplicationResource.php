@@ -52,7 +52,14 @@ class MemberApplicationResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         if (! static::canViewAny()) return null;
-        $count = MemberApplication::where('status', MemberApplication::STATUS_PENDING)->count();
+        // Every page render in the panel asks for the badge; cache the
+        // count for 60 s and bust it from AppServiceProvider whenever a
+        // MemberApplication is saved or deleted.
+        $count = \Illuminate\Support\Facades\Cache::remember(
+            'nav:applications-pending-count',
+            60,
+            fn () => MemberApplication::where('status', MemberApplication::STATUS_PENDING)->count(),
+        );
         return $count > 0 ? (string) $count : null;
     }
 

@@ -62,7 +62,11 @@ class UsersTable
             ->filters([
                 SelectFilter::make('role_id')
                     ->label(__('admin.common.role'))
-                    ->options(fn () => Role::orderBy('name')->pluck('name', 'id')->all()),
+                    ->options(fn () => \Illuminate\Support\Facades\Cache::remember(
+                        'options:roles',
+                        300,
+                        fn () => Role::orderBy('name')->pluck('name', 'id')->all(),
+                    )),
             ])
             ->recordActions([
                 EditAction::make(),

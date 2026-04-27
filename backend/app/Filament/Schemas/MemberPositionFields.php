@@ -5,6 +5,7 @@ namespace App\Filament\Schemas;
 use App\Models\Cms\TeamMemberGroup;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Shared form fragment: positions multi-select + a main-position single
@@ -25,8 +26,7 @@ class MemberPositionFields
         return [
             Select::make('position_ids')
                 ->label(__('admin.team.positions'))
-                ->options(fn () => TeamMemberGroup::all()
-                    ->mapWithKeys(fn ($g) => [$g->id => $g->name ?? $g->id]))
+                ->options(fn () => self::groupOptions())
                 ->multiple()
                 ->searchable()
                 ->preload()
@@ -36,18 +36,26 @@ class MemberPositionFields
                 ->label(__('admin.team.main_position'))
                 ->options(function (Get $get) {
                     $ids = (array) ($get('position_ids') ?? []);
-                    if (empty($ids)) {
-                        return TeamMemberGroup::all()
-                            ->mapWithKeys(fn ($g) => [$g->id => $g->name ?? $g->id])
-                            ->all();
-                    }
-                    return TeamMemberGroup::whereIn('id', $ids)->get()
-                        ->mapWithKeys(fn ($g) => [$g->id => $g->name ?? $g->id])
-                        ->all();
+                    $all = self::groupOptions();
+                    if (empty($ids)) return $all;
+                    return array_intersect_key($all, array_flip($ids));
                 })
                 ->searchable()
                 ->preload()
                 ->columnSpan($mainSpan),
         ];
+    }
+
+    /**
+     * Cached id => name map for the position selects. 5 min TTL with
+     * automatic invalidation in AppServiceProvider on save / delete.
+     *
+     * @return array<int|string, string>
+     */
+    private static function groupOptions(): array
+    {
+        return Cache::remember('options:team-member-groups', 300, fn () => TeamMemberGroup::all()
+            ->mapWithKeys(fn ($g) => [$g->id => $g->name ?? $g->id])
+            ->all());
     }
 }

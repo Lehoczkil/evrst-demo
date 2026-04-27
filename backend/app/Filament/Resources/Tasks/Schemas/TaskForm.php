@@ -9,6 +9,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Cache;
 
 class TaskForm
 {
@@ -34,7 +35,11 @@ class TaskForm
                     ->columnSpan(12),
                 Select::make('supervisor_id')
                     ->label(__('admin.tasks.supervisor'))
-                    ->options(fn () => User::orderBy('name')->pluck('name', 'id')->all())
+                    ->options(fn () => Cache::remember(
+                        'options:users',
+                        300,
+                        fn () => User::orderBy('name')->pluck('name', 'id')->all(),
+                    ))
                     ->searchable()
                     ->preload()
                     ->columnSpan(['default' => 12, 'md' => 6]),
