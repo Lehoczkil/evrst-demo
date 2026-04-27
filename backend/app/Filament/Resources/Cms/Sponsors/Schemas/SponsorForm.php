@@ -32,6 +32,7 @@ class SponsorForm
                     ->label(__('admin.sponsors.sort_order'))
                     ->numeric()
                     ->default(0)
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.sponsor_position'))
                     ->columnSpan(['default' => 6, 'md' => 3]),
                 Textarea::make('description_en')
                     ->label(__('admin.common.description') . ' (EN)')
@@ -66,6 +67,7 @@ class SponsorForm
                     ->disk('public')
                     ->panelLayout('integrated')
                     ->helperText(__('admin.sponsors.logo_help'))
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.sponsor_logo'))
                     ->columnSpanFull(),
             ])
             ->columns(12);

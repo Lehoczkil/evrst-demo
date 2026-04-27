@@ -37,6 +37,7 @@ class TaskForm
                     ->helperText(fn ($record) => $record && ! $record->hasProof()
                         ? __('admin.tasks.proof_required_for_done')
                         : null)
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_status'))
                     ->default(Task::STATUS_TODO)
                     ->required()
                     ->disabled(fn ($record) => $record !== null
@@ -51,6 +52,7 @@ class TaskForm
                     ->minLength(10)
                     ->maxLength(5000)
                     ->helperText(__('admin.tasks.description_help'))
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_description'))
                     ->columnSpan(12),
                 Select::make('supervisor_id')
                     ->label(__('admin.tasks.supervisor'))
@@ -62,6 +64,7 @@ class TaskForm
                     ))
                     ->searchable()
                     ->preload()
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_supervisor'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Select::make('assignees')
                     ->label(__('admin.tasks.assignees'))
@@ -71,11 +74,13 @@ class TaskForm
                     ->minItems(1)
                     ->preload()
                     ->searchable()
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_assignees'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 DatePicker::make('due_date')
                     ->label(__('admin.tasks.due_date'))
                     ->required()
                     ->displayFormat('d M Y')
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_due_date'))
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 TextInput::make('position')
                     ->label(__('admin.tasks.position'))

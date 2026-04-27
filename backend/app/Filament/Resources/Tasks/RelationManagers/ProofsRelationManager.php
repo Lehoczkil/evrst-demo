@@ -46,6 +46,7 @@ class ProofsRelationManager extends RelationManager
                     ->default(TaskProof::KIND_IMAGE)
                     ->required()
                     ->live()
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.proof_kind'))
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 TextInput::make('title')
                     ->label(__('admin.common.title'))

@@ -207,6 +207,151 @@ return [
         'member'       => 'Member',
     ],
 
+    'help' => [
+        'tooltip' => 'What can I do here?',
+        'close' => 'Close',
+        'pages' => [
+            'pages.dashboard' => [
+                'title' => 'Dashboard',
+                'body' => '<p>This is your launch pad. The four cards across the top summarise pending applications, open tasks, upcoming events, and your team size — they auto-refresh every minute.</p><p>Below them you\'ll find <strong>My open tasks</strong> (everything assigned to you that isn\'t Done), the <strong>latest applications</strong> awaiting review, and a 7-day <strong>Upcoming this week</strong> timeline.</p>',
+            ],
+            'resources.cms.events.index' => [
+                'title' => 'Events',
+                'body' => '<p>The public-facing event list shown on the homepage. Each event has a bilingual title + body, a start / end time, an optional cover image, and a Draft / Published status.</p><p>Drafts are hidden from the SPA. Sort order is the manual <em>Sort</em> column — lower number first.</p>',
+            ],
+            'resources.cms.events.create' => [
+                'title' => 'Create event',
+                'body' => '<p>Fill in both EN and HU titles so the language switch on the public site renders cleanly. Set Status to <strong>Published</strong> to make it visible to visitors.</p><p>End time is optional — leave it empty for a single-instant event.</p>',
+            ],
+            'resources.cms.events.edit' => [
+                'title' => 'Edit event',
+                'body' => '<p>Same fields as the create form. Toggle Status between Draft / Published to control SPA visibility without deleting the row.</p>',
+            ],
+            'resources.cms.sponsors.index' => [
+                'title' => 'Sponsors',
+                'body' => '<p>The logo strip on the public site. The form accepts HEIC photos straight from a phone and bumps the upload limit to 8 MB.</p><p>Manager role can\'t see this — sponsor relationships are admin-only.</p>',
+            ],
+            'resources.drawings.index' => [
+                'title' => 'Drawings',
+                'body' => '<p>Every drawing made in the studio. Each row has <em>View</em> (modal preview), <em>Continue editing</em> (clones into a new canvas with that PNG as the starting layer), and <em>Download</em>.</p><p>Search by title or by author. Anyone signed in to the panel can create drawings; only the author or an admin can delete one.</p>',
+            ],
+            'resources.drawings.create' => [
+                'title' => 'Drawing studio',
+                'body' => '<p>Vanilla canvas with pen, line, arrow, rectangle, ellipse, polygon, text, bucket fill, eyedropper, and eraser.</p><p>Every tool also has a one-letter shortcut shown in its corner. <strong>Image:</strong> file picker or paste with ⌘/Ctrl+V — drag to position, corner handle to resize, Enter to place.</p><p><strong>Save</strong> commits the canvas to the gallery. <strong>Export</strong> downloads it locally as PNG or JPG.</p>',
+            ],
+            'resources.onshape-models.index' => [
+                'title' => '3D models',
+                'body' => '<p>Onshape document embeds. Anyone signed in to Onshape can pan/zoom/edit inside the iframe; everyone else gets a read-only viewer.</p><p>The viewer is rendered by Onshape directly — our server only stores the document IDs and pays no bandwidth or CPU cost for the 3D scene.</p>',
+            ],
+            'resources.onshape-models.create' => [
+                'title' => 'Add a 3D model',
+                'body' => '<p>Paste any Onshape document URL into the <em>Share URL</em> field — the document, workspace, and element IDs are extracted automatically.</p><p>Once saved, open the row to see the embedded viewer. Click <em>Open in Onshape</em> to jump to the full editor in a new tab.</p>',
+            ],
+            'resources.onshape-models.edit' => [
+                'title' => 'Edit 3D model',
+                'body' => '<p>The embedded viewer below the form is live — pan, zoom, and (if you\'re signed in) edit. Changes persist on Onshape\'s side.</p>',
+            ],
+            'pages.calendar' => [
+                'title' => 'Calendar',
+                'body' => '<p>An admin-only month view layered with three sources: <strong>Calendar events</strong> created here (separate from the public Events collection), <strong>Projects</strong> with a start_at, and <strong>Tasks</strong> with a due date.</p><p><strong>Click any day</strong> to spawn a new calendar event prefilled to that date. <strong>Click an event card</strong> to edit / delete it. Filters at the top toggle each source on or off.</p>',
+            ],
+            'resources.tasks.index' => [
+                'title' => 'Tasks',
+                'body' => '<p>The full backlog grouped by status. Tasks <em>require</em> a title, description (≥10 chars), supervisor, at least one assignee, and a due date — these are validated server-side.</p><p>Use the toolbar <em>Kanban board</em> button for a drag-and-drop view.</p>',
+            ],
+            'resources.tasks.create' => [
+                'title' => 'New task',
+                'body' => '<p>All fields are required. The status starts as <strong>To do</strong>; you can\'t change it on creation.</p><p>The <strong>supervisor</strong> is the person who signs off when the task is done. <strong>Assignees</strong> do the work and post documentation.</p>',
+            ],
+            'resources.tasks.edit' => [
+                'title' => 'Edit task',
+                'body' => '<p>The <strong>Status</strong> dropdown only lists transitions you\'re allowed to make. As an assignee you can move a card to <em>Testing</em> once you\'ve attached at least one proof under <strong>Documentation</strong>; only the <em>supervisor</em> can mark it <strong>Done</strong>.</p><p>The <strong>Documentation</strong> tab below is where assignees attach a screenshot, a 3D model, an external link, or a written note as evidence of completion.</p>',
+            ],
+            'resources.tasks.kanban' => [
+                'title' => 'Kanban board',
+                'body' => '<p>Drag cards between columns to change their status. Cards snap back to the source column if you\'re not allowed to make that move.</p><p>Drag-and-drop is disabled while a filter is active — clear the filters to reorder.</p>',
+            ],
+            'resources.member-applications.index' => [
+                'title' => 'Applications',
+                'body' => '<p>Inbox of new-member applications submitted from the public site. The pending count appears as a badge in the sidebar.</p><p>Use <em>Accept</em> to convert an application into a real team member + admin account; <em>Reject</em> archives it. Both actions write a dedicated entry to the activity log.</p>',
+            ],
+            'resources.member-applications.edit' => [
+                'title' => 'Application detail',
+                'body' => '<p>Read-only snapshot of what the applicant submitted. Use the <em>Accept</em> action from the list to convert this row into a team member.</p>',
+            ],
+            'resources.member-applications.accept' => [
+                'title' => 'Accept application',
+                'body' => '<p>Creates a Team member + admin account in one go. The applicant gets a temporary password emailed (or logged to <code>storage/logs/laravel.log</code> if MAIL_MAILER=log) and is forced to change it on first sign-in.</p>',
+            ],
+            'resources.cms.team-members.index' => [
+                'title' => 'Team members',
+                'body' => '<p>The public org chart. Each member has a name, optional bilingual degree, photo, one or more positions, and a designated <em>main position</em> (used as their slot in the chart).</p>',
+            ],
+            'resources.cms.team-member-groups.index' => [
+                'title' => 'Positions',
+                'body' => '<p>The position labels (Propulsion, Avionics, …) that team members can be assigned to. Editing a label here updates it everywhere — they\'re snapshot into each team member\'s payload on save.</p>',
+            ],
+            'resources.cms.mentors.index' => [
+                'title' => 'Mentors',
+                'body' => '<p>External mentors / advisors shown on the public team page. Same shape as team members minus the position fields.</p>',
+            ],
+            'resources.cms.about-projects.index' => [
+                'title' => 'Projects',
+                'body' => '<p>Past + ongoing rocket projects shown on the About page. Set <em>Starts</em> + <em>Ends</em> to make the project appear on the calendar timeline.</p>',
+            ],
+            'resources.cms.about-goals.index' => [
+                'title' => 'Goals',
+                'body' => '<p>The bullet-point objectives shown above the project list on the About page. Bilingual title + description, sortable.</p>',
+            ],
+            'pages.about-content' => [
+                'title' => 'About content',
+                'body' => '<p>The lead heading and body text shown above the projects + goals on the public About page. Both EN and HU copy are required so the language switch keeps working.</p>',
+            ],
+            'resources.users.index' => [
+                'title' => 'Users',
+                'body' => '<p>Admin-only. Every panel sign-in account, plus their assigned role. The <em>Resend temp password</em> action emails a fresh temporary password and forces a re-set on next login.</p>',
+            ],
+            'resources.users.create' => [
+                'title' => 'New user',
+                'body' => '<p>Admin-only. The Role here controls what this user can do across the panel — see <em>Roles &amp; permissions</em> for the per-action toggle list.</p><p>Leave the password blank to invite without a temp password (you can resend later from the user list).</p>',
+            ],
+            'resources.users.edit' => [
+                'title' => 'Edit user',
+                'body' => '<p>Admin-only. Changing the Role takes effect on the user\'s next request.</p>',
+            ],
+            'resources.roles.index' => [
+                'title' => 'Roles &amp; permissions',
+                'body' => '<p>Admin-only. Three seeded roles (Admin, Manager, Member) — you can\'t add or delete roles from the UI, but you can flip permissions per role at runtime.</p>',
+            ],
+            'resources.roles.edit' => [
+                'title' => 'Edit role',
+                'body' => '<p>Toggle the actions this role is allowed to perform across the panel. Code-side checks read the same flags, so changes take effect on the user\'s next request.</p>',
+            ],
+            'resources.activity-logs.index' => [
+                'title' => 'Activity log',
+                'body' => '<p>Admin-only. Every create / update / delete, plus the explicit <em>accepted</em> / <em>rejected</em> entries from the application flow.</p><p>Entries older than 90 days are pruned each night by a scheduled job.</p>',
+            ],
+        ],
+        'fields' => [
+            'task_supervisor' => 'The person who signs off when the task is finished. Only the supervisor can move a card to "Done".',
+            'task_assignees'  => 'Who actually does the work. Multiple people can be assigned. Assignees can move the task as far as "Testing".',
+            'task_due_date'   => 'A due date is required so the task shows up on the calendar.',
+            'task_description' => 'Aim for at least a couple of sentences — enough that whoever picks it up can start without asking questions.',
+            'task_status'     => 'The dropdown only lists transitions you\'re allowed to make from the current state. Marking "Done" needs at least one Documentation proof attached.',
+            'event_status'    => 'Drafts stay hidden from the public site. Switch to Published when ready to ship.',
+            'event_date_range' => 'Start time is required. End is optional — leave blank for a single instant.',
+            'sponsor_logo'    => 'PNG / JPG / SVG / WebP / GIF / HEIC accepted, up to 8 MB.',
+            'sponsor_position' => 'Lower numbers appear first in the public sponsor strip.',
+            'user_role'       => 'Determines what the user can do across the panel. Manager loses sponsors / applications / notifications; Member is read-only.',
+            'user_password'   => 'Leave blank when editing to keep the existing password. New password forces a re-set on next sign-in.',
+            'role_permissions' => 'Permissions toggle on the next request — no need to log out / in.',
+            'application_status' => 'Set automatically by the Accept / Reject actions; not editable here.',
+            'team_main_position' => 'Used to slot the member into the public org chart. Pick one of their assigned positions.',
+            'onshape_share_url' => 'Paste a share link from cad.onshape.com — the document / workspace / element IDs are extracted for you.',
+            'proof_kind'      => 'Image: a screenshot of the result. File: a 3D model or PDF (max 20 MB). Link: an external URL (e.g. GitHub, Onshape, Drive). Note: a written summary.',
+        ],
+    ],
+
     'widgets' => [
         'pending_apps'    => 'Pending applications',
         'inbox_clear'     => 'Inbox is clear',

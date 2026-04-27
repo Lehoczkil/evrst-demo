@@ -45,6 +45,7 @@ class OnshapeModelForm
                                 if ($ids['workspace_id']) $set('workspace_id', $ids['workspace_id']);
                                 if ($ids['element_id'])   $set('element_id', $ids['element_id']);
                             })
+                            ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.onshape_share_url'))
                             ->columnSpanFull(),
                         TextInput::make('document_id')
                             ->label(__('admin.onshape.document_id'))

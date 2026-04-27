@@ -37,7 +37,8 @@ class RoleForm
                             ->searchable()
                             ->bulkToggleable()
                             ->columns(2)
-                            ->gridDirection('row'),
+                            ->gridDirection('row')
+                            ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.role_permissions')),
                     ]),
             ]);
     }

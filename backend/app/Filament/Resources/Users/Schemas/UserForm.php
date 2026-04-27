@@ -35,6 +35,7 @@ class UserForm
                         fn () => Role::orderBy('name')->pluck('name', 'id')->all(),
                     ))
                     ->native(false)
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.user_role'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('password')
                     ->label(__('admin.users.password'))
@@ -45,6 +46,7 @@ class UserForm
                     ->dehydrated(fn ($state) => filled($state))
                     ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
                     ->helperText(__('admin.users.password_help'))
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.user_password'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
             ])
             ->columns(12);

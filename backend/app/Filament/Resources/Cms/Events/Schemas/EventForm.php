@@ -33,12 +33,14 @@ class EventForm
                     ])
                     ->default('DRAFT')
                     ->required()
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.event_status'))
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 DateTimePicker::make('start_at')
                     ->label(__('admin.events.start_at'))
                     ->seconds(false)
                     ->displayFormat('d M Y H:i')
                     ->required()
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.event_date_range'))
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 DateTimePicker::make('end_at')
                     ->label(__('admin.events.end_at'))

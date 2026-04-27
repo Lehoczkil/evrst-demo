@@ -69,6 +69,7 @@ class MemberApplicationForm
                     ])
                     ->disabled()
                     ->dehydrated(false)
+                    ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.application_status'))
                     ->columnSpan(['default' => 12, 'md' => 4]),
             ])
             ->columns(12);

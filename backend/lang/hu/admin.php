@@ -207,6 +207,151 @@ return [
         'member'       => 'Tag',
     ],
 
+    'help' => [
+        'tooltip' => 'Mit tudok itt csinálni?',
+        'close' => 'Bezárás',
+        'pages' => [
+            'pages.dashboard' => [
+                'title' => 'Vezérlőpult',
+                'body' => '<p>Ez az indítóoldalad. A felső négy kártya összegzi a függőben lévő jelentkezéseket, a nyitott feladatokat, a közelgő eseményeket és a csapat méretét — percenként frissülnek.</p><p>Alatta megtalálod <strong>Az én feladataim</strong> (minden hozzád rendelt nyitott feladat), a <strong>friss jelentkezéseket</strong> elbírálásra, és egy 7 napos <strong>Közelgő hét</strong> idővonalat.</p>',
+            ],
+            'resources.cms.events.index' => [
+                'title' => 'Események',
+                'body' => '<p>A főoldalon megjelenő nyilvános eseménylista. Minden eseménynek van kétnyelvű címe + szövege, kezdés / befejezés ideje, opcionális borítóképe és Vázlat / Publikált státusza.</p><p>A vázlatok rejtve maradnak az SPA-ban. A sorrendet a <em>Sorrend</em> oszlop kézi értéke adja — kisebb szám előrébb.</p>',
+            ],
+            'resources.cms.events.create' => [
+                'title' => 'Esemény létrehozása',
+                'body' => '<p>Töltsd ki az EN és HU címet is, hogy a nyelvváltó tisztán renderelje. Állítsd a Státuszt <strong>Publikált</strong>-ra, hogy a látogatók is lássák.</p><p>A befejezési idő nem kötelező — egy időpontra szóló eseménynél hagyd üresen.</p>',
+            ],
+            'resources.cms.events.edit' => [
+                'title' => 'Esemény szerkesztése',
+                'body' => '<p>Ugyanazok a mezők, mint a létrehozásnál. Állítsd Vázlat / Publikált között a sor láthatóságát anélkül, hogy törölnéd.</p>',
+            ],
+            'resources.cms.sponsors.index' => [
+                'title' => 'Támogatók',
+                'body' => '<p>A logósor a nyilvános oldalon. A form elfogad telefonról HEIC fotókat is, és 8 MB-ig fogadja a feltöltést.</p><p>A Vezető szerepkör nem látja ezt — a támogatói kapcsolatok csak adminhoz tartoznak.</p>',
+            ],
+            'resources.drawings.index' => [
+                'title' => 'Rajzok',
+                'body' => '<p>Minden a műhelyben készült rajz. Soronként <em>Megnézem</em> (modális előnézet), <em>Szerkesztés folytatása</em> (átklónozza új vászonra a PNG-vel kiindulólappal) és <em>Letöltés</em> műveletek.</p><p>Cím vagy szerző szerint kereshető. Bárki, aki belépett, készíthet rajzot; csak a szerző vagy admin törölheti.</p>',
+            ],
+            'resources.drawings.create' => [
+                'title' => 'Rajzműhely',
+                'body' => '<p>Sima vászon toll, vonal, nyíl, téglalap, ellipszis, sokszög, szöveg, festékvödör, pipetta és radír eszközökkel.</p><p>Mindegyik eszközhöz tartozik egy betűs gyorsbillentyű a sarkában. <strong>Kép:</strong> fájlválasztó vagy ⌘/Ctrl+V beillesztés — húzd a helyére, sarokfogantyúval méretezz, Enterrel rögzítsd.</p><p><strong>Mentés</strong> a galériába helyezi. <strong>Letöltés</strong> PNG vagy JPG formában menti gépre.</p>',
+            ],
+            'resources.onshape-models.index' => [
+                'title' => '3D modellek',
+                'body' => '<p>Onshape dokumentum-beágyazások. Aki belépett az Onshape-be, panozhat / nagyíthat / szerkeszthet az iframe-ben; mindenki más csak megtekintheti.</p><p>A megjelenítőt közvetlenül az Onshape rendereli — a mi szerverünk csak a dokumentum-azonosítókat tárolja, sávszélességet és CPU-t nem fizet a 3D-ért.</p>',
+            ],
+            'resources.onshape-models.create' => [
+                'title' => '3D modell hozzáadása',
+                'body' => '<p>Illeszd be bármelyik Onshape dokumentum URL-jét a <em>Megosztási URL</em> mezőbe — a dokumentum-, workspace- és element-ID-k automatikusan kinyerésre kerülnek.</p><p>Mentés után a sor megnyitásakor látod a beágyazott megjelenítőt. Az <em>Megnyitás az Onshape-en</em> új lapon a teljes szerkesztőt indítja.</p>',
+            ],
+            'resources.onshape-models.edit' => [
+                'title' => '3D modell szerkesztése',
+                'body' => '<p>A form alatti beágyazott megjelenítő élő — panozható, nagyítható és (ha be vagy lépve) szerkeszthető. A változások az Onshape oldalán maradnak.</p>',
+            ],
+            'pages.calendar' => [
+                'title' => 'Naptár',
+                'body' => '<p>Csak admin által látható havi nézet, három forrással: <strong>Naptáreseményekkel</strong> (külön a publikus események gyűjteményétől), <strong>Projektekkel</strong> (kezdő dátummal) és <strong>Feladatokkal</strong> (határidővel).</p><p><strong>Kattints egy napra</strong> új naptáresemény létrehozásához arra a dátumra. <strong>Kattints egy eseménykártyára</strong> a szerkesztéshez / törléshez. A felső szűrők ki / be kapcsolják a forrásokat.</p>',
+            ],
+            'resources.tasks.index' => [
+                'title' => 'Feladatok',
+                'body' => '<p>A teljes feladatlista státuszok szerint csoportosítva. A feladatokhoz <em>kötelező</em> cím, leírás (≥10 karakter), felelős, legalább egy megbízott és határidő — ezt a szerver oldal is ellenőrzi.</p><p>A felső <em>Kanban tábla</em> gomb drag-and-drop nézetbe vált.</p>',
+            ],
+            'resources.tasks.create' => [
+                'title' => 'Új feladat',
+                'body' => '<p>Minden mező kötelező. A státusz <strong>Teendő</strong>-ként indul; létrehozáskor nem módosítható.</p><p>A <strong>felelős</strong> az, aki jóváhagyja a feladat elkészültét. A <strong>megbízottak</strong> végzik a munkát és töltenek fel dokumentációt.</p>',
+            ],
+            'resources.tasks.edit' => [
+                'title' => 'Feladat szerkesztése',
+                'body' => '<p>A <strong>Státusz</strong> legördülő csak azokat az átmeneteket sorolja, amiket te megtehetsz. Megbízottként csak akkor mozgathatod <em>Tesztelésre</em>, ha legalább egy bizonyítékot csatoltál a <strong>Dokumentáció</strong> alá; <strong>Készre</strong> csak a <em>felelős</em> teheti.</p><p>A <strong>Dokumentáció</strong> fülön töltheted fel a megbízottak az elkészülésről szóló képet, 3D modellt, külső linket vagy írott jegyzetet.</p>',
+            ],
+            'resources.tasks.kanban' => [
+                'title' => 'Kanban tábla',
+                'body' => '<p>Húzd a kártyákat oszlopok között a státuszváltáshoz. Ha az adott mozdulatot nem teheted meg, a kártya visszacsúszik a kiindulási oszlopba.</p><p>Aktív szűrő mellett a drag-and-drop le van tiltva — töröld a szűrőket az átrendezéshez.</p>',
+            ],
+            'resources.member-applications.index' => [
+                'title' => 'Jelentkezések',
+                'body' => '<p>A nyilvános oldalról beérkező új tag jelentkezések postaládája. A függőben lévők számát a sidebar jelvény mutatja.</p><p>Az <em>Elfogadás</em> jelentkezésből valódi csapattagot + admin fiókot készít; az <em>Elutasítás</em> archiválja. Mindkét művelet külön bejegyzést ír a tevékenységnaplóba.</p>',
+            ],
+            'resources.member-applications.edit' => [
+                'title' => 'Jelentkezés részletei',
+                'body' => '<p>Csak olvasható pillanatkép arról, amit a jelentkező beküldött. A listából használt <em>Elfogadás</em> művelettel alakíthatod csapattaggá.</p>',
+            ],
+            'resources.member-applications.accept' => [
+                'title' => 'Jelentkezés elfogadása',
+                'body' => '<p>Egy lépésben létrehoz egy csapattag + admin fiókot. A jelentkező ideiglenes jelszót kap e-mailben (vagy <code>storage/logs/laravel.log</code>-ba kerül, ha MAIL_MAILER=log), és az első belépéskor új jelszót kell beállítania.</p>',
+            ],
+            'resources.cms.team-members.index' => [
+                'title' => 'Csapattagok',
+                'body' => '<p>A nyilvános szervezeti ábra. Minden tagnál van név, opcionálisan kétnyelvű végzettség, fénykép, egy vagy több pozíció és egy kijelölt <em>fő pozíció</em> (ez az ábrabeli helye).</p>',
+            ],
+            'resources.cms.team-member-groups.index' => [
+                'title' => 'Pozíciók',
+                'body' => '<p>A pozíció címkék (Hajtómű, Avionika, …), amikhez a csapattagok rendelhetők. Itt szerkesztve mindenhol frissül — mentéskor a csapattag payloadjába is bemásolódnak.</p>',
+            ],
+            'resources.cms.mentors.index' => [
+                'title' => 'Mentorok',
+                'body' => '<p>Külső mentorok / tanácsadók a nyilvános csapatoldalon. Ugyanaz a forma, mint a csapattagoknál, csak pozíciómezők nélkül.</p>',
+            ],
+            'resources.cms.about-projects.index' => [
+                'title' => 'Projektek',
+                'body' => '<p>A Rólunk oldalon megjelenő múlt + jelenlegi rakétaprojektek. Állíts <em>Kezdés</em> + <em>Befejezés</em> időt, hogy a projekt megjelenjen a naptár idővonalán.</p>',
+            ],
+            'resources.cms.about-goals.index' => [
+                'title' => 'Célok',
+                'body' => '<p>A Rólunk oldal projekt-listája fölött megjelenő célok. Kétnyelvű cím + leírás, sorrendezhető.</p>',
+            ],
+            'pages.about-content' => [
+                'title' => 'Rólunk tartalom',
+                'body' => '<p>A nyilvános Rólunk oldal projektek + célok feletti címsora és törzsszövege. EN és HU is kötelező, hogy a nyelvváltó tovább működjön.</p>',
+            ],
+            'resources.users.index' => [
+                'title' => 'Felhasználók',
+                'body' => '<p>Csak admin által. Minden bejelentkező fiók és a hozzájuk rendelt szerepkör. Az <em>Új ideiglenes jelszó küldése</em> friss jelszót küld, és a következő belépéskor új jelszót kér.</p>',
+            ],
+            'resources.users.create' => [
+                'title' => 'Új felhasználó',
+                'body' => '<p>Csak admin által. A szerepkör határozza meg, mit tehet a panelben — lásd <em>Szerepkörök és jogosultságok</em>.</p><p>Hagyd üresen a jelszót, ha ideiglenes jelszó nélkül akarsz meghívni (később küldhetsz a felhasználólistából).</p>',
+            ],
+            'resources.users.edit' => [
+                'title' => 'Felhasználó szerkesztése',
+                'body' => '<p>Csak admin által. A szerepkör módosítása a felhasználó következő kérésekor érvényesül.</p>',
+            ],
+            'resources.roles.index' => [
+                'title' => 'Szerepkörök és jogosultságok',
+                'body' => '<p>Csak admin által. Három előre létrehozott szerepkör (Admin, Vezető, Tag) — a UI-ból nem hozhatsz létre vagy törölhetsz, de futás közben kapcsolgathatod a jogokat.</p>',
+            ],
+            'resources.roles.edit' => [
+                'title' => 'Szerepkör szerkesztése',
+                'body' => '<p>Kapcsold ki / be a szerepkör által végezhető műveleteket. A kód-oldali ellenőrzések ugyanezt a flag-et olvassák, így a következő kérésnél lépnek életbe.</p>',
+            ],
+            'resources.activity-logs.index' => [
+                'title' => 'Tevékenységnapló',
+                'body' => '<p>Csak admin által. Minden létrehozás / frissítés / törlés, plusz a jelentkezésekhez tartozó <em>elfogadva</em> / <em>elutasítva</em> bejegyzések.</p><p>A 90 napnál régebbi bejegyzéseket éjszakánként ütemezett job törli.</p>',
+            ],
+        ],
+        'fields' => [
+            'task_supervisor' => 'A személy, aki jóváhagyja a feladat elkészültét. Csak ő teheti „Kész”-re a kártyát.',
+            'task_assignees'  => 'Akik tényleg dolgoznak rajta. Több ember is kijelölhető. A megbízottak „Tesztelés”-ig vihetik a feladatot.',
+            'task_due_date'   => 'Határidő kötelező — ennek alapján jelenik meg a naptárban.',
+            'task_description' => 'Legalább pár mondatban — annyira, hogy aki felveszi, kérdés nélkül elkezdhesse.',
+            'task_status'     => 'A legördülő csak azokat az átmeneteket sorolja, amiket te megtehetsz. „Kész”-re tételhez legalább egy Dokumentáció bizonyíték kell.',
+            'event_status'    => 'A vázlatok rejtve a publikus oldalról. Állítsd Publikáltra, ha indulhat.',
+            'event_date_range' => 'Kezdés kötelező. Befejezés opcionális — egy időpontra szólónál hagyd üresen.',
+            'sponsor_logo'    => 'PNG / JPG / SVG / WebP / GIF / HEIC, max 8 MB.',
+            'sponsor_position' => 'A kisebb számok előrébb jelennek meg a publikus támogatósorban.',
+            'user_role'       => 'A panelben végezhető műveleteket határozza meg. A Vezető nem lát támogatókat / jelentkezéseket / értesítéseket; a Tag csak olvas.',
+            'user_password'   => 'Hagyd üresen szerkesztéskor a meglévő jelszó megtartásához. Új jelszó következő belépéskor új jelszó beállítását kéri.',
+            'role_permissions' => 'A jogosultságok a következő kérésnél lépnek életbe — nem kell ki / belépni.',
+            'application_status' => 'Az Elfogadás / Elutasítás művelet automatikusan állítja; itt nem szerkeszthető.',
+            'team_main_position' => 'Ez alapján kerül a tag a publikus szervezeti ábrára. Válaszd a hozzárendelt pozíciók közül.',
+            'onshape_share_url' => 'Illessz be megosztási linket a cad.onshape.com-ról — a dokumentum / workspace / element ID kinyerésre kerül.',
+            'proof_kind'      => 'Kép: a végeredmény képernyőképe. Fájl: 3D modell vagy PDF (max 20 MB). Link: külső URL (pl. GitHub, Onshape, Drive). Jegyzet: szöveges összegzés.',
+        ],
+    ],
+
     'widgets' => [
         'pending_apps'    => 'Függőben lévő jelentkezések',
         'inbox_clear'     => 'Nincs függőben',
