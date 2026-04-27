@@ -336,6 +336,10 @@ return [
                 'title' => 'Tevékenységnapló',
                 'body' => '<p>Csak admin által. Minden létrehozás / frissítés / törlés, plusz a jelentkezésekhez tartozó <em>elfogadva</em> / <em>elutasítva</em> bejegyzések.</p><p>A 90 napnál régebbi bejegyzéseket éjszakánként ütemezett job törli.</p>',
             ],
+            'pages.database-inspector' => [
+                'title' => 'Adatbázis-ellenőrző',
+                'body' => '<p>Csak admin által. Válassz egy táblát a bal oldalon, és látod a teljes szerkezetet jobbra: oszlopok típussal / nullable státusszal / alapértékkel, indexek (elsődleges, egyedi, normál) és idegen kulcsok cascade viselkedéssel.</p><p>Csak olvasható — nincs adat, nincs SQL, nincs szerkesztés. A driver neve a tábla mellett mutatja, hogy SQLite-on vagy Postgres-en vagy.</p>',
+            ],
         ],
         'fields' => [
             'task_supervisor' => 'A személy, aki jóváhagyja a feladat elkészültét. Csak ő teheti „Kész”-re a kártyát.',
@@ -355,6 +359,25 @@ return [
             'onshape_share_url' => 'Illessz be megosztási linket a cad.onshape.com-ról — a dokumentum / workspace / element ID kinyerésre kerül.',
             'proof_kind'      => 'Kép: a végeredmény képernyőképe. Fájl: 3D modell vagy PDF (max 20 MB). Link: külső URL (pl. GitHub, Onshape, Drive). Jegyzet: szöveges összegzés.',
         ],
+    ],
+
+    'db_inspector' => [
+        'title'        => 'Adatbázis-ellenőrző',
+        'subtitle'     => 'Csak olvasható nézet minden táblára — oszlopok, indexek, idegen kulcsok, sorszám.',
+        'empty'        => 'Válassz egy táblát a bal oldalon a struktúra megtekintéséhez.',
+        'columns'      => 'Oszlopok',
+        'indexes'      => 'Indexek',
+        'foreign_keys' => 'Idegen kulcsok',
+        'name'         => 'Név',
+        'type'         => 'Típus',
+        'flags'        => 'Jelölők',
+        'default'      => 'Alapérték',
+        'references'   => 'Hivatkozás',
+        'on_update'    => 'Frissítéskor',
+        'on_delete'    => 'Törléskor',
+        'row_count'    => ':count sor',
+        'no_indexes'   => 'Nincsenek indexek a táblán.',
+        'no_fks'       => 'Nincsenek idegen kulcsok a táblán.',
     ],
 
     'widgets' => [

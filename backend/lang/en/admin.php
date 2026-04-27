@@ -336,6 +336,10 @@ return [
                 'title' => 'Activity log',
                 'body' => '<p>Admin-only. Every create / update / delete, plus the explicit <em>accepted</em> / <em>rejected</em> entries from the application flow.</p><p>Entries older than 90 days are pruned each night by a scheduled job.</p>',
             ],
+            'pages.database-inspector' => [
+                'title' => 'Database inspector',
+                'body' => '<p>Admin-only. Pick a table on the left to see its full structure on the right: columns with type / nullability / default, indexes (primary, unique, regular), and foreign keys with cascade behaviour.</p><p>Read-only — no row data, no SQL, no editing. Driver is shown next to the table name so you know whether you\'re looking at the dev SQLite or the deployed Postgres.</p>',
+            ],
         ],
         'fields' => [
             'task_supervisor' => 'The person who signs off when the task is finished. Only the supervisor can move a card to "Done".',
@@ -355,6 +359,25 @@ return [
             'onshape_share_url' => 'Paste a share link from cad.onshape.com — the document / workspace / element IDs are extracted for you.',
             'proof_kind'      => 'Image: a screenshot of the result. File: a 3D model or PDF (max 20 MB). Link: an external URL (e.g. GitHub, Onshape, Drive). Note: a written summary.',
         ],
+    ],
+
+    'db_inspector' => [
+        'title'        => 'Database inspector',
+        'subtitle'     => 'Read-only browser of every table in the database — columns, indexes, foreign keys, row counts.',
+        'empty'        => 'Pick a table on the left to see its structure.',
+        'columns'      => 'Columns',
+        'indexes'      => 'Indexes',
+        'foreign_keys' => 'Foreign keys',
+        'name'         => 'Name',
+        'type'         => 'Type',
+        'flags'        => 'Flags',
+        'default'      => 'Default',
+        'references'   => 'References',
+        'on_update'    => 'On update',
+        'on_delete'    => 'On delete',
+        'row_count'    => ':count rows',
+        'no_indexes'   => 'No indexes on this table.',
+        'no_fks'       => 'No foreign keys on this table.',
     ],
 
     'widgets' => [
