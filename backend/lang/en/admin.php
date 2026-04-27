@@ -128,6 +128,8 @@ return [
         'position'    => 'Order',
         'kanban'      => 'Kanban',
         'new_task'    => 'New task',
+        'open'        => 'Open',
+        'kanban_filtered_banner' => 'Drag-and-drop is disabled while filters are active — clear the filters to reorder cards.',
         'search_placeholder' => 'Search title / description',
         'all_statuses'       => 'All statuses',
         'any_supervisor'     => 'Any supervisor',

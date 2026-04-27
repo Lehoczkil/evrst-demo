@@ -128,6 +128,8 @@ return [
         'position'    => 'Sorrend',
         'kanban'      => 'Kanban',
         'new_task'    => 'Új feladat',
+        'open'        => 'Megnyit',
+        'kanban_filtered_banner' => 'A drag-and-drop ki van kapcsolva, amíg szűrő aktív — töröld a szűrőket az átrendezéshez.',
         'search_placeholder' => 'Keresés cím / leírás szerint',
         'all_statuses'       => 'Minden státusz',
         'any_supervisor'     => 'Bármelyik felelős',

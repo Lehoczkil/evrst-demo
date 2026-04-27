@@ -24,35 +24,70 @@
         $userOptions = $this->getUserOptions();
         $statuses = \App\Models\Task::statusLabels();
     @endphp
-    <div style="display: flex; flex-wrap: wrap; gap: .5rem .75rem; align-items: center; padding-bottom: .75rem; margin-bottom: .75rem; border-bottom: 1px solid rgba(15,23,42,.08);">
+    <div class="kanban-filter-row">
         <input
             type="search"
             wire:model.live.debounce.300ms="filterSearch"
             placeholder="{{ __('admin.tasks.search_placeholder') }}"
-            style="flex: 1 1 220px; min-width: 200px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,.12); font-size: .8rem;"
+            class="kanban-filter-input"
+            style="flex: 1 1 220px; min-width: 200px;"
         >
-        <select wire:model.live="filterStatus" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,.12); font-size: .8rem;">
+        <select wire:model.live="filterStatus" class="kanban-filter-input">
             <option value="">{{ __('admin.tasks.all_statuses') }}</option>
             @foreach ($statuses as $key => $label)
                 <option value="{{ $key }}">{{ __('admin.tasks.statuses.' . $key) }}</option>
             @endforeach
         </select>
-        <select wire:model.live="filterSupervisorId" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,.12); font-size: .8rem;">
+        <select wire:model.live="filterSupervisorId" class="kanban-filter-input">
             <option value="">{{ __('admin.tasks.any_supervisor') }}</option>
             @foreach ($userOptions as $u)
                 <option value="{{ $u['id'] }}">👤 {{ $u['name'] }}</option>
             @endforeach
         </select>
-        <select wire:model.live="filterAssigneeId" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,.12); font-size: .8rem;">
+        <select wire:model.live="filterAssigneeId" class="kanban-filter-input">
             <option value="">{{ __('admin.tasks.any_assignee') }}</option>
             @foreach ($userOptions as $u)
                 <option value="{{ $u['id'] }}">🛠 {{ $u['name'] }}</option>
             @endforeach
         </select>
-        <button type="button" wire:click="clearFilters" style="padding: 6px 12px; border-radius: 999px; border: 0; background: rgba(15,23,42,.06); cursor: pointer; font-size: .75rem;">{{ __('admin.tasks.clear_filters') }}</button>
+        <button type="button" wire:click="clearFilters" class="kanban-filter-clear">{{ __('admin.tasks.clear_filters') }}</button>
     </div>
 
     <style>
+        .kanban-filter-row {
+            display: flex; flex-wrap: wrap; gap: .5rem .75rem;
+            align-items: center; padding-bottom: .75rem; margin-bottom: .75rem;
+            border-bottom: 1px solid rgba(15,23,42,.08);
+        }
+        .dark .kanban-filter-row { border-bottom-color: rgba(255,255,255,.08); }
+        .kanban-filter-input {
+            padding: 6px 10px; border-radius: 8px;
+            border: 1px solid rgba(15,23,42,.12);
+            background: white; color: rgb(15 23 42);
+            font-size: .8rem;
+        }
+        .dark .kanban-filter-input {
+            background: rgb(30 41 59); color: rgb(241 245 249);
+            border-color: rgba(255,255,255,.1);
+        }
+        .kanban-filter-clear {
+            padding: 6px 12px; border-radius: 999px; border: 0;
+            background: rgba(15,23,42,.06); color: rgb(15 23 42);
+            cursor: pointer; font-size: .75rem;
+        }
+        .dark .kanban-filter-clear {
+            background: rgba(255,255,255,.08); color: rgb(241 245 249);
+        }
+        .kanban-filter-banner {
+            margin: 0 0 .75rem; padding: .55rem .8rem;
+            border-radius: 8px;
+            background: rgba(245,158,11,.12); color: rgb(146 64 14);
+            font-size: .8rem; font-weight: 500;
+        }
+        .dark .kanban-filter-banner {
+            background: rgba(245,158,11,.18); color: rgb(252 211 77);
+        }
+
         .kanban-board {
             display: grid;
             grid-template-columns: repeat({{ count($columns) }}, minmax(280px, 1fr));
@@ -226,8 +261,8 @@
     </style>
 
     @if ($this->isFiltered())
-        <div style="margin: 0 0 .75rem; padding: .5rem .75rem; border-radius: 8px; background: rgba(245,158,11,.12); color: rgb(146 64 14); font-size: .8rem;">
-            Drag-and-drop is disabled while filters are active — clear filters to reorder cards.
+        <div class="kanban-filter-banner">
+            {{ __('admin.tasks.kanban_filtered_banner') }}
         </div>
     @endif
 
@@ -254,7 +289,7 @@
                             <a
                                 href="{{ \App\Filament\Resources\Tasks\TaskResource::getUrl('edit', ['record' => $task->id]) }}"
                                 class="kanban-card__open"
-                            >Open ↗</a>
+                            >{{ __('admin.tasks.open') }} ↗</a>
                             <a
                                 href="{{ \App\Filament\Resources\Tasks\TaskResource::getUrl('edit', ['record' => $task->id]) }}"
                                 class="kanban-card__title"
