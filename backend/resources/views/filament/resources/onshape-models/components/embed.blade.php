@@ -33,7 +33,7 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
     if (!window.evrstMountOnshapeViewer) {
-        window.evrstMountOnshapeViewer = function (wrap, glbUrl) {
+        window.evrstMountOnshapeViewer = function (wrap, glbUrl, onReady) {
             if (!wrap || !glbUrl) return;
             // Wait until the wrap actually has dimensions — Filament
             // sometimes paints the section behind a collapsed parent.
@@ -41,7 +41,7 @@
             let w = wrap.clientWidth;
             let h = wrap.clientHeight;
             if (w === 0 || h === 0) {
-                requestAnimationFrame(() => window.evrstMountOnshapeViewer(wrap, glbUrl));
+                requestAnimationFrame(() => window.evrstMountOnshapeViewer(wrap, glbUrl, onReady));
                 return;
             }
             w = w || 600;
@@ -90,9 +90,13 @@
                     camera.updateProjectionMatrix();
                     controls.target.copy(center);
                     controls.update();
+                    if (typeof onReady === 'function') onReady();
                 },
                 undefined,
-                (err) => { console.error('GLB load failed', err); },
+                (err) => {
+                    console.error('GLB load failed', err);
+                    if (typeof onReady === 'function') onReady();
+                },
             );
 
             const tick = () => {
@@ -140,11 +144,11 @@
             border: 1px solid rgba(15,23,42,.08);
             overflow: hidden;
         "
-        x-data="{ url: @js($glbUrl) }"
+        x-data="{ url: @js($glbUrl), loading: true }"
         x-init="
             const tryMount = () => {
                 if (window.evrstMountOnshapeViewer) {
-                    window.evrstMountOnshapeViewer($refs.canvasWrap, url);
+                    window.evrstMountOnshapeViewer($refs.canvasWrap, url, () => loading = false);
                 } else {
                     setTimeout(tryMount, 80);
                 }
@@ -155,6 +159,41 @@
         <div x-ref="canvasWrap" style="width: 100%; height: 540px; min-height: 360px;
             background: #f8fafc;
         " class="dark:!bg-gray-950"></div>
+
+        {{-- Loading spinner until the GLB has actually finished loading
+             into the scene. The mount function calls back through the
+             onReady callback once the gltf is added. --}}
+        <div
+            x-show="loading"
+            x-transition.opacity
+            style="
+                position: absolute; inset: 0;
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                gap: .6rem; pointer-events: none;
+                background: rgba(248,250,252,.85);
+            "
+            class="dark:!bg-gray-950/80"
+        >
+            <div style="
+                width: 32px; height: 32px;
+                border: 3px solid rgba(245,158,11,.3);
+                border-top-color: rgb(245 158 11);
+                border-radius: 9999px;
+                animation: ds-spin 1s linear infinite;
+            "></div>
+        </div>
+        <style>@keyframes ds-spin { to { transform: rotate(360deg); } }</style>
+
+        @if ($failed && $model->glb_error)
+            <div style="
+                position: absolute; left: .75rem; top: .75rem; max-width: 22rem;
+                background: rgba(239,68,68,.92); color: white;
+                padding: .35rem .6rem; border-radius: .375rem;
+                font-size: .68rem; line-height: 1.3;
+            ">
+                {{ __('admin.onshape.last_error', ['reason' => $model->glb_error]) }}
+            </div>
+        @endif
 
         <div style="
             position: absolute; right: .75rem; top: .75rem;

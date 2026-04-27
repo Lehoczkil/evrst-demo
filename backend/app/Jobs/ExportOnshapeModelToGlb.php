@@ -25,7 +25,7 @@ class ExportOnshapeModelToGlb implements ShouldQueue
 
     public int $tries = 1; // We do our own polling; let the job itself fail loudly.
 
-    public int $timeout = 180;
+    public int $timeout = 240;
 
     public function __construct(public int $modelId)
     {
@@ -53,7 +53,7 @@ class ExportOnshapeModelToGlb implements ShouldQueue
         $element = $client->findElement($model->document_id, $model->workspace_id, $model->element_id);
         $elementType = is_array($element) ? (string) ($element['elementType'] ?? '') : '';
         if ($elementType === '') {
-            $this->fail($model, 'Onshape returned no element record — check the document URL.');
+            $this->fail($model, 'Onshape returned no element record — verify the share URL points at a valid Part Studio or Assembly the API keys can read.');
             return;
         }
 
@@ -67,10 +67,15 @@ class ExportOnshapeModelToGlb implements ShouldQueue
         }
         $translationId = $start['id'];
 
-        // 3. Poll until DONE or FAILED. Cap at ~2 minutes wall-clock.
-        $deadline = microtime(true) + 120;
+        // 3. Poll until DONE or FAILED. Cap at ~3 minutes wall-clock —
+        //    big assemblies regularly take 30-90s to translate. Backs off
+        //    after the first burst so we don't hammer the API for a slow
+        //    job.
+        $deadline = microtime(true) + 180;
         $externalDataId = null;
+        $pollCount = 0;
         while (microtime(true) < $deadline) {
+            $pollCount++;
             $tx = $client->getTranslation($translationId);
             $state = is_array($tx) ? (string) ($tx['requestState'] ?? $tx['state'] ?? '') : '';
             if ($state === 'DONE') {
@@ -80,14 +85,15 @@ class ExportOnshapeModelToGlb implements ShouldQueue
             }
             if ($state === 'FAILED') {
                 $reason = is_array($tx) ? (string) ($tx['failureReason'] ?? 'Translation failed') : 'Translation failed';
-                $this->fail($model, $reason);
+                $this->fail($model, "Onshape translation failed: {$reason}");
                 return;
             }
-            usleep(2_000_000); // 2s between polls
+            // 1.5s for the first 6 polls, then 3s thereafter.
+            usleep($pollCount <= 6 ? 1_500_000 : 3_000_000);
         }
 
         if (! $externalDataId) {
-            $this->fail($model, 'Translation timed out waiting for Onshape to finish.');
+            $this->fail($model, 'Translation timed out after 3 minutes. The document may be too complex to translate inline; try splitting it or running the export off-hours.');
             return;
         }
 
