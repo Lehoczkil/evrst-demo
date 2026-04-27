@@ -2,7 +2,13 @@
      Three.js (loaded as ES modules from a CDN). When no GLB is cached
      yet we surface the "Open in Onshape" card so the document is
      reachable; the "Export GLB" action populates the GLB and the
-     viewer takes over on next render. --}}
+     viewer takes over on next render.
+
+     IMPORTANT: the importmap + module script are rendered OUTSIDE the
+     @if($hasGlb) branch so window.evrstMountOnshapeViewer is always
+     defined on first paint. Livewire DOM diffs do not re-execute
+     <script type="module"> tags, so we can't rely on the script
+     appearing only when the GLB is ready. --}}
 
 @php
     $glbUrl = $model?->glb_url;
@@ -11,6 +17,119 @@
     $exporting = in_array($model?->glb_status, [\App\Models\OnshapeModel::GLB_QUEUED, \App\Models\OnshapeModel::GLB_RUNNING], true);
     $failed = $model?->glb_status === \App\Models\OnshapeModel::GLB_FAILED;
 @endphp
+
+{{-- Always-on viewer bootstrap. Importmap + Three.js mount function. --}}
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+    }
+}
+</script>
+<script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader }   from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    if (!window.evrstMountOnshapeViewer) {
+        window.evrstMountOnshapeViewer = function (wrap, glbUrl) {
+            if (!wrap || !glbUrl) return;
+            // Wait until the wrap actually has dimensions — Filament
+            // sometimes paints the section behind a collapsed parent.
+            // Fall back to sensible defaults if we still see 0x0.
+            let w = wrap.clientWidth;
+            let h = wrap.clientHeight;
+            if (w === 0 || h === 0) {
+                requestAnimationFrame(() => window.evrstMountOnshapeViewer(wrap, glbUrl));
+                return;
+            }
+            w = w || 600;
+            h = h || 540;
+
+            // Tear down any prior renderer on the same wrap.
+            if (wrap.__evrstViewer) {
+                try { wrap.__evrstViewer.dispose(); } catch (e) {}
+            }
+
+            const scene = new THREE.Scene();
+            scene.background = null;
+            const camera = new THREE.PerspectiveCamera(45, w / Math.max(1, h), 0.01, 10000);
+            camera.position.set(2, 1.5, 3);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(w, h);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            wrap.innerHTML = '';
+            wrap.appendChild(renderer.domElement);
+
+            scene.add(new THREE.HemisphereLight(0xffffff, 0x222233, 1.0));
+            const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+            sun.position.set(5, 10, 7);
+            scene.add(sun);
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.08;
+
+            const loader = new GLTFLoader();
+            let raf;
+            loader.load(
+                glbUrl,
+                (gltf) => {
+                    scene.add(gltf.scene);
+                    const box = new THREE.Box3().setFromObject(gltf.scene);
+                    const size = box.getSize(new THREE.Vector3());
+                    const center = box.getCenter(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+                    const distance = maxDim * 1.6;
+                    camera.near = maxDim / 1000;
+                    camera.far = maxDim * 100;
+                    camera.position.copy(center).add(new THREE.Vector3(distance, distance * 0.6, distance));
+                    camera.updateProjectionMatrix();
+                    controls.target.copy(center);
+                    controls.update();
+                },
+                undefined,
+                (err) => { console.error('GLB load failed', err); },
+            );
+
+            const tick = () => {
+                raf = requestAnimationFrame(tick);
+                controls.update();
+                renderer.render(scene, camera);
+            };
+            tick();
+
+            const onResize = () => {
+                const nw = wrap.clientWidth, nh = wrap.clientHeight;
+                if (nw === 0 || nh === 0) return;
+                camera.aspect = nw / nh;
+                camera.updateProjectionMatrix();
+                renderer.setSize(nw, nh);
+            };
+            window.addEventListener('resize', onResize);
+
+            wrap.__evrstViewer = {
+                dispose() {
+                    cancelAnimationFrame(raf);
+                    window.removeEventListener('resize', onResize);
+                    controls.dispose();
+                    renderer.dispose();
+                    scene.traverse((obj) => {
+                        if (obj.geometry?.dispose) obj.geometry.dispose();
+                        if (obj.material) {
+                            const m = Array.isArray(obj.material) ? obj.material : [obj.material];
+                            m.forEach((mm) => mm.dispose && mm.dispose());
+                        }
+                    });
+                    wrap.innerHTML = '';
+                },
+            };
+        };
+    }
+</script>
 
 @if ($hasGlb)
     <div
@@ -21,8 +140,17 @@
             border: 1px solid rgba(15,23,42,.08);
             overflow: hidden;
         "
-        x-data
-        x-init="window.evrstMountOnshapeViewer && window.evrstMountOnshapeViewer($refs.canvasWrap, @js($glbUrl))"
+        x-data="{ url: @js($glbUrl) }"
+        x-init="
+            const tryMount = () => {
+                if (window.evrstMountOnshapeViewer) {
+                    window.evrstMountOnshapeViewer($refs.canvasWrap, url);
+                } else {
+                    setTimeout(tryMount, 80);
+                }
+            };
+            tryMount();
+        "
     >
         <div x-ref="canvasWrap" style="width: 100%; height: 540px; min-height: 360px;
             background: #f8fafc;
@@ -60,112 +188,6 @@
             </div>
         @endif
     </div>
-
-    {{-- Vanilla Three.js viewer wired once per page. The mount function
-         is idempotent — calling it twice on the same wrap clears the
-         old scene first. --}}
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
-        }
-    }
-    </script>
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader }   from 'three/addons/loaders/GLTFLoader.js';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-        if (!window.evrstMountOnshapeViewer) {
-            window.evrstMountOnshapeViewer = function (wrap, glbUrl) {
-                if (!wrap || !glbUrl) return;
-                // Tear down any prior renderer on the same wrap (Livewire navigation).
-                if (wrap.__evrstViewer) {
-                    try { wrap.__evrstViewer.dispose(); } catch (e) {}
-                }
-
-                const w = wrap.clientWidth, h = wrap.clientHeight;
-                const scene = new THREE.Scene();
-                scene.background = null; // wrap CSS handles the bg
-                const camera = new THREE.PerspectiveCamera(45, w / Math.max(1, h), 0.01, 10000);
-                camera.position.set(2, 1.5, 3);
-
-                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                renderer.setSize(w, h);
-                renderer.outputColorSpace = THREE.SRGBColorSpace;
-                wrap.innerHTML = '';
-                wrap.appendChild(renderer.domElement);
-
-                scene.add(new THREE.HemisphereLight(0xffffff, 0x222233, 1.0));
-                const sun = new THREE.DirectionalLight(0xffffff, 1.4);
-                sun.position.set(5, 10, 7);
-                scene.add(sun);
-
-                const controls = new OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true;
-                controls.dampingFactor = 0.08;
-
-                const loader = new GLTFLoader();
-                let raf;
-                loader.load(
-                    glbUrl,
-                    (gltf) => {
-                        scene.add(gltf.scene);
-                        // Frame the model.
-                        const box = new THREE.Box3().setFromObject(gltf.scene);
-                        const size = box.getSize(new THREE.Vector3());
-                        const center = box.getCenter(new THREE.Vector3());
-                        const maxDim = Math.max(size.x, size.y, size.z) || 1;
-                        const distance = maxDim * 1.6;
-                        camera.near = maxDim / 1000;
-                        camera.far = maxDim * 100;
-                        camera.position.copy(center).add(new THREE.Vector3(distance, distance * 0.6, distance));
-                        camera.updateProjectionMatrix();
-                        controls.target.copy(center);
-                        controls.update();
-                    },
-                    undefined,
-                    (err) => {
-                        console.error('GLB load failed', err);
-                    },
-                );
-
-                const tick = () => {
-                    raf = requestAnimationFrame(tick);
-                    controls.update();
-                    renderer.render(scene, camera);
-                };
-                tick();
-
-                const onResize = () => {
-                    const nw = wrap.clientWidth, nh = wrap.clientHeight;
-                    camera.aspect = nw / Math.max(1, nh);
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(nw, nh);
-                };
-                window.addEventListener('resize', onResize);
-
-                wrap.__evrstViewer = {
-                    dispose() {
-                        cancelAnimationFrame(raf);
-                        window.removeEventListener('resize', onResize);
-                        controls.dispose();
-                        renderer.dispose();
-                        scene.traverse((obj) => {
-                            if (obj.geometry?.dispose) obj.geometry.dispose();
-                            if (obj.material) {
-                                const m = Array.isArray(obj.material) ? obj.material : [obj.material];
-                                m.forEach((mm) => mm.dispose && mm.dispose());
-                            }
-                        });
-                        wrap.innerHTML = '';
-                    },
-                };
-            };
-        }
-    </script>
 @elseif ($model)
     <div
         class="bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 dark:border dark:border-white/10"

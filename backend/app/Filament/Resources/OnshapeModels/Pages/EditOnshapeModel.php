@@ -46,7 +46,6 @@ class EditOnshapeModel extends EditRecord
                     ExportOnshapeModelToGlb::dispatchSync($record->id);
 
                     $record->refresh();
-                    $this->refreshFormData(['glb_status', 'glb_path', 'glb_size', 'glb_exported_at']);
 
                     if ($record->hasGlb()) {
                         Notification::make()
@@ -59,6 +58,14 @@ class EditOnshapeModel extends EditRecord
                             ->danger()
                             ->send();
                     }
+
+                    // Filament's partial form refresh doesn't re-evaluate
+                    // the embed Section's visible() / viewData() closures,
+                    // so the Three.js viewer wouldn't see the new GLB
+                    // until a manual page reload. A self-redirect on the
+                    // current edit URL forces a fresh schema render that
+                    // picks up the cached GLB straight away.
+                    $this->redirect(static::getResource()::getUrl('edit', ['record' => $record]));
                 }),
             Action::make('open_in_onshape')
                 ->label(__('admin.onshape.view_in_onshape'))
