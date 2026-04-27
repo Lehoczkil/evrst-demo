@@ -4,6 +4,7 @@ namespace App\Filament\Resources\OnshapeModels\Tables;
 
 use App\Jobs\ExportOnshapeModelToGlb;
 use App\Models\OnshapeModel;
+use App\Services\Onshape\Client as OnshapeClient;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -71,13 +72,28 @@ class OnshapeModelsTable
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
                     ->action(function (OnshapeModel $r) {
+                        if (! OnshapeClient::fromConfig()->isConfigured()) {
+                            Notification::make()
+                                ->title(__('admin.onshape.export_failed', ['reason' => '']))
+                                ->body(__('admin.onshape.keys_missing'))
+                                ->danger()
+                                ->send();
+                            return;
+                        }
                         $r->forceFill(['glb_status' => OnshapeModel::GLB_QUEUED, 'glb_error' => null])->save();
-                        ExportOnshapeModelToGlb::dispatch($r->id);
-                        Notification::make()
-                            ->title(__('admin.onshape.export_queued'))
-                            ->body(__('admin.onshape.export_queued_body'))
-                            ->success()
-                            ->send();
+                        // Inline run so the table refreshes with the
+                        // ready/failed state in one click instead of
+                        // depending on a separate queue worker.
+                        ExportOnshapeModelToGlb::dispatchSync($r->id);
+                        $r->refresh();
+                        if ($r->hasGlb()) {
+                            Notification::make()->title(__('admin.onshape.export_done'))->success()->send();
+                        } else {
+                            Notification::make()
+                                ->title(__('admin.onshape.export_failed', ['reason' => $r->glb_error ?: '']))
+                                ->danger()
+                                ->send();
+                        }
                     }),
                 Action::make('open_in_onshape')
                     ->label(__('admin.onshape.view_in_onshape'))
