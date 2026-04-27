@@ -113,6 +113,11 @@ return [
         'position'    => 'Order',
         'kanban'      => 'Kanban',
         'new_task'    => 'New task',
+        'search_placeholder' => 'Search title / description',
+        'all_statuses'       => 'All statuses',
+        'any_supervisor'     => 'Any supervisor',
+        'any_assignee'       => 'Any assignee',
+        'clear_filters'      => 'Clear',
         'statuses'    => [
             'TODO'        => 'To do',
             'IN_PROGRESS' => 'In progress',

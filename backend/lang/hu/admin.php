@@ -113,6 +113,11 @@ return [
         'position'    => 'Sorrend',
         'kanban'      => 'Kanban',
         'new_task'    => 'Új feladat',
+        'search_placeholder' => 'Keresés cím / leírás szerint',
+        'all_statuses'       => 'Minden státusz',
+        'any_supervisor'     => 'Bármelyik felelős',
+        'any_assignee'       => 'Bármelyik megbízott',
+        'clear_filters'      => 'Törlés',
         'statuses'    => [
             'TODO'        => 'Teendő',
             'IN_PROGRESS' => 'Folyamatban',
