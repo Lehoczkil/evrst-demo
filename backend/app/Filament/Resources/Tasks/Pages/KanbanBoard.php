@@ -161,8 +161,9 @@ class KanbanBoard extends Page
 
         $allowedStatuses = Task::statuses();
         $movedAcrossColumns = [];
+        $rejected = [];
 
-        DB::transaction(function () use ($payload, $allowedStatuses, &$movedAcrossColumns) {
+        DB::transaction(function () use ($payload, $allowedStatuses, &$movedAcrossColumns, &$rejected) {
             foreach ($payload as $status => $ids) {
                 if (! in_array($status, $allowedStatuses, true)) continue;
                 if (! is_array($ids)) continue;
@@ -175,6 +176,13 @@ class KanbanBoard extends Page
                     if (! $task) continue;
 
                     $statusChanged = $task->status !== $status;
+                    if ($statusChanged && ! $task->canTransitionTo(auth()->user(), $status)) {
+                        // Snap the card back to its current column by
+                        // skipping the status change but still updating
+                        // its position within its existing column later.
+                        $rejected[] = ['task' => $task, 'attempted' => $status];
+                        continue;
+                    }
                     if ($statusChanged) {
                         $movedAcrossColumns[] = [
                             'task' => $task,
@@ -184,11 +192,12 @@ class KanbanBoard extends Page
                     }
                     $task->status = $status;
                     $task->position = $position++;
-                    // Suppress LogsActivity here — a drag can touch dozens
-                    // of rows and would otherwise dump a "position from X
-                    // to Y" entry per card. We emit one summary entry per
-                    // status transition further down instead.
+                    // Suppress both LogsActivity and the Task::saving guard
+                    // here — a drag can touch dozens of rows, and we've
+                    // already validated the transition above.
+                    $task->skipStatusGuard = true;
                     $task->withoutActivityLog(fn () => $task->save());
+                    $task->skipStatusGuard = false;
                 }
             }
         });
@@ -206,6 +215,14 @@ class KanbanBoard extends Page
             if ($watchers->isNotEmpty()) {
                 Notification::send($watchers, new TaskStatusChanged($task, $entry['previous'], $entry['next']));
             }
+        }
+
+        if (! empty($rejected)) {
+            FilamentNotification::make()
+                ->title(__('admin.tasks.transition_denied'))
+                ->body(__('admin.tasks.transition_denied_body', ['count' => count($rejected)]))
+                ->warning()
+                ->send();
         }
 
         if (! empty($movedAcrossColumns)) {

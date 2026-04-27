@@ -122,6 +122,22 @@ return [
         'comment'     => 'Comment',
         'comments'    => 'Comments',
         'description' => 'Description',
+        'description_help' => 'Required — explain what needs to be done in enough detail that an assignee can pick it up cold.',
+        'proofs'      => 'Documentation',
+        'add_proof'   => 'Attach proof',
+        'proof_kind'  => 'Type',
+        'proof_notes' => 'Notes',
+        'proof_link'  => 'Link',
+        'proof_file'  => 'File',
+        'proof_kinds' => [
+            'image' => 'Screenshot / image',
+            'file'  => '3D model or document',
+            'link'  => 'External link',
+            'note'  => 'Written note',
+        ],
+        'proof_required_for_done' => 'A proof has to be attached before the task can be moved to Testing or Done.',
+        'transition_denied'       => 'You can\'t move this task to that column.',
+        'transition_denied_body'  => ':count card(s) snapped back — assignees can only move to Testing (with a proof attached); only the supervisor can mark a task Done.',
     ],
 
     'applications' => [

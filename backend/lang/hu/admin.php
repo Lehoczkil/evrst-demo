@@ -122,6 +122,22 @@ return [
         'comment'     => 'Hozzászólás',
         'comments'    => 'Hozzászólások',
         'description' => 'Leírás',
+        'description_help' => 'Kötelező — fejtsd ki a feladatot olyan részletességgel, hogy a megbízott önállóan elkezdhesse.',
+        'proofs'      => 'Dokumentáció',
+        'add_proof'   => 'Bizonyíték hozzáadása',
+        'proof_kind'  => 'Típus',
+        'proof_notes' => 'Megjegyzések',
+        'proof_link'  => 'Link',
+        'proof_file'  => 'Fájl',
+        'proof_kinds' => [
+            'image' => 'Képernyőkép / kép',
+            'file'  => '3D modell vagy dokumentum',
+            'link'  => 'Külső link',
+            'note'  => 'Írott jegyzet',
+        ],
+        'proof_required_for_done' => 'A feladatot csak akkor lehet Tesztelés vagy Kész állapotba átmozgatni, ha legalább egy dokumentáció csatolva van.',
+        'transition_denied'       => 'Ezt a feladatot nem tudod ebbe az oszlopba áthelyezni.',
+        'transition_denied_body'  => ':count kártya visszacsúszott — a megbízottak csak Tesztelésre mozgathatnak (csatolt bizonyítékkal); kész állapotba csak a felelős teheti.',
     ],
 
     'applications' => [
