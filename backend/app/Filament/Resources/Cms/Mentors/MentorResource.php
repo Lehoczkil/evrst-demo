@@ -26,6 +26,10 @@ class MentorResource extends Resource
 
     protected static ?int $navigationSort = 30;
 
+    public static function getNavigationLabel(): string { return __('admin.resources.mentor.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.mentor.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.mentor.p'); }
+
     // Visible to everyone, but only Admins can mutate (no explicit perm
     // in the catalog, so we gate on the role).
     public static function canViewAny(): bool { return auth()->check(); }

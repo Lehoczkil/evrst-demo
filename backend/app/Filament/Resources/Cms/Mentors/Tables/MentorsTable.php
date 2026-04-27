@@ -22,15 +22,17 @@ class MentorsTable
                     ->size(48)
                     ->label(''),
                 TextColumn::make('name')
+                    ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold'),
                 TextColumn::make('email')
+                    ->label(__('admin.common.email'))
                     ->copyable()
                     ->color('gray')
                     ->toggleable(),
                 TextColumn::make('position')
-                    ->label('Sort')
+                    ->label(__('admin.common.sort'))
                     ->numeric()
                     ->sortable(),
             ])

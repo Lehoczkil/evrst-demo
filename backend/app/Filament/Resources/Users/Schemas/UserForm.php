@@ -14,29 +14,32 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('admin.common.name'))
                     ->required()
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email')
+                    ->label(__('admin.common.email'))
                     ->required()
                     ->email()
                     ->unique(ignoreRecord: true)
                     ->maxLength(180)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Select::make('role_id')
-                    ->label('Role')
+                    ->label(__('admin.common.role'))
                     ->required()
                     ->options(fn () => Role::orderBy('name')->pluck('name', 'id')->all())
                     ->native(false)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('password')
+                    ->label(__('admin.users.password'))
                     ->password()
                     ->revealable()
                     ->minLength(8)
                     ->maxLength(128)
                     ->dehydrated(fn ($state) => filled($state))
                     ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
-                    ->helperText('Leave blank to keep the current password.')
+                    ->helperText(__('admin.users.password_help'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
             ])
             ->columns(12);

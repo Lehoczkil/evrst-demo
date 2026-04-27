@@ -21,15 +21,13 @@ class TeamMemberResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static ?string $navigationLabel = 'Team members';
-
-    protected static ?string $modelLabel = 'team member';
-
-    protected static ?string $pluralModelLabel = 'team members';
-
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Team';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.team_member.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.team_member.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.team_member.p'); }
 
     protected static ?int $navigationSort = 10;
 

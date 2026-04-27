@@ -14,33 +14,33 @@ class AboutProjectForm
         return $schema
             ->components([
                 TextInput::make('title')
+                    ->label(__('admin.common.title'))
                     ->required()
-                    ->helperText('Project name — not translated.')
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 8]),
                 TextInput::make('position')
-                    ->label('Sort order')
+                    ->label(__('admin.sponsors.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 DateTimePicker::make('start_at')
-                    ->label('Starts')
+                    ->label(__('admin.events.start_at'))
                     ->seconds(false)
                     ->displayFormat('d M Y H:i')
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 DateTimePicker::make('end_at')
-                    ->label('Ends')
+                    ->label(__('admin.events.end_at'))
                     ->seconds(false)
                     ->displayFormat('d M Y H:i')
                     ->after('start_at')
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Textarea::make('description_en')
-                    ->label('Description (EN)')
+                    ->label(__('admin.common.description') . ' (EN)')
                     ->rows(4)
                     ->maxLength(500)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Textarea::make('description_hu')
-                    ->label('Description (HU)')
+                    ->label(__('admin.common.description') . ' (HU)')
                     ->rows(4)
                     ->maxLength(500)
                     ->columnSpan(['default' => 12, 'md' => 6]),

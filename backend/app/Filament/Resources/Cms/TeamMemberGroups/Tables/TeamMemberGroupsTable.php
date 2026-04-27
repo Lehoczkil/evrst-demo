@@ -17,11 +17,12 @@ class TeamMemberGroupsTable
             ->defaultSort('position')
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold'),
                 TextColumn::make('position')
-                    ->label('Sort')
+                    ->label(__('admin.common.sort'))
                     ->numeric()
                     ->sortable(),
             ])

@@ -26,43 +26,52 @@ class UsersTable
             ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold'),
                 TextColumn::make('email')
+                    ->label(__('admin.common.email'))
                     ->searchable()
                     ->copyable()
                     ->color('gray'),
                 TextColumn::make('role.name')
-                    ->label('Role')
+                    ->label(__('admin.common.role'))
                     ->badge()
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'Admin' => __('admin.roles.admin'),
+                        'Manager' => __('admin.roles.manager'),
+                        'Member' => __('admin.roles.member'),
+                        default => $state,
+                    })
                     ->color(fn ($state) => match ($state) {
                         'Admin' => 'danger',
                         'Manager' => 'warning',
                         default => 'gray',
                     }),
                 IconColumn::make('password_changed_at')
-                    ->label('Password set')
+                    ->label(__('admin.users.password_set'))
                     ->boolean()
                     ->getStateUsing(fn (User $r) => $r->password_changed_at !== null),
                 TextColumn::make('created_at')
+                    ->label(__('admin.common.created_at'))
                     ->dateTime('d M Y')
                     ->sortable()
                     ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('role_id')
-                    ->label('Role')
+                    ->label(__('admin.common.role'))
                     ->options(fn () => Role::orderBy('name')->pluck('name', 'id')->all()),
             ])
             ->recordActions([
                 EditAction::make(),
                 Action::make('resend_temp_password')
-                    ->label('Resend temp password')
+                    ->label(__('admin.users.resend_temp'))
                     ->icon('heroicon-o-envelope')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->modalHeading('Send a new temporary password?')
+                    ->modalHeading(__('admin.users.resend_modal'))
                     ->action(function (User $record) {
                         $temp = Str::password(12);
                         $record->update([
@@ -71,8 +80,8 @@ class UsersTable
                         ]);
                         $record->notify(new TeamMemberAccountCreated($temp));
                         Notification::make()
-                            ->title('Temporary password emailed')
-                            ->body('A new temp password has been sent to ' . $record->email . '.')
+                            ->title(__('admin.users.temp_sent'))
+                            ->body(__('admin.users.temp_sent_body', ['email' => $record->email]))
                             ->success()
                             ->send();
                     }),

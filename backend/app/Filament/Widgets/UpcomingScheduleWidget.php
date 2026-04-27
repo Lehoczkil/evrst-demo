@@ -13,7 +13,7 @@ class UpcomingScheduleWidget extends Widget
 {
     protected string $view = 'filament.widgets.upcoming-schedule';
 
-    protected ?string $heading = 'Upcoming this week';
+    public function getHeading(): ?string { return __('admin.widgets.upcoming'); }
 
     protected int|string|array $columnSpan = 'full';
 
@@ -29,9 +29,9 @@ class UpcomingScheduleWidget extends Widget
             ->get()
             ->map(fn (Event $e) => [
                 'when' => $e->payload['start_at'] ?? null,
-                'type' => 'Event',
+                'type' => __('admin.resources.event.s'),
                 'color' => '#0ea5e9',
-                'title' => $e->title ?? 'Event',
+                'title' => $e->title ?? __('admin.resources.event.s'),
                 'url' => EventResource::getUrl('edit', ['record' => $e->id]),
             ]);
 
@@ -42,7 +42,7 @@ class UpcomingScheduleWidget extends Widget
             ->get()
             ->map(fn (Task $t) => [
                 'when' => $t->due_date?->toDateTimeString(),
-                'type' => 'Task',
+                'type' => __('admin.resources.task.s'),
                 'color' => match ($t->status) {
                     Task::STATUS_TODO => '#94a3b8',
                     Task::STATUS_IN_PROGRESS => '#f59e0b',

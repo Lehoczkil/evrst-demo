@@ -24,6 +24,10 @@ class CollectionResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
+    public static function getNavigationLabel(): string { return __('admin.resources.collection.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.collection.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.collection.p'); }
+
     public static function canViewAny(): bool { return auth()->user()?->isAdmin() ?? false; }
     public static function canCreate(): bool { return static::canViewAny(); }
     public static function canEdit($record): bool   { return static::canViewAny(); }

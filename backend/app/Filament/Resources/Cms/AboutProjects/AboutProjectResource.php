@@ -21,15 +21,13 @@ class AboutProjectResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRocketLaunch;
 
-    protected static ?string $navigationLabel = 'Projects';
-
-    protected static ?string $modelLabel = 'project';
-
-    protected static ?string $pluralModelLabel = 'projects';
-
     protected static ?string $recordTitleAttribute = 'title';
 
     protected static string|\UnitEnum|null $navigationGroup = 'About';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.project.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.project.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.project.p'); }
 
     protected static ?int $navigationSort = 20;
 

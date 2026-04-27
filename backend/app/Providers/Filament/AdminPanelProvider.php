@@ -9,10 +9,12 @@ use App\Filament\Widgets\MyTasksWidget;
 use App\Filament\Widgets\RecentApplicationsWidget;
 use App\Filament\Widgets\UpcomingScheduleWidget;
 use App\Http\Middleware\RequirePasswordChange;
+use App\Http\Middleware\SetLocale;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -45,11 +47,12 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->navigationGroups([
-                'Site',
-                'About',
-                'Team',
-                'Tasks',
-                'Membership',
+                NavigationGroup::make('Site')      ->label(fn () => __('admin.nav.site')),
+                NavigationGroup::make('About')     ->label(fn () => __('admin.nav.about')),
+                NavigationGroup::make('Team')      ->label(fn () => __('admin.nav.team')),
+                NavigationGroup::make('Tasks')     ->label(fn () => __('admin.nav.tasks')),
+                NavigationGroup::make('Membership')->label(fn () => __('admin.nav.membership')),
+                NavigationGroup::make('Advanced')  ->label(fn () => __('admin.nav.advanced')),
             ])
             ->databaseNotifications(fn () => auth()->user()?->can(Perm::NOTIFICATIONS_SEE) ?? false)
             ->databaseNotificationsPolling('30s')
@@ -76,6 +79,18 @@ class AdminPanelProvider extends PanelProvider
                     .fi-page-header-heading { letter-spacing: -0.01em; }
                 </style>'),
             )
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn () => view('filament.hooks.desktop-view-script'),
+            )
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn () => view('filament.hooks.desktop-view-toggle'),
+            )
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn () => view('filament.hooks.locale-switcher'),
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -86,9 +101,15 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                // Honour the session-stored locale on guest screens (login,
+                // password reset) so the form text matches the chosen UI.
+                SetLocale::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
+                // Re-runs after auth so the user's saved preference takes
+                // precedence over the session fallback.
+                SetLocale::class,
                 RequirePasswordChange::class,
             ]);
     }

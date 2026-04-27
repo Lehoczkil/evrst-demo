@@ -21,15 +21,13 @@ class AboutGoalResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFlag;
 
-    protected static ?string $navigationLabel = 'Goals';
-
-    protected static ?string $modelLabel = 'goal';
-
-    protected static ?string $pluralModelLabel = 'goals';
-
     protected static ?string $recordTitleAttribute = 'title';
 
     protected static string|\UnitEnum|null $navigationGroup = 'About';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.goal.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.goal.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.goal.p'); }
 
     protected static ?int $navigationSort = 30;
 

@@ -14,22 +14,24 @@ class RoleForm
     {
         return $schema
             ->components([
-                Section::make('Role')
+                Section::make(__('admin.roles.role'))
                     ->components([
                         TextInput::make('name')
+                            ->label(__('admin.common.name'))
                             ->required()
                             ->maxLength(120),
                         TextInput::make('key')
+                            ->label(__('admin.roles.key'))
                             ->disabled()
                             ->dehydrated(false)
-                            ->helperText('Slug used in code — not editable from the UI.'),
+                            ->helperText(__('admin.roles.key_help')),
                     ])
                     ->columns(2),
-                Section::make('Permissions')
-                    ->description('Toggle the actions this role can perform across the admin.')
+                Section::make(__('admin.roles.permissions'))
+                    ->description(__('admin.roles.permissions_help'))
                     ->components([
                         CheckboxList::make('permissions')
-                            ->label('Granted permissions')
+                            ->label(__('admin.roles.granted'))
                             ->relationship('permissions', 'label')
                             ->options(fn () => Permission::orderBy('id')->pluck('label', 'id')->all())
                             ->searchable()

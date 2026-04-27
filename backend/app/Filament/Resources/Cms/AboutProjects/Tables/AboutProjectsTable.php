@@ -16,15 +16,17 @@ class AboutProjectsTable
             ->defaultSort('position')
             ->columns([
                 TextColumn::make('title')
+                    ->label(__('admin.common.title'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold'),
                 TextColumn::make('description')
+                    ->label(__('admin.common.description'))
                     ->limit(80)
                     ->color('gray')
                     ->toggleable(),
                 TextColumn::make('position')
-                    ->label('Sort')
+                    ->label(__('admin.common.sort'))
                     ->numeric()
                     ->sortable(),
             ])

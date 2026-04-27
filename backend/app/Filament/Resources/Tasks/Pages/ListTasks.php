@@ -15,7 +15,7 @@ class ListTasks extends ListRecords
     {
         return [
             Action::make('kanban')
-                ->label('Kanban board')
+                ->label(__('admin.tasks.kanban'))
                 ->icon('heroicon-o-view-columns')
                 ->color('gray')
                 ->url(TaskResource::getUrl('kanban')),

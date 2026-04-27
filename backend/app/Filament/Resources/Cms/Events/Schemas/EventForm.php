@@ -16,49 +16,51 @@ class EventForm
         return $schema
             ->components([
                 TextInput::make('title_en')
-                    ->label('Title (EN)')
+                    ->label(__('admin.common.title') . ' (EN)')
                     ->required()
                     ->maxLength(180)
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 TextInput::make('title_hu')
-                    ->label('Title (HU)')
+                    ->label(__('admin.common.title') . ' (HU)')
                     ->required()
                     ->maxLength(180)
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 Select::make('status')
+                    ->label(__('admin.common.status'))
                     ->options([
-                        'DRAFT' => 'Draft',
-                        'PUBLISHED' => 'Published',
+                        'DRAFT' => __('admin.events.statuses.draft'),
+                        'PUBLISHED' => __('admin.events.statuses.upcoming'),
                     ])
                     ->default('DRAFT')
                     ->required()
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 DateTimePicker::make('start_at')
-                    ->label('Starts')
+                    ->label(__('admin.events.start_at'))
                     ->seconds(false)
                     ->displayFormat('d M Y H:i')
                     ->required()
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 DateTimePicker::make('end_at')
-                    ->label('Ends')
+                    ->label(__('admin.events.end_at'))
                     ->seconds(false)
                     ->displayFormat('d M Y H:i')
                     ->after('start_at')
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 TextInput::make('position')
-                    ->label('Sort order')
+                    ->label(__('admin.sponsors.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 Textarea::make('content_en')
-                    ->label('Content (EN)')
+                    ->label(__('admin.events.content') . ' (EN)')
                     ->rows(5)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Textarea::make('content_hu')
-                    ->label('Content (HU)')
+                    ->label(__('admin.events.content') . ' (HU)')
                     ->rows(5)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('image')
+                    ->label(__('admin.events.image'))
                     ->image()
                     ->directory('events')
                     ->visibility('public')

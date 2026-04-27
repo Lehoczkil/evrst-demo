@@ -27,6 +27,10 @@ class SponsorResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
+    public static function getNavigationLabel(): string { return __('admin.resources.sponsor.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.sponsor.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.sponsor.p'); }
+
     /**
      * Manager has no sponsor permissions, so the resource disappears
      * from the sidebar entirely for them. Members keep read-only view.

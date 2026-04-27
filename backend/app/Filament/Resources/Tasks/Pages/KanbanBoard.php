@@ -17,7 +17,6 @@ class KanbanBoard extends Page
 
     protected string $view = 'filament.resources.tasks.pages.kanban-board';
 
-    protected static ?string $title = 'Kanban';
 
     public ?int $filterAssigneeId = null;
     public ?int $filterSupervisorId = null;
@@ -26,7 +25,7 @@ class KanbanBoard extends Page
 
     public function getTitle(): string
     {
-        return 'Kanban';
+        return __('admin.tasks.kanban');
     }
 
     /**
@@ -39,7 +38,7 @@ class KanbanBoard extends Page
         $actions = [];
         if (auth()->user()?->can(Perm::TASKS_CREATE)) {
             $actions[] = \Filament\Actions\Action::make('newTask')
-                ->label('New task')
+                ->label(__('admin.tasks.new_task'))
                 ->icon('heroicon-o-plus')
                 ->color('primary')
                 ->url(TaskResource::getUrl('create'));

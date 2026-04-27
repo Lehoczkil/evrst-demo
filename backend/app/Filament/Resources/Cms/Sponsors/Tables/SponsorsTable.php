@@ -21,19 +21,21 @@ class SponsorsTable
                     ->size(48)
                     ->label(''),
                 TextColumn::make('name')
+                    ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold'),
                 TextColumn::make('year')
+                    ->label(__('admin.common.year'))
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('url')
-                    ->label('Website')
+                    ->label(__('admin.common.website'))
                     ->url(fn ($record) => $record->url, true)
                     ->limit(36)
                     ->toggleable(),
                 TextColumn::make('position')
-                    ->label('Sort')
+                    ->label(__('admin.common.sort'))
                     ->numeric()
                     ->sortable(),
             ])

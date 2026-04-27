@@ -21,15 +21,13 @@ class MemberApplicationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserPlus;
 
-    protected static ?string $navigationLabel = 'Applications';
-
-    protected static ?string $modelLabel = 'application';
-
-    protected static ?string $pluralModelLabel = 'applications';
-
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Membership';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.application.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.application.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.application.p'); }
 
     protected static ?int $navigationSort = 10;
 

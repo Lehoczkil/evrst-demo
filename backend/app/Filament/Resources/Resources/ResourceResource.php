@@ -27,13 +27,11 @@ class ResourceResource extends Resource
         return $record->resourceLabel();
     }
 
-    protected static ?string $modelLabel = 'Resource';
-
-    protected static ?string $pluralModelLabel = 'Resources';
-
-    protected static ?string $navigationLabel = 'All resources';
-
     protected static string|\UnitEnum|null $navigationGroup = 'Advanced';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.all_resources.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.all_resources.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.all_resources.p'); }
 
     protected static ?int $navigationSort = 10;
 

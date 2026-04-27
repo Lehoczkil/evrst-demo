@@ -20,15 +20,13 @@ class TeamMemberGroupResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
-    protected static ?string $navigationLabel = 'Positions';
-
-    protected static ?string $modelLabel = 'position';
-
-    protected static ?string $pluralModelLabel = 'positions';
-
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Team';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.position.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.position.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.position.p'); }
 
     protected static ?int $navigationSort = 20;
 

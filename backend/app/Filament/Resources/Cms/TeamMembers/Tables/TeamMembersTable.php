@@ -25,26 +25,29 @@ class TeamMembersTable
                     ->size(48)
                     ->label(''),
                 TextColumn::make('name')
+                    ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold'),
                 TextColumn::make('email')
+                    ->label(__('admin.common.email'))
                     ->searchable()
                     ->copyable()
                     ->color('gray')
                     ->toggleable(),
                 TextColumn::make('degree')
+                    ->label(__('admin.team.degree'))
                     ->color('gray')
                     ->toggleable(),
                 TextColumn::make('main_position_id')
-                    ->label('Main position')
+                    ->label(__('admin.team.main_position'))
                     ->state(fn ($record) => \App\Models\Cms\CollectionResource::pickLocale(
                         $record->payload['main_position']['payload']['name'] ?? null
                     ) ?? '—')
                     ->badge()
                     ->color('primary'),
                 TextColumn::make('position_ids')
-                    ->label('Positions')
+                    ->label(__('admin.team.positions'))
                     ->state(function ($record) {
                         $positions = $record->payload['positions'] ?? [];
                         if (! is_array($positions)) return [];
@@ -56,13 +59,13 @@ class TeamMembersTable
                     ->badge()
                     ->color('gray'),
                 TextColumn::make('position')
-                    ->label('Sort')
+                    ->label(__('admin.common.sort'))
                     ->numeric()
                     ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('main_position_id')
-                    ->label('Main position')
+                    ->label(__('admin.team.main_position'))
                     ->options(fn () => TeamMemberGroup::all()->mapWithKeys(fn ($g) => [$g->id => $g->name ?? $g->id]))
                     ->query(function ($query, array $data) {
                         $value = $data['value'] ?? null;

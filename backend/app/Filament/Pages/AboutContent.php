@@ -19,11 +19,11 @@ class AboutContent extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static ?string $title = 'About content';
-
-    protected static ?string $navigationLabel = 'Content';
-
     protected static string|\UnitEnum|null $navigationGroup = 'About';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.about_content.p'); }
+
+    public function getTitle(): string { return __('admin.resources.about_content.p'); }
 
     protected static ?int $navigationSort = 10;
 
@@ -67,24 +67,24 @@ class AboutContent extends Page
     {
         return $schema
             ->components([
-                Section::make('Who we are')
-                    ->description('This text is shown above the project / goal cards on the home page.')
+                Section::make(__('admin.about.who'))
+                    ->description(__('admin.about.who_help'))
                     ->components([
                         TextInput::make('title')
-                            ->label('Heading (EN)')
+                            ->label(__('admin.about.heading') . ' (EN)')
                             ->required()
                             ->maxLength(120),
                         TextInput::make('title_hu')
-                            ->label('Heading (HU)')
+                            ->label(__('admin.about.heading') . ' (HU)')
                             ->required()
                             ->maxLength(120),
                         Textarea::make('content_en')
-                            ->label('Body (EN)')
+                            ->label(__('admin.about.body') . ' (EN)')
                             ->rows(8)
                             ->maxLength(2000)
                             ->required(),
                         Textarea::make('content_hu')
-                            ->label('Body (HU)')
+                            ->label(__('admin.about.body') . ' (HU)')
                             ->rows(8)
                             ->maxLength(2000)
                             ->required(),
@@ -114,7 +114,7 @@ class AboutContent extends Page
         $record->save();
 
         Notification::make()
-            ->title('About content saved')
+            ->title(__('admin.about.saved'))
             ->success()
             ->send();
     }
@@ -123,7 +123,7 @@ class AboutContent extends Page
     {
         return [
             \Filament\Actions\Action::make('save')
-                ->label('Save')
+                ->label(__('admin.common.save'))
                 ->action('save')
                 ->color('primary'),
         ];

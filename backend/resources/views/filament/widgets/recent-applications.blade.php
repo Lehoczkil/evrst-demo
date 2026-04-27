@@ -4,10 +4,10 @@
 
 <x-filament-widgets::widget>
     <x-filament::section>
-        <x-slot name="heading">Latest applications</x-slot>
+        <x-slot name="heading">{{ __('admin.widgets.recent_apps') }}</x-slot>
 
         @if ($apps->isEmpty())
-            <p style="color: rgb(100 116 139); font-size: .85rem;">No applications yet.</p>
+            <p style="color: rgb(100 116 139); font-size: .85rem;">{{ __('admin.widgets.recent_apps_empty') }}</p>
         @else
             <div style="display: flex; flex-direction: column; gap: .5rem;">
                 @foreach ($apps as $app)

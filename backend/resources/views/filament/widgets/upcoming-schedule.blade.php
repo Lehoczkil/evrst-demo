@@ -4,10 +4,10 @@
 
 <x-filament-widgets::widget>
     <x-filament::section>
-        <x-slot name="heading">Upcoming this week</x-slot>
+        <x-slot name="heading">{{ __('admin.widgets.upcoming') }}</x-slot>
 
         @if ($items->isEmpty())
-            <p style="color: rgb(100 116 139); font-size: .85rem;">Nothing scheduled in the next seven days.</p>
+            <p style="color: rgb(100 116 139); font-size: .85rem;">{{ __('admin.widgets.no_upcoming') }}</p>
         @else
             <div style="display: flex; flex-direction: column; gap: .55rem;">
                 @foreach ($items as $item)

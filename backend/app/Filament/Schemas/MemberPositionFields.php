@@ -24,8 +24,7 @@ class MemberPositionFields
 
         return [
             Select::make('position_ids')
-                ->label('Positions')
-                ->helperText('All positions this member holds.')
+                ->label(__('admin.team.positions'))
                 ->options(fn () => TeamMemberGroup::all()
                     ->mapWithKeys(fn ($g) => [$g->id => $g->name ?? $g->id]))
                 ->multiple()
@@ -34,8 +33,7 @@ class MemberPositionFields
                 ->live()
                 ->columnSpan($positionsSpan),
             Select::make('main_position_id')
-                ->label('Main position')
-                ->helperText('Used for the org chart on the site.')
+                ->label(__('admin.team.main_position'))
                 ->options(function (Get $get) {
                     $ids = (array) ($get('position_ids') ?? []);
                     if (empty($ids)) {

@@ -19,31 +19,34 @@ class TasksTable
     {
         return $table
             ->defaultGroup(Group::make('status')
-                ->label('Status')
-                ->getTitleFromRecordUsing(fn (Task $r) => Task::statusLabel($r->status)))
+                ->label(__('admin.common.status'))
+                ->getTitleFromRecordUsing(fn (Task $r) => __('admin.tasks.statuses.' . $r->status)))
             ->groupingSettingsHidden()
             ->defaultSort('position')
             ->columns([
                 TextColumn::make('title')
+                    ->label(__('admin.common.title'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
                     ->wrap(),
                 TextColumn::make('supervisor.name')
-                    ->label('Supervisor')
+                    ->label(__('admin.tasks.supervisor'))
                     ->badge()
                     ->color('warning'),
                 TextColumn::make('assignees.name')
-                    ->label('Assignees')
+                    ->label(__('admin.tasks.assignees'))
                     ->badge()
                     ->color('primary')
                     ->listWithLineBreaks(false),
                 TextColumn::make('due_date')
+                    ->label(__('admin.tasks.due_date'))
                     ->date('d M Y')
                     ->sortable(),
                 TextColumn::make('status')
+                    ->label(__('admin.common.status'))
                     ->badge()
-                    ->formatStateUsing(fn ($state) => Task::statusLabel($state))
+                    ->formatStateUsing(fn ($state) => __('admin.tasks.statuses.' . $state))
                     ->color(fn ($state) => match ($state) {
                         Task::STATUS_TODO => 'gray',
                         Task::STATUS_IN_PROGRESS => 'warning',
@@ -57,13 +60,14 @@ class TasksTable
             ->persistSortInSession()
             ->filters([
                 SelectFilter::make('status')
-                    ->options(Task::statusLabels()),
+                    ->label(__('admin.common.status'))
+                    ->options(fn () => collect(Task::statuses())->mapWithKeys(fn ($s) => [$s => __('admin.tasks.statuses.' . $s)])->all()),
                 SelectFilter::make('supervisor_id')
-                    ->label('Supervisor')
+                    ->label(__('admin.tasks.supervisor'))
                     ->options(fn () => User::orderBy('name')->pluck('name', 'id')->all()),
                 SelectFilter::make('assignees')
                     ->relationship('assignees', 'name')
-                    ->label('Assignee'),
+                    ->label(__('admin.tasks.assignees')),
             ])
             ->recordActions([
                 EditAction::make(),

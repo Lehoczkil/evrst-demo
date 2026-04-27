@@ -12,7 +12,7 @@ class RecentApplicationsWidget extends Widget
 {
     protected string $view = 'filament.widgets.recent-applications';
 
-    protected ?string $heading = 'Latest applications';
+    public function getHeading(): ?string { return __('admin.widgets.recent_apps'); }
 
     protected int|string|array $columnSpan = 1;
 

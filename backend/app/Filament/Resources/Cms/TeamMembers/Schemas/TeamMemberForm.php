@@ -16,37 +16,37 @@ class TeamMemberForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('admin.common.name'))
                     ->required()
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email')
+                    ->label(__('admin.common.email'))
                     ->email()
                     ->maxLength(180)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('degree_en')
-                    ->label('Degree (EN)')
+                    ->label(__('admin.team.degree') . ' (EN)')
                     ->maxLength(120)
-                    ->placeholder('e.g. BSc Mech. Eng.')
                     ->columnSpan(['default' => 12, 'md' => 3]),
                 TextInput::make('degree_hu')
-                    ->label('Degree (HU)')
+                    ->label(__('admin.team.degree') . ' (HU)')
                     ->maxLength(120)
-                    ->placeholder('pl. BSc Gépészmérnök')
                     ->columnSpan(['default' => 12, 'md' => 3]),
                 Select::make('user_id')
-                    ->label('Linked admin account')
-                    ->helperText('Set automatically when an application is accepted; clear here to unlink.')
+                    ->label(__('admin.team.linked_user'))
                     ->options(fn () => User::orderBy('name')->pluck('name', 'id')->all())
                     ->searchable()
                     ->preload()
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 ...MemberPositionFields::components(),
                 TextInput::make('position')
-                    ->label('Sort order')
+                    ->label(__('admin.sponsors.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('photo')
+                    ->label(__('admin.team.photo'))
                     ->image()
                     ->directory('team-members')
                     ->visibility('public')

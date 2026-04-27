@@ -4,10 +4,10 @@
 
 <x-filament-widgets::widget>
     <x-filament::section>
-        <x-slot name="heading">My open tasks</x-slot>
+        <x-slot name="heading">{{ __('admin.widgets.my_tasks') }}</x-slot>
 
         @if ($tasks->isEmpty())
-            <p style="color: rgb(100 116 139); font-size: .85rem;">Nothing on your plate. 🎉</p>
+            <p style="color: rgb(100 116 139); font-size: .85rem;">{{ __('admin.widgets.my_tasks_empty') }}</p>
         @else
             <div style="display: flex; flex-direction: column; gap: .5rem;">
                 @foreach ($tasks as $task)
@@ -29,9 +29,9 @@
                         <div style="flex: 1; min-width: 0;">
                             <div style="font-weight: 600; color: rgb(15 23 42); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $task->title }}</div>
                             <div style="font-size: .7rem; color: rgb(100 116 139);">
-                                {{ \App\Models\Task::statusLabel($task->status) }}
+                                {{ __('admin.tasks.statuses.' . $task->status) }}
                                 @if ($task->due_date)
-                                    · due {{ $task->due_date->format('d M') }}
+                                    · {{ __('admin.tasks.due_date') }}: {{ $task->due_date->format('d M') }}
                                 @endif
                             </div>
                         </div>

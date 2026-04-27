@@ -27,6 +27,10 @@ class EventResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
+    public static function getNavigationLabel(): string { return __('admin.resources.event.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.event.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.event.p'); }
+
     public static function canViewAny(): bool { return true; }
     public static function canCreate(): bool  { return auth()->user()?->can(Perm::EVENTS_CREATE) ?? false; }
     public static function canEdit($record): bool   { return auth()->user()?->can(Perm::EVENTS_EDIT) ?? false; }

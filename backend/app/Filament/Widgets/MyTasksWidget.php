@@ -11,7 +11,7 @@ class MyTasksWidget extends Widget
 {
     protected string $view = 'filament.widgets.my-tasks';
 
-    protected ?string $heading = 'My open tasks';
+    public function getHeading(): ?string { return __('admin.widgets.my_tasks'); }
 
     protected int|string|array $columnSpan = 1;
 
