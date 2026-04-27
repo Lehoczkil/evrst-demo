@@ -36,7 +36,7 @@
             opacity: .55; cursor: help; transition: opacity .12s ease, background .12s ease;
             vertical-align: middle;
         "
-        onmouseover="this.style.opacity='1'; this.style.background='rgba(127,127,127,.15)';"
+        onmouseover="this.style.opacity='1'; this.style.background='color-mix(in srgb, currentColor 18%, transparent)';"
         onmouseout="this.style.opacity='.55'; this.style.background='transparent';"
     >?</button>
 </span>

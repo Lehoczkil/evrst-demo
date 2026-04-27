@@ -47,7 +47,7 @@ class AcceptMemberApplication extends Page implements HasForms
 
     public function getTitle(): string
     {
-        return 'Accept ' . $this->record->name;
+        return __('admin.applications.accept') . ' — ' . $this->record->name;
     }
 
     public function mount(int|string $record): void
@@ -58,7 +58,7 @@ class AcceptMemberApplication extends Page implements HasForms
 
         if ($this->record->status === MemberApplication::STATUS_ACCEPTED) {
             Notification::make()
-                ->title('Already accepted')
+                ->title(__('admin.applications.already_accepted'))
                 ->info()
                 ->send();
             $this->redirect(MemberApplicationResource::getUrl('index'));
@@ -80,21 +80,23 @@ class AcceptMemberApplication extends Page implements HasForms
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('admin.common.name'))
                     ->required()
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email')
+                    ->label(__('admin.common.email'))
                     ->required()
                     ->email()
                     ->maxLength(180)
-                    ->helperText('Login email for the new admin account; the temporary password is sent here.')
+                    ->helperText(__('admin.applications.email_help'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('degree_en')
-                    ->label('Degree (EN)')
+                    ->label(__('admin.team.degree') . ' (EN)')
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 3]),
                 TextInput::make('degree_hu')
-                    ->label('Degree (HU)')
+                    ->label(__('admin.team.degree') . ' (HU)')
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 3]),
                 ...MemberPositionFields::components(),

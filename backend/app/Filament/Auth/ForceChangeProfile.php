@@ -18,11 +18,11 @@ class ForceChangeProfile extends EditProfile
     {
         return $schema
             ->components([
-                Section::make('Profile')
-                    ->description('How your name and avatar appear in the admin.')
+                Section::make(__('admin.profile.section'))
+                    ->description(__('admin.profile.section_help'))
                     ->components([
                         FileUpload::make('avatar')
-                            ->label('Profile picture')
+                            ->label(__('admin.profile.avatar'))
                             ->avatar()
                             ->image()
                             ->imageCropAspectRatio('1:1')
@@ -34,8 +34,8 @@ class ForceChangeProfile extends EditProfile
                         $this->getEmailFormComponent(),
                     ])
                     ->columns(2),
-                Section::make('Password')
-                    ->description('Set a new password — required on first sign-in, optional thereafter.')
+                Section::make(__('admin.users.password'))
+                    ->description(__('admin.profile.password_help'))
                     ->components([
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),

@@ -187,6 +187,17 @@ return [
         'reject_modal'  => 'Reject application?',
         'accepted_msg'  => 'Application accepted',
         'rejected_msg'  => 'Application rejected',
+        'already_accepted' => 'Already accepted',
+        'email_help'    => 'Login email for the new admin account; the temporary password is sent here.',
+    ],
+
+    'profile' => [
+        'section'      => 'Profile',
+        'section_help' => 'How your name and avatar appear in the admin.',
+        'avatar'       => 'Profile picture',
+        'password_help' => 'Set a new password — required on first sign-in, optional thereafter.',
+        'add_comment'  => 'Add comment',
+        'posted'       => 'Posted',
     ],
 
     'team' => [

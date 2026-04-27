@@ -187,6 +187,17 @@ return [
         'reject_modal'  => 'Elutasítod a jelentkezést?',
         'accepted_msg'  => 'Jelentkezés elfogadva',
         'rejected_msg'  => 'Jelentkezés elutasítva',
+        'already_accepted' => 'Már elfogadva',
+        'email_help'    => 'Az új adminfiók belépési címe; az ideiglenes jelszót erre küldjük.',
+    ],
+
+    'profile' => [
+        'section'      => 'Profil',
+        'section_help' => 'Hogyan jelenik meg a neved és az avatarod a panelben.',
+        'avatar'       => 'Profilkép',
+        'password_help' => 'Új jelszó beállítása — első belépéskor kötelező, később opcionális.',
+        'add_comment'  => 'Hozzászólás hozzáadása',
+        'posted'       => 'Beküldve',
     ],
 
     'team' => [

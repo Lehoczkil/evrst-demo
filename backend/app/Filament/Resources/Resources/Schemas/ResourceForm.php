@@ -15,16 +15,17 @@ class ResourceForm
         return $schema
             ->components([
                 Select::make('collection_id')
-                    ->label('Collection')
+                    ->label(__('admin.resources.collection.s'))
                     ->relationship('collection', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 TextInput::make('position')
+                    ->label(__('admin.common.sort'))
                     ->required()
                     ->numeric()
                     ->default(0)
-                    ->helperText('Lower numbers appear first.'),
+                    ->helperText(__('admin.help.fields.sponsor_position')),
                 Textarea::make('payload')
                     ->label('Payload (JSON)')
                     ->rows(14)

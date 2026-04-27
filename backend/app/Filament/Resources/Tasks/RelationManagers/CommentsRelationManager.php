@@ -22,14 +22,17 @@ class CommentsRelationManager extends RelationManager
 {
     protected static string $relationship = 'comments';
 
-    protected static ?string $title = 'Comments';
+    public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
+    {
+        return __('admin.tasks.comments');
+    }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Textarea::make('body')
-                    ->label('Comment')
+                    ->label(__('admin.tasks.comment'))
                     ->required()
                     ->rows(4)
                     ->maxLength(5000)
@@ -44,19 +47,20 @@ class CommentsRelationManager extends RelationManager
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('author.name')
-                    ->label('Author')
+                    ->label(__('admin.drawing.author'))
                     ->weight('semibold'),
                 TextColumn::make('body')
+                    ->label(__('admin.tasks.comment'))
                     ->wrap()
                     ->limit(180),
                 TextColumn::make('created_at')
-                    ->label('Posted')
+                    ->label(__('admin.profile.posted'))
                     ->dateTime('d M Y H:i')
                     ->sortable(),
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Add comment')
+                    ->label(__('admin.profile.add_comment'))
                     ->mutateDataUsing(function (array $data): array {
                         $data['user_id'] = auth()->id();
                         return $data;

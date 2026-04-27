@@ -23,29 +23,30 @@ class EditMemberApplication extends EditRecord
 
         return [
             Action::make('accept')
-                ->label('Accept')
+                ->label(__('admin.applications.accept'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->visible($record->status !== MemberApplication::STATUS_ACCEPTED
                     && (auth()->user()?->can(Perm::APPLICATIONS_ACCEPT) ?? false))
                 ->url(MemberApplicationResource::getUrl('accept', ['record' => $record])),
             Action::make('reject')
-                ->label('Reject')
+                ->label(__('admin.applications.reject'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
                 ->requiresConfirmation()
-                ->modalHeading('Reject application?')
+                ->modalHeading(__('admin.applications.reject_modal'))
                 ->visible($record->status !== MemberApplication::STATUS_REJECTED
                     && (auth()->user()?->can(Perm::APPLICATIONS_REFUSE) ?? false))
                 ->action(function () use ($record) {
-                    $record->update([
+                    $record->withoutActivityLog(fn () => $record->update([
                         'status' => MemberApplication::STATUS_REJECTED,
                         'reviewed_at' => now(),
                         'reviewed_by' => auth()->id(),
-                    ]);
+                    ]));
+                    $record->logActivity('rejected');
                     $payload = DiscordPayloads::applicationRejected($record, auth()->user());
                     PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference']);
-                    Notification::make()->title('Application rejected')->warning()->send();
+                    Notification::make()->title(__('admin.applications.rejected_msg'))->warning()->send();
                     $this->redirect(MemberApplicationResource::getUrl('index'));
                 }),
             DeleteAction::make(),

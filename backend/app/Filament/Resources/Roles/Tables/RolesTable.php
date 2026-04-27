@@ -14,18 +14,20 @@ class RolesTable
             ->defaultSort('id')
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('admin.common.name'))
                     ->searchable()
                     ->weight('semibold'),
                 TextColumn::make('key')
+                    ->label(__('admin.roles.key'))
                     ->color('gray')
                     ->copyable(),
                 TextColumn::make('permissions_count')
-                    ->label('Permissions')
+                    ->label(__('admin.roles.permissions'))
                     ->badge()
                     ->counts('permissions')
                     ->color('primary'),
                 TextColumn::make('users_count')
-                    ->label('Users')
+                    ->label(__('admin.resources.user.p'))
                     ->badge()
                     ->counts('users')
                     ->color('gray'),
