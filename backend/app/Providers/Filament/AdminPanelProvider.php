@@ -98,6 +98,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::PAGE_HEADER_HEADING_AFTER,
                 fn () => view('filament.hooks.help-button'),
             )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => view('filament.hooks.help-modal'),
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
