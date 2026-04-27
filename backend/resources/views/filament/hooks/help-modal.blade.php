@@ -37,28 +37,37 @@
     @keydown.escape.window="open = false"
     x-cloak
 >
+    {{-- Full-viewport backdrop. Fixed to the viewport so any ancestor's
+         transform / filter doesn't displace it; the modal itself is
+         positioned with translate(-50%, -50%) so it stays dead-centre
+         regardless of flex quirks. --}}
     <div
         x-show="open"
         x-transition.opacity
         @click.self="open = false"
         style="
-            position: fixed; inset: 0; z-index: 9999;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh;
+            z-index: 9999;
             background: rgba(15,23,42,.55);
-            display: flex; align-items: center; justify-content: center;
-            padding: 1rem; backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
         "
     >
         <div
             @click.stop
             style="
+                position: fixed;
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
                 background: white; color: rgb(15 23 42);
                 border-radius: 14px;
-                width: 100%; max-width: 560px;
+                width: calc(100vw - 2rem); max-width: 560px;
                 max-height: calc(100vh - 4rem);
                 box-shadow: 0 16px 60px rgba(15,23,42,.35);
                 display: flex; flex-direction: column;
                 overflow: hidden;
-                margin: auto;
+                z-index: 10000;
             "
             class="dark:!bg-gray-900 dark:!text-gray-100 dark:!border dark:!border-white/10"
         >
