@@ -130,11 +130,14 @@ class AcceptMemberApplication extends Page implements HasForms
         $member->user_id = $user->id;
         $member->save();
 
-        $this->record->update([
+        $this->record->withoutActivityLog(fn () => $this->record->update([
             'status' => MemberApplication::STATUS_ACCEPTED,
             'reviewed_at' => now(),
             'reviewed_by' => auth()->id(),
             'team_member_id' => $member->id,
+        ]));
+        $this->record->logActivity('accepted', [
+            'team_member' => ['id' => $member->id, 'name' => $member->name],
         ]);
 
         $user->notify(new TeamMemberAccountCreated($temp));

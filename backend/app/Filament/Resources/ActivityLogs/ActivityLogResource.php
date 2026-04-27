@@ -20,17 +20,17 @@ class ActivityLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static ?string $navigationLabel = 'Activity log';
-
-    protected static ?string $modelLabel = 'activity entry';
-
-    protected static ?string $pluralModelLabel = 'activity log';
-
     protected static string|\UnitEnum|null $navigationGroup = 'Membership';
+
+    public static function getNavigationLabel(): string { return __('admin.resources.activity_log.p'); }
+    public static function getModelLabel(): string { return __('admin.resources.activity_log.s'); }
+    public static function getPluralModelLabel(): string { return __('admin.resources.activity_log.p'); }
 
     protected static ?int $navigationSort = 50;
 
     public static function canViewAny(): bool { return auth()->user()?->isAdmin() ?? false; }
+    public static function canAccess(): bool { return static::canViewAny(); }
+    public static function shouldRegisterNavigation(): bool { return static::canViewAny(); }
     public static function canCreate(): bool { return false; }
     public static function canEdit($record): bool { return false; }
     public static function canDelete($record): bool { return auth()->user()?->isAdmin() ?? false; }
@@ -46,37 +46,45 @@ class ActivityLogResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('When')
+                    ->label(__('admin.common.when'))
                     ->dateTime('d M Y H:i')
                     ->since(),
                 TextColumn::make('user.name')
-                    ->label('Actor')
-                    ->placeholder('System')
+                    ->label(__('admin.common.actor'))
+                    ->placeholder(__('admin.common.system'))
                     ->badge()
                     ->color('gray'),
                 TextColumn::make('event')
+                    ->label(__('admin.common.event'))
                     ->badge()
+                    ->formatStateUsing(fn ($state) => __('admin.activity.events.' . $state))
                     ->color(fn ($state) => match ($state) {
-                        'created' => 'success',
-                        'updated' => 'warning',
-                        'deleted' => 'danger',
-                        default   => 'gray',
+                        'created'  => 'success',
+                        'updated'  => 'warning',
+                        'deleted'  => 'danger',
+                        'accepted' => 'success',
+                        'rejected' => 'danger',
+                        default    => 'gray',
                     }),
                 TextColumn::make('subject_label')
-                    ->label('Subject')
+                    ->label(__('admin.common.subject'))
                     ->wrap(),
                 TextColumn::make('subject_type')
-                    ->label('Type')
+                    ->label(__('admin.common.type'))
                     ->formatStateUsing(fn ($state) => class_basename((string) $state))
                     ->color('gray')
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('event')->options([
-                    'created' => 'Created',
-                    'updated' => 'Updated',
-                    'deleted' => 'Deleted',
-                ]),
+                SelectFilter::make('event')
+                    ->label(__('admin.common.event'))
+                    ->options([
+                        'created'  => __('admin.activity.events.created'),
+                        'updated'  => __('admin.activity.events.updated'),
+                        'deleted'  => __('admin.activity.events.deleted'),
+                        'accepted' => __('admin.activity.events.accepted'),
+                        'rejected' => __('admin.activity.events.rejected'),
+                    ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

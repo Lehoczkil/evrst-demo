@@ -25,18 +25,23 @@ class MemberApplicationsTable
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold'),
                 TextColumn::make('email')
+                    ->label(__('admin.common.email'))
                     ->searchable()
                     ->copyable()
                     ->color('gray'),
                 TextColumn::make('department')
+                    ->label(__('admin.applications.department'))
                     ->badge()
                     ->color('gray'),
                 TextColumn::make('status')
+                    ->label(__('admin.common.status'))
                     ->badge()
+                    ->formatStateUsing(fn ($state) => __('admin.applications.statuses.' . $state))
                     ->colors([
                         'warning' => MemberApplication::STATUS_PENDING,
                         'success' => MemberApplication::STATUS_ACCEPTED,
@@ -44,45 +49,47 @@ class MemberApplicationsTable
                     ])
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label('Submitted')
+                    ->label(__('admin.common.submitted_at'))
                     ->dateTime('d M Y H:i')
                     ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
+                    ->label(__('admin.common.status'))
                     ->options([
-                        MemberApplication::STATUS_PENDING => 'Pending',
-                        MemberApplication::STATUS_ACCEPTED => 'Accepted',
-                        MemberApplication::STATUS_REJECTED => 'Rejected',
+                        MemberApplication::STATUS_PENDING => __('admin.applications.statuses.PENDING'),
+                        MemberApplication::STATUS_ACCEPTED => __('admin.applications.statuses.ACCEPTED'),
+                        MemberApplication::STATUS_REJECTED => __('admin.applications.statuses.REJECTED'),
                     ])
                     ->default(MemberApplication::STATUS_PENDING),
             ])
             ->recordActions([
                 EditAction::make(),
                 Action::make('accept')
-                    ->label('Accept')
+                    ->label(__('admin.applications.accept'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn (MemberApplication $record) => $record->status !== MemberApplication::STATUS_ACCEPTED
                         && (auth()->user()?->can(Perm::APPLICATIONS_ACCEPT) ?? false))
                     ->url(fn (MemberApplication $record) => MemberApplicationResource::getUrl('accept', ['record' => $record])),
                 Action::make('reject')
-                    ->label('Reject')
+                    ->label(__('admin.applications.reject'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->modalHeading('Reject application?')
+                    ->modalHeading(__('admin.applications.reject_modal'))
                     ->visible(fn (MemberApplication $record) => $record->status !== MemberApplication::STATUS_REJECTED
                         && (auth()->user()?->can(Perm::APPLICATIONS_REFUSE) ?? false))
                     ->action(function (MemberApplication $record) {
-                        $record->update([
+                        $record->withoutActivityLog(fn () => $record->update([
                             'status' => MemberApplication::STATUS_REJECTED,
                             'reviewed_at' => now(),
                             'reviewed_by' => auth()->id(),
-                        ]);
+                        ]));
+                        $record->logActivity('rejected');
                         $payload = DiscordPayloads::applicationRejected($record, auth()->user());
                         PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference']);
-                        Notification::make()->title('Application rejected')->warning()->send();
+                        Notification::make()->title(__('admin.applications.rejected_msg'))->warning()->send();
                     }),
                 DeleteAction::make(),
             ])
