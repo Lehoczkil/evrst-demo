@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Concerns\HasFileUrl;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class Drawing extends Model
 {
+    use HasFileUrl;
+
     protected $fillable = [
         'user_id',
         'title',
@@ -31,20 +33,13 @@ class Drawing extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** Backwards-compatible alias — every Filament + Blade reference
+     *  uses $drawing->url. Keep both names working so we don't have to
+     *  rewrite the gallery + preview Blades in this pass. */
     protected function url(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->path ? Storage::disk($this->disk ?: 'public')->url($this->path) : null,
+            get: fn () => $this->file_url,
         );
-    }
-
-    public function deleteFile(): void
-    {
-        if (! $this->path) return;
-        try {
-            Storage::disk($this->disk ?: 'public')->delete($this->path);
-        } catch (\Throwable) {
-            // best-effort; row deletion proceeds either way
-        }
     }
 }

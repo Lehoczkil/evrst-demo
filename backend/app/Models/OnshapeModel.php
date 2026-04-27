@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Concerns\HasFileUrl;
 use App\Concerns\LogsActivity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class OnshapeModel extends Model
 {
-    use LogsActivity;
+    use HasFileUrl, LogsActivity;
 
     public const GLB_IDLE    = 'idle';
     public const GLB_QUEUED  = 'queued';
@@ -38,6 +38,10 @@ class OnshapeModel extends Model
         'glb_size' => 'integer',
         'glb_exported_at' => 'datetime',
     ];
+
+    /** Tell HasFileUrl which columns hold the disk + path. */
+    public function fileDiskAttribute(): string { return 'glb_disk'; }
+    public function filePathAttribute(): string { return 'glb_path'; }
 
     public function labelForLog(): string
     {
@@ -70,26 +74,11 @@ class OnshapeModel extends Model
         );
     }
 
-    /**
-     * Pull `did`, `wid`, and `eid` out of a pasted Onshape URL. Returns
-     * an associative array with keys `document_id`, `workspace_id`,
-     * `element_id`, or null entries when they aren't present.
-     *
-     * @return array{document_id: ?string, workspace_id: ?string, element_id: ?string}
-     */
-    /** Public URL of the cached GLB on the public disk, or null if none. */
+    /** Backwards-compatible alias for the cached GLB URL. The Blade +
+     *  Filament resource still read $model->glb_url. */
     protected function glbUrl(): Attribute
     {
-        return Attribute::make(
-            get: function () {
-                if (! $this->glb_path) return null;
-                try {
-                    return Storage::disk($this->glb_disk ?: 'public')->url($this->glb_path);
-                } catch (\Throwable) {
-                    return null;
-                }
-            },
-        );
+        return Attribute::make(get: fn () => $this->file_url);
     }
 
     public function hasGlb(): bool
@@ -97,22 +86,24 @@ class OnshapeModel extends Model
         return (bool) $this->glb_path;
     }
 
+    /** Backwards-compatible alias used by the Filament DeleteAction
+     *  ->before() hooks. Trait now owns the actual delete logic. */
     public function deleteGlbFile(): void
     {
-        if (! $this->glb_path) return;
-        try {
-            Storage::disk($this->glb_disk ?: 'public')->delete($this->glb_path);
-        } catch (\Throwable) {
-            // best-effort
-        }
+        $this->deleteFile();
     }
 
+    /**
+     * Pull `did`, `wid`, and `eid` out of a pasted Onshape URL.
+     *
+     * @return array{document_id: ?string, workspace_id: ?string, element_id: ?string}
+     */
     public static function parseShareUrl(?string $url): array
     {
         $out = ['document_id' => null, 'workspace_id' => null, 'element_id' => null];
         if (! $url) return $out;
 
-        // Examples:
+        // Accepted shapes:
         //   https://cad.onshape.com/documents/{did}/w/{wid}/e/{eid}
         //   https://cad.onshape.com/documents/{did}/v/{vid}/e/{eid}
         //   https://cad.onshape.com/documents/{did}

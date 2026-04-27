@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
+use App\Concerns\HasFileUrl;
 use App\Concerns\LogsActivity;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class TaskProof extends Model
 {
-    use LogsActivity;
+    use HasFileUrl, LogsActivity;
 
     public const KIND_IMAGE = 'image';
     public const KIND_FILE  = 'file';   // 3D model (GLB/STL/STEP), PDF, …
@@ -40,6 +39,10 @@ class TaskProof extends Model
         'file_size' => 'integer',
     ];
 
+    /** Tell HasFileUrl which columns store the disk + path. */
+    public function fileDiskAttribute(): string { return 'file_disk'; }
+    public function filePathAttribute(): string { return 'file_path'; }
+
     public function labelForLog(): string
     {
         return 'Proof: ' . $this->title;
@@ -53,32 +56,5 @@ class TaskProof extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Resolve the public URL for image / file proofs. Null for note / link.
-     */
-    protected function fileUrl(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                if (! $this->file_path) return null;
-                try {
-                    return Storage::disk($this->file_disk ?: 'public')->url($this->file_path);
-                } catch (\Throwable) {
-                    return null;
-                }
-            },
-        );
-    }
-
-    public function deleteFile(): void
-    {
-        if (! $this->file_path) return;
-        try {
-            Storage::disk($this->file_disk ?: 'public')->delete($this->file_path);
-        } catch (\Throwable) {
-            // best-effort; row deletion proceeds anyway.
-        }
     }
 }
