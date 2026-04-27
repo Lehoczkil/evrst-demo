@@ -20,10 +20,37 @@
 @endphp
 
 <x-filament-panels::page>
-    {{-- The filter row was removed from the kanban view: drag-and-drop
-         is disabled while filters are active, so the kanban becomes
-         read-only with a filter applied. Use the regular Tasks list
-         when you need to filter; the kanban stays a clean board. --}}
+    @php
+        $userOptions = $this->getUserOptions();
+        $statuses = \App\Models\Task::statusLabels();
+    @endphp
+    <div style="display: flex; flex-wrap: wrap; gap: .5rem .75rem; align-items: center; padding-bottom: .75rem; margin-bottom: .75rem; border-bottom: 1px solid rgba(15,23,42,.08);">
+        <input
+            type="search"
+            wire:model.live.debounce.300ms="filterSearch"
+            placeholder="{{ __('admin.tasks.search_placeholder') }}"
+            style="flex: 1 1 220px; min-width: 200px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,.12); font-size: .8rem;"
+        >
+        <select wire:model.live="filterStatus" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,.12); font-size: .8rem;">
+            <option value="">{{ __('admin.tasks.all_statuses') }}</option>
+            @foreach ($statuses as $key => $label)
+                <option value="{{ $key }}">{{ __('admin.tasks.statuses.' . $key) }}</option>
+            @endforeach
+        </select>
+        <select wire:model.live="filterSupervisorId" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,.12); font-size: .8rem;">
+            <option value="">{{ __('admin.tasks.any_supervisor') }}</option>
+            @foreach ($userOptions as $u)
+                <option value="{{ $u['id'] }}">👤 {{ $u['name'] }}</option>
+            @endforeach
+        </select>
+        <select wire:model.live="filterAssigneeId" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,.12); font-size: .8rem;">
+            <option value="">{{ __('admin.tasks.any_assignee') }}</option>
+            @foreach ($userOptions as $u)
+                <option value="{{ $u['id'] }}">🛠 {{ $u['name'] }}</option>
+            @endforeach
+        </select>
+        <button type="button" wire:click="clearFilters" style="padding: 6px 12px; border-radius: 999px; border: 0; background: rgba(15,23,42,.06); cursor: pointer; font-size: .75rem;">{{ __('admin.tasks.clear_filters') }}</button>
+    </div>
 
     <style>
         .kanban-board {

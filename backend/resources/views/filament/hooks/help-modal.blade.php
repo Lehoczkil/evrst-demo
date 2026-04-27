@@ -100,7 +100,8 @@
             } catch (e) {}
         }
 
-        document.querySelectorAll('a.fi-sidebar-item-button').forEach((a) => {
+        // Filament 4's actual class on the link element is fi-sidebar-item-btn.
+        document.querySelectorAll('a.fi-sidebar-item-btn').forEach((a) => {
             if (a.dataset.evrstHelpInjected) return;
             const href = a.getAttribute('href');
             if (!href) return;
@@ -118,23 +119,25 @@
             btn.textContent = '?';
             btn.style.cssText = [
                 'margin-left:auto', 'flex-shrink:0',
-                'width:16px', 'height:16px',
+                'width:14px', 'height:14px',
                 'border-radius:9999px',
-                'border:1px solid rgba(255,255,255,.45)',
-                'background:rgba(255,255,255,.08)',
+                'border:1px solid rgba(255,255,255,.4)',
+                'background:transparent',
                 'color:#ffffff',
-                'font-size:.6rem', 'font-weight:700', 'line-height:1',
+                'font-size:.55rem', 'font-weight:700', 'line-height:1',
                 'cursor:help', 'padding:0',
                 'display:inline-flex', 'align-items:center', 'justify-content:center',
-                'opacity:.6', 'transition:opacity .12s ease, background .12s ease',
+                'opacity:.55', 'transition:opacity .12s ease, background .12s ease, border-color .12s ease',
             ].join(';');
             btn.addEventListener('mouseenter', () => {
                 btn.style.opacity = '1';
-                btn.style.background = 'rgba(255,255,255,.2)';
+                btn.style.background = 'rgba(255,255,255,.18)';
+                btn.style.borderColor = 'rgba(255,255,255,.7)';
             });
             btn.addEventListener('mouseleave', () => {
-                btn.style.opacity = '.6';
-                btn.style.background = 'rgba(255,255,255,.08)';
+                btn.style.opacity = '.55';
+                btn.style.background = 'transparent';
+                btn.style.borderColor = 'rgba(255,255,255,.4)';
             });
             btn.addEventListener('click', (e) => {
                 e.preventDefault();

@@ -19,6 +19,9 @@
     "
     style="display:inline-flex; align-items:center; vertical-align: middle; margin-left: .55rem;"
 >
+    {{-- The button inherits the heading's text colour via currentColor so
+         it lands as white in dark mode and dark slate in light mode
+         without a per-theme override. --}}
     <button
         type="button"
         onclick="window.evrstOpenHelp(@js($key))"
@@ -26,15 +29,15 @@
         aria-label="{{ __('admin.help.tooltip') }}"
         style="
             display:inline-flex; align-items:center; justify-content:center;
-            width: 24px; height: 24px; border-radius: 9999px;
-            background: rgba(245, 158, 11, .18); color: rgb(146 64 14);
-            border: 1px solid rgba(245, 158, 11, .55);
-            font-size: .8rem; font-weight: 700; line-height: 1;
-            cursor: help; transition: all .15s ease;
+            width: 16px; height: 16px; border-radius: 9999px;
+            background: transparent; color: currentColor;
+            border: 1px solid currentColor;
+            font-size: .6rem; font-weight: 700; line-height: 1;
+            opacity: .55; cursor: help; transition: opacity .12s ease, background .12s ease;
             vertical-align: middle;
         "
-        onmouseover="this.style.background='rgb(245 158 11)'; this.style.color='white';"
-        onmouseout="this.style.background='rgba(245, 158, 11, .18)'; this.style.color='rgb(146 64 14)';"
+        onmouseover="this.style.opacity='1'; this.style.background='rgba(127,127,127,.15)';"
+        onmouseout="this.style.opacity='.55'; this.style.background='transparent';"
     >?</button>
 </span>
 @endif
