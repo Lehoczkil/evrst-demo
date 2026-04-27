@@ -8,18 +8,24 @@
     // Strip the panel prefix once: "filament.admin.resources.tasks.index"
     // becomes "resources.tasks.index" so the lang file stays compact.
     $key = preg_replace('/^filament\.admin\./', '', $routeName);
-    $titleKey = "admin.help.pages.{$key}.title";
-    $bodyKey  = "admin.help.pages.{$key}.body";
-    $title = __($titleKey);
-    $body  = __($bodyKey);
-    $hasHelp = $title !== $titleKey && $body !== $bodyKey;
+    // The lang keys are literal dotted strings (e.g. "resources.cms.events.index")
+    // — Laravel's __() would otherwise traverse them as nested paths.
+    $pages = (array) trans('admin.help.pages');
+    $entry = $pages[$key] ?? null;
+    $hasHelp = is_array($entry) && isset($entry['title'], $entry['body']);
+    $title = $hasHelp ? $entry['title'] : null;
+    $body  = $hasHelp ? $entry['body']  : null;
 @endphp
 
 @if ($hasHelp)
 <span
     x-data="{ open: false }"
+    x-init="
+        const h1 = $el.parentElement?.querySelector('.fi-header-heading');
+        if (h1 && !h1.contains($el)) h1.appendChild($el);
+    "
     @keydown.escape.window="open = false"
-    style="display:inline-flex; align-items:center; margin-left: .5rem;"
+    style="display:inline-flex; align-items:center; vertical-align: middle; margin-left: .55rem;"
 >
     <button
         type="button"
@@ -28,11 +34,12 @@
         aria-label="{{ __('admin.help.tooltip') }}"
         style="
             display:inline-flex; align-items:center; justify-content:center;
-            width: 22px; height: 22px; border-radius: 9999px;
-            background: rgba(245, 158, 11, .14); color: rgb(180 83 9);
-            border: 1px solid rgba(245, 158, 11, .35);
-            font-size: .75rem; font-weight: 700; line-height: 1;
+            width: 26px; height: 26px; border-radius: 9999px;
+            background: rgba(245, 158, 11, .18); color: rgb(146 64 14);
+            border: 1px solid rgba(245, 158, 11, .55);
+            font-size: .85rem; font-weight: 700; line-height: 1;
             cursor: help; transition: all .15s ease;
+            vertical-align: middle;
         "
         onmouseover="this.style.background='rgb(245 158 11)'; this.style.color='white';"
         onmouseout="this.style.background='rgba(245, 158, 11, .14)'; this.style.color='rgb(180 83 9)';"
