@@ -100,8 +100,7 @@ class OnshapeModelsTable
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->color('gray')
                     ->url(fn (OnshapeModel $r) => $r->share_url ?: $r->embed_url, true),
-                DeleteAction::make()
-                    ->before(fn (OnshapeModel $r) => $r->deleteGlbFile()),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

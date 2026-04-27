@@ -72,8 +72,7 @@ class EditOnshapeModel extends EditRecord
                 ->icon('heroicon-o-arrow-top-right-on-square')
                 ->color('gray')
                 ->url(fn () => $this->record->share_url ?: $this->record->embed_url, true),
-            DeleteAction::make()
-                ->before(fn () => $this->record?->deleteGlbFile()),
+            DeleteAction::make(),
         ];
     }
 }

@@ -86,15 +86,12 @@ class DrawingsTable
                             preg_replace('/[^A-Za-z0-9_\-]+/', '_', $r->title) . '.png',
                         );
                     }),
-                DeleteAction::make()
-                    ->before(fn (Drawing $r) => $r->deleteFile()),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->before(function ($records) {
-                            foreach ($records as $r) $r->deleteFile();
-                        }),
+                    // Trait's deleting hook handles file cleanup.
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->emptyStateHeading(__('admin.drawing.empty_heading'))

@@ -20,6 +20,20 @@ use Illuminate\Support\Facades\Storage;
  */
 trait HasFileUrl
 {
+    /**
+     * Wire the file cleanup to the model's `deleting` event so cascade
+     * deletes (and bulk DeleteBulkAction) clean up the asset on disk
+     * automatically — Filament tables can stop carrying their own
+     * `->before(fn ($r) => $r->deleteFile())` hooks. Trait constructor
+     * pattern: `boot{TraitName}` runs once per model class.
+     */
+    public static function bootHasFileUrl(): void
+    {
+        static::deleting(function ($model) {
+            $model->deleteFile();
+        });
+    }
+
     public function fileDiskAttribute(): string
     {
         return 'disk';

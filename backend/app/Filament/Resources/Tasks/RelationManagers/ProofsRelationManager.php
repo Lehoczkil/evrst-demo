@@ -142,7 +142,6 @@ class ProofsRelationManager extends RelationManager
                 EditAction::make()
                     ->visible(fn (TaskProof $r) => $this->canEditProof($r)),
                 DeleteAction::make()
-                    ->before(fn (TaskProof $r) => $r->deleteFile())
                     ->visible(fn (TaskProof $r) => $this->canEditProof($r)),
             ])
             ->toolbarActions([
