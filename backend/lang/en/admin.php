@@ -32,6 +32,25 @@ return [
         'activity_log'       => ['s' => 'Activity entry',  'p' => 'Activity log'],
         'collection'         => ['s' => 'Collection',      'p' => 'Collections'],
         'all_resources'      => ['s' => 'Resource',        'p' => 'All resources'],
+        'onshape_model'      => ['s' => '3D model',        'p' => '3D models'],
+    ],
+
+    'onshape' => [
+        'new'              => 'New 3D model',
+        'gallery_sub'      => 'Browse and edit Onshape CAD models embedded in the panel.',
+        'section_meta'     => 'Details',
+        'section_link'     => 'Onshape link',
+        'section_preview'  => 'Embedded viewer',
+        'paste_help'       => 'Paste an Onshape document URL — we extract the document, workspace, and element IDs automatically.',
+        'share_url'        => 'Share URL',
+        'document_id'      => 'Document ID',
+        'workspace_id'     => 'Workspace ID',
+        'element_id'       => 'Element ID',
+        'view_in_onshape'  => 'Open in Onshape',
+        'embed_help'       => 'Sign in to Onshape to enable editing inside the iframe — read-only otherwise.',
+        'no_link'          => 'No Onshape link saved yet.',
+        'empty_heading'    => 'No 3D models yet',
+        'empty_body'       => 'Add one with the “New 3D model” button.',
     ],
 
     'common' => [

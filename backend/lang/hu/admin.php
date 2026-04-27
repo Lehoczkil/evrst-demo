@@ -32,6 +32,25 @@ return [
         'activity_log'       => ['s' => 'Naplóbejegyzés',  'p' => 'Tevékenységnapló'],
         'collection'         => ['s' => 'Gyűjtemény',      'p' => 'Gyűjtemények'],
         'all_resources'      => ['s' => 'Erőforrás',       'p' => 'Minden erőforrás'],
+        'onshape_model'      => ['s' => '3D modell',       'p' => '3D modellek'],
+    ],
+
+    'onshape' => [
+        'new'              => 'Új 3D modell',
+        'gallery_sub'      => 'Böngéssz és szerkessz Onshape CAD modelleket a panelbe ágyazva.',
+        'section_meta'     => 'Adatok',
+        'section_link'     => 'Onshape link',
+        'section_preview'  => 'Beágyazott megjelenítő',
+        'paste_help'       => 'Illessz be egy Onshape dokumentum URL-t — a dokumentum, workspace és element ID-kat automatikusan kinyerjük.',
+        'share_url'        => 'Megosztási URL',
+        'document_id'      => 'Dokumentum ID',
+        'workspace_id'     => 'Workspace ID',
+        'element_id'       => 'Element ID',
+        'view_in_onshape'  => 'Megnyitás az Onshape-en',
+        'embed_help'       => 'Jelentkezz be az Onshape-be a beágyazott szerkesztéshez — egyébként csak olvasható.',
+        'no_link'          => 'Nincs Onshape link mentve.',
+        'empty_heading'    => 'Még nincs 3D modell',
+        'empty_body'       => 'Adj hozzá egyet az „Új 3D modell” gombbal.',
     ],
 
     'common' => [

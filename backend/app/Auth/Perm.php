@@ -40,6 +40,11 @@ final class Perm
     public const TASKS_EDIT   = 'tasks.edit';
     public const TASKS_DELETE = 'tasks.delete';
 
+    public const MODELS_VIEW   = 'models.view';
+    public const MODELS_CREATE = 'models.create';
+    public const MODELS_EDIT   = 'models.edit';
+    public const MODELS_DELETE = 'models.delete';
+
     public const NOTIFICATIONS_SEE = 'notifications.see';
 
     public const ROLE_ADMIN   = 'admin';
@@ -74,6 +79,10 @@ final class Perm
             ['key' => self::TASKS_CREATE,        'label' => 'Create tasks'],
             ['key' => self::TASKS_EDIT,          'label' => 'Edit tasks'],
             ['key' => self::TASKS_DELETE,        'label' => 'Delete tasks'],
+            ['key' => self::MODELS_VIEW,         'label' => 'View 3D models'],
+            ['key' => self::MODELS_CREATE,       'label' => 'Create 3D models'],
+            ['key' => self::MODELS_EDIT,         'label' => 'Edit 3D models'],
+            ['key' => self::MODELS_DELETE,       'label' => 'Delete 3D models'],
             ['key' => self::NOTIFICATIONS_SEE,   'label' => 'See notifications about new member entries'],
         ];
     }
