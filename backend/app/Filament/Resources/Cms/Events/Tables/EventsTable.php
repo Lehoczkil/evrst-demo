@@ -67,6 +67,9 @@ class EventsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('admin.empty.events_h'))
+            ->emptyStateDescription(__('admin.empty.events_b'))
+            ->emptyStateIcon('heroicon-o-calendar-days');
     }
 }

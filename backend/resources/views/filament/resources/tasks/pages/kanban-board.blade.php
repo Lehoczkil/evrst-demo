@@ -164,6 +164,9 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 18px -6px rgba(15,23,42,.18);
         }
+        .dark .kanban-card:hover {
+            box-shadow: 0 8px 18px -6px rgba(0,0,0,.5);
+        }
         .kanban-card:active { cursor: grabbing; }
         .kanban-card.sortable-ghost {
             opacity: .35;
@@ -237,14 +240,19 @@
         }
         .kanban-card__open {
             position: absolute; top: 8px; right: 8px;
-            opacity: 0; transition: opacity 160ms ease;
-            font-size: .68rem;
+            opacity: 0;
+            transform: translateY(-2px);
+            transition: opacity 160ms ease, transform 160ms ease, background-color 120ms ease;
+            font-size: .7rem; font-weight: 500;
             background: rgb(15 23 42); color: white;
-            padding: 2px 8px; border-radius: 999px;
+            padding: 3px 10px; border-radius: 999px;
             text-decoration: none;
+            letter-spacing: .01em;
         }
         .dark .kanban-card__open { background: rgb(248 250 252); color: rgb(15 23 42); }
-        .kanban-card:hover .kanban-card__open { opacity: 1; }
+        .kanban-card:hover .kanban-card__open { opacity: 1; transform: translateY(0); }
+        .kanban-card__open:hover { background: rgb(245 158 11); color: rgb(120 53 15); }
+        .dark .kanban-card__open:hover { background: rgb(252 211 77); color: rgb(120 53 15); }
 
         .kanban-empty {
             border: 2px dashed rgba(15,23,42,.12);

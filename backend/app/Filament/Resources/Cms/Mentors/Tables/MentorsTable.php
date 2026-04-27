@@ -43,6 +43,9 @@ class MentorsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('admin.empty.mentors_h'))
+            ->emptyStateDescription(__('admin.empty.mentors_b'))
+            ->emptyStateIcon('heroicon-o-academic-cap');
     }
 }

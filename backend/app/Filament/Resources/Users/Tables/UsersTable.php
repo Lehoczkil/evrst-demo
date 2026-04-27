@@ -96,6 +96,9 @@ class UsersTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('admin.empty.users_h'))
+            ->emptyStateDescription(__('admin.empty.users_b'))
+            ->emptyStateIcon('heroicon-o-shield-check');
     }
 }

@@ -81,6 +81,9 @@ class TeamMembersTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('admin.empty.team_members_h'))
+            ->emptyStateDescription(__('admin.empty.team_members_b'))
+            ->emptyStateIcon('heroicon-o-user-group');
     }
 }

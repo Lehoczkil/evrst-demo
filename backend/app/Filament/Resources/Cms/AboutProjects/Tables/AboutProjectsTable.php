@@ -37,6 +37,9 @@ class AboutProjectsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('admin.empty.about_projects_h'))
+            ->emptyStateDescription(__('admin.empty.about_projects_b'))
+            ->emptyStateIcon('heroicon-o-rocket-launch');
     }
 }

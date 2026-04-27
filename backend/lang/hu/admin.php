@@ -73,6 +73,25 @@ return [
         'glb_exported_at'  => ':date · :size',
     ],
 
+    'empty' => [
+        'tasks_h'         => 'Még nincs feladat',
+        'tasks_b'         => 'Hozz létre egyet a jobb felső „Létrehozás” gombbal.',
+        'events_h'        => 'Még nincs esemény',
+        'events_b'        => 'Adj hozzá egy eseményt, hogy megjelenjen a publikus oldalon.',
+        'sponsors_h'      => 'Még nincs támogató',
+        'sponsors_b'      => 'Adj hozzá egy támogatót, hogy a logója megjelenjen a főoldalon.',
+        'team_members_h'  => 'Még nincs csapattag',
+        'team_members_b'  => 'Adj hozzá csapattagokat a publikus csapatoldalhoz és a szervezeti ábrához.',
+        'mentors_h'       => 'Még nincs mentor',
+        'mentors_b'       => 'A külső mentorok / tanácsadók a publikus csapatoldalon jelennek meg.',
+        'about_goals_h'   => 'Még nincs cél',
+        'about_goals_b'   => 'A célok a Rólunk oldalon a projektek felett jelennek meg.',
+        'about_projects_h'=> 'Még nincs projekt',
+        'about_projects_b'=> 'A projektek a Rólunk oldalon és a naptár idővonalán jelennek meg.',
+        'users_h'         => 'Még nincs felhasználó',
+        'users_b'         => 'Adj hozzá admin fiókot, vagy fogadj el egy jelentkezést a csapat bővítéséhez.',
+    ],
+
     'common' => [
         'actions'      => 'Műveletek',
         'create'       => 'Létrehozás',

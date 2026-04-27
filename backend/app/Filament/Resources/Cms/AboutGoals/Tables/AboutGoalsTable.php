@@ -37,6 +37,9 @@ class AboutGoalsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('admin.empty.about_goals_h'))
+            ->emptyStateDescription(__('admin.empty.about_goals_b'))
+            ->emptyStateIcon('heroicon-o-flag');
     }
 }

@@ -1,7 +1,10 @@
 @php
     $rows = $this->getCalendarGrid();
+    // HU weekday abbreviations follow the conventional 1-3 char form
+    // used in Hungarian calendars (H, K, Sze, Cs, P, Szo, V) so the row
+    // has consistent visual rhythm under the centred header style.
     $weekdays = app()->getLocale() === 'hu'
-        ? ['Hét', 'Ke', 'Sze', 'Csü', 'Pé', 'Szo', 'Vas']
+        ? ['H', 'K', 'Sze', 'Cs', 'P', 'Szo', 'V']
         : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 @endphp
 
@@ -95,7 +98,7 @@
             display: flex; flex-direction: column;
             border: 1px solid rgba(15,23,42,.05);
             cursor: pointer;
-            transition: background-color .12s ease, border-color .12s ease;
+            transition: background-color .08s ease, border-color .08s ease;
         }
         .dark .cal-day {
             background: rgb(30 41 59);
@@ -203,6 +206,7 @@
             font-size: .7rem; text-transform: uppercase; letter-spacing: .05em;
             font-weight: 600; color: rgb(100 116 139);
         }
+        .dark .cal-field label { color: rgb(148 163 184); }
         .cal-input {
             width: 100%;
             padding: .5rem .65rem;

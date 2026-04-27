@@ -73,6 +73,25 @@ return [
         'glb_exported_at'  => 'Cached :date · :size',
     ],
 
+    'empty' => [
+        'tasks_h'         => 'No tasks yet',
+        'tasks_b'         => 'Create one with the “Create” button at the top right.',
+        'events_h'        => 'No events yet',
+        'events_b'        => 'Add an event to publish it on the public site.',
+        'sponsors_h'      => 'No sponsors yet',
+        'sponsors_b'      => 'Add a sponsor to show their logo on the home page.',
+        'team_members_h'  => 'No team members yet',
+        'team_members_b'  => 'Add team members to populate the public team page + org chart.',
+        'mentors_h'       => 'No mentors yet',
+        'mentors_b'       => 'External mentors / advisors appear on the public team page.',
+        'about_goals_h'   => 'No goals yet',
+        'about_goals_b'   => 'Goals appear above the projects on the About page.',
+        'about_projects_h'=> 'No projects yet',
+        'about_projects_b'=> 'Projects show up on the About page and the calendar timeline.',
+        'users_h'         => 'No users yet',
+        'users_b'         => 'Add an admin account or accept an application to grow the team.',
+    ],
+
     'common' => [
         'actions'      => 'Actions',
         'create'       => 'Create',

@@ -46,6 +46,9 @@ class SponsorsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('admin.empty.sponsors_h'))
+            ->emptyStateDescription(__('admin.empty.sponsors_b'))
+            ->emptyStateIcon('heroicon-o-heart');
     }
 }

@@ -81,6 +81,9 @@ class TasksTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('admin.empty.tasks_h'))
+            ->emptyStateDescription(__('admin.empty.tasks_b'))
+            ->emptyStateIcon('heroicon-o-clipboard-document-check');
     }
 }
