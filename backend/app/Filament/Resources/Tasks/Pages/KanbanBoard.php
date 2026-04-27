@@ -57,10 +57,14 @@ class KanbanBoard extends Page
     /** @return array<int, array{id: int, name: string}> */
     public function getUserOptions(): array
     {
-        return \App\Models\User::orderBy('name')->get(['id', 'name'])->map(fn ($u) => [
-            'id' => $u->id,
-            'name' => $u->name,
-        ])->all();
+        return \Illuminate\Support\Facades\Cache::remember(
+            'options:assignees',
+            300,
+            fn () => \App\Models\User::orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])
+                ->all(),
+        );
     }
 
     /**
@@ -180,10 +184,21 @@ class KanbanBoard extends Page
                     }
                     $task->status = $status;
                     $task->position = $position++;
-                    $task->save();
+                    // Suppress LogsActivity here — a drag can touch dozens
+                    // of rows and would otherwise dump a "position from X
+                    // to Y" entry per card. We emit one summary entry per
+                    // status transition further down instead.
+                    $task->withoutActivityLog(fn () => $task->save());
                 }
             }
         });
+
+        // One concise activity entry per task that actually changed column.
+        foreach ($movedAcrossColumns as $entry) {
+            $entry['task']->logActivity('updated', [
+                'status' => ['from' => $entry['previous'], 'to' => $entry['next']],
+            ]);
+        }
 
         foreach ($movedAcrossColumns as $entry) {
             $task = $entry['task']->fresh(['assignees', 'supervisor']);
