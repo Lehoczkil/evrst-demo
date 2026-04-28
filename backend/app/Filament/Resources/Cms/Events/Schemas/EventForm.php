@@ -8,6 +8,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class EventForm
@@ -43,6 +44,9 @@ class EventForm
                             ->seconds(false)
                             ->displayFormat('d M Y H:i')
                             ->required()
+                            ->live(onBlur: true)
+                            ->minDate(now())
+                            ->after(now()->subMinute())
                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.event_date_range'))
                             ->columnSpan(['default' => 12, 'md' => 4]),
                         DateTimePicker::make('end_at')
@@ -50,6 +54,7 @@ class EventForm
                             ->seconds(false)
                             ->displayFormat('d M Y H:i')
                             ->after('start_at')
+                            ->minDate(fn (Get $get) => $get('start_at'))
                             ->columnSpan(['default' => 12, 'md' => 4]),
                         TextInput::make('position')
                             ->label(__('admin.common.sort'))

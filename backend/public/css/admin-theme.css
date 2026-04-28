@@ -458,15 +458,24 @@ html:not(.dark) tr.fi-ta-group-header {
 
 /* When two cards/sections sit side-by-side in a Filament grid row,
    stretch each section to the row's tallest sibling so their bottoms
-   line up. Scoped narrowly to grid containers so we don't disturb
-   form-field wrappers (which are also `.fi-fo-component-ctn`). */
+   line up. Filament v4 wraps them in `.fi-sc-grid` / `.fi-fo-grid`
+   on top of the older `.fi-grid` / `.fi-fo-component-ctn` shapes. */
 .fi-grid > .fi-section,
 .fi-grid > .fi-fo-section,
 .fi-grid-col > .fi-section,
 .fi-grid-col > .fi-fo-section,
+.fi-sc-grid > .fi-section,
+.fi-sc-grid > .fi-fo-section,
+.fi-sc-grid-col > .fi-section,
+.fi-sc-grid-col > .fi-fo-section,
+.fi-fo-grid > .fi-section,
+.fi-fo-grid > .fi-fo-section,
 .fi-fo-component-ctn:has(> .fi-section),
-.fi-fo-component-ctn:has(> .fi-fo-section) {
-    height: 100%;
+.fi-fo-component-ctn:has(> .fi-fo-section),
+.fi-form > .fi-section,
+.fi-form > .fi-fo-section {
+    height: 100% !important;
+    align-self: stretch !important;
 }
 .fi-section-header,
 .fi-section .fi-header,
@@ -697,6 +706,16 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
     box-shadow: 0 12px 40px rgba(0,0,0,.4) !important;
 }
 .fi-dropdown-list-item:hover { background: var(--evrst-surface-raised) !important; }
+
+/* Date / time picker popover sits inside a `.fi-dropdown-panel`. The
+   sticky form-action footer otherwise paints on top of it — bump the
+   panel's z-index above the page-level chrome. */
+.fi-fo-date-time-picker-popover,
+.fi-fo-date-time-picker .fi-dropdown-panel,
+.fi-dropdown-panel:has(.fi-fo-date-time-picker-day),
+.fi-dropdown-panel:has(.fi-fo-date-time-picker-popover) {
+    z-index: 60 !important;
+}
 
 /* ---------- Tabs --------------------------------------------------- */
 
