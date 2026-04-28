@@ -54,7 +54,8 @@ class EventForm
                             ->seconds(false)
                             ->displayFormat('d M Y H:i')
                             ->after('start_at')
-                            ->minDate(fn (Get $get) => $get('start_at'))
+                            ->after(now())
+                            ->minDate(fn (Get $get) => $get('start_at') ?: now())
                             ->columnSpan(['default' => 12, 'md' => 4]),
                         TextInput::make('position')
                             ->label(__('admin.common.sort'))

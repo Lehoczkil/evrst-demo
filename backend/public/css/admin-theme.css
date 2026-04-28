@@ -456,26 +456,26 @@ html:not(.dark) tr.fi-ta-group-header {
     box-shadow: none !important;
 }
 
-/* When two cards/sections sit side-by-side in a Filament grid row,
-   stretch each section to the row's tallest sibling so their bottoms
-   line up. Filament v4 wraps them in `.fi-sc-grid` / `.fi-fo-grid`
-   on top of the older `.fi-grid` / `.fi-fo-component-ctn` shapes. */
-.fi-grid > .fi-section,
-.fi-grid > .fi-fo-section,
-.fi-grid-col > .fi-section,
-.fi-grid-col > .fi-fo-section,
-.fi-sc-grid > .fi-section,
-.fi-sc-grid > .fi-fo-section,
-.fi-sc-grid-col > .fi-section,
-.fi-sc-grid-col > .fi-fo-section,
-.fi-fo-grid > .fi-section,
-.fi-fo-grid > .fi-fo-section,
-.fi-fo-component-ctn:has(> .fi-section),
-.fi-fo-component-ctn:has(> .fi-fo-section),
-.fi-form > .fi-section,
-.fi-form > .fi-fo-section {
-    height: 100% !important;
-    align-self: stretch !important;
+/* Equal-height sibling Sections inside a schema grid row.
+   Filament v4 emits `.fi-sc` (the grid) > unnamed grid-item div >
+   `.fi-sc-component` > `.fi-sc-section` > `.fi-section`. CSS Grid
+   stretches grid items by default; the inner card needs an unbroken
+   chain of `height: 100%` (or flex children) so the actual section
+   card matches its row's tallest sibling. `:has(> .fi-sc-section)`
+   keeps the rule scoped to wrappers that hold a Section, leaving
+   regular form fields untouched. */
+.fi-sc-component:has(> .fi-sc-section) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.fi-sc-component > .fi-sc-section {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+.fi-sc-section > .fi-section {
+    flex: 1 1 auto;
 }
 .fi-section-header,
 .fi-section .fi-header,
@@ -707,14 +707,42 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 }
 .fi-dropdown-list-item:hover { background: var(--evrst-surface-raised) !important; }
 
-/* Date / time picker popover sits inside a `.fi-dropdown-panel`. The
-   sticky form-action footer otherwise paints on top of it — bump the
-   panel's z-index above the page-level chrome. */
-.fi-fo-date-time-picker-popover,
-.fi-fo-date-time-picker .fi-dropdown-panel,
-.fi-dropdown-panel:has(.fi-fo-date-time-picker-day),
-.fi-dropdown-panel:has(.fi-fo-date-time-picker-popover) {
+/* Date / time picker panel — Filament v4 renders an x-float anchored
+   `<div class="fi-fo-date-time-picker-panel">` inside the field. Alpine
+   sets `position: absolute` via inline style; we MUST NOT override that
+   to `relative` (it makes the panel take inline space and blows out the
+   form's height). Lift its z-index above the form-action row and paint
+   an opaque background so the buttons below don't bleed through (the
+   glass tokens are translucent). */
+.fi-fo-date-time-picker-panel {
     z-index: 60 !important;
+    background: var(--evrst-surface-solid) !important;
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,.5) !important;
+}
+
+/* Each `.fi-section` establishes its own stacking context (because of
+   the section's `backdrop-filter`), which traps the picker panel
+   inside the section's own paint layer — adjacent sections (later in
+   DOM) then render over it. Lift the section above its siblings while
+   it contains a focused input or an open popover so the picker can
+   paint on top. */
+.fi-section:has(.fi-fo-date-time-picker:focus-within),
+.fi-section:has(input:focus),
+.fi-section:has(.fi-dropdown-panel),
+.fi-section:has([x-data]:focus-within input[readonly]:focus) {
+    position: relative;
+    z-index: 50;
+}
+
+/* Form-action row (Create / Cancel etc.). Filament v4 wraps it in
+   `.fi-sc-actions` (and adds `.fi-sticky` while it's pinned). Keep it
+   below the picker panel's stacking context so popovers anchored over
+   it stay on top. */
+.fi-sc-actions,
+.fi-sc-actions.fi-sticky {
+    z-index: 1;
 }
 
 /* ---------- Tabs --------------------------------------------------- */
