@@ -23,6 +23,15 @@ class EventResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    // Stored on the shared `resources` table with the title inside JSON
+    // `payload`, so Filament's default `where title like …` search would
+    // crash. Opt out of global search here; users find these via the
+    // sidebar and table filters instead.
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [];
+    }
+
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
     protected static ?int $navigationSort = 10;

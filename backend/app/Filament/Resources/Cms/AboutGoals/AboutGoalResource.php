@@ -23,6 +23,13 @@ class AboutGoalResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    // See EventResource — title lives in JSON payload, default global
+    // search would crash. Opt out here.
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [];
+    }
+
     protected static string|\UnitEnum|null $navigationGroup = 'About';
 
     public static function getNavigationLabel(): string { return __('admin.resources.goal.p'); }

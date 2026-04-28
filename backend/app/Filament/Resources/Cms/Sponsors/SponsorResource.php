@@ -23,6 +23,13 @@ class SponsorResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    // See EventResource — name lives in JSON payload, default global
+    // search would crash. Opt out here.
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [];
+    }
+
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
 
     protected static ?int $navigationSort = 40;
