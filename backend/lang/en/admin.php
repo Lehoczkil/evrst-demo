@@ -184,6 +184,32 @@ return [
         'proof_required_for_done' => 'A proof has to be attached before the task can be moved to Testing or Done.',
         'transition_denied'       => 'You can\'t move this task to that column.',
         'transition_denied_body'  => ':count card(s) snapped back — assignees can only move to Testing (with a proof attached); only the supervisor can mark a task Done.',
+        'priority'    => 'Priority',
+        'category'    => 'Category',
+        'parent'      => 'Parent task',
+        'parent_help' => 'A child task can\'t be set Done until its parent is Done — and a parent auto-promotes once all its children reach Testing or Done.',
+        'no_parent'   => 'No parent (top-level)',
+        'no_category' => 'No category',
+        'subtasks'    => 'Subtasks',
+        'no_subtasks' => 'No subtasks yet',
+        'add_subtask' => 'Add subtask',
+        'add_subtask_hint' => 'Break this task down into smaller pieces. The parent waits for every child before it can be marked Done.',
+        'priorities'  => [
+            'urgent' => 'Urgent',
+            'high'   => 'High',
+            'normal' => 'Normal',
+            'low'    => 'Low',
+        ],
+        'categories'  => [
+            'docs'           => 'Docs',
+            'webpage'        => 'Webpage',
+            'model_3d'       => '3D model',
+            'administration' => 'Administration',
+            'hardware'       => 'Hardware',
+            'software'       => 'Software',
+            'outreach'       => 'Outreach',
+            'other'          => 'Other',
+        ],
     ],
 
     'applications' => [
@@ -226,6 +252,10 @@ return [
         'positions'      => 'Positions',
         'photo'          => 'Photo',
         'linked_user'    => 'Linked user',
+        'discord'        => 'Discord',
+        'discord_help'   => 'The user\'s Discord handle (without the @). Used for notifications and team coordination.',
+        'private_email'  => 'Private email',
+        'private_email_help' => 'A non-EVRST address we can reach the team member at outside the panel.',
     ],
 
     'about' => [

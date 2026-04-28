@@ -82,6 +82,39 @@ class TaskForm
                     ->displayFormat('d M Y')
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_due_date'))
                     ->columnSpan(['default' => 12, 'md' => 4]),
+                Select::make('priority')
+                    ->label(__('admin.tasks.priority'))
+                    ->options(fn () => collect(Task::priorities())
+                        ->mapWithKeys(fn ($p) => [$p => __('admin.tasks.priorities.' . $p)])
+                        ->all())
+                    ->default(Task::PRIORITY_NORMAL)
+                    ->required()
+                    ->native(false)
+                    ->columnSpan(['default' => 12, 'md' => 4]),
+                Select::make('category')
+                    ->label(__('admin.tasks.category'))
+                    ->options(fn () => collect(Task::categories())
+                        ->mapWithKeys(fn ($c) => [$c => __('admin.tasks.categories.' . $c)])
+                        ->all())
+                    ->searchable()
+                    ->native(false)
+                    ->placeholder(__('admin.tasks.no_category'))
+                    ->columnSpan(['default' => 12, 'md' => 4]),
+                Select::make('parent_task_id')
+                    ->label(__('admin.tasks.parent'))
+                    ->options(function ($record) {
+                        $q = Task::query()->orderBy('title');
+                        if ($record) {
+                            // Don't let a task pick itself or any descendant.
+                            $q->where('id', '!=', $record->id);
+                        }
+                        return $q->pluck('title', 'id')->all();
+                    })
+                    ->searchable()
+                    ->native(false)
+                    ->placeholder(__('admin.tasks.no_parent'))
+                    ->helperText(__('admin.tasks.parent_help'))
+                    ->columnSpan(['default' => 12, 'md' => 8]),
                 TextInput::make('position')
                     ->label(__('admin.tasks.position'))
                     ->numeric()

@@ -185,6 +185,15 @@
             width: 4px;
             border-top-left-radius: 12px; border-bottom-left-radius: 12px;
         }
+        .kanban-card__priority {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 9999px;
+            margin-right: .35rem;
+            vertical-align: middle;
+            box-shadow: 0 0 0 2px rgba(255,255,255,.7);
+        }
+        .dark .kanban-card__priority { box-shadow: 0 0 0 2px rgba(30,41,59,.7); }
         .kanban-card__title {
             font-size: .9rem;
             font-weight: 600;
@@ -292,12 +301,26 @@
 
                 <div class="kanban-col__list" data-status="{{ $col['key'] }}">
                     @forelse ($col['tasks'] as $task)
+                        @php
+                            $priorityColor = match ($task->priority) {
+                                \App\Models\Task::PRIORITY_URGENT => '#ef4444',
+                                \App\Models\Task::PRIORITY_HIGH   => '#f59e0b',
+                                \App\Models\Task::PRIORITY_LOW    => '#94a3b8',
+                                default                           => '#6366f1',
+                            };
+                            $childCount = $task->children_count ?? $task->children()->count();
+                        @endphp
                         <div class="kanban-card" data-task-id="{{ $task->id }}">
                             <span class="kanban-card__accent" style="background: {{ $col['accent'] }}"></span>
                             <a
                                 href="{{ \App\Filament\Resources\Tasks\TaskResource::getUrl('edit', ['record' => $task->id]) }}"
                                 class="kanban-card__open"
                             >{{ __('admin.tasks.open') }} ↗</a>
+                            <span
+                                class="kanban-card__priority"
+                                style="background: {{ $priorityColor }};"
+                                title="{{ __('admin.tasks.priority') }}: {{ __('admin.tasks.priorities.' . ($task->priority ?? 'normal')) }}"
+                            ></span>
                             <a
                                 href="{{ \App\Filament\Resources\Tasks\TaskResource::getUrl('edit', ['record' => $task->id]) }}"
                                 class="kanban-card__title"
@@ -309,6 +332,18 @@
                                 @if ($task->due_date)
                                     <span class="kanban-card__chip kanban-card__chip--due">
                                         🗓 {{ $task->due_date->format('d M Y') }}
+                                    </span>
+                                @endif
+
+                                @if ($task->category)
+                                    <span class="kanban-card__chip">
+                                        {{ __('admin.tasks.categories.' . $task->category) }}
+                                    </span>
+                                @endif
+
+                                @if ($childCount > 0)
+                                    <span class="kanban-card__chip" title="{{ __('admin.tasks.subtasks') }}">
+                                        ⤷ {{ $childCount }}
                                     </span>
                                 @endif
 

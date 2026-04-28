@@ -76,6 +76,7 @@ class KanbanBoard extends Page
     public function getColumns(): array
     {
         $query = Task::with(['assignees', 'supervisor'])
+            ->withCount('children')
             ->orderBy('position')
             ->orderBy('id');
 

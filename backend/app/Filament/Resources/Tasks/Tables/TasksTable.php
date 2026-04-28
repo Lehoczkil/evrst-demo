@@ -24,12 +24,41 @@ class TasksTable
             ->groupingSettingsHidden()
             ->defaultSort('position')
             ->columns([
+                TextColumn::make('priority')
+                    ->label(__('admin.tasks.priority'))
+                    ->badge()
+                    ->formatStateUsing(fn (?string $s) => $s ? __('admin.tasks.priorities.' . $s) : '—')
+                    ->color(fn (?string $s) => match ($s) {
+                        Task::PRIORITY_URGENT => 'danger',
+                        Task::PRIORITY_HIGH   => 'warning',
+                        Task::PRIORITY_LOW    => 'gray',
+                        default               => 'primary',
+                    }),
                 TextColumn::make('title')
                     ->label(__('admin.common.title'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
                     ->wrap(),
+                TextColumn::make('category')
+                    ->label(__('admin.tasks.category'))
+                    ->badge()
+                    ->color('gray')
+                    ->formatStateUsing(fn (?string $s) => $s ? __('admin.tasks.categories.' . $s) : '—')
+                    ->toggleable(),
+                TextColumn::make('parent.title')
+                    ->label(__('admin.tasks.parent'))
+                    ->limit(28)
+                    ->color('gray')
+                    ->placeholder('—')
+                    ->toggleable(),
+                TextColumn::make('children_count')
+                    ->label(__('admin.tasks.subtasks'))
+                    ->counts('children')
+                    ->badge()
+                    ->color(fn ($state) => $state > 0 ? 'primary' : 'gray')
+                    ->formatStateUsing(fn ($state) => $state > 0 ? (string) $state : '—')
+                    ->toggleable(),
                 TextColumn::make('supervisor.name')
                     ->label(__('admin.tasks.supervisor'))
                     ->badge()
@@ -62,6 +91,16 @@ class TasksTable
                 SelectFilter::make('status')
                     ->label(__('admin.common.status'))
                     ->options(fn () => collect(Task::statuses())->mapWithKeys(fn ($s) => [$s => __('admin.tasks.statuses.' . $s)])->all()),
+                SelectFilter::make('priority')
+                    ->label(__('admin.tasks.priority'))
+                    ->options(fn () => collect(Task::priorities())
+                        ->mapWithKeys(fn ($p) => [$p => __('admin.tasks.priorities.' . $p)])
+                        ->all()),
+                SelectFilter::make('category')
+                    ->label(__('admin.tasks.category'))
+                    ->options(fn () => collect(Task::categories())
+                        ->mapWithKeys(fn ($c) => [$c => __('admin.tasks.categories.' . $c)])
+                        ->all()),
                 SelectFilter::make('supervisor_id')
                     ->label(__('admin.tasks.supervisor'))
                     ->options(fn () => \Illuminate\Support\Facades\Cache::remember(

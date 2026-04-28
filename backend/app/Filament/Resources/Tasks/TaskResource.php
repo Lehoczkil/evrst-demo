@@ -7,6 +7,7 @@ use App\Filament\Resources\Tasks\Pages\CreateTask;
 use App\Filament\Resources\Tasks\Pages\EditTask;
 use App\Filament\Resources\Tasks\Pages\KanbanBoard;
 use App\Filament\Resources\Tasks\Pages\ListTasks;
+use App\Filament\Resources\Tasks\RelationManagers\ChildrenRelationManager;
 use App\Filament\Resources\Tasks\RelationManagers\CommentsRelationManager;
 use App\Filament\Resources\Tasks\RelationManagers\ProofsRelationManager;
 use App\Filament\Resources\Tasks\Schemas\TaskForm;
@@ -53,6 +54,7 @@ class TaskResource extends Resource
     public static function getRelations(): array
     {
         return [
+            ChildrenRelationManager::class,
             ProofsRelationManager::class,
             CommentsRelationManager::class,
         ];

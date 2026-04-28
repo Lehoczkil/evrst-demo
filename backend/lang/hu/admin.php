@@ -184,6 +184,32 @@ return [
         'proof_required_for_done' => 'A feladatot csak akkor lehet Tesztelés vagy Kész állapotba átmozgatni, ha legalább egy dokumentáció csatolva van.',
         'transition_denied'       => 'Ezt a feladatot nem tudod ebbe az oszlopba áthelyezni.',
         'transition_denied_body'  => ':count kártya visszacsúszott — a megbízottak csak Tesztelésre mozgathatnak (csatolt bizonyítékkal); kész állapotba csak a felelős teheti.',
+        'priority'    => 'Prioritás',
+        'category'    => 'Kategória',
+        'parent'      => 'Szülő feladat',
+        'parent_help' => 'Egy gyermek feladatot csak akkor lehet Késznek jelölni, ha a szülő is Kész — a szülő pedig automatikusan átvált, ha minden gyermeke eléri a Tesztelés / Kész állapotot.',
+        'no_parent'   => 'Nincs szülő (legfelső szint)',
+        'no_category' => 'Nincs kategória',
+        'subtasks'    => 'Alfeladatok',
+        'no_subtasks' => 'Még nincsenek alfeladatok',
+        'add_subtask' => 'Alfeladat hozzáadása',
+        'add_subtask_hint' => 'Bontsd a feladatot kisebb darabokra. A szülő addig vár, amíg minden gyermek el nem készül.',
+        'priorities'  => [
+            'urgent' => 'Sürgős',
+            'high'   => 'Magas',
+            'normal' => 'Normál',
+            'low'    => 'Alacsony',
+        ],
+        'categories'  => [
+            'docs'           => 'Dokumentáció',
+            'webpage'        => 'Weboldal',
+            'model_3d'       => '3D modell',
+            'administration' => 'Adminisztráció',
+            'hardware'       => 'Hardver',
+            'software'       => 'Szoftver',
+            'outreach'       => 'Külkapcsolat',
+            'other'          => 'Egyéb',
+        ],
     ],
 
     'applications' => [
@@ -226,6 +252,10 @@ return [
         'positions'      => 'Pozíciók',
         'photo'          => 'Fénykép',
         'linked_user'    => 'Kapcsolt felhasználó',
+        'discord'        => 'Discord',
+        'discord_help'   => 'A tag Discord neve (a @ nélkül). Értesítésekhez és csapatkommunikációhoz használjuk.',
+        'private_email'  => 'Privát e-mail',
+        'private_email_help' => 'Egy nem-EVRST cím, ahol a panelen kívül elérhető a tag.',
     ],
 
     'about' => [
