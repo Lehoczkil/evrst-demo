@@ -561,7 +561,18 @@ html:not(.dark) .fi-body::before {
     gap: .25rem;
 }
 .evrst-countdown.evrst-standby .evrst-countdown-digits {
-    color: var(--evrst-text-dim);
+    color: var(--evrst-text-muted);
+    opacity: .85;
+}
+
+/* Filament wraps every widget in `.fi-wi`. The countdown owns its full
+   chrome, so strip the wrapper's padding/border for that one widget. */
+.fi-wi:has(> .evrst-countdown),
+.fi-wi:has(> * > .evrst-countdown) {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
 }
 .evrst-countdown .evrst-countdown-digits .sep { color: var(--evrst-text-dim); font-weight: 400; }
 .evrst-countdown .evrst-countdown-digits .unit {

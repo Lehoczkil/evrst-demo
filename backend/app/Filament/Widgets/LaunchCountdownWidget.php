@@ -19,6 +19,8 @@ class LaunchCountdownWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
+    public function getColumnSpan(): int|string|array { return 'full'; }
+
     protected static ?int $sort = -10;
 
     public function getNextEvent(): ?CalendarEvent
