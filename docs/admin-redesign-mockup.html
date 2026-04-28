@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EVRST admin · redesign mockup</title>
+<link rel="preconnect" href="https://rsms.me/" />
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+    --bg: #0a0c10;
+    --bg-grid: rgba(255,255,255,.025);
+    --bg-grid-strong: rgba(255,255,255,.04);
+    --surface: rgba(20,24,33,.45);
+    --surface-solid: #11141a;
+    --surface-raised: rgba(28,33,43,.55);
+    --glass: rgba(20,24,33,.45);
+    --glass-strong: rgba(20,24,33,.65);
+    --border: rgba(255,255,255,.08);
+    --border-strong: rgba(255,255,255,.16);
+    --border-amber: rgba(251,191,36,.45);
+    --text: #e8ebf2;
+    --text-muted: #9aa3b3;
+    --text-dim: #6b7383;
+    --accent: #fbbf24;
+    --accent-text: #1a1306;
+    --accent-soft: rgba(251,191,36,.12);
+    --danger: #f87171;
+    --success: #34d399;
+    --info: #38bdf8;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    --sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --r-sm: 4px;
+    --r-md: 6px;
+    --r-lg: 8px;
+    --blur: blur(22px) saturate(140%);
+}
+:root.light {
+    --bg: #f5f6f8;
+    --bg-grid: rgba(15,23,42,.04);
+    --bg-grid-strong: rgba(15,23,42,.06);
+    --surface: rgba(255,255,255,.65);
+    --surface-solid: #ffffff;
+    --surface-raised: rgba(255,255,255,.85);
+    --glass: rgba(255,255,255,.6);
+    --glass-strong: rgba(255,255,255,.75);
+    --border: rgba(15,23,42,.08);
+    --border-strong: rgba(15,23,42,.18);
+    --border-amber: rgba(245,158,11,.5);
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #94a3b8;
+    --accent: #f59e0b;
+    --accent-text: #ffffff;
+    --accent-soft: rgba(245,158,11,.12);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+    font-family: var(--sans);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text);
+    background:
+        linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        var(--bg);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+@supports (font-variation-settings: normal) {
+    body { font-family: 'Inter var', 'Inter', system-ui, sans-serif; }
+}
+
+.mono { font-family: var(--mono); font-feature-settings: 'zero', 'ss01'; }
+
+/* Page surface — graphite with the blueprint grid + a soft amber wash
+   bleeding in from the top-right so glass surfaces have something
+   coloured to bend. */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(251,191,36,.06), transparent 70%),
+        radial-gradient(ellipse 80% 50% at 0% 100%, rgba(56,189,248,.04), transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ─────────── Mockup chrome ─────────── */
+
+.mockup-banner {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: .75rem 1.25rem;
+    background: var(--glass-strong);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+.mockup-banner .toggle {
+    margin-left: auto;
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.mockup-banner .toggle button {
+    background: transparent; border: 0; cursor: pointer;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .08em;
+    padding: 4px 12px;
+}
+.mockup-banner .toggle button.active {
+    background: var(--accent);
+    color: var(--accent-text);
+}
+.mockup-banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.mockup-banner a { color: var(--text-muted); text-decoration: none; transition: color .12s ease; }
+.mockup-banner a:hover { color: var(--text); }
+
+.screen {
+    margin: 4rem auto;
+    max-width: 1680px;
+    padding: 0 1.5rem;
+}
+.screen-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: .75rem;
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+}
+.screen-label .num {
+    color: var(--accent);
+    border: 1px solid var(--border-amber);
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+}
+.screen-frame {
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 24px 80px rgba(0,0,0,.35);
+}
+
+/* ─────────── Topbar + sidebar shared ─────────── */
+
+.app-topbar {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 1.25rem;
+    gap: 1rem;
+    background: var(--glass-strong);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border-bottom: 1px solid var(--border);
+}
+.app-topbar .brand {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    height: 100%;
+}
+.brand-logo {
+    height: 24px;
+    width: auto;
+    display: block;
+}
+.login-card .brand-logo { height: 32px; }
+.app-topbar .brand-mark {
+    width: 22px; height: 22px;
+    background: var(--accent);
+    border-radius: var(--r-sm);
+    display: grid; place-items: center;
+    color: var(--accent-text);
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+.app-topbar .search {
+    flex: 1;
+    max-width: 360px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    padding: 0 .85rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    display: flex; align-items: center; gap: .5rem;
+    background: rgba(255,255,255,.02);
+}
+.app-topbar .search:focus-within { border-color: var(--border-amber); box-shadow: 0 0 0 3px var(--accent-soft); }
+.app-topbar .spacer { flex: 1; }
+.app-topbar .pill-group {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.app-topbar .pill-group button {
+    background: transparent;
+    border: 0;
+    padding: 4px 12px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: all .12s ease;
+}
+.app-topbar .pill-group button.active {
+    background: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+}
+.app-topbar .icon-btn {
+    width: 32px; height: 32px;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    display: grid; place-items: center;
+    cursor: pointer;
+    transition: all .12s ease;
+}
+.app-topbar .icon-btn:hover { color: var(--text); border-color: var(--border); }
+.app-topbar .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2a3140, #161a22);
+    border: 1px solid var(--border);
+    display: grid; place-items: center;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text);
+}
+
+.app-shell { display: grid; grid-template-columns: 220px 1fr; min-height: 540px; }
+.app-sidebar {
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border-right: 1px solid var(--border);
+    padding: 1rem .75rem;
+}
+.nav-group {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 1rem .5rem .5rem;
+}
+.nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .5rem .65rem;
+    height: 36px;
+    border-radius: var(--r-md);
+    color: var(--text-muted);
+    font-size: 0.825rem;
+    cursor: pointer;
+    transition: all .12s ease;
+}
+.nav-item:hover { background: rgba(255,255,255,.03); color: var(--text); }
+.nav-item.active {
+    color: var(--text);
+    background: var(--accent-soft);
+}
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: -2px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+}
+.nav-item .ico { width: 16px; height: 16px; opacity: .8; }
+.nav-item .help-pill {
+    margin-left: auto;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: grid; place-items: center;
+    color: var(--text-dim);
+    font-size: 0.6rem;
+    font-weight: 600;
+}
+
+.app-main, .app-content {
+    --container: 1440px;
+    padding: 2rem 2.5rem;
+    background:
+        linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        rgba(10,12,16,.45);
+}
+.app-main > *, .app-content > * { max-width: var(--container); margin-left: auto; margin-right: auto; }
+.page-head {
+    display: flex;
+    align-items: baseline;
+    gap: .65rem;
+    margin-bottom: 1.25rem;
+}
+.page-head h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0;
+}
+.page-head .help-pill {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: inline-grid; place-items: center;
+    color: var(--text-dim);
+    font-size: 0.6rem;
+    font-weight: 600;
+}
+.page-head .crumb {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-left: auto;
+}
+
+/* ─────────── Countdown ─────────── */
+
+.countdown {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background:
+        linear-gradient(var(--bg-grid-strong) 1px, transparent 1px) 0 0 / 16px 16px,
+        linear-gradient(90deg, var(--bg-grid-strong) 1px, transparent 1px) 0 0 / 16px 16px,
+        var(--glass-strong);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+.countdown::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 90% 50%, rgba(251,191,36,.06), transparent 50%);
+    pointer-events: none;
+}
+.countdown .label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: .35rem;
+}
+.countdown .digits {
+    font-family: var(--mono);
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: baseline;
+    gap: .25rem;
+}
+.countdown .digits .sep { color: var(--text-dim); font-weight: 400; }
+.countdown .digits .unit { font-size: 0.7rem; color: var(--text-muted); margin-left: -.05rem; margin-right: .2rem; align-self: flex-end; padding-bottom: .55rem; }
+.countdown .digits .seg { display: inline-block; min-width: 2.2ch; text-align: center; }
+.countdown .meta { margin-left: auto; text-align: right; }
+.countdown .meta .ev {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--text);
+}
+.countdown .meta .sub {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: .25rem;
+}
+
+/* tick flip */
+@keyframes tickFlip {
+    0% { transform: translateY(-30%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+.countdown .digits .seg.flip { animation: tickFlip 220ms cubic-bezier(.16,1,.3,1); }
+
+/* ─────────── Cards / tiles ─────────── */
+
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+.tile {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    padding: 1.25rem;
+    transition: border-color .12s ease;
+}
+.tile.glass {
+    background: var(--glass-strong);
+}
+.tile:hover { border-color: var(--border-strong); }
+.tile h3 {
+    margin: 0 0 .9rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: .5rem;
+}
+.tile h3 .count {
+    font-family: var(--mono);
+    color: var(--text-dim);
+    font-weight: 500;
+    letter-spacing: .04em;
+}
+.tile .big {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: baseline;
+    gap: .65rem;
+    margin-bottom: .5rem;
+}
+.tile .big .delta { font-size: 0.75rem; color: var(--success); font-weight: 500; }
+.tile .row {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .5rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.825rem;
+}
+.tile .row:last-child { border-bottom: 0; }
+.tile .row .who { color: var(--text); }
+.tile .row .meta { font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted); margin-left: auto; }
+.tile .row .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.dot-urgent { background: var(--accent); box-shadow: 0 0 6px var(--accent-soft); }
+.dot-high { background: var(--danger); }
+.dot-normal { background: var(--info); }
+.dot-low { background: var(--text-dim); }
+.dot-success { background: var(--success); }
+
+.quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+.qa {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    padding: .55rem .75rem;
+    border-radius: var(--r-md);
+    font-size: 0.8rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex; align-items: center; gap: .5rem;
+    transition: all .12s ease;
+}
+.qa:hover { border-color: var(--border-strong); background: var(--surface-raised); }
+.qa .plus { color: var(--accent); font-family: var(--mono); }
+
+/* ─────────── Tables ─────────── */
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: .75rem;
+}
+.toolbar .legend {
+    margin-left: auto;
+    display: flex;
+    gap: 1rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.toolbar .legend > span { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
+.toolbar .legend > span:hover { color: var(--text); }
+.toolbar .filter-pill {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+}
+.toolbar .filter-pill.active {
+    border-color: var(--border-amber);
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.table {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+}
+.table .thead, .table .tr {
+    display: grid;
+    grid-template-columns: 1.4fr 90px 110px 130px 110px 110px;
+    gap: .75rem;
+    padding: .85rem 1.1rem;
+    align-items: center;
+}
+.table .thead {
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.table .tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .12s ease;
+}
+.table .tr:last-child { border-bottom: 0; }
+.table .tr:hover { background: var(--surface-raised); }
+.table .title { font-weight: 500; display: flex; align-items: center; gap: .55rem; }
+.table .meta { font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); }
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+.pill.todo { color: var(--text-muted); }
+.pill.progress { color: var(--accent); border-color: var(--border-amber); background: var(--accent-soft); }
+.pill.testing { color: var(--info); border-color: rgba(56,189,248,.35); background: rgba(56,189,248,.08); }
+.pill.done { color: var(--success); border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.08); }
+
+/* ─────────── Kanban ─────────── */
+
+.kanban {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+.kanban .col {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    padding: .85rem;
+    min-height: 280px;
+}
+.kanban .col-head {
+    display: flex; align-items: center; gap: .5rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: .85rem;
+}
+.kanban .col-head .count {
+    margin-left: auto;
+    color: var(--text-dim);
+}
+.kanban .card {
+    background: var(--surface-raised);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: .75rem;
+    margin-bottom: .65rem;
+    cursor: grab;
+    transition: all .12s ease;
+}
+.kanban .card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+.kanban .card .ttl { font-size: 0.825rem; font-weight: 600; margin-bottom: .35rem; display: flex; align-items: center; gap: .5rem; }
+.kanban .card .meta {
+    display: flex; gap: .5rem; align-items: center; margin-top: .5rem;
+    font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted);
+}
+.kanban .card .due { color: var(--accent); }
+
+/* ─────────── Sticky save bar (tasks edit) ─────────── */
+
+.form-section {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+.form-section h2 {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.field { display: flex; flex-direction: column; gap: .35rem; }
+.field label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.field input, .field select, .field textarea {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.875rem;
+    padding: .5rem 0;
+    outline: 0;
+    transition: all .12s ease;
+}
+.field input:focus { border-bottom-color: var(--accent); box-shadow: 0 3px 0 -1px var(--accent-soft); }
+
+.save-bar {
+    position: sticky;
+    bottom: 0;
+    margin: 1rem -1.5rem -1.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--glass-strong);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 1rem;
+}
+.save-bar .status-pill {
+    border: 1px solid var(--border-amber);
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: .08em;
+    display: inline-flex; align-items: center; gap: .5rem;
+}
+.save-bar .status-pill .d { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.save-bar .spacer { flex: 1; }
+.btn {
+    border: 1px solid var(--border);
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: var(--r-md);
+    font-size: 0.825rem;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all .12s ease;
+}
+.btn:hover { border-color: var(--border-strong); }
+.btn.primary {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+.btn.primary:hover { filter: brightness(1.05); }
+
+/* ─────────── Calendar ─────────── */
+
+.cal-toolbar {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: .75rem 1rem;
+    margin-bottom: 1rem;
+}
+.cal-toolbar .month { font-weight: 600; font-size: 1rem; }
+.cal-toolbar .nav { display: flex; gap: .25rem; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: .75rem; overflow: hidden; }
+.cal-cell {
+    background: var(--surface);
+    min-height: 96px;
+    padding: .5rem;
+    position: relative;
+    transition: background .12s ease;
+}
+.cal-cell:hover { background: var(--surface-raised); }
+.cal-cell .dn { font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted); }
+.cal-cell.today { box-shadow: inset 0 0 0 2px var(--border-amber); }
+.cal-cell.today .dn { color: var(--accent); font-weight: 600; }
+.cal-cell.muted .dn { color: var(--text-dim); }
+.cal-event {
+    margin-top: .35rem;
+    padding: .15rem .45rem;
+    border-left: 3px solid var(--info);
+    font-size: 0.7rem;
+    color: var(--text);
+    line-height: 1.3;
+}
+.cal-event.amber { border-left-color: var(--accent); }
+.cal-event.success { border-left-color: var(--success); }
+.cal-event.danger { border-left-color: var(--danger); }
+.cal-day-headers { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; margin-bottom: .25rem; }
+.cal-day-headers > div { font-family: var(--mono); font-size: 0.6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); padding: .35rem .5rem; }
+
+/* ─────────── Login ─────────── */
+
+.login-stage {
+    min-height: 540px;
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(circle at 30% 20%, rgba(251,191,36,.06), transparent 40%),
+        linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        var(--bg);
+}
+.login-card {
+    width: 380px;
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+.login-card .logo {
+    display: flex; align-items: center; gap: .65rem;
+    font-weight: 700; letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+}
+.login-card .sub { color: var(--text-muted); font-size: 0.825rem; margin-bottom: 1.5rem; }
+.login-card .field { margin-bottom: 1rem; }
+.login-card .btn { width: 100%; }
+
+/* ─────────── Onshape mockup ─────────── */
+
+.onshape-stage {
+    height: 360px;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(56,189,248,.05), transparent 50%),
+        linear-gradient(var(--bg-grid-strong) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(90deg, var(--bg-grid-strong) 1px, transparent 1px) 0 0 / 32px 32px,
+        var(--bg);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    position: relative;
+    display: grid; place-items: center;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    overflow: hidden;
+}
+.onshape-stage::before {
+    content: '';
+    position: absolute;
+    width: 220px; height: 320px;
+    background: linear-gradient(180deg, #2a3140 0%, #11141a 100%);
+    border-radius: 110px 110px 24px 24px;
+    box-shadow: inset -40px 0 60px rgba(0,0,0,.5), 0 12px 40px rgba(0,0,0,.4);
+    transform: rotate(-8deg);
+    opacity: .9;
+}
+.onshape-stage::after {
+    content: '';
+    position: absolute;
+    bottom: 24px; left: 50%;
+    width: 30px; height: 30px;
+    transform: translateX(-50%) rotate(-8deg);
+    background: radial-gradient(circle, var(--accent) 0%, var(--danger) 60%, transparent 80%);
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: .8;
+}
+.onshape-chip {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .08em;
+    display: flex; align-items: center; gap: .35rem;
+    z-index: 2;
+}
+.onshape-status {
+    position: absolute;
+    bottom: 12px; left: 12px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: .04em;
+    z-index: 2;
+}
+
+/* ─────────── Activity timeline ─────────── */
+
+.timeline {
+    position: relative;
+    padding-left: 1.5rem;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: var(--border);
+}
+.timeline .ev {
+    position: relative;
+    padding: .65rem 0 .65rem .25rem;
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 1rem;
+    font-size: 0.825rem;
+}
+.timeline .ev::before {
+    content: '';
+    position: absolute;
+    left: -19px; top: 16px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+}
+.timeline .ev.amber::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 6px var(--accent-soft); }
+.timeline .ev .ts { font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted); }
+.timeline .ev .who { color: var(--text); }
+.timeline .ev .verb { color: var(--text-muted); }
+.timeline .ev .target { color: var(--accent); font-family: var(--mono); }
+
+footer {
+    margin: 4rem auto 6rem;
+    max-width: 1320px;
+    padding: 2rem 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<div class="mockup-banner">
+    <span class="dot"></span>
+    <span>EVRST admin · redesign mockup</span>
+    <span style="color: var(--text-dim);">·</span>
+    <span style="color: var(--text-dim);">mission console at night</span>
+    <div class="toggle" id="theme-toggle">
+        <button data-theme="dark" class="active">DARK</button>
+        <button data-theme="light">LIGHT</button>
+    </div>
+</div>
+
+<!-- ─────────── 1 · LOGIN ─────────── -->
+<section class="screen">
+    <div class="screen-label"><span class="num">01</span> LOGIN — soft amber radial + blueprint grid</div>
+    <div class="screen-frame">
+        <div class="login-stage">
+            <div class="login-card">
+                <div class="logo">
+                    <span class="brand-mark" style="display:inline-grid;place-items:center;width:24px;height:24px;background:var(--accent);border-radius:6px;color:var(--accent-text);font-family:var(--mono);font-weight:700;font-size:.75rem;">E</span>
+                    <span>EVRST <span style="color:var(--text-dim);font-weight:400;">admin</span></span>
+                </div>
+                <div class="sub">Sign in to the mission console.</div>
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" value="klabacsek.balint@gmail.com" />
+                </div>
+                <div class="field" style="margin-bottom: 1.5rem;">
+                    <label>Password</label>
+                    <input type="password" value="••••••••••••" />
+                </div>
+                <button class="btn primary">Sign in</button>
+                <div style="text-align:center;margin-top:1rem;"><a href="#" style="font-family:var(--mono);font-size:.7rem;color:var(--text-dim);text-decoration:none;letter-spacing:.04em;">FORGOT PASSWORD →</a></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────── 2 · DASHBOARD ─────────── -->
+<section class="screen">
+    <div class="screen-label"><span class="num">02</span> DASHBOARD — T-countdown + 2×3 tile grid</div>
+    <div class="screen-frame">
+        <div class="app-topbar">
+            <div class="brand">
+                <svg class="brand-logo" viewBox="0 0 865 302" xmlns="http://www.w3.org/2000/svg" aria-label="EVRST">
+                    <g fill="var(--accent)">
+                        <path d="M433.279 199.68C427.917 193.85 421.636 192.357 414.174 192.817C404.776 193.396 395.315 192.956 384.894 192.956C389.576 186.449 393.581 180.586 397.975 175.031C398.839 173.94 401.198 173.706 402.888 173.646C419.696 173.046 436.524 172.824 453.313 171.897C458.512 171.61 463.711 169.801 468.724 168.131C473.127 166.665 474.948 163.074 475.063 158.378C475.177 153.713 473.036 150.274 468.978 149.059C461.863 146.929 454.551 144.745 447.208 144.246C433.927 143.342 420.561 143.489 407.236 143.648C405.141 143.674 402.452 145.606 401.09 147.438C381.834 173.353 362.715 199.37 343.697 225.46C341.194 228.894 338.286 229.645 334.184 230.209C324.084 231.597 318.36 227.441 312.913 219.159C292.971 188.841 272.24 159.042 251.817 129.041C251.098 127.986 250.491 126.855 249.395 125.033C255.531 125.033 260.968 124.729 266.333 125.214C267.994 125.364 269.808 127.41 270.966 129.012C289.985 155.338 308.909 181.733 327.86 208.108C328.909 209.568 330.01 210.99 331.469 212.94C339.307 202.108 346.809 191.746 354.307 181.381C367.385 163.3 380.425 145.19 393.606 127.184C394.635 125.779 396.661 124.179 398.194 124.208C419.001 124.605 439.82 124.945 460.594 126.074C466.922 126.418 473.36 128.519 479.33 130.873C491.422 135.643 497.79 145.857 497.58 158.571C497.34 173.047 491.356 182.115 478.02 186.688C471.625 188.881 464.795 189.802 458.168 191.322C457.433 191.491 456.734 191.816 455.292 192.326C470.721 204.547 485.631 216.357 501.577 228.988C490.68 228.988 481.091 229.088 471.509 228.88C470.08 228.849 468.555 227.534 467.288 226.54C456.016 217.698 444.791 208.794 433.279 199.68Z"/>
+                        <path d="M160 125.18C184.163 125.18 207.826 125.265 231.488 125.091C235.12 125.064 237.293 126.205 239.136 129.239C242.203 134.289 245.641 139.114 249.467 144.849C207.877 144.849 167.323 144.849 126.551 144.849C126.551 150.784 126.551 156.217 126.551 162.13C157.659 162.13 188.588 162.13 219.851 162.13C219.851 168.846 219.851 175.09 219.851 181.782C188.878 181.782 157.959 181.782 126.686 181.782C126.686 191.432 126.686 200.647 126.686 210.572C167.942 210.572 209.138 210.572 250.496 210.572C250.496 217.365 250.496 223.452 250.496 229.79C202.671 229.79 155.098 229.79 107.258 229.79C107.258 195.082 107.258 160.489 107.258 125.18C124.649 125.18 142.075 125.18 160 125.18Z"/>
+                        <path d="M625.705 157.617C624.784 157.578 624.034 157.741 623.825 157.476C615.965 147.512 604.395 146.237 593.221 145.47C572.766 144.065 552.251 144.195 531.965 148.004C529.215 148.521 526.258 149.16 523.989 150.647C522.006 151.947 519.654 154.535 519.678 156.527C519.702 158.527 522.115 161.693 524.083 162.261C531.217 164.317 538.555 166.441 545.905 166.82C563.699 167.738 581.561 167.339 599.361 168.187C607.261 168.564 615.326 169.858 622.884 172.158C641.336 177.774 649.214 196.937 639.722 212.184C634.125 221.175 624.951 224.75 615.149 226.927C595.894 231.203 576.408 230.321 556.928 229.317C542.652 228.581 528.845 226.018 516.199 218.887C507.572 214.022 501.858 207.228 501.103 196.3C507.096 196.3 512.865 196.279 518.633 196.331C519.232 196.337 520.062 196.602 520.39 197.041C526.298 204.969 535.275 206.953 544.056 208.281C566.397 211.661 588.845 212.18 611.177 207.943C614.362 207.339 617.602 206.01 620.337 204.266C625.405 201.034 625.477 194.95 620.138 192.191C615.837 189.969 610.772 188.41 605.96 188.147C591.166 187.339 576.332 187.262 561.512 186.963C548.014 186.691 534.513 186.472 521.523 182.112C519.327 181.375 517.171 180.462 515.102 179.421C506.576 175.135 506.978 174.697 507.549 165.419C507.981 158.407 506.448 151.288 506.059 144.202C505.96 142.388 506.301 139.482 507.433 138.847C513.59 135.388 519.761 130.959 526.469 129.653C554.791 124.139 583.327 123.279 611.817 128.981C621 130.819 629.177 135.077 635.883 141.368C640.077 145.303 642.004 151.048 642.353 157.619C636.701 157.619 631.415 157.619 625.705 157.617Z"/>
+                        <path d="M668 125.065C707.615 125.065 746.73 125.065 786.07 125.065C786.07 131.707 786.07 137.806 786.07 144.391C764.254 144.391 742.652 144.391 720.45 144.391C720.45 173.075 720.45 201.284 720.45 229.745C713.759 229.745 707.671 229.745 701.074 229.745C701.074 201.45 701.074 173.211 701.074 144.443C688.465 144.443 676.318 143.885 664.254 144.637C656.11 145.145 650.314 143.001 645.737 136.19C643.174 132.376 639.498 129.309 635.541 125.065C646.765 125.065 657.132 125.065 668 125.065Z"/>
+                    </g>
+                    <g fill="var(--text)">
+                        <path d="M546.029 28.8233C527.707 28.4196 509.384 27.9937 491.061 27.6163C427.877 26.3147 364.74 27.4908 301.719 32.2548C246.883 36.4002 192.394 43.1704 139.259 58.0829C107.9 66.884 77.5724 78.1992 50.9733 97.6408C30.6372 112.505 15.2815 131.046 9.5108 156.231C4.42169 178.441 8.12723 199.924 15.5668 220.963C24.9156 247.401 39.4636 271 55.7808 293.601C56.7485 294.942 57.6926 296.299 58.9322 298.051C57.3809 299.268 55.8801 300.446 53.9008 301.999C51.2663 298.354 48.7139 294.943 46.2873 291.444C28.9566 266.461 13.6917 240.415 5.63302 210.774C-3.61417 176.763 -0.586061 144.775 21.9586 116.264C35.11 99.6327 52.027 87.6397 70.5593 77.7752C101.516 61.2975 134.803 51.5099 168.843 44.0447C212.841 34.3959 257.454 29.1743 302.324 25.7738C383.199 19.6445 464.156 20.0365 545.584 22.8778C546.026 25.2054 546.028 27.0143 546.029 28.8233Z"/>
+                        <path d="M546.171 28.9404C546.028 27.0144 546.026 25.2054 546.038 23.0126C546.232 22.4351 546.413 22.2413 546.83 21.7676C547.068 21.4876 547.053 21.3684 547.053 21.3684C538.563 16.9027 536.14 7.62962 529.332 0.485819C537.1 -0.044119 543.315 -0.689413 549.276 3.17283C555.128 6.96403 561.902 9.42472 567.455 13.5635C577.588 21.1152 589.009 19.0759 600.131 19.1133C637.285 19.2382 674.453 18.4744 711.587 19.3309C731.013 19.7789 750.379 22.8877 769.767 24.8478C770.807 24.9529 771.797 25.5491 772.736 26.9571C762.309 27.9483 751.88 28.921 741.455 29.9337C691.9 34.7477 642.248 31.3228 592.642 31.5401C583.618 31.5796 575.32 31.9954 567.734 37.6801C562.839 41.3488 556.825 43.5234 551.919 47.1801C545.68 51.8297 538.984 51.3375 530.118 50.7688C536.074 43.1175 541.251 36.4674 546.603 29.4706C546.777 29.124 546.667 28.9658 546.667 28.9658C546.667 28.9658 546.312 29.0575 546.171 28.9404Z"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="search">⌕ &nbsp; search tasks, events, members…</div>
+            <div class="spacer"></div>
+            <div class="pill-group">
+                <button class="active">EN</button>
+                <button>HU</button>
+            </div>
+            <button class="icon-btn" title="Help">?</button>
+            <button class="icon-btn" title="Theme">◐</button>
+            <div class="avatar">KB</div>
+        </div>
+        <div class="app-shell">
+            <aside class="app-sidebar">
+                <div class="nav-group">Workspace</div>
+                <div class="nav-item active">▣ &nbsp;Dashboard</div>
+                <div class="nav-item">◷ &nbsp;Calendar <span class="help-pill">?</span></div>
+                <div class="nav-item">⌗ &nbsp;Tasks <span class="help-pill">?</span></div>
+                <div class="nav-item">▦ &nbsp;Kanban</div>
+                <div class="nav-group">Studio</div>
+                <div class="nav-item">✎ &nbsp;Drawings <span class="help-pill">?</span></div>
+                <div class="nav-item">⬢ &nbsp;Onshape models <span class="help-pill">?</span></div>
+                <div class="nav-group">Site</div>
+                <div class="nav-item">◯ &nbsp;Sponsors</div>
+                <div class="nav-item">⚇ &nbsp;Team members</div>
+                <div class="nav-item">⓵ &nbsp;About</div>
+                <div class="nav-group">Membership</div>
+                <div class="nav-item">⚐ &nbsp;Applications</div>
+                <div class="nav-item">⚇ &nbsp;Users</div>
+                <div class="nav-item">▢ &nbsp;Roles</div>
+                <div class="nav-item">≡ &nbsp;Activity log</div>
+            </aside>
+            <main class="app-main">
+                <div class="page-head">
+                    <h1>Dashboard</h1>
+                    <span class="help-pill">?</span>
+                    <span class="crumb">/ admin / dashboard</span>
+                </div>
+
+                <div class="countdown">
+                    <div>
+                        <div class="label">T-minus to next launch</div>
+                        <div class="digits" id="countdown">
+                            <span class="seg" data-i="0">23</span><span class="unit">D</span>
+                            <span class="sep">:</span>
+                            <span class="seg" data-i="1">14</span><span class="unit">H</span>
+                            <span class="sep">:</span>
+                            <span class="seg" data-i="2">06</span><span class="unit">M</span>
+                            <span class="sep">:</span>
+                            <span class="seg" data-i="3">41</span><span class="unit">S</span>
+                        </div>
+                    </div>
+                    <div class="meta">
+                        <div class="ev">APOGEE-IV</div>
+                        <div class="sub">static fire · mátrafüred</div>
+                    </div>
+                </div>
+
+                <div class="tile-grid">
+                    <div class="tile glass">
+                        <h3>Pending applications <span class="count">· 7</span></h3>
+                        <div class="big">7 <span class="delta">+3 this week</span></div>
+                        <div class="row"><span class="dot dot-urgent"></span><span class="who">Anna Kovács</span><span class="meta">2H AGO</span></div>
+                        <div class="row"><span class="dot dot-normal"></span><span class="who">Péter Szabó</span><span class="meta">5H AGO</span></div>
+                        <div class="row"><span class="dot dot-normal"></span><span class="who">Réka Tóth</span><span class="meta">YESTERDAY</span></div>
+                    </div>
+                    <div class="tile glass">
+                        <h3>Open tasks (you) <span class="count">· 4</span></h3>
+                        <div class="row"><span class="dot dot-urgent"></span><span class="who">Finalize nosecone CFD</span><span class="meta">DUE TOMORROW</span></div>
+                        <div class="row"><span class="dot dot-high"></span><span class="who">Sponsor deck v3</span><span class="meta">DUE FRI</span></div>
+                        <div class="row"><span class="dot dot-normal"></span><span class="who">Update parts BOM</span><span class="meta">DUE +9D</span></div>
+                        <div class="row"><span class="dot dot-low"></span><span class="who">Archive old launch logs</span><span class="meta">NO DUE</span></div>
+                    </div>
+                    <div class="tile">
+                        <h3>Upcoming this week</h3>
+                        <div class="row"><span class="dot dot-success"></span><span class="who">Workshop · solid motor</span><span class="meta">TUE 18:00</span></div>
+                        <div class="row"><span class="dot dot-normal"></span><span class="who">CAD review</span><span class="meta">WED 20:30</span></div>
+                        <div class="row"><span class="dot dot-urgent"></span><span class="who">Static fire · APOGEE-IV</span><span class="meta">SAT 09:00</span></div>
+                    </div>
+                    <div class="tile">
+                        <h3>Latest applications</h3>
+                        <div class="row"><span class="dot dot-normal"></span><span class="who">Anna Kovács · BME GPK</span><span class="meta">PENDING</span></div>
+                        <div class="row"><span class="dot dot-normal"></span><span class="who">Péter Szabó · BME VIK</span><span class="meta">PENDING</span></div>
+                        <div class="row"><span class="dot dot-success"></span><span class="who">Eszter Nagy · BME ÉPK</span><span class="meta">ACCEPTED</span></div>
+                    </div>
+                    <div class="tile">
+                        <h3>Activity</h3>
+                        <div class="row"><span class="dot dot-normal"></span><span class="who"><b>balint</b> moved <span style="color:var(--accent);font-family:var(--mono);font-size:.75rem;">CFD-04</span> to <span style="color:var(--info);">testing</span></span><span class="meta">2M AGO</span></div>
+                        <div class="row"><span class="dot dot-success"></span><span class="who"><b>réka</b> closed <span style="color:var(--accent);font-family:var(--mono);font-size:.75rem;">SPONS-12</span></span><span class="meta">14M AGO</span></div>
+                        <div class="row"><span class="dot dot-low"></span><span class="who"><b>system</b> exported GLB for <span style="color:var(--accent);font-family:var(--mono);font-size:.75rem;">FIN-02</span></span><span class="meta">1H AGO</span></div>
+                    </div>
+                    <div class="tile">
+                        <h3>Quick actions</h3>
+                        <div class="quick-actions">
+                            <button class="qa"><span class="plus">+</span> Task</button>
+                            <button class="qa"><span class="plus">+</span> Event</button>
+                            <button class="qa"><span class="plus">+</span> Drawing</button>
+                            <button class="qa"><span class="plus">+</span> 3D model</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────── 3 · TASKS LIST ─────────── -->
+<section class="screen">
+    <div class="screen-label"><span class="num">03</span> TASKS LIST — priority dot legend + clean table chrome</div>
+    <div class="screen-frame">
+        <div class="app-topbar">
+            <div class="brand">
+                <svg class="brand-logo" viewBox="0 0 865 302" xmlns="http://www.w3.org/2000/svg" aria-label="EVRST">
+                    <g fill="var(--accent)">
+                        <path d="M433.279 199.68C427.917 193.85 421.636 192.357 414.174 192.817C404.776 193.396 395.315 192.956 384.894 192.956C389.576 186.449 393.581 180.586 397.975 175.031C398.839 173.94 401.198 173.706 402.888 173.646C419.696 173.046 436.524 172.824 453.313 171.897C458.512 171.61 463.711 169.801 468.724 168.131C473.127 166.665 474.948 163.074 475.063 158.378C475.177 153.713 473.036 150.274 468.978 149.059C461.863 146.929 454.551 144.745 447.208 144.246C433.927 143.342 420.561 143.489 407.236 143.648C405.141 143.674 402.452 145.606 401.09 147.438C381.834 173.353 362.715 199.37 343.697 225.46C341.194 228.894 338.286 229.645 334.184 230.209C324.084 231.597 318.36 227.441 312.913 219.159C292.971 188.841 272.24 159.042 251.817 129.041C251.098 127.986 250.491 126.855 249.395 125.033C255.531 125.033 260.968 124.729 266.333 125.214C267.994 125.364 269.808 127.41 270.966 129.012C289.985 155.338 308.909 181.733 327.86 208.108C328.909 209.568 330.01 210.99 331.469 212.94C339.307 202.108 346.809 191.746 354.307 181.381C367.385 163.3 380.425 145.19 393.606 127.184C394.635 125.779 396.661 124.179 398.194 124.208C419.001 124.605 439.82 124.945 460.594 126.074C466.922 126.418 473.36 128.519 479.33 130.873C491.422 135.643 497.79 145.857 497.58 158.571C497.34 173.047 491.356 182.115 478.02 186.688C471.625 188.881 464.795 189.802 458.168 191.322C457.433 191.491 456.734 191.816 455.292 192.326C470.721 204.547 485.631 216.357 501.577 228.988C490.68 228.988 481.091 229.088 471.509 228.88C470.08 228.849 468.555 227.534 467.288 226.54C456.016 217.698 444.791 208.794 433.279 199.68Z"/>
+                        <path d="M160 125.18C184.163 125.18 207.826 125.265 231.488 125.091C235.12 125.064 237.293 126.205 239.136 129.239C242.203 134.289 245.641 139.114 249.467 144.849C207.877 144.849 167.323 144.849 126.551 144.849C126.551 150.784 126.551 156.217 126.551 162.13C157.659 162.13 188.588 162.13 219.851 162.13C219.851 168.846 219.851 175.09 219.851 181.782C188.878 181.782 157.959 181.782 126.686 181.782C126.686 191.432 126.686 200.647 126.686 210.572C167.942 210.572 209.138 210.572 250.496 210.572C250.496 217.365 250.496 223.452 250.496 229.79C202.671 229.79 155.098 229.79 107.258 229.79C107.258 195.082 107.258 160.489 107.258 125.18C124.649 125.18 142.075 125.18 160 125.18Z"/>
+                        <path d="M625.705 157.617C624.784 157.578 624.034 157.741 623.825 157.476C615.965 147.512 604.395 146.237 593.221 145.47C572.766 144.065 552.251 144.195 531.965 148.004C529.215 148.521 526.258 149.16 523.989 150.647C522.006 151.947 519.654 154.535 519.678 156.527C519.702 158.527 522.115 161.693 524.083 162.261C531.217 164.317 538.555 166.441 545.905 166.82C563.699 167.738 581.561 167.339 599.361 168.187C607.261 168.564 615.326 169.858 622.884 172.158C641.336 177.774 649.214 196.937 639.722 212.184C634.125 221.175 624.951 224.75 615.149 226.927C595.894 231.203 576.408 230.321 556.928 229.317C542.652 228.581 528.845 226.018 516.199 218.887C507.572 214.022 501.858 207.228 501.103 196.3C507.096 196.3 512.865 196.279 518.633 196.331C519.232 196.337 520.062 196.602 520.39 197.041C526.298 204.969 535.275 206.953 544.056 208.281C566.397 211.661 588.845 212.18 611.177 207.943C614.362 207.339 617.602 206.01 620.337 204.266C625.405 201.034 625.477 194.95 620.138 192.191C615.837 189.969 610.772 188.41 605.96 188.147C591.166 187.339 576.332 187.262 561.512 186.963C548.014 186.691 534.513 186.472 521.523 182.112C519.327 181.375 517.171 180.462 515.102 179.421C506.576 175.135 506.978 174.697 507.549 165.419C507.981 158.407 506.448 151.288 506.059 144.202C505.96 142.388 506.301 139.482 507.433 138.847C513.59 135.388 519.761 130.959 526.469 129.653C554.791 124.139 583.327 123.279 611.817 128.981C621 130.819 629.177 135.077 635.883 141.368C640.077 145.303 642.004 151.048 642.353 157.619C636.701 157.619 631.415 157.619 625.705 157.617Z"/>
+                        <path d="M668 125.065C707.615 125.065 746.73 125.065 786.07 125.065C786.07 131.707 786.07 137.806 786.07 144.391C764.254 144.391 742.652 144.391 720.45 144.391C720.45 173.075 720.45 201.284 720.45 229.745C713.759 229.745 707.671 229.745 701.074 229.745C701.074 201.45 701.074 173.211 701.074 144.443C688.465 144.443 676.318 143.885 664.254 144.637C656.11 145.145 650.314 143.001 645.737 136.19C643.174 132.376 639.498 129.309 635.541 125.065C646.765 125.065 657.132 125.065 668 125.065Z"/>
+                    </g>
+                    <g fill="var(--text)">
+                        <path d="M546.029 28.8233C527.707 28.4196 509.384 27.9937 491.061 27.6163C427.877 26.3147 364.74 27.4908 301.719 32.2548C246.883 36.4002 192.394 43.1704 139.259 58.0829C107.9 66.884 77.5724 78.1992 50.9733 97.6408C30.6372 112.505 15.2815 131.046 9.5108 156.231C4.42169 178.441 8.12723 199.924 15.5668 220.963C24.9156 247.401 39.4636 271 55.7808 293.601C56.7485 294.942 57.6926 296.299 58.9322 298.051C57.3809 299.268 55.8801 300.446 53.9008 301.999C51.2663 298.354 48.7139 294.943 46.2873 291.444C28.9566 266.461 13.6917 240.415 5.63302 210.774C-3.61417 176.763 -0.586061 144.775 21.9586 116.264C35.11 99.6327 52.027 87.6397 70.5593 77.7752C101.516 61.2975 134.803 51.5099 168.843 44.0447C212.841 34.3959 257.454 29.1743 302.324 25.7738C383.199 19.6445 464.156 20.0365 545.584 22.8778C546.026 25.2054 546.028 27.0143 546.029 28.8233Z"/>
+                        <path d="M546.171 28.9404C546.028 27.0144 546.026 25.2054 546.038 23.0126C546.232 22.4351 546.413 22.2413 546.83 21.7676C547.068 21.4876 547.053 21.3684 547.053 21.3684C538.563 16.9027 536.14 7.62962 529.332 0.485819C537.1 -0.044119 543.315 -0.689413 549.276 3.17283C555.128 6.96403 561.902 9.42472 567.455 13.5635C577.588 21.1152 589.009 19.0759 600.131 19.1133C637.285 19.2382 674.453 18.4744 711.587 19.3309C731.013 19.7789 750.379 22.8877 769.767 24.8478C770.807 24.9529 771.797 25.5491 772.736 26.9571C762.309 27.9483 751.88 28.921 741.455 29.9337C691.9 34.7477 642.248 31.3228 592.642 31.5401C583.618 31.5796 575.32 31.9954 567.734 37.6801C562.839 41.3488 556.825 43.5234 551.919 47.1801C545.68 51.8297 538.984 51.3375 530.118 50.7688C536.074 43.1175 541.251 36.4674 546.603 29.4706C546.777 29.124 546.667 28.9658 546.667 28.9658C546.667 28.9658 546.312 29.0575 546.171 28.9404Z"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="search">⌕ &nbsp; tasks</div>
+            <div class="spacer"></div>
+            <div class="avatar">KB</div>
+        </div>
+        <div class="app-content">
+            <div class="page-head">
+                <h1>Tasks</h1>
+                <span class="help-pill">?</span>
+                <span class="crumb">/ admin / tasks</span>
+            </div>
+
+            <div class="toolbar">
+                <button class="filter-pill active">ALL · 24</button>
+                <button class="filter-pill">MINE · 4</button>
+                <button class="filter-pill">SUPERVISING · 8</button>
+                <div class="legend">
+                    <span><span class="dot dot-urgent" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span>urgent</span>
+                    <span><span class="dot dot-high" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span>high</span>
+                    <span><span class="dot dot-normal" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span>normal</span>
+                    <span><span class="dot dot-low" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span>low</span>
+                </div>
+            </div>
+
+            <div class="table">
+                <div class="thead">
+                    <div>Title</div><div>Category</div><div>Status</div><div>Supervisor</div><div>Assignee</div><div>Due</div>
+                </div>
+                <div class="tr">
+                    <div class="title"><span class="dot dot-urgent" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Finalize nosecone CFD analysis</div>
+                    <div class="meta">3D MODEL</div>
+                    <div><span class="pill progress">in progress</span></div>
+                    <div class="meta">B. KLABACSEK</div>
+                    <div class="meta">R. TÓTH</div>
+                    <div class="meta" style="color:var(--accent);">2026-04-29</div>
+                </div>
+                <div class="tr">
+                    <div class="title"><span class="dot dot-high" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Sponsor deck v3 — outreach pack</div>
+                    <div class="meta">DOCS</div>
+                    <div><span class="pill testing">testing</span></div>
+                    <div class="meta">B. KLABACSEK</div>
+                    <div class="meta">P. SZABÓ</div>
+                    <div class="meta">2026-05-01</div>
+                </div>
+                <div class="tr">
+                    <div class="title"><span class="dot dot-normal" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Update parts BOM with new bolts</div>
+                    <div class="meta">ADMIN</div>
+                    <div><span class="pill todo">todo</span></div>
+                    <div class="meta">M. VARGA</div>
+                    <div class="meta">B. KLABACSEK</div>
+                    <div class="meta">2026-05-07</div>
+                </div>
+                <div class="tr">
+                    <div class="title"><span class="dot dot-normal" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Webpage — sponsors carousel polish</div>
+                    <div class="meta">WEBPAGE</div>
+                    <div><span class="pill done">done</span></div>
+                    <div class="meta">B. KLABACSEK</div>
+                    <div class="meta">E. NAGY</div>
+                    <div class="meta">2026-04-22</div>
+                </div>
+                <div class="tr">
+                    <div class="title"><span class="dot dot-low" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Archive old launch logs (2024)</div>
+                    <div class="meta">ADMIN</div>
+                    <div><span class="pill todo">todo</span></div>
+                    <div class="meta">B. KLABACSEK</div>
+                    <div class="meta">B. KLABACSEK</div>
+                    <div class="meta">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────── 4 · TASKS EDIT ─────────── -->
+<section class="screen">
+    <div class="screen-label"><span class="num">04</span> TASKS EDIT — sectioned form + sticky save bar with status pill</div>
+    <div class="screen-frame">
+        <div class="app-topbar">
+            <div class="brand">
+                <svg class="brand-logo" viewBox="0 0 865 302" xmlns="http://www.w3.org/2000/svg" aria-label="EVRST">
+                    <g fill="var(--accent)">
+                        <path d="M433.279 199.68C427.917 193.85 421.636 192.357 414.174 192.817C404.776 193.396 395.315 192.956 384.894 192.956C389.576 186.449 393.581 180.586 397.975 175.031C398.839 173.94 401.198 173.706 402.888 173.646C419.696 173.046 436.524 172.824 453.313 171.897C458.512 171.61 463.711 169.801 468.724 168.131C473.127 166.665 474.948 163.074 475.063 158.378C475.177 153.713 473.036 150.274 468.978 149.059C461.863 146.929 454.551 144.745 447.208 144.246C433.927 143.342 420.561 143.489 407.236 143.648C405.141 143.674 402.452 145.606 401.09 147.438C381.834 173.353 362.715 199.37 343.697 225.46C341.194 228.894 338.286 229.645 334.184 230.209C324.084 231.597 318.36 227.441 312.913 219.159C292.971 188.841 272.24 159.042 251.817 129.041C251.098 127.986 250.491 126.855 249.395 125.033C255.531 125.033 260.968 124.729 266.333 125.214C267.994 125.364 269.808 127.41 270.966 129.012C289.985 155.338 308.909 181.733 327.86 208.108C328.909 209.568 330.01 210.99 331.469 212.94C339.307 202.108 346.809 191.746 354.307 181.381C367.385 163.3 380.425 145.19 393.606 127.184C394.635 125.779 396.661 124.179 398.194 124.208C419.001 124.605 439.82 124.945 460.594 126.074C466.922 126.418 473.36 128.519 479.33 130.873C491.422 135.643 497.79 145.857 497.58 158.571C497.34 173.047 491.356 182.115 478.02 186.688C471.625 188.881 464.795 189.802 458.168 191.322C457.433 191.491 456.734 191.816 455.292 192.326C470.721 204.547 485.631 216.357 501.577 228.988C490.68 228.988 481.091 229.088 471.509 228.88C470.08 228.849 468.555 227.534 467.288 226.54C456.016 217.698 444.791 208.794 433.279 199.68Z"/>
+                        <path d="M160 125.18C184.163 125.18 207.826 125.265 231.488 125.091C235.12 125.064 237.293 126.205 239.136 129.239C242.203 134.289 245.641 139.114 249.467 144.849C207.877 144.849 167.323 144.849 126.551 144.849C126.551 150.784 126.551 156.217 126.551 162.13C157.659 162.13 188.588 162.13 219.851 162.13C219.851 168.846 219.851 175.09 219.851 181.782C188.878 181.782 157.959 181.782 126.686 181.782C126.686 191.432 126.686 200.647 126.686 210.572C167.942 210.572 209.138 210.572 250.496 210.572C250.496 217.365 250.496 223.452 250.496 229.79C202.671 229.79 155.098 229.79 107.258 229.79C107.258 195.082 107.258 160.489 107.258 125.18C124.649 125.18 142.075 125.18 160 125.18Z"/>
+                        <path d="M625.705 157.617C624.784 157.578 624.034 157.741 623.825 157.476C615.965 147.512 604.395 146.237 593.221 145.47C572.766 144.065 552.251 144.195 531.965 148.004C529.215 148.521 526.258 149.16 523.989 150.647C522.006 151.947 519.654 154.535 519.678 156.527C519.702 158.527 522.115 161.693 524.083 162.261C531.217 164.317 538.555 166.441 545.905 166.82C563.699 167.738 581.561 167.339 599.361 168.187C607.261 168.564 615.326 169.858 622.884 172.158C641.336 177.774 649.214 196.937 639.722 212.184C634.125 221.175 624.951 224.75 615.149 226.927C595.894 231.203 576.408 230.321 556.928 229.317C542.652 228.581 528.845 226.018 516.199 218.887C507.572 214.022 501.858 207.228 501.103 196.3C507.096 196.3 512.865 196.279 518.633 196.331C519.232 196.337 520.062 196.602 520.39 197.041C526.298 204.969 535.275 206.953 544.056 208.281C566.397 211.661 588.845 212.18 611.177 207.943C614.362 207.339 617.602 206.01 620.337 204.266C625.405 201.034 625.477 194.95 620.138 192.191C615.837 189.969 610.772 188.41 605.96 188.147C591.166 187.339 576.332 187.262 561.512 186.963C548.014 186.691 534.513 186.472 521.523 182.112C519.327 181.375 517.171 180.462 515.102 179.421C506.576 175.135 506.978 174.697 507.549 165.419C507.981 158.407 506.448 151.288 506.059 144.202C505.96 142.388 506.301 139.482 507.433 138.847C513.59 135.388 519.761 130.959 526.469 129.653C554.791 124.139 583.327 123.279 611.817 128.981C621 130.819 629.177 135.077 635.883 141.368C640.077 145.303 642.004 151.048 642.353 157.619C636.701 157.619 631.415 157.619 625.705 157.617Z"/>
+                        <path d="M668 125.065C707.615 125.065 746.73 125.065 786.07 125.065C786.07 131.707 786.07 137.806 786.07 144.391C764.254 144.391 742.652 144.391 720.45 144.391C720.45 173.075 720.45 201.284 720.45 229.745C713.759 229.745 707.671 229.745 701.074 229.745C701.074 201.45 701.074 173.211 701.074 144.443C688.465 144.443 676.318 143.885 664.254 144.637C656.11 145.145 650.314 143.001 645.737 136.19C643.174 132.376 639.498 129.309 635.541 125.065C646.765 125.065 657.132 125.065 668 125.065Z"/>
+                    </g>
+                    <g fill="var(--text)">
+                        <path d="M546.029 28.8233C527.707 28.4196 509.384 27.9937 491.061 27.6163C427.877 26.3147 364.74 27.4908 301.719 32.2548C246.883 36.4002 192.394 43.1704 139.259 58.0829C107.9 66.884 77.5724 78.1992 50.9733 97.6408C30.6372 112.505 15.2815 131.046 9.5108 156.231C4.42169 178.441 8.12723 199.924 15.5668 220.963C24.9156 247.401 39.4636 271 55.7808 293.601C56.7485 294.942 57.6926 296.299 58.9322 298.051C57.3809 299.268 55.8801 300.446 53.9008 301.999C51.2663 298.354 48.7139 294.943 46.2873 291.444C28.9566 266.461 13.6917 240.415 5.63302 210.774C-3.61417 176.763 -0.586061 144.775 21.9586 116.264C35.11 99.6327 52.027 87.6397 70.5593 77.7752C101.516 61.2975 134.803 51.5099 168.843 44.0447C212.841 34.3959 257.454 29.1743 302.324 25.7738C383.199 19.6445 464.156 20.0365 545.584 22.8778C546.026 25.2054 546.028 27.0143 546.029 28.8233Z"/>
+                        <path d="M546.171 28.9404C546.028 27.0144 546.026 25.2054 546.038 23.0126C546.232 22.4351 546.413 22.2413 546.83 21.7676C547.068 21.4876 547.053 21.3684 547.053 21.3684C538.563 16.9027 536.14 7.62962 529.332 0.485819C537.1 -0.044119 543.315 -0.689413 549.276 3.17283C555.128 6.96403 561.902 9.42472 567.455 13.5635C577.588 21.1152 589.009 19.0759 600.131 19.1133C637.285 19.2382 674.453 18.4744 711.587 19.3309C731.013 19.7789 750.379 22.8877 769.767 24.8478C770.807 24.9529 771.797 25.5491 772.736 26.9571C762.309 27.9483 751.88 28.921 741.455 29.9337C691.9 34.7477 642.248 31.3228 592.642 31.5401C583.618 31.5796 575.32 31.9954 567.734 37.6801C562.839 41.3488 556.825 43.5234 551.919 47.1801C545.68 51.8297 538.984 51.3375 530.118 50.7688C536.074 43.1175 541.251 36.4674 546.603 29.4706C546.777 29.124 546.667 28.9658 546.667 28.9658C546.667 28.9658 546.312 29.0575 546.171 28.9404Z"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="search">⌕</div>
+            <div class="spacer"></div>
+            <div class="avatar">KB</div>
+        </div>
+        <div class="app-content">
+            <div class="page-head">
+                <h1>Finalize nosecone CFD analysis</h1>
+                <span class="help-pill">?</span>
+                <span class="crumb">/ admin / tasks / cfd-04</span>
+            </div>
+
+            <div class="form-section">
+                <h2>Details</h2>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Title</label>
+                        <input value="Finalize nosecone CFD analysis" />
+                    </div>
+                    <div class="field">
+                        <label>Category</label>
+                        <input value="3D model" />
+                    </div>
+                    <div class="field">
+                        <label>Priority</label>
+                        <input value="Urgent" />
+                    </div>
+                    <div class="field">
+                        <label>Due date</label>
+                        <input value="2026-04-29" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>People</h2>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Supervisor</label>
+                        <input value="Klabacsek Bálint" />
+                    </div>
+                    <div class="field">
+                        <label>Assignee</label>
+                        <input value="Tóth Réka" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Description</h2>
+                <div class="field">
+                    <textarea rows="4" style="border-bottom:1px solid var(--border);background:transparent;color:var(--text);outline:0;resize:vertical;font-family:var(--sans);font-size:.875rem;padding:.5rem 0;width:100%;">Run final CFD pass on nosecone v7 with 4° angle of attack. Compare drag coefficient against v6. Attach vis screenshots + run logs as proofs.</textarea>
+                </div>
+            </div>
+
+            <div class="save-bar">
+                <span class="status-pill"><span class="d"></span> IN PROGRESS</span>
+                <span style="font-family:var(--mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.08em;">UNSAVED CHANGES</span>
+                <div class="spacer"></div>
+                <button class="btn">Cancel</button>
+                <button class="btn primary">Save</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────── 5 · KANBAN ─────────── -->
+<section class="screen">
+    <div class="screen-label"><span class="num">05</span> KANBAN — solid graphite columns, hairline cards, priority dot</div>
+    <div class="screen-frame">
+        <div class="app-topbar">
+            <div class="brand">
+                <svg class="brand-logo" viewBox="0 0 865 302" xmlns="http://www.w3.org/2000/svg" aria-label="EVRST">
+                    <g fill="var(--accent)">
+                        <path d="M433.279 199.68C427.917 193.85 421.636 192.357 414.174 192.817C404.776 193.396 395.315 192.956 384.894 192.956C389.576 186.449 393.581 180.586 397.975 175.031C398.839 173.94 401.198 173.706 402.888 173.646C419.696 173.046 436.524 172.824 453.313 171.897C458.512 171.61 463.711 169.801 468.724 168.131C473.127 166.665 474.948 163.074 475.063 158.378C475.177 153.713 473.036 150.274 468.978 149.059C461.863 146.929 454.551 144.745 447.208 144.246C433.927 143.342 420.561 143.489 407.236 143.648C405.141 143.674 402.452 145.606 401.09 147.438C381.834 173.353 362.715 199.37 343.697 225.46C341.194 228.894 338.286 229.645 334.184 230.209C324.084 231.597 318.36 227.441 312.913 219.159C292.971 188.841 272.24 159.042 251.817 129.041C251.098 127.986 250.491 126.855 249.395 125.033C255.531 125.033 260.968 124.729 266.333 125.214C267.994 125.364 269.808 127.41 270.966 129.012C289.985 155.338 308.909 181.733 327.86 208.108C328.909 209.568 330.01 210.99 331.469 212.94C339.307 202.108 346.809 191.746 354.307 181.381C367.385 163.3 380.425 145.19 393.606 127.184C394.635 125.779 396.661 124.179 398.194 124.208C419.001 124.605 439.82 124.945 460.594 126.074C466.922 126.418 473.36 128.519 479.33 130.873C491.422 135.643 497.79 145.857 497.58 158.571C497.34 173.047 491.356 182.115 478.02 186.688C471.625 188.881 464.795 189.802 458.168 191.322C457.433 191.491 456.734 191.816 455.292 192.326C470.721 204.547 485.631 216.357 501.577 228.988C490.68 228.988 481.091 229.088 471.509 228.88C470.08 228.849 468.555 227.534 467.288 226.54C456.016 217.698 444.791 208.794 433.279 199.68Z"/>
+                        <path d="M160 125.18C184.163 125.18 207.826 125.265 231.488 125.091C235.12 125.064 237.293 126.205 239.136 129.239C242.203 134.289 245.641 139.114 249.467 144.849C207.877 144.849 167.323 144.849 126.551 144.849C126.551 150.784 126.551 156.217 126.551 162.13C157.659 162.13 188.588 162.13 219.851 162.13C219.851 168.846 219.851 175.09 219.851 181.782C188.878 181.782 157.959 181.782 126.686 181.782C126.686 191.432 126.686 200.647 126.686 210.572C167.942 210.572 209.138 210.572 250.496 210.572C250.496 217.365 250.496 223.452 250.496 229.79C202.671 229.79 155.098 229.79 107.258 229.79C107.258 195.082 107.258 160.489 107.258 125.18C124.649 125.18 142.075 125.18 160 125.18Z"/>
+                        <path d="M625.705 157.617C624.784 157.578 624.034 157.741 623.825 157.476C615.965 147.512 604.395 146.237 593.221 145.47C572.766 144.065 552.251 144.195 531.965 148.004C529.215 148.521 526.258 149.16 523.989 150.647C522.006 151.947 519.654 154.535 519.678 156.527C519.702 158.527 522.115 161.693 524.083 162.261C531.217 164.317 538.555 166.441 545.905 166.82C563.699 167.738 581.561 167.339 599.361 168.187C607.261 168.564 615.326 169.858 622.884 172.158C641.336 177.774 649.214 196.937 639.722 212.184C634.125 221.175 624.951 224.75 615.149 226.927C595.894 231.203 576.408 230.321 556.928 229.317C542.652 228.581 528.845 226.018 516.199 218.887C507.572 214.022 501.858 207.228 501.103 196.3C507.096 196.3 512.865 196.279 518.633 196.331C519.232 196.337 520.062 196.602 520.39 197.041C526.298 204.969 535.275 206.953 544.056 208.281C566.397 211.661 588.845 212.18 611.177 207.943C614.362 207.339 617.602 206.01 620.337 204.266C625.405 201.034 625.477 194.95 620.138 192.191C615.837 189.969 610.772 188.41 605.96 188.147C591.166 187.339 576.332 187.262 561.512 186.963C548.014 186.691 534.513 186.472 521.523 182.112C519.327 181.375 517.171 180.462 515.102 179.421C506.576 175.135 506.978 174.697 507.549 165.419C507.981 158.407 506.448 151.288 506.059 144.202C505.96 142.388 506.301 139.482 507.433 138.847C513.59 135.388 519.761 130.959 526.469 129.653C554.791 124.139 583.327 123.279 611.817 128.981C621 130.819 629.177 135.077 635.883 141.368C640.077 145.303 642.004 151.048 642.353 157.619C636.701 157.619 631.415 157.619 625.705 157.617Z"/>
+                        <path d="M668 125.065C707.615 125.065 746.73 125.065 786.07 125.065C786.07 131.707 786.07 137.806 786.07 144.391C764.254 144.391 742.652 144.391 720.45 144.391C720.45 173.075 720.45 201.284 720.45 229.745C713.759 229.745 707.671 229.745 701.074 229.745C701.074 201.45 701.074 173.211 701.074 144.443C688.465 144.443 676.318 143.885 664.254 144.637C656.11 145.145 650.314 143.001 645.737 136.19C643.174 132.376 639.498 129.309 635.541 125.065C646.765 125.065 657.132 125.065 668 125.065Z"/>
+                    </g>
+                    <g fill="var(--text)">
+                        <path d="M546.029 28.8233C527.707 28.4196 509.384 27.9937 491.061 27.6163C427.877 26.3147 364.74 27.4908 301.719 32.2548C246.883 36.4002 192.394 43.1704 139.259 58.0829C107.9 66.884 77.5724 78.1992 50.9733 97.6408C30.6372 112.505 15.2815 131.046 9.5108 156.231C4.42169 178.441 8.12723 199.924 15.5668 220.963C24.9156 247.401 39.4636 271 55.7808 293.601C56.7485 294.942 57.6926 296.299 58.9322 298.051C57.3809 299.268 55.8801 300.446 53.9008 301.999C51.2663 298.354 48.7139 294.943 46.2873 291.444C28.9566 266.461 13.6917 240.415 5.63302 210.774C-3.61417 176.763 -0.586061 144.775 21.9586 116.264C35.11 99.6327 52.027 87.6397 70.5593 77.7752C101.516 61.2975 134.803 51.5099 168.843 44.0447C212.841 34.3959 257.454 29.1743 302.324 25.7738C383.199 19.6445 464.156 20.0365 545.584 22.8778C546.026 25.2054 546.028 27.0143 546.029 28.8233Z"/>
+                        <path d="M546.171 28.9404C546.028 27.0144 546.026 25.2054 546.038 23.0126C546.232 22.4351 546.413 22.2413 546.83 21.7676C547.068 21.4876 547.053 21.3684 547.053 21.3684C538.563 16.9027 536.14 7.62962 529.332 0.485819C537.1 -0.044119 543.315 -0.689413 549.276 3.17283C555.128 6.96403 561.902 9.42472 567.455 13.5635C577.588 21.1152 589.009 19.0759 600.131 19.1133C637.285 19.2382 674.453 18.4744 711.587 19.3309C731.013 19.7789 750.379 22.8877 769.767 24.8478C770.807 24.9529 771.797 25.5491 772.736 26.9571C762.309 27.9483 751.88 28.921 741.455 29.9337C691.9 34.7477 642.248 31.3228 592.642 31.5401C583.618 31.5796 575.32 31.9954 567.734 37.6801C562.839 41.3488 556.825 43.5234 551.919 47.1801C545.68 51.8297 538.984 51.3375 530.118 50.7688C536.074 43.1175 541.251 36.4674 546.603 29.4706C546.777 29.124 546.667 28.9658 546.667 28.9658C546.667 28.9658 546.312 29.0575 546.171 28.9404Z"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="spacer"></div>
+            <div class="avatar">KB</div>
+        </div>
+        <div class="app-content">
+            <div class="page-head">
+                <h1>Kanban</h1>
+                <span class="help-pill">?</span>
+                <span class="crumb">/ admin / tasks / kanban</span>
+            </div>
+            <div class="kanban">
+                <div class="col">
+                    <div class="col-head">Backlog <span class="count">3</span></div>
+                    <div class="card">
+                        <div class="ttl"><span class="dot dot-low" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Archive old launch logs</div>
+                        <div class="meta"><span>ADMIN</span> · <span>B. KLABACSEK</span></div>
+                    </div>
+                    <div class="card">
+                        <div class="ttl"><span class="dot dot-normal" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Update parts BOM</div>
+                        <div class="meta"><span>ADMIN</span> · <span class="due">DUE 2026-05-07</span></div>
+                    </div>
+                    <div class="card">
+                        <div class="ttl"><span class="dot dot-normal" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Webpage — fix nav scroll</div>
+                        <div class="meta"><span>WEBPAGE</span></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="col-head">In progress <span class="count">2</span></div>
+                    <div class="card" style="border-color: var(--border-amber);">
+                        <div class="ttl"><span class="dot dot-urgent" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Finalize nosecone CFD</div>
+                        <div class="meta"><span>3D MODEL</span> · <span class="due">DUE TOMORROW</span></div>
+                    </div>
+                    <div class="card">
+                        <div class="ttl"><span class="dot dot-high" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Sponsor deck v3</div>
+                        <div class="meta"><span>DOCS</span> · <span class="due">DUE FRI</span></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="col-head">Testing <span class="count">2</span></div>
+                    <div class="card">
+                        <div class="ttl"><span class="dot dot-normal" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Mounting rail v2</div>
+                        <div class="meta"><span>3D MODEL</span> · <span>P. SZABÓ</span></div>
+                    </div>
+                    <div class="card">
+                        <div class="ttl"><span class="dot dot-normal" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Application form copy</div>
+                        <div class="meta"><span>WEBPAGE</span> · <span>E. NAGY</span></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="col-head">Done <span class="count">4</span></div>
+                    <div class="card" style="opacity:.65;">
+                        <div class="ttl"><span class="dot dot-success" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Sponsors carousel polish</div>
+                        <div class="meta"><span>WEBPAGE</span></div>
+                    </div>
+                    <div class="card" style="opacity:.65;">
+                        <div class="ttl"><span class="dot dot-success" style="width:8px;height:8px;border-radius:50%;display:inline-block;"></span> Discord webhook test</div>
+                        <div class="meta"><span>ADMIN</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────── 6 · CALENDAR + ONSHAPE + ACTIVITY ─────────── -->
+<section class="screen">
+    <div class="screen-label"><span class="num">06</span> CALENDAR / ONSHAPE / ACTIVITY — signature moments at a glance</div>
+    <div class="screen-frame">
+        <div class="app-topbar">
+            <div class="brand">
+                <svg class="brand-logo" viewBox="0 0 865 302" xmlns="http://www.w3.org/2000/svg" aria-label="EVRST">
+                    <g fill="var(--accent)">
+                        <path d="M433.279 199.68C427.917 193.85 421.636 192.357 414.174 192.817C404.776 193.396 395.315 192.956 384.894 192.956C389.576 186.449 393.581 180.586 397.975 175.031C398.839 173.94 401.198 173.706 402.888 173.646C419.696 173.046 436.524 172.824 453.313 171.897C458.512 171.61 463.711 169.801 468.724 168.131C473.127 166.665 474.948 163.074 475.063 158.378C475.177 153.713 473.036 150.274 468.978 149.059C461.863 146.929 454.551 144.745 447.208 144.246C433.927 143.342 420.561 143.489 407.236 143.648C405.141 143.674 402.452 145.606 401.09 147.438C381.834 173.353 362.715 199.37 343.697 225.46C341.194 228.894 338.286 229.645 334.184 230.209C324.084 231.597 318.36 227.441 312.913 219.159C292.971 188.841 272.24 159.042 251.817 129.041C251.098 127.986 250.491 126.855 249.395 125.033C255.531 125.033 260.968 124.729 266.333 125.214C267.994 125.364 269.808 127.41 270.966 129.012C289.985 155.338 308.909 181.733 327.86 208.108C328.909 209.568 330.01 210.99 331.469 212.94C339.307 202.108 346.809 191.746 354.307 181.381C367.385 163.3 380.425 145.19 393.606 127.184C394.635 125.779 396.661 124.179 398.194 124.208C419.001 124.605 439.82 124.945 460.594 126.074C466.922 126.418 473.36 128.519 479.33 130.873C491.422 135.643 497.79 145.857 497.58 158.571C497.34 173.047 491.356 182.115 478.02 186.688C471.625 188.881 464.795 189.802 458.168 191.322C457.433 191.491 456.734 191.816 455.292 192.326C470.721 204.547 485.631 216.357 501.577 228.988C490.68 228.988 481.091 229.088 471.509 228.88C470.08 228.849 468.555 227.534 467.288 226.54C456.016 217.698 444.791 208.794 433.279 199.68Z"/>
+                        <path d="M160 125.18C184.163 125.18 207.826 125.265 231.488 125.091C235.12 125.064 237.293 126.205 239.136 129.239C242.203 134.289 245.641 139.114 249.467 144.849C207.877 144.849 167.323 144.849 126.551 144.849C126.551 150.784 126.551 156.217 126.551 162.13C157.659 162.13 188.588 162.13 219.851 162.13C219.851 168.846 219.851 175.09 219.851 181.782C188.878 181.782 157.959 181.782 126.686 181.782C126.686 191.432 126.686 200.647 126.686 210.572C167.942 210.572 209.138 210.572 250.496 210.572C250.496 217.365 250.496 223.452 250.496 229.79C202.671 229.79 155.098 229.79 107.258 229.79C107.258 195.082 107.258 160.489 107.258 125.18C124.649 125.18 142.075 125.18 160 125.18Z"/>
+                        <path d="M625.705 157.617C624.784 157.578 624.034 157.741 623.825 157.476C615.965 147.512 604.395 146.237 593.221 145.47C572.766 144.065 552.251 144.195 531.965 148.004C529.215 148.521 526.258 149.16 523.989 150.647C522.006 151.947 519.654 154.535 519.678 156.527C519.702 158.527 522.115 161.693 524.083 162.261C531.217 164.317 538.555 166.441 545.905 166.82C563.699 167.738 581.561 167.339 599.361 168.187C607.261 168.564 615.326 169.858 622.884 172.158C641.336 177.774 649.214 196.937 639.722 212.184C634.125 221.175 624.951 224.75 615.149 226.927C595.894 231.203 576.408 230.321 556.928 229.317C542.652 228.581 528.845 226.018 516.199 218.887C507.572 214.022 501.858 207.228 501.103 196.3C507.096 196.3 512.865 196.279 518.633 196.331C519.232 196.337 520.062 196.602 520.39 197.041C526.298 204.969 535.275 206.953 544.056 208.281C566.397 211.661 588.845 212.18 611.177 207.943C614.362 207.339 617.602 206.01 620.337 204.266C625.405 201.034 625.477 194.95 620.138 192.191C615.837 189.969 610.772 188.41 605.96 188.147C591.166 187.339 576.332 187.262 561.512 186.963C548.014 186.691 534.513 186.472 521.523 182.112C519.327 181.375 517.171 180.462 515.102 179.421C506.576 175.135 506.978 174.697 507.549 165.419C507.981 158.407 506.448 151.288 506.059 144.202C505.96 142.388 506.301 139.482 507.433 138.847C513.59 135.388 519.761 130.959 526.469 129.653C554.791 124.139 583.327 123.279 611.817 128.981C621 130.819 629.177 135.077 635.883 141.368C640.077 145.303 642.004 151.048 642.353 157.619C636.701 157.619 631.415 157.619 625.705 157.617Z"/>
+                        <path d="M668 125.065C707.615 125.065 746.73 125.065 786.07 125.065C786.07 131.707 786.07 137.806 786.07 144.391C764.254 144.391 742.652 144.391 720.45 144.391C720.45 173.075 720.45 201.284 720.45 229.745C713.759 229.745 707.671 229.745 701.074 229.745C701.074 201.45 701.074 173.211 701.074 144.443C688.465 144.443 676.318 143.885 664.254 144.637C656.11 145.145 650.314 143.001 645.737 136.19C643.174 132.376 639.498 129.309 635.541 125.065C646.765 125.065 657.132 125.065 668 125.065Z"/>
+                    </g>
+                    <g fill="var(--text)">
+                        <path d="M546.029 28.8233C527.707 28.4196 509.384 27.9937 491.061 27.6163C427.877 26.3147 364.74 27.4908 301.719 32.2548C246.883 36.4002 192.394 43.1704 139.259 58.0829C107.9 66.884 77.5724 78.1992 50.9733 97.6408C30.6372 112.505 15.2815 131.046 9.5108 156.231C4.42169 178.441 8.12723 199.924 15.5668 220.963C24.9156 247.401 39.4636 271 55.7808 293.601C56.7485 294.942 57.6926 296.299 58.9322 298.051C57.3809 299.268 55.8801 300.446 53.9008 301.999C51.2663 298.354 48.7139 294.943 46.2873 291.444C28.9566 266.461 13.6917 240.415 5.63302 210.774C-3.61417 176.763 -0.586061 144.775 21.9586 116.264C35.11 99.6327 52.027 87.6397 70.5593 77.7752C101.516 61.2975 134.803 51.5099 168.843 44.0447C212.841 34.3959 257.454 29.1743 302.324 25.7738C383.199 19.6445 464.156 20.0365 545.584 22.8778C546.026 25.2054 546.028 27.0143 546.029 28.8233Z"/>
+                        <path d="M546.171 28.9404C546.028 27.0144 546.026 25.2054 546.038 23.0126C546.232 22.4351 546.413 22.2413 546.83 21.7676C547.068 21.4876 547.053 21.3684 547.053 21.3684C538.563 16.9027 536.14 7.62962 529.332 0.485819C537.1 -0.044119 543.315 -0.689413 549.276 3.17283C555.128 6.96403 561.902 9.42472 567.455 13.5635C577.588 21.1152 589.009 19.0759 600.131 19.1133C637.285 19.2382 674.453 18.4744 711.587 19.3309C731.013 19.7789 750.379 22.8877 769.767 24.8478C770.807 24.9529 771.797 25.5491 772.736 26.9571C762.309 27.9483 751.88 28.921 741.455 29.9337C691.9 34.7477 642.248 31.3228 592.642 31.5401C583.618 31.5796 575.32 31.9954 567.734 37.6801C562.839 41.3488 556.825 43.5234 551.919 47.1801C545.68 51.8297 538.984 51.3375 530.118 50.7688C536.074 43.1175 541.251 36.4674 546.603 29.4706C546.777 29.124 546.667 28.9658 546.667 28.9658C546.667 28.9658 546.312 29.0575 546.171 28.9404Z"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="spacer"></div>
+            <div class="avatar">KB</div>
+        </div>
+        <div class="app-content">
+            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem;">
+            <div>
+                <div class="page-head"><h1 style="font-size:1.1rem;">Calendar</h1><span class="crumb">/ apr 2026</span></div>
+                <div class="cal-toolbar">
+                    <div class="month">April 2026</div>
+                    <div class="nav">
+                        <button class="btn" style="padding:4px 10px;">←</button>
+                        <button class="btn" style="padding:4px 10px;">today</button>
+                        <button class="btn" style="padding:4px 10px;">→</button>
+                    </div>
+                    <div class="spacer" style="flex:1;"></div>
+                    <button class="filter-pill active">EVENTS</button>
+                    <button class="filter-pill">TASKS</button>
+                </div>
+                <div class="cal-day-headers">
+                    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                </div>
+                <div class="cal-grid">
+                    <div class="cal-cell muted"><div class="dn">31</div></div>
+                    <div class="cal-cell"><div class="dn">1</div></div>
+                    <div class="cal-cell"><div class="dn">2</div></div>
+                    <div class="cal-cell"><div class="dn">3</div></div>
+                    <div class="cal-cell"><div class="dn">4</div><div class="cal-event success">Workshop · solid motor</div></div>
+                    <div class="cal-cell"><div class="dn">5</div></div>
+                    <div class="cal-cell muted"><div class="dn">6</div></div>
+
+                    <div class="cal-cell"><div class="dn">7</div></div>
+                    <div class="cal-cell"><div class="dn">8</div><div class="cal-event">CAD review</div></div>
+                    <div class="cal-cell"><div class="dn">9</div></div>
+                    <div class="cal-cell"><div class="dn">10</div></div>
+                    <div class="cal-cell"><div class="dn">11</div><div class="cal-event danger">Sponsor deadline</div></div>
+                    <div class="cal-cell"><div class="dn">12</div></div>
+                    <div class="cal-cell muted"><div class="dn">13</div></div>
+
+                    <div class="cal-cell"><div class="dn">14</div></div>
+                    <div class="cal-cell"><div class="dn">15</div></div>
+                    <div class="cal-cell"><div class="dn">16</div></div>
+                    <div class="cal-cell"><div class="dn">17</div></div>
+                    <div class="cal-cell"><div class="dn">18</div></div>
+                    <div class="cal-cell"><div class="dn">19</div><div class="cal-event amber">Static fire APOGEE-IV</div></div>
+                    <div class="cal-cell muted"><div class="dn">20</div></div>
+
+                    <div class="cal-cell"><div class="dn">21</div></div>
+                    <div class="cal-cell"><div class="dn">22</div></div>
+                    <div class="cal-cell"><div class="dn">23</div></div>
+                    <div class="cal-cell"><div class="dn">24</div></div>
+                    <div class="cal-cell"><div class="dn">25</div></div>
+                    <div class="cal-cell"><div class="dn">26</div></div>
+                    <div class="cal-cell muted"><div class="dn">27</div></div>
+
+                    <div class="cal-cell today"><div class="dn">28</div><div class="cal-event">Workshop · CFD walkthrough</div></div>
+                    <div class="cal-cell"><div class="dn">29</div><div class="cal-event amber">CFD-04 due</div></div>
+                    <div class="cal-cell"><div class="dn">30</div></div>
+                    <div class="cal-cell muted"><div class="dn">1</div></div>
+                    <div class="cal-cell muted"><div class="dn">2</div></div>
+                    <div class="cal-cell muted"><div class="dn">3</div></div>
+                    <div class="cal-cell muted"><div class="dn">4</div></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="page-head"><h1 style="font-size:1.1rem;">Onshape · APOGEE-IV</h1></div>
+                <div class="onshape-stage">
+                    <div class="onshape-chip">↗ open in onshape</div>
+                    <div class="onshape-status">GLB · 4.2 MB · cached 3h ago</div>
+                </div>
+
+                <div class="page-head" style="margin-top:1.5rem;"><h1 style="font-size:1.1rem;">Activity</h1></div>
+                <div class="timeline">
+                    <div class="ev amber">
+                        <div class="ts">14:21:08</div>
+                        <div><span class="who">balint</span> <span class="verb">moved</span> <span class="target">CFD-04</span> <span class="verb">→ testing</span></div>
+                    </div>
+                    <div class="ev">
+                        <div class="ts">14:08:44</div>
+                        <div><span class="who">réka</span> <span class="verb">attached proof to</span> <span class="target">CFD-04</span></div>
+                    </div>
+                    <div class="ev">
+                        <div class="ts">13:54:02</div>
+                        <div><span class="who">system</span> <span class="verb">exported GLB for</span> <span class="target">FIN-02</span></div>
+                    </div>
+                    <div class="ev">
+                        <div class="ts">13:11:30</div>
+                        <div><span class="who">péter</span> <span class="verb">commented on</span> <span class="target">SPONS-12</span></div>
+                    </div>
+                    <div class="ev">
+                        <div class="ts">12:00:00</div>
+                        <div><span class="who">eszter</span> <span class="verb">closed</span> <span class="target">WEB-09</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    EVRST admin redesign · mockup · mission console at night · scroll up to review screens 1–6
+</footer>
+
+<script>
+// Live ticking countdown — proves the §3.1 signature moment.
+(function () {
+    const segs = document.querySelectorAll('#countdown .seg');
+    if (!segs.length) return;
+
+    // Target: 23d 14h 06m 41s from now-ish, ticks every second.
+    const target = Date.now() + (23*86400 + 14*3600 + 6*60 + 41) * 1000;
+
+    let last = ['', '', '', ''];
+    function tick() {
+        const ms = Math.max(0, target - Date.now());
+        const s = Math.floor(ms / 1000);
+        const d = Math.floor(s / 86400);
+        const h = Math.floor((s % 86400) / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const ss = s % 60;
+        const vals = [d, h, m, ss].map(n => String(n).padStart(2, '0'));
+        vals.forEach((v, i) => {
+            if (last[i] !== v) {
+                segs[i].textContent = v;
+                segs[i].classList.remove('flip');
+                void segs[i].offsetWidth;
+                segs[i].classList.add('flip');
+                last[i] = v;
+            }
+        });
+    }
+    tick();
+    setInterval(tick, 1000);
+})();
+
+// Manual dark/light toggle (force-dark default + manual switch).
+(function () {
+    const root = document.documentElement;
+    const buttons = document.querySelectorAll('#theme-toggle button');
+    buttons.forEach(b => b.addEventListener('click', () => {
+        const theme = b.dataset.theme;
+        root.classList.toggle('light', theme === 'light');
+        buttons.forEach(x => x.classList.toggle('active', x === b));
+    }));
+})();
+</script>
+
+</body>
+</html>
