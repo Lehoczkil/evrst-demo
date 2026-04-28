@@ -107,32 +107,153 @@ html:not(.dark) .fi-body::before {
     -webkit-backdrop-filter: var(--evrst-blur);
     border-bottom: 1px solid var(--evrst-border) !important;
     box-shadow: none !important;
+    height: 56px;
 }
+.fi-topbar > nav { padding: 0 1.25rem !important; gap: 1rem; }
+.fi-topbar .fi-topbar-end { gap: .35rem !important; }
 .fi-topbar .fi-logo {
     display: flex;
     align-items: center;
     gap: .5rem;
 }
 .fi-topbar .fi-logo img {
-    height: 1.6rem !important;
+    height: 24px !important;
     width: auto;
 }
 .fi-topbar .fi-input-wrp,
 .fi-global-search-field .fi-input-wrp {
     border-radius: 999px !important;
     background: rgba(255,255,255,.02);
-    border: 1px solid var(--evrst-border);
+    border: 1px solid var(--evrst-border) !important;
+    height: 36px;
 }
 .fi-topbar .fi-input-wrp:focus-within,
 .fi-global-search-field .fi-input-wrp:focus-within {
-    border-color: var(--evrst-border-amber);
-    box-shadow: 0 0 0 3px var(--evrst-accent-soft);
+    border-color: var(--evrst-border-amber) !important;
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+/* fi-topbar-end is the right cluster; flip it to flex with the search
+   leading + ordered children so notifications sit immediately next to
+   the user menu (per the latest mockup). */
+.fi-topbar-end {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    align-items: center !important;
+    gap: .5rem !important;
+    margin-left: auto !important;
+}
+/* Global search — fixed-width pill anchored to the LEFT of the topbar
+   (right after the brand). `margin-right: auto` pushes the rest of
+   the right cluster (locale / bell / KB) to the far right. */
+.fi-global-search,
+.fi-topbar-end > [wire\:id]:has(.fi-global-search-field),
+.fi-topbar-end form[wire\:submit*="globalSearch"] {
+    flex: 0 0 360px !important;
+    max-width: 360px !important;
+    width: 360px !important;
+    margin: 0 auto 0 .5rem !important;
+    order: 1 !important;
+}
+.fi-global-search-field { width: 100% !important; }
+.fi-global-search-field .fi-input-wrp { height: 36px !important; width: 100% !important; }
+
+/* Locale switcher comes after the search but before the bell. */
+.fi-topbar [role="group"][aria-label] { order: 2 !important; }
+
+/* Notifications bell sits IMMEDIATELY to the LEFT of the user menu /
+   profile avatar. The Livewire wrapper around the bell is .fi-no-database
+   — we target that directly so the order applies to the flex child. */
+.fi-no-database,
+.fi-topbar-end > .fi-no-database,
+.fi-topbar-end > [wire\:id]:has(.fi-topbar-database-notifications-trigger),
+.fi-topbar-end > [wire\:id]:has(.fi-no-database) {
+    order: 3 !important;
+}
+.fi-user-menu,
+.fi-user-menu-trigger,
+.fi-topbar-end > .fi-user-menu,
+.fi-topbar-end > [x-data]:has(.fi-user-menu-trigger) {
+    order: 4 !important;
+}
+
+/* Hide topbar chrome the mockup drops: desktop-view toggle and the
+   bug-report shortcut. Functionality lives elsewhere — bug reports
+   stay reachable from the Bugs resource in the sidebar. */
+#evrst-desktop-toggle,
+.fi-topbar a[href*="bug-reports/create"] {
+    display: none !important;
+}
+.fi-global-search-field input,
+.fi-global-search-field input::placeholder {
+    font-family: var(--evrst-mono);
+    font-size: 0.72rem;
+    letter-spacing: .04em;
+}
+.fi-global-search-field input::placeholder {
+    color: var(--evrst-text-dim) !important;
+    opacity: 1 !important;
 }
 .fi-topbar .fi-icon-btn {
     border-radius: var(--evrst-r-md) !important;
     color: var(--evrst-text-muted);
 }
 .fi-topbar .fi-icon-btn:hover { color: var(--evrst-text); }
+
+/* Trailing toolbar: locale switcher (EN/HU) + bug-report shortcut.
+   Blade ships inline styles for both — override here so they share the
+   topbar's mono-pill chrome and respond to dark/light tokens. */
+.fi-topbar [role="group"][aria-label] {
+    display: inline-flex !important;
+    gap: 0 !important;
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: 999px !important;
+    overflow: hidden;
+    background: rgba(255,255,255,.02);
+    height: 28px;
+    align-items: stretch;
+}
+.fi-topbar [role="group"][aria-label] form { margin: 0; line-height: 0; }
+.fi-topbar [role="group"][aria-label] form button {
+    height: 26px !important;
+    min-width: 36px !important;
+    padding: 0 .65rem !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--evrst-text-muted) !important;
+    font-family: var(--evrst-mono) !important;
+    font-size: .62rem !important;
+    font-weight: 600 !important;
+    letter-spacing: .12em !important;
+    text-transform: uppercase;
+    box-shadow: none !important;
+    transition: background-color .12s ease, color .12s ease;
+}
+.fi-topbar [role="group"][aria-label] form button[aria-pressed="true"] {
+    background: var(--evrst-accent-soft) !important;
+    color: var(--evrst-accent) !important;
+}
+.fi-topbar [role="group"][aria-label] form button:hover {
+    background: rgba(255,255,255,.04) !important;
+    color: var(--evrst-text) !important;
+}
+.fi-topbar [role="group"][aria-label] form button[aria-pressed="true"]:hover {
+    background: var(--evrst-accent-soft) !important;
+    color: var(--evrst-accent) !important;
+}
+.fi-topbar [role="group"][aria-label] form + form button { border-left: 1px solid var(--evrst-border) !important; }
+
+/* Bug-report button: keep it as a 32px circular icon hit-area but pull
+   the colour from the theme tokens. */
+.fi-topbar a[aria-label][title][href*="bug-report"],
+.fi-topbar a[href*="bug-reports/create"] {
+    color: var(--evrst-text-muted) !important;
+    border-radius: 999px !important;
+}
+.fi-topbar a[href*="bug-reports/create"]:hover {
+    color: var(--evrst-text) !important;
+    background: rgba(255,255,255,.04) !important;
+}
 
 /* ---------- Sidebar ------------------------------------------------ */
 
@@ -144,25 +265,56 @@ html:not(.dark) .fi-body::before {
     border-right: 1px solid var(--evrst-border) !important;
     box-shadow: none !important;
 }
+.fi-sidebar-nav { padding: .5rem .5rem !important; }
 .fi-sidebar-header,
 .fi-sidebar-header > * {
     background: transparent !important;
     border-bottom-color: var(--evrst-border) !important;
 }
-.fi-sidebar-group-label {
+/* Tight, mockup-style sidebar: static group labels (no collapse
+   chevron), small gaps, 36px nav items. */
+.fi-sidebar-nav-groups,
+.fi-sidebar-nav-group { gap: .25rem !important; }
+.fi-sidebar-group { padding: .25rem 0 0 !important; margin: 0 !important; }
+.fi-sidebar-group-label-ctn,
+.fi-sidebar-group-label,
+.fi-sidebar-group-button {
     font-family: var(--evrst-mono);
     font-size: 0.6rem !important;
-    letter-spacing: .12em;
+    font-weight: 600 !important;
+    letter-spacing: .14em !important;
     text-transform: uppercase;
     color: var(--evrst-text-dim) !important;
-    padding-top: 1rem !important;
+    padding: .65rem .5rem .35rem !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    cursor: default !important;
+    box-shadow: none !important;
+    pointer-events: none;
 }
+/* Hide the collapse chevron so groups read as static labels. */
+.fi-sidebar-group-collapse-button,
+.fi-sidebar-group-button .fi-icon,
+.fi-sidebar-group-button svg {
+    display: none !important;
+}
+.fi-sidebar-group-items {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem !important;
+    margin-top: .1rem;
+}
+.fi-sidebar-item { padding: 0 !important; }
 .fi-sidebar-item-btn {
     position: relative;
     border-radius: var(--evrst-r-md) !important;
-    height: 36px;
+    height: 36px !important;
+    padding: .35rem .6rem !important;
     color: var(--evrst-text-muted) !important;
     transition: all .12s ease;
+    gap: .65rem !important;
+    font-size: 0.825rem !important;
 }
 .fi-sidebar-item-btn:hover {
     background: rgba(255,255,255,.03) !important;
@@ -182,7 +334,17 @@ html:not(.dark) .fi-body::before {
     background: var(--evrst-accent);
     border-radius: 2px;
 }
-.fi-sidebar-item-icon { color: inherit !important; }
+.fi-sidebar-item-icon,
+.fi-sidebar-item-btn .fi-icon,
+.fi-sidebar-item-btn svg {
+    color: inherit !important;
+    width: 16px !important;
+    height: 16px !important;
+    opacity: .85;
+    flex-shrink: 0;
+}
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+.fi-sidebar-item-btn[aria-current="page"] .fi-sidebar-item-icon { opacity: 1; }
 .fi-sidebar-item-badge { background: var(--evrst-accent) !important; color: var(--evrst-accent-text) !important; }
 
 /* Help-pill (?) injected next to sidebar items by help-modal hook —
@@ -204,6 +366,17 @@ html:not(.dark) .fi-body::before {
     flex-shrink: 0;
 }
 .evrst-help-pill:hover { color: var(--evrst-text); border-color: var(--evrst-border-strong); }
+
+/* When the sidebar is collapsed (Filament drops `.fi-sidebar-open`),
+   hide the entire sidebar — the topbar chevron stays as the only way
+   to bring it back. */
+.fi-sidebar:not(.fi-sidebar-open) {
+    width: 0 !important;
+    min-width: 0 !important;
+    border-right: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+}
 
 /* ---------- Page header ------------------------------------------- */
 
@@ -228,6 +401,47 @@ html:not(.dark) .fi-body::before {
     letter-spacing: .04em;
 }
 
+/* ---------- Auto-card unwrapped resource forms -------------------- */
+
+/* On Create / Edit pages where the resource's form schema doesn't
+   already wrap fields in a Section, paint the bare form as a single
+   glass card so it reads as a discrete surface — matches the rest of
+   the panels (TaskForm, BugReportForm, EventForm) which are already
+   sectioned. The :has() guard skips any form that already supplies
+   its own sections. */
+.fi-resource-create-record-page form:not(:has(.fi-section)):not(:has(.fi-fo-section)),
+.fi-resource-edit-record-page form:not(:has(.fi-section)):not(:has(.fi-fo-section)),
+.fi-page-form-wrapper form:not(:has(.fi-section)):not(:has(.fi-fo-section)) {
+    background: var(--evrst-glass) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+    padding: 1.5rem !important;
+}
+
+/* ---------- Table group rows polish ------------------------------- */
+
+/* `Status: Done` etc. dividers in the Tasks list. Tighten the chrome
+   so they read as labels, not full-row banners. */
+.fi-ta-group-header,
+.fi-ta-group-header-cell,
+tr.fi-ta-group-header,
+tr.fi-ta-group-header-row {
+    background: rgba(255,255,255,.02) !important;
+    border-top: 1px solid var(--evrst-border) !important;
+    border-bottom: 1px solid var(--evrst-border) !important;
+    color: var(--evrst-text-muted) !important;
+    font-family: var(--evrst-mono) !important;
+    font-size: 0.62rem !important;
+    letter-spacing: .14em !important;
+    text-transform: uppercase;
+}
+html:not(.dark) .fi-ta-group-header,
+html:not(.dark) tr.fi-ta-group-header {
+    background: rgba(15,23,42,.02) !important;
+}
+
 /* ---------- Sections / cards / panels ----------------------------- */
 
 .fi-section,
@@ -240,6 +454,19 @@ html:not(.dark) .fi-body::before {
     border: 1px solid var(--evrst-border) !important;
     border-radius: var(--evrst-r-md) !important;
     box-shadow: none !important;
+}
+
+/* When two cards/sections sit side-by-side in a Filament grid row,
+   stretch each section to the row's tallest sibling so their bottoms
+   line up. Scoped narrowly to grid containers so we don't disturb
+   form-field wrappers (which are also `.fi-fo-component-ctn`). */
+.fi-grid > .fi-section,
+.fi-grid > .fi-fo-section,
+.fi-grid-col > .fi-section,
+.fi-grid-col > .fi-fo-section,
+.fi-fo-component-ctn:has(> .fi-section),
+.fi-fo-component-ctn:has(> .fi-fo-section) {
+    height: 100%;
 }
 .fi-section-header,
 .fi-section .fi-header,
@@ -387,24 +614,53 @@ html:not(.dark) .fi-body::before {
 
 /* ---------- Modal -------------------------------------------------- */
 
-.fi-modal-window {
+/* Filament's compiled CSS paints `.fi-modal-window` with a Tailwind
+   ring (`box-shadow: 0 0 0 1px ...`) that drowns out a plain border on
+   dark surfaces. We override BOTH the box-shadow ring and the border
+   so the white hairline is unambiguous, matching the help modal. */
+html .fi-modal .fi-modal-window,
+html .fi-modal-window,
+html .fi-modal-window-ctn .fi-modal-window,
+.fi-modal[data-fi-modal-id] .fi-modal-window {
     background: var(--evrst-glass-strong) !important;
     backdrop-filter: var(--evrst-blur);
     -webkit-backdrop-filter: var(--evrst-blur);
-    border: 1px solid var(--evrst-border) !important;
+    border: 1px solid rgba(255,255,255,.85) !important;
     border-radius: var(--evrst-r-lg) !important;
-    box-shadow: 0 24px 80px rgba(0,0,0,.6) !important;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,.85),
+        0 24px 80px rgba(0,0,0,.6) !important;
+    overflow: hidden;
+}
+html:not(.dark) .fi-modal .fi-modal-window,
+html:not(.dark) .fi-modal-window,
+html:not(.dark) .fi-modal-window-ctn .fi-modal-window {
+    border-color: rgba(15,23,42,.25) !important;
+    box-shadow:
+        0 0 0 1px rgba(15,23,42,.25),
+        0 24px 80px rgba(0,0,0,.18) !important;
 }
 .fi-modal-header { border-bottom-color: var(--evrst-border) !important; }
 .fi-modal-footer { border-top-color: var(--evrst-border) !important; background: transparent !important; }
 
-/* Help modal already mounted globally — leave its custom shell alone
-   except align tokens. */
-.evrst-help-modal {
+/* Help modal already mounted globally — small white hairline border
+   so the dialog reads as a discrete card against the dimmed page. */
+.evrst-help-modal,
+.evrst-help-modal-content,
+.evrst-help-modal > .evrst-help-modal-window,
+[id*="evrst-help"][role="dialog"],
+[id*="evrst-help"] .fi-modal-window {
     background: var(--evrst-glass-strong) !important;
-    border: 1px solid var(--evrst-border) !important;
+    border: 1px solid rgba(255,255,255,.85) !important;
     border-radius: var(--evrst-r-lg) !important;
     box-shadow: 0 24px 80px rgba(0,0,0,.6);
+    overflow: hidden;
+}
+html:not(.dark) .evrst-help-modal,
+html:not(.dark) .evrst-help-modal-content,
+html:not(.dark) [id*="evrst-help"][role="dialog"],
+html:not(.dark) [id*="evrst-help"] .fi-modal-window {
+    border-color: rgba(15,23,42,.18) !important;
 }
 
 /* ---------- Notifications / toast ---------------------------------- */
@@ -503,7 +759,42 @@ html:not(.dark) .fi-body::before {
     border-radius: var(--evrst-r-md) !important;
 }
 
-/* ---------- Mobile glass fallback --------------------------------- */
+/* On desktop (≥1024px) the mobile sidebar search is hidden — only
+   the topbar's global search is visible. */
+@media (min-width: 1024px) {
+    .evrst-sidebar-search { display: none !important; }
+}
+
+/* Below the lg breakpoint the global search moves into the sidebar
+   drawer (rendered via SIDEBAR_NAV_START). Style it as a wide pill at
+   the top of the drawer. Override the topbar's fixed-360px width
+   rules on `.fi-global-search` so it fills the drawer instead. */
+@media (max-width: 1023.98px) {
+    .evrst-sidebar-search {
+        padding: .25rem .25rem .75rem;
+        border-bottom: 1px solid var(--evrst-border);
+        margin-bottom: .5rem;
+    }
+    .evrst-sidebar-search .fi-global-search,
+    .evrst-sidebar-search [wire\:id]:has(.fi-global-search-field) {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        order: initial !important;
+    }
+    .evrst-sidebar-search .fi-input-wrp {
+        border-radius: 999px !important;
+        background: rgba(255,255,255,.02);
+        height: 36px !important;
+        width: 100% !important;
+    }
+    .evrst-sidebar-search .fi-global-search-field {
+        width: 100% !important;
+    }
+}
+
+/* ---------- Mobile glass fallback + layout ----------------------- */
 
 @media (max-width: 720px) {
     :root {
@@ -514,6 +805,145 @@ html:not(.dark) .fi-body::before {
     html:not(.dark) {
         --evrst-glass: rgba(255,255,255,.94);
         --evrst-glass-strong: rgba(255,255,255,.97);
+    }
+
+    /* Topbar: shrink the search + tighten the right cluster so the
+       logo + everything else still fits on a phone width. */
+    .fi-topbar > nav,
+    .fi-topbar { padding: 0 .65rem !important; gap: .5rem !important; }
+
+    /* Filament hides `.fi-topbar-start` (which contains the logo)
+       below `lg` by default — bring it back so mobile users still see
+       the EVRST mark. Drop the desktop sidebar collapse arrow that
+       lives inside it. */
+    .fi-topbar-start {
+        display: flex !important;
+        align-items: center;
+        margin-right: 0 !important;
+    }
+    .fi-topbar-start .fi-logo { margin-left: .25rem !important; height: 1.5rem !important; }
+
+    /* Hide the desktop sidebar collapse chevrons in the topbar on
+       mobile — but KEEP `.fi-topbar-close-sidebar-btn`, which is the
+       close (X) button Filament swaps in for the hamburger when the
+       drawer is open. Hiding it leaves no visible toggle. */
+    .fi-topbar-collapse-sidebar-btn-ctn,
+    .fi-topbar-open-collapse-sidebar-btn,
+    .fi-topbar-close-collapse-sidebar-btn {
+        display: none !important;
+    }
+
+    /* User-menu trigger / avatar must be a perfect circle on mobile —
+       Filament's default sets a square hit area; collapse to circular
+       and keep the inner avatar img round too. */
+    .fi-topbar .fi-user-menu-trigger,
+    .fi-topbar .fi-user-menu-trigger > .fi-avatar,
+    .fi-topbar .fi-user-menu-trigger img,
+    .fi-topbar .fi-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        border-radius: 999px !important;
+        aspect-ratio: 1 / 1 !important;
+        object-fit: cover !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Topbar global search is hidden below lg (it lives in the sidebar
+       drawer instead), so the cluster justifies to the end. */
+    .fi-topbar-end {
+        gap: .25rem !important;
+        justify-content: flex-end !important;
+    }
+    .fi-topbar [role="group"][aria-label] { display: none !important; }
+    .fi-topbar .fi-icon-btn,
+    .fi-topbar .fi-user-menu-trigger { width: 30px !important; height: 30px !important; }
+
+    /* Page padding pulls in so cards aren't pushed off-screen. */
+    .fi-main, .fi-page { padding-left: .75rem !important; padding-right: .75rem !important; }
+    .fi-main > * { max-width: 100% !important; }
+}
+
+/* Below the lg breakpoint the global-search is relocated into the
+   sidebar drawer (see filament/hooks/sidebar-search.blade.php). Hide
+   it only while it's still inside the topbar — once moved, it lives
+   in `.evrst-sidebar-search` and must remain visible. */
+@media (max-width: 1023.98px) {
+    .fi-topbar .fi-global-search,
+    .fi-topbar-end > [wire\:id]:has(.fi-global-search-field) {
+        display: none !important;
+    }
+    .evrst-sidebar-search .fi-global-search,
+    .evrst-sidebar-search [wire\:id]:has(.fi-global-search-field) {
+        display: block !important;
+    }
+}
+
+/* ---------- Mobile: page-level responsiveness -------------------- */
+
+@media (max-width: 720px) {
+    /* Tables — let them scroll horizontally instead of overflowing the
+       page. Filament wraps `.fi-ta` in `.fi-ta-ctn`; force the scroll
+       on the inner content area. */
+    .fi-ta-ctn,
+    .fi-ta-content-ctn,
+    .fi-ta-content {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    .fi-ta-content table { min-width: 540px; }
+
+    /* Filament page header: collapse heading row + actions onto two
+       lines so headings don't truncate behind the action buttons. */
+    .fi-header,
+    .fi-page-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: .65rem !important;
+    }
+    .fi-header-heading,
+    .fi-page-header-heading {
+        font-size: 1.15rem !important;
+    }
+    .fi-header-actions {
+        width: 100%;
+        flex-wrap: wrap !important;
+    }
+
+    /* Form-grid columns collapse to single column on phones — Filament
+       already does some of this through its own breakpoints, but our
+       12-col forms occasionally render side-by-side fields that
+       collide. */
+    .fi-fo-component-ctn,
+    .fi-sc-component-ctn {
+        grid-column: span 12 / span 12 !important;
+    }
+    .fi-section,
+    .fi-fo-section { padding: 1rem !important; }
+    .fi-section-content,
+    .fi-fo-section-content { padding: 0 !important; }
+
+    /* Custom kanban + calendar grids — collapse to single column to
+       avoid horizontal overflow. SortableJS still works inside a
+       single-column list. */
+    .evrst-kanban-grid,
+    .evrst-calendar-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Action button rows in toolbars wrap. */
+    .fi-ta-actions,
+    .fi-ac { flex-wrap: wrap !important; }
+}
+
+@media (max-width: 480px) {
+    /* Compact title font + tighter page padding on phones. */
+    .fi-header-heading,
+    .fi-page-header-heading { font-size: 1rem !important; }
+    .fi-main, .fi-page {
+        padding-left: .5rem !important;
+        padding-right: .5rem !important;
     }
 }
 
@@ -528,12 +958,31 @@ html:not(.dark) .fi-body::before {
         var(--evrst-glass-strong);
     backdrop-filter: var(--evrst-blur);
     -webkit-backdrop-filter: var(--evrst-blur);
-    padding: 1.25rem 1.5rem;
+    padding: 1.5rem 1.75rem;
     display: flex;
     align-items: center;
     gap: 2rem;
     position: relative;
     overflow: hidden;
+    margin-bottom: .25rem;
+    flex-wrap: wrap;
+}
+@media (max-width: 720px) {
+    .evrst-countdown {
+        padding: 1rem 1.1rem;
+        gap: .75rem;
+    }
+    .evrst-countdown .evrst-countdown-digits {
+        font-size: 1.6rem !important;
+    }
+    .evrst-countdown .evrst-countdown-meta {
+        text-align: left !important;
+        margin-left: 0 !important;
+        width: 100%;
+    }
+    .evrst-countdown .evrst-countdown-event {
+        font-size: 0.8rem !important;
+    }
 }
 .evrst-countdown::after {
     content: '';
@@ -561,18 +1010,24 @@ html:not(.dark) .fi-body::before {
     gap: .25rem;
 }
 .evrst-countdown.evrst-standby .evrst-countdown-digits {
-    color: var(--evrst-text-muted);
-    opacity: .85;
+    color: var(--evrst-text);
+    opacity: .55;
+}
+.evrst-countdown.evrst-standby .evrst-countdown-event {
+    color: var(--evrst-accent);
+    letter-spacing: .12em;
 }
 
 /* Filament wraps every widget in `.fi-wi`. The countdown owns its full
-   chrome, so strip the wrapper's padding/border for that one widget. */
-.fi-wi:has(> .evrst-countdown),
-.fi-wi:has(> * > .evrst-countdown) {
+   chrome, so strip the wrapper's padding/border for that one widget,
+   and force it to span the entire grid no matter how many columns the
+   dashboard layout uses. */
+.fi-wi:has(.evrst-countdown) {
     background: transparent !important;
     border: 0 !important;
     padding: 0 !important;
     backdrop-filter: none !important;
+    grid-column: 1 / -1 !important;
 }
 .evrst-countdown .evrst-countdown-digits .sep { color: var(--evrst-text-dim); font-weight: 400; }
 .evrst-countdown .evrst-countdown-digits .unit {
@@ -607,6 +1062,167 @@ html:not(.dark) .fi-body::before {
     100% { transform: translateY(0); opacity: 1; }
 }
 .evrst-countdown .seg.flip { animation: evrstTickFlip 220ms cubic-bezier(.16,1,.3,1); }
+
+/* ---------- Dashboard tiles (custom page) ------------------------- */
+
+.evrst-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+@media (max-width: 900px) {
+    .evrst-tile-grid { grid-template-columns: 1fr; gap: .75rem; }
+}
+.evrst-tile {
+    border: 1px solid var(--evrst-border);
+    border-radius: var(--evrst-r-md);
+    background: var(--evrst-glass);
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    transition: border-color .12s ease;
+    min-width: 0;
+}
+@media (max-width: 720px) {
+    .evrst-tile { padding: 1rem 1.1rem; }
+    .evrst-tile-big { font-size: 1.35rem !important; flex-wrap: wrap; }
+}
+.evrst-tile:hover { border-color: var(--evrst-border-strong); }
+.evrst-tile-heading {
+    font-family: var(--evrst-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--evrst-text-muted);
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-bottom: .15rem;
+}
+.evrst-tile-count {
+    color: var(--evrst-text-dim);
+    font-weight: 500;
+    letter-spacing: .08em;
+}
+.evrst-tile-big {
+    font-family: var(--evrst-mono);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--evrst-text);
+    display: flex;
+    align-items: baseline;
+    gap: .65rem;
+}
+.evrst-tile-delta {
+    font-family: var(--evrst-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: .04em;
+}
+.evrst-tile-delta.evrst-success { color: var(--evrst-success); }
+.evrst-tile-delta.evrst-amber { color: var(--evrst-accent); }
+.evrst-tile-empty {
+    color: var(--evrst-text-muted);
+    font-size: 0.825rem;
+    margin: 0;
+}
+.evrst-tile-rows {
+    display: flex;
+    flex-direction: column;
+}
+.evrst-tile-row {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem 0;
+    border-bottom: 1px solid var(--evrst-border);
+    font-size: 0.825rem;
+    color: var(--evrst-text);
+    text-decoration: none;
+    transition: color .12s ease;
+    min-width: 0;
+}
+@media (max-width: 720px) {
+    .evrst-tile-row { font-size: 0.78rem; gap: .5rem; }
+    .evrst-tile-row-meta { font-size: 0.6rem !important; }
+}
+.evrst-tile-row:last-child { border-bottom: 0; }
+.evrst-tile-row:hover { color: var(--evrst-accent); }
+.evrst-tile-row-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.evrst-tile-row-sub {
+    color: var(--evrst-text-muted);
+    font-weight: 400;
+}
+.evrst-tile-row-target {
+    font-family: var(--evrst-mono);
+    font-size: 0.72rem;
+    color: var(--evrst-accent);
+}
+.evrst-tile-row-meta {
+    font-family: var(--evrst-mono);
+    font-size: 0.65rem;
+    letter-spacing: .08em;
+    color: var(--evrst-text-muted);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Dots — single source of truth for status colours. */
+.evrst-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+}
+.evrst-dot-amber { background: var(--evrst-accent); box-shadow: 0 0 6px var(--evrst-accent-soft); }
+.evrst-dot-danger { background: var(--evrst-danger); }
+.evrst-dot-info { background: var(--evrst-info); }
+.evrst-dot-success { background: var(--evrst-success); }
+.evrst-dot-muted { background: var(--evrst-text-dim); }
+
+/* Quick actions tile. */
+.evrst-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: .5rem;
+}
+@media (max-width: 480px) {
+    .evrst-quick-actions { grid-template-columns: 1fr; }
+}
+.evrst-qa {
+    border: 1px solid var(--evrst-border);
+    background: transparent;
+    color: var(--evrst-text);
+    padding: .55rem .75rem;
+    border-radius: var(--evrst-r-md);
+    font-size: 0.825rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    transition: all .12s ease;
+}
+.evrst-qa:hover {
+    border-color: var(--evrst-border-strong);
+    background: var(--evrst-surface-raised);
+    color: var(--evrst-text);
+}
+.evrst-qa-plus {
+    color: var(--evrst-accent);
+    font-family: var(--evrst-mono);
+    font-weight: 600;
+}
 
 /* ---------- Login -------------------------------------------------- */
 
@@ -668,7 +1284,298 @@ body, .fi-body { font-weight: 400; }
 /* ---------- Misc --------------------------------------------------- */
 
 ::selection { background: var(--evrst-accent-soft); color: var(--evrst-text); }
+
+/* Default keyboard-only focus ring for elements WITHOUT a custom focus
+   style. We exclude the chrome that already paints its own ring (inputs,
+   buttons, topbar links, sidebar items, brand) so we never double up
+   with the universal outline that produced the rectangle around the
+   pill-shaped search input.
+
+   We use box-shadow on a transparent outline so the ring can follow
+   border-radius — `outline` doesn't reliably do that across browsers. */
 *:focus-visible {
-    outline: 2px solid var(--evrst-border-amber);
+    outline: 2px solid transparent;
     outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--evrst-border-amber);
+}
+.fi-topbar a:focus-visible,
+.fi-topbar button:focus-visible,
+.fi-topbar [role="button"]:focus-visible,
+.fi-sidebar a:focus-visible,
+.fi-sidebar button:focus-visible,
+.fi-sidebar-item-btn:focus-visible,
+.fi-input:focus-visible,
+.fi-input-wrp:focus-within,
+.fi-select-input:focus-visible,
+.fi-textarea-input:focus-visible,
+.fi-btn:focus-visible,
+.fi-icon-btn:focus-visible,
+.fi-logo:focus,
+.fi-logo:focus-visible,
+.fi-logo a:focus,
+.fi-logo a:focus-visible,
+.fi-logo img:focus,
+.fi-logo img:focus-visible,
+.fi-topbar [role="group"][aria-label] form button:focus-visible,
+.fi-topbar a[href*="bug-reports/create"]:focus-visible,
+.evrst-help-pill:focus-visible,
+.evrst-qa:focus-visible,
+.evrst-tile-row:focus-visible {
+    outline: 0 !important;
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+/* Inputs already paint a bottom-border accent on focus — keep that as
+   the visual signal and drop the focus ring entirely. */
+.fi-input:focus-visible,
+.fi-select-input:focus-visible,
+.fi-textarea-input:focus-visible,
+.fi-input-wrp:focus-within {
+    box-shadow: 0 3px 0 -1px var(--evrst-accent-soft) !important;
+}
+/* The global topbar search keeps its pill ring. */
+.fi-global-search-field .fi-input-wrp:focus-within {
+    border-color: var(--evrst-border-amber) !important;
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+/* Brand: never paint a focus ring on the EVRST logo. The screenshot
+   showed the universal outline drawing a yellow square around it. */
+.fi-logo, .fi-logo *,
+.fi-topbar .fi-logo, .fi-topbar .fi-logo * {
+    outline: 0 !important;
+}
+
+/* ---------- Topbar polish (mockup parity) ------------------------- */
+
+/* Icon buttons in the topbar share a 32×32 hit-area with a transparent
+   border baseline that lights up on hover, matching the mockup's
+   .icon-btn treatment. */
+.fi-topbar .fi-icon-btn,
+.fi-topbar .fi-dropdown-trigger > button,
+.fi-topbar .fi-dropdown-trigger > .fi-icon-btn,
+.fi-topbar .fi-user-menu-trigger {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--evrst-r-md) !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: var(--evrst-text-muted) !important;
+    transition: color .12s ease, border-color .12s ease, background-color .12s ease;
+}
+.fi-topbar .fi-icon-btn:hover,
+.fi-topbar .fi-dropdown-trigger > button:hover,
+.fi-topbar .fi-dropdown-trigger > .fi-icon-btn:hover,
+.fi-topbar .fi-user-menu-trigger:hover {
+    color: var(--evrst-text) !important;
+    border-color: var(--evrst-border) !important;
+    background: rgba(255,255,255,.04) !important;
+}
+.fi-topbar .fi-icon-btn:active,
+.fi-topbar .fi-dropdown-trigger > button:active {
+    background: var(--evrst-surface-raised) !important;
+}
+html:not(.dark) .fi-topbar .fi-icon-btn:hover,
+html:not(.dark) .fi-topbar .fi-dropdown-trigger > button:hover {
+    background: rgba(15,23,42,.04) !important;
+}
+
+/* Bug-report button — the inline blade style sets border-radius:9999px;
+   pull it back to the icon-btn radius so it shares chrome with its
+   neighbours (theme/help icons). */
+.fi-topbar a[href*="bug-reports/create"] {
+    border-radius: var(--evrst-r-md) !important;
+    border: 1px solid transparent !important;
+}
+.fi-topbar a[href*="bug-reports/create"]:hover {
+    border-color: var(--evrst-border) !important;
+    background: rgba(255,255,255,.04) !important;
+}
+html:not(.dark) .fi-topbar a[href*="bug-reports/create"]:hover {
+    background: rgba(15,23,42,.04) !important;
+}
+
+/* Avatar / user-menu trigger should sit inside a 28-32px circle. */
+.fi-topbar .fi-avatar,
+.fi-topbar .fi-user-menu-trigger img,
+.fi-topbar .fi-user-menu-trigger .fi-avatar {
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: 999px !important;
+}
+
+/* Topbar global search — keep the search pill 36px tall, centered, and
+   make sure no inner focus square shows up. */
+.fi-topbar .fi-global-search { max-width: 480px; flex: 1 1 auto; }
+.fi-global-search-field .fi-input-wrp { box-shadow: none; }
+.fi-global-search-field .fi-input,
+.fi-global-search-field .fi-input-wrp .fi-input {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    height: 100% !important;
+}
+.fi-global-search-field .fi-input:focus,
+.fi-global-search-field .fi-input:focus-visible {
+    box-shadow: none !important;
+    border: 0 !important;
+}
+
+/* ---------- Sidebar polish (mockup parity) ------------------------ */
+
+@media (min-width: 1024px) {
+    .fi-sidebar { width: 220px !important; }
+}
+.fi-sidebar-nav { padding: 1rem .75rem !important; }
+.fi-sidebar-item-btn {
+    padding: .5rem .65rem !important;
+    gap: .65rem !important;
+}
+/* Hide the desktop sidebar collapse caret/handle that Filament adds in
+   the bottom-left — the mockup has a static rail. */
+.fi-sidebar-collapse-button,
+.fi-sidebar-nav > .fi-sidebar-collapse-button {
+    display: none !important;
+}
+
+/* ---------- Inputs: hover + active states ------------------------- */
+
+/* Hover should highlight the bottom border so the field reads as
+   interactive before the user clicks. */
+.fi-input:hover:not(:focus),
+.fi-select-input:hover:not(:focus),
+.fi-textarea-input:hover:not(:focus),
+.fi-input-wrp:hover:not(:focus-within) {
+    border-bottom-color: var(--evrst-border-strong) !important;
+}
+/* Active (mid-click) — flash the accent. */
+.fi-input:active,
+.fi-select-input:active,
+.fi-textarea-input:active {
+    border-bottom-color: var(--evrst-accent) !important;
+}
+
+/* Native <select> arrow tints — keep readable in dark. */
+.fi-select-input,
+select.fi-input {
+    color: var(--evrst-text) !important;
+    background-color: transparent !important;
+}
+.fi-select-input option,
+select.fi-input option {
+    background-color: var(--evrst-surface-solid) !important;
+    color: var(--evrst-text) !important;
+}
+
+/* Checkboxes / radios. */
+.fi-checkbox-input,
+.fi-radio-input,
+input[type="checkbox"].fi-input,
+input[type="radio"].fi-input {
+    border: 1px solid var(--evrst-border-strong) !important;
+    background: transparent !important;
+    transition: border-color .12s ease, background-color .12s ease;
+}
+.fi-checkbox-input:hover,
+.fi-radio-input:hover,
+input[type="checkbox"].fi-input:hover,
+input[type="radio"].fi-input:hover {
+    border-color: var(--evrst-accent) !important;
+}
+.fi-checkbox-input:checked,
+.fi-radio-input:checked,
+input[type="checkbox"].fi-input:checked,
+input[type="radio"].fi-input:checked {
+    background-color: var(--evrst-accent) !important;
+    border-color: var(--evrst-accent) !important;
+}
+.fi-checkbox-input:focus-visible,
+.fi-radio-input:focus-visible {
+    outline: 0 !important;
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+
+/* Toggle switch hover */
+.fi-fo-toggle [role="switch"] {
+    transition: background-color .12s ease, box-shadow .12s ease;
+}
+.fi-fo-toggle [role="switch"]:hover { box-shadow: 0 0 0 3px var(--evrst-accent-soft); }
+.fi-fo-toggle [role="switch"]:focus-visible {
+    outline: 0 !important;
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+
+/* ---------- Buttons: hover/active/focus parity -------------------- */
+
+.fi-btn { transition: background-color .12s ease, border-color .12s ease, filter .12s ease, color .12s ease; }
+.fi-btn-color-gray:hover {
+    background: var(--evrst-surface-raised) !important;
+    border-color: var(--evrst-border-strong) !important;
+    color: var(--evrst-text) !important;
+}
+.fi-btn-color-gray:active { filter: brightness(0.95); }
+.fi-btn-color-primary:hover { filter: brightness(1.08); }
+.fi-btn-color-primary:active { filter: brightness(0.95); }
+.fi-btn:focus-visible {
+    outline: 0 !important;
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+
+/* Generic icon-button hover for table/action cells. */
+.fi-icon-btn {
+    transition: color .12s ease, background-color .12s ease, border-color .12s ease;
+    color: var(--evrst-text-muted);
+}
+.fi-icon-btn:hover {
+    color: var(--evrst-text) !important;
+    background: var(--evrst-surface-raised) !important;
+}
+.fi-icon-btn:active { background: rgba(255,255,255,.06) !important; }
+.fi-icon-btn:focus-visible {
+    outline: 0 !important;
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+
+/* Table search input + filter chips polish. */
+.fi-ta-search .fi-input-wrp,
+.fi-ta-search-field .fi-input-wrp {
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.02);
+}
+.fi-ta-search .fi-input-wrp:focus-within,
+.fi-ta-search-field .fi-input-wrp:focus-within {
+    border-color: var(--evrst-border-amber) !important;
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+html:not(.dark) .fi-ta-search .fi-input-wrp,
+html:not(.dark) .fi-ta-search-field .fi-input-wrp {
+    background: rgba(15,23,42,.02);
+}
+
+.fi-ta-filter-pills button,
+.fi-ta-filter-indicator {
+    border-radius: 999px !important;
+    transition: border-color .12s ease, background-color .12s ease, color .12s ease;
+}
+.fi-ta-filter-pills button:hover {
+    border-color: var(--evrst-border-strong) !important;
+    background: var(--evrst-surface-raised) !important;
+}
+
+/* Dropdown items: clickable rows already get a bg on hover; add an
+   active flash so clicks feel tactile. */
+.fi-dropdown-list-item { transition: background-color .12s ease; }
+.fi-dropdown-list-item:active { background: var(--evrst-accent-soft) !important; color: var(--evrst-accent) !important; }
+
+/* Sidebar items: active state for click. */
+.fi-sidebar-item-btn:active { background: var(--evrst-accent-soft) !important; }
+
+/* Locale switcher (topbar): the inline blade gap collides with our
+   joined-pill design. Force a flush layout — already handled — but
+   make sure the active pill keeps its colour through hover/focus. */
+.fi-topbar [role="group"][aria-label] form button:focus-visible {
+    outline: 0 !important;
+    box-shadow: inset 0 0 0 2px var(--evrst-accent-soft) !important;
+}
+.fi-topbar [role="group"][aria-label] form button:active {
+    background: var(--evrst-accent-soft) !important;
+    color: var(--evrst-accent) !important;
 }
