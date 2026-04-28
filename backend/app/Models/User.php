@@ -48,6 +48,19 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
+     * Look up the TeamMember row that points at this user via
+     * payload.user.id. There's no FK in the schema (TeamMember is a
+     * JSON-payload Resource) so we filter the resources table directly.
+     * Returns null when the user hasn't been linked to a member yet.
+     */
+    public function teamMember(): ?\App\Models\Cms\TeamMember
+    {
+        return \App\Models\Cms\TeamMember::query()
+            ->whereRaw("json_extract(payload, '$.user.id') = ?", [$this->id])
+            ->first();
+    }
+
+    /**
      * Permission check. When called with a key shaped like our Perm::*
      * constants (`<resource>.<action>`) we look it up against the user's
      * role. Anything else is delegated to the framework so Laravel Gates

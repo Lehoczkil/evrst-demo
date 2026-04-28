@@ -25,6 +25,25 @@ class TeamMemberForm
                     ->email()
                     ->maxLength(180)
                     ->columnSpan(['default' => 12, 'md' => 6]),
+                TextInput::make('private_email')
+                    ->label(__('admin.team.private_email'))
+                    ->email()
+                    ->maxLength(180)
+                    ->helperText(__('admin.team.private_email_help'))
+                    ->columnSpan(['default' => 12, 'md' => 6]),
+                TextInput::make('discord_name')
+                    ->label(__('admin.team.discord'))
+                    ->maxLength(64)
+                    ->placeholder('e.g. balint_klabacsek')
+                    ->prefix('@')
+                    ->helperText(__('admin.team.discord_help'))
+                    ->columnSpan(['default' => 12, 'md' => 6]),
+                Select::make('user_id')
+                    ->label(__('admin.team.linked_user'))
+                    ->options(fn () => User::orderBy('name')->pluck('name', 'id')->all())
+                    ->searchable()
+                    ->preload()
+                    ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('degree_en')
                     ->label(__('admin.team.degree') . ' (EN)')
                     ->maxLength(120)
@@ -33,12 +52,6 @@ class TeamMemberForm
                     ->label(__('admin.team.degree') . ' (HU)')
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 3]),
-                Select::make('user_id')
-                    ->label(__('admin.team.linked_user'))
-                    ->options(fn () => User::orderBy('name')->pluck('name', 'id')->all())
-                    ->searchable()
-                    ->preload()
-                    ->columnSpan(['default' => 12, 'md' => 6]),
                 ...MemberPositionFields::components(),
                 TextInput::make('position')
                     ->label(__('admin.sponsors.sort_order'))

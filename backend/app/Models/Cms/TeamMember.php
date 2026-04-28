@@ -57,6 +57,27 @@ class TeamMember extends CollectionResource
         );
     }
 
+    /** Member's Discord handle (e.g. balint_klabacsek). Stored under
+     *  payload.discord — surfaced in the team-member edit form so we
+     *  can ping the right person from the build channel. */
+    protected function discordName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->readPayload('discord'),
+            set: fn ($value) => $this->writePayload('discord', $value),
+        );
+    }
+
+    /** Member's private contact email — kept separate from the EVRST
+     *  account email so we can reach them outside the panel. */
+    protected function privateEmail(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->readPayload('private_email'),
+            set: fn ($value) => $this->writePayload('private_email', $value),
+        );
+    }
+
     /**
      * Virtual position_ids attribute — round-trips through payload.positions:
      *   read  → array of UUIDs from payload.positions[*].id

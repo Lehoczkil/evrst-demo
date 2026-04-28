@@ -35,6 +35,13 @@ class TeamMembersTable
                     ->copyable()
                     ->color('gray')
                     ->toggleable(),
+                TextColumn::make('discord_name')
+                    ->label(__('admin.team.discord'))
+                    ->state(fn ($record) => $record->payload['discord'] ?? null)
+                    ->prefix('@')
+                    ->color('gray')
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('degree')
                     ->label(__('admin.team.degree'))
                     ->color('gray')
