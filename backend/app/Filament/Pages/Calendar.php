@@ -4,10 +4,12 @@ namespace App\Filament\Pages;
 
 use App\Filament\Resources\Cms\AboutProjects\AboutProjectResource;
 use App\Filament\Resources\Tasks\TaskResource;
+use App\Jobs\PostDiscordWebhook;
 use App\Models\CalendarEvent;
 use App\Models\Cms\AboutProject;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\DiscordPayloads;
 use BackedEnum;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -324,8 +326,11 @@ class Calendar extends Page
             $event->update($payload);
             Notification::make()->title(__('admin.calendar.modal.updated'))->success()->send();
         } else {
-            CalendarEvent::create($payload);
+            $event = CalendarEvent::create($payload);
             Notification::make()->title(__('admin.calendar.modal.created'))->success()->send();
+
+            $discord = DiscordPayloads::newCalendarEvent($event);
+            PostDiscordWebhook::dispatch($discord['content'], $discord['embed'], $discord['reference']);
         }
 
         $this->closeFormModal();

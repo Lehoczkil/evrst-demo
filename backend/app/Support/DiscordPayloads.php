@@ -2,9 +2,11 @@
 
 namespace App\Support;
 
+use App\Filament\Pages\Calendar;
 use App\Filament\Resources\Cms\Events\EventResource;
 use App\Filament\Resources\MemberApplications\MemberApplicationResource;
 use App\Filament\Resources\Tasks\TaskResource;
+use App\Models\CalendarEvent;
 use App\Models\Cms\Event;
 use App\Models\MemberApplication;
 use App\Models\Task;
@@ -118,6 +120,40 @@ class DiscordPayloads
                 'timestamp' => optional($event->created_at)->toIso8601String(),
             ],
             'reference' => 'event:' . $event->id,
+        ];
+    }
+
+    /** @return array{content: string, embed: array<string, mixed>, reference: string} */
+    public static function newCalendarEvent(CalendarEvent $event): array
+    {
+        $when = null;
+        if ($event->start_at) {
+            $when = $event->start_at->translatedFormat($event->all_day ? 'd M Y' : 'd M Y H:i');
+            if ($event->end_at) {
+                $sameDay = $event->start_at->isSameDay($event->end_at);
+                $endFmt = $event->all_day || $sameDay
+                    ? ($event->all_day ? 'd M Y' : 'H:i')
+                    : 'd M Y H:i';
+                if ($event->end_at->ne($event->start_at)) {
+                    $when .= ' — ' . $event->end_at->translatedFormat($endFmt);
+                }
+            }
+        }
+
+        return [
+            'content' => '📅 New event added to the calendar',
+            'embed' => [
+                'title' => $event->title,
+                'description' => Str::limit((string) ($event->description ?? ''), 200) ?: null,
+                'url' => Calendar::getUrl(),
+                'color' => self::COLOR_EVENT,
+                'fields' => array_values(array_filter([
+                    $when ? ['name' => 'When', 'value' => $when, 'inline' => true] : null,
+                    $event->location ? ['name' => 'Where', 'value' => (string) $event->location, 'inline' => true] : null,
+                ])),
+                'timestamp' => optional($event->created_at)->toIso8601String(),
+            ],
+            'reference' => 'calendar-event:' . $event->id,
         ];
     }
 
