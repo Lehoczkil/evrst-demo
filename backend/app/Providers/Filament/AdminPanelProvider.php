@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Auth\Perm;
 use App\Filament\Auth\ForceChangeProfile;
 use App\Filament\Widgets\AdminStatsOverview;
+use App\Filament\Widgets\LaunchCountdownWidget;
 use App\Filament\Widgets\MyTasksWidget;
 use App\Filament\Widgets\RecentApplicationsWidget;
 use App\Filament\Widgets\UpcomingScheduleWidget;
@@ -19,9 +20,9 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Enums\ThemeMode;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -46,6 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->defaultThemeMode(ThemeMode::Dark)
             ->navigationGroups([
                 NavigationGroup::make('Site')      ->label(fn () => __('admin.nav.site')),
                 NavigationGroup::make('About')     ->label(fn () => __('admin.nav.about')),
@@ -67,20 +69,19 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
+                LaunchCountdownWidget::class,
                 AdminStatsOverview::class,
                 UpcomingScheduleWidget::class,
                 MyTasksWidget::class,
                 RecentApplicationsWidget::class,
             ])
             ->sidebarCollapsibleOnDesktop()
+            // Mission-console theme — single override stylesheet over
+            // Filament's `.fi-*` selectors. See public/css/admin-theme.css
+            // and docs/admin-redesign.md.
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
-                fn () => Blade::render('<style>
-                    .fi-topbar { backdrop-filter: blur(8px); }
-                    .fi-sidebar-nav-groups { gap: 0.4rem; }
-                    .fi-section { box-shadow: 0 1px 2px rgba(15,23,42,.05); }
-                    .fi-page-header-heading { letter-spacing: -0.01em; }
-                </style>'),
+                fn () => '<link rel="stylesheet" href="' . asset('css/admin-theme.css') . '?v=' . filemtime(public_path('css/admin-theme.css')) . '" />',
             )
             ->renderHook(
                 PanelsRenderHook::HEAD_START,

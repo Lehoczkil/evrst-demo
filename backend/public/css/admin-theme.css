@@ -1,0 +1,663 @@
+/* ====================================================================
+   EVRST admin theme — "mission console at night"
+   Single override stylesheet. Loaded via PanelsRenderHook::HEAD_END.
+   Pairs with Filament v4's .fi-* class names.
+   See docs/admin-redesign.md for the design brief.
+   ==================================================================== */
+
+/* JetBrains Mono for telemetry-style numbers + IDs. */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ---------- Tokens ------------------------------------------------- */
+
+:root {
+    /* Dark (default) */
+    --evrst-bg: #0a0c10;
+    --evrst-bg-grid: rgba(255,255,255,.025);
+    --evrst-bg-grid-strong: rgba(255,255,255,.04);
+    --evrst-surface: rgba(20,24,33,.45);
+    --evrst-surface-solid: #11141a;
+    --evrst-surface-raised: rgba(28,33,43,.55);
+    --evrst-glass: rgba(20,24,33,.45);
+    --evrst-glass-strong: rgba(20,24,33,.65);
+    --evrst-border: rgba(255,255,255,.08);
+    --evrst-border-strong: rgba(255,255,255,.16);
+    --evrst-border-amber: rgba(251,191,36,.45);
+    --evrst-text: #e8ebf2;
+    --evrst-text-muted: #9aa3b3;
+    --evrst-text-dim: #6b7383;
+    --evrst-accent: #fbbf24;
+    --evrst-accent-text: #1a1306;
+    --evrst-accent-soft: rgba(251,191,36,.12);
+    --evrst-danger: #f87171;
+    --evrst-success: #34d399;
+    --evrst-info: #38bdf8;
+    --evrst-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --evrst-r-sm: 4px;
+    --evrst-r-md: 6px;
+    --evrst-r-lg: 8px;
+    --evrst-blur: blur(22px) saturate(140%);
+    --evrst-container: 1440px;
+}
+
+/* Light mode — Filament toggles the .dark class on <html> for dark.
+   Without it, we paint a near-white surface palette. */
+html:not(.dark) {
+    --evrst-bg: #f5f6f8;
+    --evrst-bg-grid: rgba(15,23,42,.04);
+    --evrst-bg-grid-strong: rgba(15,23,42,.06);
+    --evrst-surface: rgba(255,255,255,.65);
+    --evrst-surface-solid: #ffffff;
+    --evrst-surface-raised: rgba(255,255,255,.85);
+    --evrst-glass: rgba(255,255,255,.6);
+    --evrst-glass-strong: rgba(255,255,255,.75);
+    --evrst-border: rgba(15,23,42,.08);
+    --evrst-border-strong: rgba(15,23,42,.18);
+    --evrst-border-amber: rgba(245,158,11,.5);
+    --evrst-text: #0f172a;
+    --evrst-text-muted: #475569;
+    --evrst-text-dim: #94a3b8;
+    --evrst-accent: #f59e0b;
+    --evrst-accent-text: #ffffff;
+    --evrst-accent-soft: rgba(245,158,11,.12);
+}
+
+/* ---------- Page surface ------------------------------------------- */
+
+html.dark body,
+html.dark .fi-body {
+    background:
+        linear-gradient(var(--evrst-bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(90deg, var(--evrst-bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        var(--evrst-bg) !important;
+}
+html:not(.dark) body,
+html:not(.dark) .fi-body {
+    background:
+        linear-gradient(var(--evrst-bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(90deg, var(--evrst-bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        var(--evrst-bg) !important;
+}
+
+/* Soft amber wash bleeding from the top-right + a cool wash from the
+   bottom-left so glass surfaces have something coloured to bend. */
+.fi-body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(251,191,36,.06), transparent 70%),
+        radial-gradient(ellipse 80% 50% at 0% 100%, rgba(56,189,248,.04), transparent 70%);
+}
+html:not(.dark) .fi-body::before {
+    background:
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(245,158,11,.10), transparent 70%),
+        radial-gradient(ellipse 80% 50% at 0% 100%, rgba(56,189,248,.06), transparent 70%);
+}
+.fi-layout, .fi-main { position: relative; z-index: 1; }
+
+/* ---------- Topbar ------------------------------------------------- */
+
+.fi-topbar > nav,
+.fi-topbar {
+    background: var(--evrst-glass-strong) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border-bottom: 1px solid var(--evrst-border) !important;
+    box-shadow: none !important;
+}
+.fi-topbar .fi-logo {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.fi-topbar .fi-logo img {
+    height: 1.6rem !important;
+    width: auto;
+}
+.fi-topbar .fi-input-wrp,
+.fi-global-search-field .fi-input-wrp {
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.02);
+    border: 1px solid var(--evrst-border);
+}
+.fi-topbar .fi-input-wrp:focus-within,
+.fi-global-search-field .fi-input-wrp:focus-within {
+    border-color: var(--evrst-border-amber);
+    box-shadow: 0 0 0 3px var(--evrst-accent-soft);
+}
+.fi-topbar .fi-icon-btn {
+    border-radius: var(--evrst-r-md) !important;
+    color: var(--evrst-text-muted);
+}
+.fi-topbar .fi-icon-btn:hover { color: var(--evrst-text); }
+
+/* ---------- Sidebar ------------------------------------------------ */
+
+.fi-sidebar,
+.fi-sidebar-nav {
+    background: var(--evrst-glass) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border-right: 1px solid var(--evrst-border) !important;
+    box-shadow: none !important;
+}
+.fi-sidebar-header,
+.fi-sidebar-header > * {
+    background: transparent !important;
+    border-bottom-color: var(--evrst-border) !important;
+}
+.fi-sidebar-group-label {
+    font-family: var(--evrst-mono);
+    font-size: 0.6rem !important;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--evrst-text-dim) !important;
+    padding-top: 1rem !important;
+}
+.fi-sidebar-item-btn {
+    position: relative;
+    border-radius: var(--evrst-r-md) !important;
+    height: 36px;
+    color: var(--evrst-text-muted) !important;
+    transition: all .12s ease;
+}
+.fi-sidebar-item-btn:hover {
+    background: rgba(255,255,255,.03) !important;
+    color: var(--evrst-text) !important;
+}
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn,
+.fi-sidebar-item-btn[aria-current="page"] {
+    background: var(--evrst-accent-soft) !important;
+    color: var(--evrst-text) !important;
+}
+.fi-sidebar-item.fi-active .fi-sidebar-item-btn::before,
+.fi-sidebar-item-btn[aria-current="page"]::before {
+    content: '';
+    position: absolute;
+    left: -2px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--evrst-accent);
+    border-radius: 2px;
+}
+.fi-sidebar-item-icon { color: inherit !important; }
+.fi-sidebar-item-badge { background: var(--evrst-accent) !important; color: var(--evrst-accent-text) !important; }
+
+/* Help-pill (?) injected next to sidebar items by help-modal hook —
+   keep it visible on the new chrome. */
+.fi-sidebar-item .evrst-help-pill,
+.fi-page-header-heading + .evrst-help-pill,
+.evrst-help-pill {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--evrst-border);
+    display: inline-grid;
+    place-items: center;
+    color: var(--evrst-text-dim);
+    font-size: 0.6rem;
+    font-weight: 600;
+    background: transparent;
+    margin-left: auto;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.evrst-help-pill:hover { color: var(--evrst-text); border-color: var(--evrst-border-strong); }
+
+/* ---------- Page header ------------------------------------------- */
+
+.fi-header,
+.fi-page-header {
+    background: transparent !important;
+    border: 0 !important;
+    padding-top: 1.25rem !important;
+}
+.fi-header-heading,
+.fi-page-header-heading {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    color: var(--evrst-text) !important;
+}
+.fi-breadcrumbs,
+.fi-breadcrumbs * {
+    font-family: var(--evrst-mono);
+    font-size: 0.7rem !important;
+    color: var(--evrst-text-dim) !important;
+    letter-spacing: .04em;
+}
+
+/* ---------- Sections / cards / panels ----------------------------- */
+
+.fi-section,
+.fi-fo-section,
+.fi-wi,
+.fi-card {
+    background: var(--evrst-glass) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+    box-shadow: none !important;
+}
+.fi-section-header,
+.fi-section .fi-header,
+.fi-fo-section-header {
+    background: transparent !important;
+    border-bottom: 1px solid var(--evrst-border) !important;
+}
+.fi-section-header-heading,
+.fi-section-heading,
+.fi-fo-section-heading {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: var(--evrst-text) !important;
+}
+
+/* ---------- Tables ------------------------------------------------- */
+
+.fi-ta,
+.fi-ta-ctn {
+    background: var(--evrst-glass) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+    box-shadow: none !important;
+}
+.fi-ta-header,
+.fi-ta-toolbar,
+.fi-ta-filter-pills {
+    background: transparent !important;
+    border-bottom-color: var(--evrst-border) !important;
+}
+.fi-ta-header-cell,
+.fi-ta th {
+    font-family: var(--evrst-mono);
+    font-size: 0.62rem !important;
+    letter-spacing: .12em !important;
+    text-transform: uppercase;
+    color: var(--evrst-text-muted) !important;
+    background: transparent !important;
+    border-bottom: 1px solid var(--evrst-border) !important;
+}
+.fi-ta-row {
+    background: transparent !important;
+    border-bottom: 1px solid var(--evrst-border) !important;
+    transition: background .12s ease;
+}
+.fi-ta-row:hover { background: var(--evrst-surface-raised) !important; }
+.fi-ta-row:last-child { border-bottom: 0 !important; }
+.fi-ta-cell { background: transparent !important; }
+.fi-ta-empty-state { background: transparent !important; }
+
+/* ---------- Buttons ------------------------------------------------ */
+
+.fi-btn {
+    border-radius: var(--evrst-r-md) !important;
+    transition: all .12s ease;
+}
+.fi-btn-color-gray:not(.fi-btn-disabled) {
+    background: var(--evrst-glass) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    color: var(--evrst-text) !important;
+}
+.fi-btn-color-gray:hover { border-color: var(--evrst-border-strong) !important; }
+.fi-btn-color-primary:not(.fi-btn-disabled) {
+    background: var(--evrst-accent) !important;
+    color: var(--evrst-accent-text) !important;
+    border-color: var(--evrst-accent) !important;
+    font-weight: 600;
+}
+.fi-btn-color-primary:hover { filter: brightness(1.05); }
+.fi-icon-btn { border-radius: var(--evrst-r-md) !important; }
+
+/* ---------- Inputs ------------------------------------------------- */
+
+.fi-input,
+.fi-select-input,
+.fi-textarea-input,
+.fi-input-wrp {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--evrst-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: all .12s ease;
+}
+.fi-input:focus,
+.fi-select-input:focus,
+.fi-textarea-input:focus,
+.fi-input-wrp:focus-within {
+    border-bottom-color: var(--evrst-accent) !important;
+    box-shadow: 0 3px 0 -1px var(--evrst-accent-soft) !important;
+}
+.fi-fo-field-wrp-label {
+    font-family: var(--evrst-mono);
+    font-size: 0.62rem !important;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--evrst-text-muted) !important;
+}
+
+/* Toggle / checkbox / radio — keep amber for the "on" state. */
+.fi-fo-toggle [role="switch"][aria-checked="true"] { background: var(--evrst-accent) !important; }
+
+/* ---------- Pills / badges ---------------------------------------- */
+
+.fi-badge {
+    border-radius: 999px !important;
+    font-family: var(--evrst-mono);
+    font-size: 0.62rem !important;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border: 1px solid var(--evrst-border) !important;
+    background: transparent !important;
+}
+.fi-badge.fi-color-warning,
+.fi-badge.fi-color-amber,
+.fi-badge.fi-color-primary {
+    color: var(--evrst-accent) !important;
+    border-color: var(--evrst-border-amber) !important;
+    background: var(--evrst-accent-soft) !important;
+}
+.fi-badge.fi-color-success,
+.fi-badge.fi-color-emerald {
+    color: var(--evrst-success) !important;
+    border-color: rgba(52,211,153,.35) !important;
+    background: rgba(52,211,153,.08) !important;
+}
+.fi-badge.fi-color-info,
+.fi-badge.fi-color-sky,
+.fi-badge.fi-color-blue {
+    color: var(--evrst-info) !important;
+    border-color: rgba(56,189,248,.35) !important;
+    background: rgba(56,189,248,.08) !important;
+}
+.fi-badge.fi-color-danger,
+.fi-badge.fi-color-red,
+.fi-badge.fi-color-rose {
+    color: var(--evrst-danger) !important;
+    border-color: rgba(248,113,113,.35) !important;
+    background: rgba(248,113,113,.08) !important;
+}
+
+/* ---------- Modal -------------------------------------------------- */
+
+.fi-modal-window {
+    background: var(--evrst-glass-strong) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-lg) !important;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6) !important;
+}
+.fi-modal-header { border-bottom-color: var(--evrst-border) !important; }
+.fi-modal-footer { border-top-color: var(--evrst-border) !important; background: transparent !important; }
+
+/* Help modal already mounted globally — leave its custom shell alone
+   except align tokens. */
+.evrst-help-modal {
+    background: var(--evrst-glass-strong) !important;
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-lg) !important;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+
+/* ---------- Notifications / toast ---------------------------------- */
+
+.fi-no-notification {
+    background: var(--evrst-glass-strong) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+}
+
+/* ---------- Empty states ------------------------------------------ */
+
+.fi-ta-empty-state-icon-bg,
+.fi-empty-state-icon-bg {
+    background: transparent !important;
+    border: 1px dashed var(--evrst-border-strong) !important;
+}
+.fi-ta-empty-state-heading,
+.fi-empty-state-heading { color: var(--evrst-text) !important; }
+.fi-ta-empty-state-description,
+.fi-empty-state-description { color: var(--evrst-text-muted) !important; }
+
+/* ---------- Action menus / dropdowns ------------------------------ */
+
+.fi-dropdown-panel,
+.fi-dropdown-list {
+    background: var(--evrst-glass-strong) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,.4) !important;
+}
+.fi-dropdown-list-item:hover { background: var(--evrst-surface-raised) !important; }
+
+/* ---------- Tabs --------------------------------------------------- */
+
+.fi-tabs,
+.fi-tabs-nav {
+    background: transparent !important;
+    border-bottom: 1px solid var(--evrst-border) !important;
+}
+.fi-tabs-item {
+    color: var(--evrst-text-muted) !important;
+    border-bottom: 2px solid transparent !important;
+    transition: all .12s ease;
+}
+.fi-tabs-item:hover { color: var(--evrst-text) !important; }
+.fi-tabs-item.fi-active,
+.fi-tabs-item[aria-selected="true"] {
+    color: var(--evrst-accent) !important;
+    border-bottom-color: var(--evrst-accent) !important;
+}
+
+/* ---------- Page container ---------------------------------------- */
+
+.fi-main {
+    --container: var(--evrst-container);
+}
+.fi-main > .fi-page,
+.fi-main > .fi-resource-page,
+.fi-main > * {
+    max-width: var(--container);
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* ---------- Custom EVRST surfaces (drawing studio, kanban, etc.) -- */
+
+/* The custom Blades use scoped class names that pre-date this theme;
+   we tweak the tokens they rely on, then add a few local fixes. */
+
+.evrst-kanban-column {
+    background: var(--evrst-glass) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+}
+.evrst-kanban-card {
+    background: var(--evrst-surface-raised) !important;
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+}
+.evrst-kanban-card:hover { border-color: var(--evrst-border-strong) !important; }
+
+.evrst-drawing-toolbar,
+.evrst-drawing-rail,
+.evrst-drawing-properties {
+    background: var(--evrst-glass-strong) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-md) !important;
+}
+
+/* ---------- Mobile glass fallback --------------------------------- */
+
+@media (max-width: 720px) {
+    :root {
+        --evrst-glass: rgba(20,24,33,.92);
+        --evrst-glass-strong: rgba(20,24,33,.96);
+        --evrst-blur: none;
+    }
+    html:not(.dark) {
+        --evrst-glass: rgba(255,255,255,.94);
+        --evrst-glass-strong: rgba(255,255,255,.97);
+    }
+}
+
+/* ---------- T- Countdown widget ----------------------------------- */
+
+.evrst-countdown {
+    border: 1px solid var(--evrst-border);
+    border-radius: var(--evrst-r-md);
+    background:
+        linear-gradient(var(--evrst-bg-grid-strong) 1px, transparent 1px) 0 0 / 16px 16px,
+        linear-gradient(90deg, var(--evrst-bg-grid-strong) 1px, transparent 1px) 0 0 / 16px 16px,
+        var(--evrst-glass-strong);
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+.evrst-countdown::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 90% 50%, rgba(251,191,36,.06), transparent 50%);
+    pointer-events: none;
+}
+.evrst-countdown .evrst-countdown-label {
+    font-family: var(--evrst-mono);
+    font-size: 0.65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--evrst-text-dim);
+    margin-bottom: .35rem;
+}
+.evrst-countdown .evrst-countdown-digits {
+    font-family: var(--evrst-mono);
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: var(--evrst-accent);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: baseline;
+    gap: .25rem;
+}
+.evrst-countdown.evrst-standby .evrst-countdown-digits {
+    color: var(--evrst-text-dim);
+}
+.evrst-countdown .evrst-countdown-digits .sep { color: var(--evrst-text-dim); font-weight: 400; }
+.evrst-countdown .evrst-countdown-digits .unit {
+    font-size: 0.7rem;
+    color: var(--evrst-text-muted);
+    align-self: flex-end;
+    padding-bottom: .55rem;
+}
+.evrst-countdown .evrst-countdown-digits .seg {
+    display: inline-block;
+    min-width: 2.2ch;
+    text-align: center;
+}
+.evrst-countdown .evrst-countdown-meta { margin-left: auto; text-align: right; }
+.evrst-countdown .evrst-countdown-event {
+    font-family: var(--evrst-mono);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--evrst-text);
+}
+.evrst-countdown .evrst-countdown-sub {
+    font-family: var(--evrst-mono);
+    font-size: 0.65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--evrst-text-muted);
+    margin-top: .25rem;
+}
+@keyframes evrstTickFlip {
+    0% { transform: translateY(-30%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+.evrst-countdown .seg.flip { animation: evrstTickFlip 220ms cubic-bezier(.16,1,.3,1); }
+
+/* ---------- Login -------------------------------------------------- */
+
+.fi-simple-layout {
+    background:
+        radial-gradient(circle at 30% 20%, rgba(251,191,36,.08), transparent 40%),
+        linear-gradient(var(--evrst-bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        linear-gradient(90deg, var(--evrst-bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+        var(--evrst-bg) !important;
+}
+.fi-simple-main {
+    background: var(--evrst-glass-strong) !important;
+    backdrop-filter: var(--evrst-blur);
+    -webkit-backdrop-filter: var(--evrst-blur);
+    border: 1px solid var(--evrst-border) !important;
+    border-radius: var(--evrst-r-lg) !important;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6) !important;
+}
+
+/* ---------- Activity log (timeline rail) -------------------------- */
+
+.evrst-activity-timeline {
+    position: relative;
+    padding-left: 1.5rem;
+}
+.evrst-activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: var(--evrst-border);
+}
+.evrst-activity-timeline .ev {
+    position: relative;
+    padding: .65rem 0;
+}
+.evrst-activity-timeline .ev::before {
+    content: '';
+    position: absolute;
+    left: -19px; top: 16px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--evrst-surface-solid);
+    border: 1px solid var(--evrst-border-strong);
+}
+
+/* ---------- Type --------------------------------------------------- */
+
+body, .fi-body { font-weight: 400; }
+.fi-section .fi-text-sm,
+.fi-wi .fi-text-sm,
+.fi-section p,
+.fi-wi p { color: var(--evrst-text); }
+
+/* Mono numbers wherever Filament renders raw integers in widget headings. */
+.fi-wi-stats-overview-stat-value,
+.fi-stats-overview-stat-value { font-family: var(--evrst-mono) !important; font-size: 1.6rem !important; }
+
+/* ---------- Misc --------------------------------------------------- */
+
+::selection { background: var(--evrst-accent-soft); color: var(--evrst-text); }
+*:focus-visible {
+    outline: 2px solid var(--evrst-border-amber);
+    outline-offset: 2px;
+}
