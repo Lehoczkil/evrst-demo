@@ -8,6 +8,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Cache;
 
@@ -17,6 +18,9 @@ class TaskForm
     {
         return $schema
             ->components([
+                Section::make(__('admin.tasks.section_details'))
+                    ->columns(12)
+                    ->components([
                 TextInput::make('title')
                     ->label(__('admin.common.title'))
                     ->required()
@@ -120,7 +124,7 @@ class TaskForm
                     ->numeric()
                     ->default(0)
                     ->columnSpan(['default' => 12, 'md' => 4]),
-            ])
-            ->columns(12);
+                    ]),
+            ]);
     }
 }

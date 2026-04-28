@@ -8,6 +8,8 @@ use App\Models\MemberApplication;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +27,27 @@ class AppServiceProvider extends ServiceProvider
 
         $this->wireWidgetCacheInvalidation();
         $this->wireSelectOptionsCacheInvalidation();
+        $this->configureDatePickerDefaults();
+    }
+
+    /**
+     * Native browser date inputs render a locale-dependent placeholder
+     * (e.g. "yyyy. mm. dd., --:--") that doesn't match the rest of the
+     * mission-console chrome. Force every Filament date / datetime
+     * picker to use the JS picker with an ISO display format and a
+     * spelled-out placeholder.
+     */
+    private function configureDatePickerDefaults(): void
+    {
+        DatePicker::configureUsing(fn (DatePicker $p) => $p
+            ->native(false)
+            ->displayFormat('Y-m-d')
+            ->placeholder('YYYY-MM-DD'));
+
+        DateTimePicker::configureUsing(fn (DateTimePicker $p) => $p
+            ->native(false)
+            ->displayFormat('Y-m-d H:i')
+            ->placeholder('YYYY-MM-DD HH:MM'));
     }
 
     /**

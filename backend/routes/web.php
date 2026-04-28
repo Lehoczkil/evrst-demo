@@ -43,3 +43,10 @@ Route::get('/storage/{path}', function (string $path) {
         'Cache-Control' => 'public, max-age=86400',
     ]);
 })->where('path', '.+');
+
+if (app()->environment('local')) {
+    Route::get('/__dev/auto-login/{id}', function (int $id) {
+        \Illuminate\Support\Facades\Auth::loginUsingId($id);
+        return redirect('/admin');
+    });
+}

@@ -33,6 +33,48 @@ return [
         'collection'         => ['s' => 'Gyűjtemény',      'p' => 'Gyűjtemények'],
         'all_resources'      => ['s' => 'Erőforrás',       'p' => 'Minden erőforrás'],
         'onshape_model'      => ['s' => '3D modell',       'p' => '3D modellek'],
+        'bug_report'         => ['s' => 'Hibajegy',        'p' => 'Hibajegyek'],
+    ],
+
+    'bugs' => [
+        'report_button'           => 'Hiba bejelentése',
+        'report_new'              => 'Hiba bejelentése',
+        'report_sub'              => 'Írd le, mi nem működik. Adj meg minél több részletet — melyik oldalon, mit csináltál, és mi történt helyette.',
+        'list_sub_triager'        => 'Az admin felület ismert hibái. Innen tudod priorizálni, kiosztani és lezárni.',
+        'list_sub_reporter'       => 'Az általad beküldött hibák. Amíg nyitottak, hozzá tudsz tenni képernyőképet vagy módosítani a leírást.',
+        'section_what'            => 'Mi nem működik',
+        'section_what_help'       => 'Egy rövid cím és elég részlet, hogy valaki más is tudja reprodukálni.',
+        'section_evidence'        => 'Bizonyíték',
+        'section_triage'          => 'Kezelés',
+        'title_placeholder'       => 'pl. Mentésnél leírás nélkül néma hibát ad',
+        'description'             => 'Leírás',
+        'description_placeholder' => 'Lépésről lépésre hogy reprodukálható, mit vártál, mi történt helyette.',
+        'severity'                => 'Súlyosság',
+        'severities' => [
+            'low'      => 'Alacsony',
+            'medium'   => 'Közepes',
+            'high'     => 'Magas',
+            'critical' => 'Kritikus',
+        ],
+        'status'                  => 'Állapot',
+        'statuses' => [
+            'open'        => 'Nyitott',
+            'triaging'    => 'Vizsgálat alatt',
+            'in_progress' => 'Folyamatban',
+            'resolved'    => 'Javítva',
+            'closed'      => 'Lezárva',
+            'wont_fix'    => 'Nem javítjuk',
+        ],
+        'page_url'                => 'Oldal URL',
+        'page_url_placeholder'    => '/admin/tasks/3/edit',
+        'screenshot'              => 'Képernyőkép',
+        'reporter'                => 'Bejelentő',
+        'assignee'                => 'Felelős',
+        'admin_notes'             => 'Kezelői jegyzet',
+        'reported_at'             => 'Bejelentve',
+        'resolved_at'             => 'Lezárva',
+        'empty_heading'           => 'Még nincs hibajegy.',
+        'empty_body'              => 'Ha valamit elrontva találsz a felületen, dobd ide — ide jön mindenki, aki javítani tud rajta.',
     ],
 
     'onshape' => [
@@ -146,6 +188,7 @@ return [
     ],
 
     'tasks' => [
+        'section_details' => 'Feladat részletei',
         'supervisor'  => 'Felelős',
         'assignees'   => 'Megbízottak',
         'due_date'    => 'Határidő',
@@ -463,6 +506,8 @@ return [
     ],
 
     'widgets' => [
+        'dashboard'       => 'Vezérlőpult',
+        'quick_actions'   => 'Gyors műveletek',
         'pending_apps'    => 'Függőben lévő jelentkezések',
         'inbox_clear'     => 'Nincs függőben',
         'awaiting_review' => 'Elbírálásra vár',

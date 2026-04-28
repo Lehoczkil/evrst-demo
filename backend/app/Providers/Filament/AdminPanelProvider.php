@@ -4,11 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Auth\Perm;
 use App\Filament\Auth\ForceChangeProfile;
-use App\Filament\Widgets\AdminStatsOverview;
-use App\Filament\Widgets\LaunchCountdownWidget;
-use App\Filament\Widgets\MyTasksWidget;
-use App\Filament\Widgets\RecentApplicationsWidget;
-use App\Filament\Widgets\UpcomingScheduleWidget;
+use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\RequirePasswordChange;
 use App\Http\Middleware\SetLocale;
 use Filament\Http\Middleware\Authenticate;
@@ -16,7 +12,6 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -63,17 +58,14 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
+                // Custom mission-console dashboard — countdown + 6-tile grid.
+                // See app/Filament/Pages/Dashboard.php and the matching Blade.
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                // Mission-console signature — full-width countdown strip.
-                LaunchCountdownWidget::class,
-                AdminStatsOverview::class,
-                UpcomingScheduleWidget::class,
-                MyTasksWidget::class,
-                RecentApplicationsWidget::class,
-            ])
+            // No widgets — every dashboard panel is rendered directly by
+            // the custom Dashboard view above. Cache keys (widgets:*) are
+            // still invalidated by AppServiceProvider on model events.
+            ->widgets([])
             ->sidebarCollapsibleOnDesktop()
             // Mission-console theme — single override stylesheet over
             // Filament's `.fi-*` selectors. See public/css/admin-theme.css
@@ -94,9 +86,22 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn () => view('filament.hooks.locale-switcher'),
             )
+            // Report-a-bug shortcut — any signed-in user with bugs.report
+            // can file a report from anywhere in the panel. Lives next
+            // to the user menu so it's always reachable.
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn () => view('filament.hooks.report-bug-button'),
+            )
             ->renderHook(
                 PanelsRenderHook::PAGE_HEADER_HEADING_AFTER,
                 fn () => view('filament.hooks.help-button'),
+            )
+            // Mobile-only sidebar search — CSS keeps it hidden on lg+
+            // so it doesn't duplicate the topbar's global search.
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_NAV_START,
+                fn () => view('filament.hooks.sidebar-search'),
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,

@@ -45,6 +45,12 @@ final class Perm
     public const MODELS_EDIT   = 'models.edit';
     public const MODELS_DELETE = 'models.delete';
 
+    /** Bug reports — anyone signed in can file + view; triage is gated. */
+    public const BUGS_REPORT = 'bugs.report';
+    public const BUGS_VIEW   = 'bugs.view';
+    public const BUGS_TRIAGE = 'bugs.triage';
+    public const BUGS_DELETE = 'bugs.delete';
+
     public const NOTIFICATIONS_SEE = 'notifications.see';
 
     public const ROLE_ADMIN   = 'admin';
@@ -83,6 +89,10 @@ final class Perm
             ['key' => self::MODELS_CREATE,       'label' => 'Create 3D models'],
             ['key' => self::MODELS_EDIT,         'label' => 'Edit 3D models'],
             ['key' => self::MODELS_DELETE,       'label' => 'Delete 3D models'],
+            ['key' => self::BUGS_REPORT,         'label' => 'Report bugs'],
+            ['key' => self::BUGS_VIEW,           'label' => 'View bug reports'],
+            ['key' => self::BUGS_TRIAGE,         'label' => 'Triage / resolve bug reports'],
+            ['key' => self::BUGS_DELETE,         'label' => 'Delete bug reports'],
             ['key' => self::NOTIFICATIONS_SEE,   'label' => 'See notifications about new member entries'],
         ];
     }
@@ -108,12 +118,16 @@ final class Perm
     }
 
     /**
-     * Member: read-only — no permissions.
+     * Member: read-only — except they can file + view bug reports so the
+     * report-a-bug page is reachable without admin privileges.
      *
      * @return array<int, string>
      */
     public static function memberPermissions(): array
     {
-        return [];
+        return [
+            self::BUGS_REPORT,
+            self::BUGS_VIEW,
+        ];
     }
 }

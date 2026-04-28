@@ -56,7 +56,7 @@
     >
         <div
             @click.stop
-            class="bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 dark:border dark:border-white/10"
+            class="evrst-help-modal bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100"
             style="
                 position: fixed;
                 top: 50%; left: 50%;
@@ -68,6 +68,7 @@
                 display: flex; flex-direction: column;
                 overflow: hidden;
                 z-index: 10000;
+                border: 1px solid rgba(255,255,255,.18);
             "
         >
             <div class="border-b border-gray-200 dark:border-white/10" style="padding: 1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; flex: 0 0 auto;">

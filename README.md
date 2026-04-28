@@ -192,6 +192,17 @@ layout: every table on the left with row counts, the selected
 table's columns / indexes / foreign keys / driver / row-count badge
 on the right. Same code works against SQLite, MySQL, and Postgres.
 
+### Bug reports (`/admin/bug-reports`)
+
+Lightweight in-panel issue tracker. Anyone signed in can file a
+report (members included) — title, description, severity, page URL,
+optional screenshot. Managers and admins triage: status, assignee,
+admin notes, and the open-bug count surfaces as a sidebar badge. A
+heroicon bug-ant shortcut lives next to the user menu so a report
+is always one click away from wherever the bug was hit. Permissions
+split four ways: `bugs.report` / `bugs.view` / `bugs.triage` /
+`bugs.delete`.
+
 ### EN / HU language switcher
 
 Compact pill toggle in the topbar (next to the user avatar). Stores

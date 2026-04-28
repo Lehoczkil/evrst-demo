@@ -33,6 +33,48 @@ return [
         'collection'         => ['s' => 'Collection',      'p' => 'Collections'],
         'all_resources'      => ['s' => 'Resource',        'p' => 'All resources'],
         'onshape_model'      => ['s' => '3D model',        'p' => '3D models'],
+        'bug_report'         => ['s' => 'Bug report',      'p' => 'Bug reports'],
+    ],
+
+    'bugs' => [
+        'report_button'           => 'Report a bug',
+        'report_new'              => 'Report a bug',
+        'report_sub'              => 'Tell us what broke. Be specific — what page were you on, what you tried, and what happened instead.',
+        'list_sub_triager'        => 'Currently known bugs across the panel. Triage, assign, and resolve from here.',
+        'list_sub_reporter'       => 'Bugs you have filed. Add a screenshot or update the description while a report is still open.',
+        'section_what'            => 'What broke',
+        'section_what_help'       => 'A short title plus enough detail for someone else to reproduce it.',
+        'section_evidence'        => 'Evidence',
+        'section_triage'          => 'Triage',
+        'title_placeholder'       => 'e.g. Saving a task with no description silently fails',
+        'description'             => 'Description',
+        'description_placeholder' => 'Steps to reproduce, what you expected, what happened instead.',
+        'severity'                => 'Severity',
+        'severities' => [
+            'low'      => 'Low',
+            'medium'   => 'Medium',
+            'high'     => 'High',
+            'critical' => 'Critical',
+        ],
+        'status'                  => 'Status',
+        'statuses' => [
+            'open'        => 'Open',
+            'triaging'    => 'Triaging',
+            'in_progress' => 'In progress',
+            'resolved'    => 'Resolved',
+            'closed'      => 'Closed',
+            'wont_fix'    => "Won't fix",
+        ],
+        'page_url'                => 'Page URL',
+        'page_url_placeholder'    => '/admin/tasks/3/edit',
+        'screenshot'              => 'Screenshot',
+        'reporter'                => 'Reporter',
+        'assignee'                => 'Assignee',
+        'admin_notes'             => 'Triage notes',
+        'reported_at'             => 'Reported',
+        'resolved_at'             => 'Resolved',
+        'empty_heading'           => 'No bugs reported (yet).',
+        'empty_body'              => 'When something breaks on the panel, file a bug here so it ends up in front of someone who can fix it.',
     ],
 
     'onshape' => [
@@ -146,6 +188,7 @@ return [
     ],
 
     'tasks' => [
+        'section_details' => 'Task details',
         'supervisor'  => 'Supervisor',
         'assignees'   => 'Assignees',
         'due_date'    => 'Due date',
@@ -463,6 +506,8 @@ return [
     ],
 
     'widgets' => [
+        'dashboard'       => 'Dashboard',
+        'quick_actions'   => 'Quick actions',
         'pending_apps'    => 'Pending applications',
         'inbox_clear'     => 'Inbox is clear',
         'awaiting_review' => 'Awaiting review',
@@ -476,7 +521,7 @@ return [
         'my_tasks_empty'  => 'You have no open tasks. Nice.',
         'recent_apps'     => 'Recent applications',
         'recent_apps_empty' => 'No recent applications.',
-        'upcoming'        => 'Upcoming',
+        'upcoming'        => 'Upcoming this week',
         'no_upcoming'     => 'Nothing scheduled coming up.',
     ],
 
