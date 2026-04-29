@@ -1,5 +1,19 @@
 # Changelog
 
+## Versioning convention
+
+Every new deploy = a new version. Bump rules:
+
+- **Bug fix** → patch (`0.0.1`)
+- **Small feature** → minor (`0.1.0`)
+- **Big update** → major (`1.0.0`)
+
+Before each deploy, bump the version in **`backend/config/app.php`**
+(the `version` key — surfaced at the bottom of the Filament sidebar via
+`config('app.version')`) and in **`frontend/package.json`** (the
+`version` field — already gated by `.github/workflows/deploy.yaml`),
+then add a one-line entry under the matching section below.
+
 ## 0.4.0 (unreleased)
 
 Tracked on the `feature/0.4.0` branch.

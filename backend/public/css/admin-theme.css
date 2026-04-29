@@ -1626,3 +1626,23 @@ html:not(.dark) .fi-ta-search-field .fi-input-wrp {
     background: var(--evrst-accent-soft) !important;
     color: var(--evrst-accent) !important;
 }
+
+/* Version stamp at the bottom of the sidebar (SIDEBAR_FOOTER hook).
+   Reads `config('app.version')` — bumped before each deploy. */
+.evrst-sidebar-version {
+    padding: .5rem .75rem .75rem;
+    font-family: var(--evrst-mono);
+    font-size: .6875rem;
+    letter-spacing: .04em;
+    color: var(--evrst-text-dim);
+    text-align: left;
+    user-select: none;
+    opacity: .8;
+}
+.fi-sidebar-collapsed .evrst-sidebar-version {
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+    font-size: .625rem;
+}
+

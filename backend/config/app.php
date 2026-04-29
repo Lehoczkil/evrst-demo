@@ -17,6 +17,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | Bump this string before every deploy. The value is surfaced at the
+    | bottom of the Filament sidebar via config('app.version'). Follow the
+    | repo's versioning convention:
+    |   - Bug fix      → patch (0.0.x)
+    |   - Small feature→ minor (0.x.0)
+    |   - Big update   → major (x.0.0)
+    | Keep this in sync with frontend/package.json and add a one-line
+    | entry to CHANGELOG.md.
+    |
+    */
+
+    'version' => '0.4.0',
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

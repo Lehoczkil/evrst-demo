@@ -103,6 +103,12 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::SIDEBAR_NAV_START,
                 fn () => view('filament.hooks.sidebar-search'),
             )
+            // Tiny version stamp pinned at the bottom of the sidebar.
+            // Reads `config('app.version')` — bump that before each deploy.
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_FOOTER,
+                fn () => view('filament.hooks.sidebar-version'),
+            )
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.hooks.help-modal'),
