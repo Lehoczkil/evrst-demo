@@ -27,18 +27,36 @@ RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-avail
     && printf '<Directory /var/www/html/public>\n  AllowOverride All\n  Require all granted\n</Directory>\n' > /etc/apache2/conf-available/laravel.conf \
     && a2enconf laravel
 
-# Install PHP deps with cache mount
+# Install PHP deps with cache mount. Dev dependencies (phpunit etc.)
+# are installed first so the test stage below can run the suite; they
+# get pruned right after via `composer install --no-dev`.
 COPY composer.json composer.lock ./
 RUN --mount=type=cache,target=/root/.composer/cache \
-    composer install --no-dev --no-interaction --no-scripts --prefer-dist --optimize-autoloader
+    composer install --no-interaction --no-scripts --prefer-dist
 
 # App source
 COPY . .
 
-# Finalise composer with --no-scripts so we don't run artisan at build
-# time (it would need APP_KEY + DB to boot). The entrypoint runs
-# `package:discover` at runtime, where real env vars from Render are set.
-RUN composer dump-autoload --optimize --no-dev --no-scripts \
+# Run the test suite as part of the build. phpunit.xml configures
+# DB_CONNECTION=sqlite + DB_DATABASE=:memory: so no external services
+# are needed. A red suite fails the Docker build, which fails the
+# Render deploy — bad code never replaces a known-good production.
+RUN composer dump-autoload --no-scripts \
+    && mkdir -p \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/framework/testing \
+        storage/logs \
+        bootstrap/cache \
+    && APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')" \
+       APP_ENV=testing \
+       php artisan test --stop-on-failure
+
+# Strip dev dependencies and re-optimise the autoloader for production.
+RUN --mount=type=cache,target=/root/.composer/cache \
+    composer install --no-dev --no-interaction --no-scripts --prefer-dist --optimize-autoloader \
+    && composer dump-autoload --optimize --no-dev --no-scripts \
     && mkdir -p \
         storage/app/public \
         storage/framework/cache/data \
