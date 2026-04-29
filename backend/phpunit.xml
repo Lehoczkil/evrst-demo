@@ -32,5 +32,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Outbound integrations must never fire from the suite. -->
+        <env name="DISCORD_WEBHOOK_URL" value=""/>
+        <env name="RESEND_API_KEY" value=""/>
     </php>
 </phpunit>

@@ -45,7 +45,7 @@ class EditMemberApplication extends EditRecord
                     ]));
                     $record->logActivity('rejected');
                     $payload = DiscordPayloads::applicationRejected($record, auth()->user());
-                    PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference']);
+                    PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
                     Notification::make()->title(__('admin.applications.rejected_msg'))->warning()->send();
                     $this->redirect(MemberApplicationResource::getUrl('index'));
                 }),

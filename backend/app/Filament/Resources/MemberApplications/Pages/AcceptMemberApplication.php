@@ -145,7 +145,7 @@ class AcceptMemberApplication extends Page implements HasForms
         $user->notify(new TeamMemberAccountCreated($temp));
 
         $payload = DiscordPayloads::applicationAccepted($this->record, auth()->user());
-        PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference']);
+        PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
 
         Notification::make()
             ->title('Application accepted')

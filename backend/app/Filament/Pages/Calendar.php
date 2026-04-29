@@ -330,7 +330,7 @@ class Calendar extends Page
             Notification::make()->title(__('admin.calendar.modal.created'))->success()->send();
 
             $discord = DiscordPayloads::newCalendarEvent($event);
-            PostDiscordWebhook::dispatch($discord['content'], $discord['embed'], $discord['reference']);
+            PostDiscordWebhook::dispatch($discord['content'], $discord['embed'], $discord['reference'])->afterResponse();
         }
 
         $this->closeFormModal();

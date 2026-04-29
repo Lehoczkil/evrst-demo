@@ -17,7 +17,7 @@ class CreateEvent extends CreateRecord
         /** @var Event $record */
         $record = $this->record;
         $p = DiscordPayloads::newEvent($record);
-        PostDiscordWebhook::dispatch($p['content'], $p['embed'], $p['reference']);
+        PostDiscordWebhook::dispatch($p['content'], $p['embed'], $p['reference'])->afterResponse();
     }
 
     protected function getRedirectUrl(): string

@@ -53,7 +53,7 @@ class EditTask extends EditRecord
                 Notification::send($recipients, new TaskAssigned($task));
                 foreach ($recipients as $assignee) {
                     $payload = DiscordPayloads::newTaskAssigned($task, $assignee);
-                    PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference']);
+                    PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
                 }
             }
         }

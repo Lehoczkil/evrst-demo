@@ -38,7 +38,7 @@ class CreateTask extends CreateRecord
         // Discord ping per newly-added assignee.
         foreach ($recipients as $assignee) {
             $payload = DiscordPayloads::newTaskAssigned($task, $assignee);
-            PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference']);
+            PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
         }
     }
 }

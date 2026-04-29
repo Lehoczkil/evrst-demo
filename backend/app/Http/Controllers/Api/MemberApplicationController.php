@@ -44,7 +44,7 @@ class MemberApplicationController extends Controller
         }
 
         $p = DiscordPayloads::newApplication($application);
-        PostDiscordWebhook::dispatch($p['content'], $p['embed'], $p['reference']);
+        PostDiscordWebhook::dispatch($p['content'], $p['embed'], $p['reference'])->afterResponse();
 
         return response()->json(['id' => $application->id], 201);
     }
