@@ -20,7 +20,9 @@ bootstrap/cache/*.php
 !.env.example
 test-trace.php
 server.php
-tests
 docker/local
 *.md
 !README.md
+# `tests/` is intentionally NOT excluded — the Dockerfile runs the
+# suite during build (`php artisan test --stop-on-failure`) so a red
+# test fails the deploy before it can replace production.
