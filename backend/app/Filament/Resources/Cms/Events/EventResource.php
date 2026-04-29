@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class EventResource extends Resource
 {
@@ -23,13 +24,30 @@ class EventResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    // Stored on the shared `resources` table with the title inside JSON
-    // `payload`, so Filament's default `where title like …` search would
-    // crash. Opt out of global search here; users find these via the
-    // sidebar and table filters instead.
+    // Title lives in the shared `resources` table inside JSON `payload`.
+    // Search both locales of payload.title via Laravel's JSON-path
+    // operator — the query grammar translates this to json_extract on
+    // SQLite/MySQL and ->> on Postgres.
     public static function getGloballySearchableAttributes(): array
     {
-        return [];
+        return ['payload->title->en', 'payload->title->hu'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return (string) ($record->title ?? __('admin.resources.event.s'));
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $details = [];
+        if ($record->status) {
+            $details['Status'] = (string) $record->status;
+        }
+        if ($record->start_at) {
+            $details['Date'] = $record->start_at->format('d M Y');
+        }
+        return $details;
     }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Site';

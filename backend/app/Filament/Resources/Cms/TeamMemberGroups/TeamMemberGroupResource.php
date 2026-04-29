@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class TeamMemberGroupResource extends Resource
 {
@@ -22,11 +23,15 @@ class TeamMemberGroupResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    // See EventResource — name lives in JSON payload, default global
-    // search would crash. Opt out here.
+    // Name lives in JSON payload as { en, hu }; search both locales.
     public static function getGloballySearchableAttributes(): array
     {
-        return [];
+        return ['payload->name->en', 'payload->name->hu'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return (string) ($record->name ?? __('admin.resources.position.s'));
     }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Team';

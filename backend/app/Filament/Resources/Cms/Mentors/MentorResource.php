@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class MentorResource extends Resource
 {
@@ -22,11 +23,24 @@ class MentorResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    // See EventResource — name lives in JSON payload, default global
-    // search would crash. Opt out here.
+    // Name + email live in JSON payload; search both via JSON-path.
     public static function getGloballySearchableAttributes(): array
     {
-        return [];
+        return ['payload->name', 'payload->email'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return (string) ($record->name ?? __('admin.resources.mentor.s'));
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $details = [];
+        if ($record->email) {
+            $details['Email'] = (string) $record->email;
+        }
+        return $details;
     }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Team';

@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class MemberApplicationResource extends Resource
 {
@@ -22,6 +23,23 @@ class MemberApplicationResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserPlus;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $details = [];
+        if ($record->email) {
+            $details['Email'] = (string) $record->email;
+        }
+        if ($record->status) {
+            $details['Status'] = (string) $record->status;
+        }
+        return $details;
+    }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Membership';
 

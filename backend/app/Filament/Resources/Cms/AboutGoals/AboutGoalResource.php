@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class AboutGoalResource extends Resource
 {
@@ -23,11 +24,15 @@ class AboutGoalResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    // See EventResource — title lives in JSON payload, default global
-    // search would crash. Opt out here.
+    // Title lives in JSON payload as { en, hu }; search both locales.
     public static function getGloballySearchableAttributes(): array
     {
-        return [];
+        return ['payload->title->en', 'payload->title->hu'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return (string) ($record->title ?? __('admin.resources.goal.s'));
     }
 
     protected static string|\UnitEnum|null $navigationGroup = 'About';

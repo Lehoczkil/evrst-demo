@@ -18,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class TaskResource extends Resource
 {
@@ -26,6 +27,23 @@ class TaskResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title', 'description'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $details = [];
+        if ($record->status) {
+            $details['Status'] = (string) $record->status;
+        }
+        if ($record->due_date) {
+            $details['Due'] = $record->due_date->format('d M Y');
+        }
+        return $details;
+    }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Tasks';
 

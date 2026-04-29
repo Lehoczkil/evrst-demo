@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class BugReportResource extends Resource
 {
@@ -30,6 +31,23 @@ class BugReportResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBugAnt;
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title', 'description'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $details = [];
+        if ($record->status) {
+            $details['Status'] = (string) $record->status;
+        }
+        if ($record->severity) {
+            $details['Severity'] = (string) $record->severity;
+        }
+        return $details;
+    }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Advanced';
 

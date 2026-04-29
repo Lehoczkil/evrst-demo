@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class SponsorResource extends Resource
 {
@@ -23,11 +24,25 @@ class SponsorResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    // See EventResource — name lives in JSON payload, default global
-    // search would crash. Opt out here.
+    // Name + year live in JSON payload; search via JSON-path so the
+    // query grammar can translate it to the right driver primitive.
     public static function getGloballySearchableAttributes(): array
     {
-        return [];
+        return ['payload->name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return (string) ($record->name ?? __('admin.resources.sponsor.s'));
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $details = [];
+        if ($record->year) {
+            $details['Year'] = (string) $record->year;
+        }
+        return $details;
     }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Site';
