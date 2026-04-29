@@ -54,9 +54,18 @@ RUN composer dump-autoload --no-scripts \
        php artisan test --stop-on-failure
 
 # Strip dev dependencies and re-optimise the autoloader for production.
+# `bootstrap/cache/*.php` is wiped at the end because the test stage above
+# booted Laravel with dev packages installed, which caused
+# `Illuminate\Foundation\PackageManifest` to write a packages.php that
+# references `Laravel\Pail\PailServiceProvider`. After --no-dev that
+# class is gone but the cached manifest still points at it, and any
+# subsequent artisan call (entrypoint runtime) fails before
+# `package:discover` gets a chance to regenerate the cache.
 RUN --mount=type=cache,target=/root/.composer/cache \
     composer install --no-dev --no-interaction --no-scripts --prefer-dist --optimize-autoloader \
     && composer dump-autoload --optimize --no-dev --no-scripts \
+    && rm -f bootstrap/cache/packages.php bootstrap/cache/services.php \
+             bootstrap/cache/config.php bootstrap/cache/routes-*.php \
     && mkdir -p \
         storage/app/public \
         storage/framework/cache/data \
