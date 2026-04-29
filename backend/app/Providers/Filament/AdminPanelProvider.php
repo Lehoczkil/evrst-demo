@@ -42,13 +42,23 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->defaultThemeMode(ThemeMode::Dark)
+            // Filament's NavigationManager matches a resource's
+            // `$navigationGroup` string against either the array key
+            // OR the registered group's evaluated label. Using a
+            // closure label means the label string changes per locale
+            // — in HU `getLabel()` returns "Oldal", which then fails
+            // to match a resource declaring `$navigationGroup = 'Site'`,
+            // and Filament silently falls back to a new untranslated
+            // group named "Site". Keying by the raw English string
+            // makes the match locale-independent while the label
+            // closure stays free to translate.
             ->navigationGroups([
-                NavigationGroup::make('Site')      ->label(fn () => __('admin.nav.site')),
-                NavigationGroup::make('About')     ->label(fn () => __('admin.nav.about')),
-                NavigationGroup::make('Team')      ->label(fn () => __('admin.nav.team')),
-                NavigationGroup::make('Tasks')     ->label(fn () => __('admin.nav.tasks')),
-                NavigationGroup::make('Membership')->label(fn () => __('admin.nav.membership')),
-                NavigationGroup::make('Advanced')  ->label(fn () => __('admin.nav.advanced')),
+                'Site'       => NavigationGroup::make()->label(fn () => __('admin.nav.site')),
+                'About'      => NavigationGroup::make()->label(fn () => __('admin.nav.about')),
+                'Team'       => NavigationGroup::make()->label(fn () => __('admin.nav.team')),
+                'Tasks'      => NavigationGroup::make()->label(fn () => __('admin.nav.tasks')),
+                'Membership' => NavigationGroup::make()->label(fn () => __('admin.nav.membership')),
+                'Advanced'   => NavigationGroup::make()->label(fn () => __('admin.nav.advanced')),
             ])
             ->databaseNotifications(fn () => auth()->user()?->can(Perm::NOTIFICATIONS_SEE) ?? false)
             // 30 s polling on every open tab, every user, was the largest
