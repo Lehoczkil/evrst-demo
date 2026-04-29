@@ -39,14 +39,34 @@ return [
             'report' => false,
         ],
 
-        'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
-            'visibility' => 'public',
-            'throw' => false,
-            'report' => false,
-        ],
+        // The `public` disk is what Filament FileUpload writes to via
+        // `->disk('public')` (drawings / sponsor logos / event banners
+        // / Onshape GLBs / bug-report screenshots). Local in dev,
+        // S3-compatible (R2 / B2 / S3) in production so uploads aren't
+        // wiped on every Render redeploy. Switch by setting
+        // FILESYSTEM_PUBLIC_DRIVER=s3 plus the AWS_* keys.
+        'public' => env('FILESYSTEM_PUBLIC_DRIVER', 'local') === 's3'
+            ? [
+                'driver' => 's3',
+                'key' => env('AWS_ACCESS_KEY_ID'),
+                'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                'region' => env('AWS_DEFAULT_REGION'),
+                'bucket' => env('AWS_BUCKET'),
+                'url' => env('AWS_URL'),
+                'endpoint' => env('AWS_ENDPOINT'),
+                'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+                'visibility' => 'public',
+                'throw' => false,
+                'report' => false,
+            ]
+            : [
+                'driver' => 'local',
+                'root' => storage_path('app/public'),
+                'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+                'visibility' => 'public',
+                'throw' => false,
+                'report' => false,
+            ],
 
         's3' => [
             'driver' => 's3',

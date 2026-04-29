@@ -96,8 +96,34 @@ services:
         value: sync               # No worker on free tier → run jobs inline
       - key: LOG_CHANNEL
         value: stderr
+      # Object storage for uploads. Render's container filesystem is
+      # wiped on every redeploy, so user-uploaded sponsor logos /
+      # drawings / Onshape GLBs / event banners would vanish if we
+      # left this on `local`. Wired for any S3-compatible service —
+      # Cloudflare R2 is recommended (free 10 GB, no egress fees).
+      # Fill the AWS_* keys in the Render dashboard.
+      # FILESYSTEM_DISK stays `local` (default cache + tmp scratch);
+      # FILESYSTEM_PUBLIC_DRIVER=s3 swaps the `public` disk that
+      # Filament FileUpload writes to for sponsor / drawing / Onshape
+      # / bug-screenshot uploads.
       - key: FILESYSTEM_DISK
-        value: local              # change to "s3" + add bucket creds for upload persistence
+        value: local
+      - key: FILESYSTEM_PUBLIC_DRIVER
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: auto                # R2 ignores region; "auto" is the conventional value
+      - key: AWS_ENDPOINT
+        sync: false               # e.g. https://<account>.r2.cloudflarestorage.com
+      - key: AWS_URL
+        sync: false               # public bucket URL or custom domain (https://cdn.evrst.demo)
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: "true"             # required for R2 / B2 / MinIO; ignored on real AWS
       - key: MAIL_MAILER
         value: log                # Switch to resend/postmark + add the API key when ready
       - key: MAIL_FROM_ADDRESS
