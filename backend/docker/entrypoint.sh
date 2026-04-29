@@ -68,15 +68,13 @@ php artisan package:discover --ansi --no-interaction || true
 php artisan storage:link --quiet 2>/dev/null || true
 
 # Apply pending schema on every boot. Idempotent.
-php artisan migrate --force --no-interaction || true
+php artisan migrate --force --no-interaction
 
-# Seed when the DB is empty (i.e. first boot OR after a free-tier reset).
-# Every seeder uses updateOrCreate so re-running is also safe — but we
-# only invoke it when there's no admin user yet to keep deploys quick.
-USERS=$(php -r "require 'vendor/autoload.php'; \$a=require 'bootstrap/app.php'; \$a->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap(); echo \\App\\Models\\User::count();" 2>/dev/null || echo 0)
-if [ "$USERS" = "0" ]; then
-  php artisan db:seed --force --no-interaction || true
-fi
+# Seed every boot. All seeders use `updateOrCreate` / `firstOrCreate`,
+# so this is safe to re-run and guarantees the admin user exists even
+# if a previous deploy's seed step failed silently. Stderr is NOT
+# suppressed so any seeder failure surfaces in the Render logs.
+php artisan db:seed --force --no-interaction
 
 # Tighten caches in production.
 if [ "${APP_ENV:-production}" = "production" ]; then
