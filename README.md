@@ -55,6 +55,57 @@ Mounted at `/admin`. Sidebar groups: **Site**, **About**, **Team**,
   `/admin/tasks/kanban`.
 - **Membership** — Member applications (review + accept/reject), Users.
 
+#### Feature checklist
+
+Single-line index of every admin capability currently shipped. Most items
+have a dedicated subsection further down with the full story.
+
+Auth & roles
+
+- Three seeded roles (Admin / Manager / Member) backed by `permissions` + `permission_role` and `User::can()`.
+- Runtime role + permission editor at Membership → Roles & permissions (no code deploy needed to rebalance access).
+- First-login password gate: `RequirePasswordChange` middleware redirects new accounts to `/admin/profile`.
+- Filament profile page with built-in password change (`ForceChangeProfile`).
+
+Content
+
+- CMS resources for Site (Events, Sponsors), About (Content singleton, Projects, Goals), Team (Members, Positions, Mentors).
+- `Event` + `AboutProject` promote `start_at` / `end_at` / `event_status` to indexed columns (dual-written into JSON for the SPA).
+- Sponsor logo upload accepts HEIC/HEIF up to 8 MB; PHP upload limits bumped via `backend/public/.user.ini`.
+- Drawing studio at `/admin/drawings` (vanilla canvas, pen / shapes / fill / text / image paste, mobile-friendly toolbar).
+- Onshape models at `/admin/onshape-models` with Three.js GLB viewer + REST translation re-export pipeline.
+- Calendar at `/admin/calendar` (admin-only month grid, separate from public CMS Events; tasks + projects overlay as badges).
+
+Tasks
+
+- Tasks list + drag-and-drop kanban at `/admin/tasks/kanban` (SortableJS vendored locally, no CDN).
+- Required-field gate on create (title, description ≥10 chars, supervisor, assignee, due date) enforced server-side.
+- State machine in `Task::canTransitionTo()`: assignees can advance to TESTING with proof, only supervisor/admin can mark DONE.
+- Per-task documentation/proofs (`task_proofs`: image / file / link / note) gating TESTING + DONE transitions.
+- Filtering on the kanban disables drag-and-drop to avoid clobbering `position` over partial sets.
+
+Tools
+
+- Mission-console dashboard: dark-by-default glass-surface widgets (T-countdown, status tiles) lazy-loaded with 60s caches.
+- Activity log at `/admin/activity-logs` (auto-logged on hot models; supports custom events; pruned after 90 days).
+- Database inspector at `/admin/database-inspector` (portable schema browser — SQLite / MySQL / Postgres).
+- Bug reports at `/admin/bug-reports` with topbar shortcut + four-way permission split (`bugs.report/view/triage/delete`).
+- Help system: `?` icon on every page heading + sidebar nav, plus per-field tooltips, copy in `lang/{en,hu}/admin.php`.
+
+Notifications
+
+- In-app database-notification bell (Filament) for application + task events; polling at 2 min.
+- Discord webhook posts on new member applications and on new calendar events (`SendDiscordWebhook` job, no-op without URL).
+- Email delivery for provisioned accounts (temp passwords) — `MAIL_MAILER=log` in dev, Postmark/Resend stubs in prod.
+
+Quality of life
+
+- EN/HU locale switcher pill in the topbar, persisted on `users.locale` + `session('locale')`.
+- Force-desktop view toggle in the topbar (overrides viewport meta, persists in localStorage) for mobile pinch-zoom.
+- Performance baseline: lazy widgets, 60s cache on dashboard panes, 5-min cache on shared Select options, hot-path indexes on `tasks`, `member_applications`, `activity_logs`, `resources`.
+- Public-facing CMS resources opted out of the global search to keep results focused on operational data.
+- `withoutActivityLog()` helper used in bulk reorders so dozens of position updates don't flood the activity log.
+
 ### Roles and permissions
 
 Three seeded roles (`database/seeders/RoleSeeder.php`):
@@ -238,6 +289,20 @@ unwrapped (no `{ data: … }` envelope) so the frontend can consume them
 directly. The `payload` is recursively localized into the `X-Lang`
 header's locale before being returned (see
 `App\Http\Resources\ResourceResource`).
+
+### Tests
+
+```sh
+cd backend
+php artisan test
+```
+
+Feature suite lives under `backend/tests/Feature/`:
+
+- **`AdminPagesTest`** — every admin page (resources, kanban, calendar, drawings, database inspector, bug reports, activity log) renders without 5xx for the seeded admin.
+- **`AdminFunctionalityTest`** — exercises the activity-log trait, the task state machine + proof gating, and the kanban reorder path.
+- **`PermissionsTest`** — Admin / Manager / Member visibility on each resource + action (sponsors and applications hidden from Manager, members read-only, etc.).
+- **`PublicApiTest`** — public REST contract for `/api/resource`, `/api/resource/{id}`, and the rate-limited `/api/member-applications` POST.
 
 ## Database tables
 
