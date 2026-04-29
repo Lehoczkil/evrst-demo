@@ -32,8 +32,13 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
-        <!-- Outbound integrations must never fire from the suite. -->
-        <env name="DISCORD_WEBHOOK_URL" value=""/>
-        <env name="RESEND_API_KEY" value=""/>
+        <!-- Outbound integrations must never fire from the suite.
+             `force="true"` is critical: the Render build environment
+             passes DISCORD_WEBHOOK_URL into the Docker build, and
+             without force the rate-limit test's 10 fake submissions
+             would each post to the real Discord channel. -->
+        <env name="DISCORD_WEBHOOK_URL" value="" force="true"/>
+        <env name="RESEND_API_KEY" value="" force="true"/>
+        <env name="POSTMARK_API_KEY" value="" force="true"/>
     </php>
 </phpunit>

@@ -111,6 +111,12 @@ class PublicApiTest extends TestCase
 
     public function test_member_application_post_is_rate_limited(): void
     {
+        // Bus::fake() so the 10 fake submissions can't reach the real
+        // Discord channel even if the test runs in an environment
+        // where DISCORD_WEBHOOK_URL is somehow set (defence in depth
+        // against missing phpunit.xml `force="true"`).
+        Bus::fake();
+
         // Throttle key is per-IP; hammer the same endpoint and the
         // 11th call must trip 429.
         for ($i = 0; $i < 10; $i++) {
