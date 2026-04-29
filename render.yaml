@@ -77,14 +77,21 @@ services:
       - key: DB_SSLMODE
         value: require
 
+      # Sessions stay on Postgres so they survive Apache restarts /
+      # multi-worker setups. (Switch to file/cookie if you ever see
+      # DB write-pressure here — the table is tiny.)
       - key: SESSION_DRIVER
         value: database
       - key: SESSION_SECURE_COOKIE
         value: "true"
       - key: SESSION_SAME_SITE
         value: lax
+      # Application + framework cache lives on the local filesystem
+      # so Filament's view-render / config / route caches don't make
+      # a Postgres roundtrip per request. Render's filesystem is
+      # ephemeral, but the cache is regenerated on demand anyway.
       - key: CACHE_STORE
-        value: database
+        value: file
       - key: QUEUE_CONNECTION
         value: sync               # No worker on free tier → run jobs inline
       - key: LOG_CHANNEL

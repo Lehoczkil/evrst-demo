@@ -13,9 +13,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev \
         ca-certificates curl gnupg \
     && docker-php-ext-install -j"$(nproc)" \
-        bcmath intl pdo_sqlite pdo_pgsql pgsql mbstring xml zip exif pcntl gd \
+        bcmath intl pdo_sqlite pdo_pgsql pgsql mbstring xml zip exif pcntl gd opcache \
     && a2enmod rewrite headers expires \
     && rm -rf /var/lib/apt/lists/*
+
+# Enable OPcache aggressively for production. The base php:8.4-apache
+# image installs the extension but ships it disabled — without this
+# block every request re-parses every PHP file. Roughly halves request
+# latency on Filament pages.
+RUN { \
+        echo 'opcache.enable=1'; \
+        echo 'opcache.enable_cli=0'; \
+        echo 'opcache.memory_consumption=192'; \
+        echo 'opcache.interned_strings_buffer=16'; \
+        echo 'opcache.max_accelerated_files=20000'; \
+        echo 'opcache.validate_timestamps=0'; \
+        echo 'opcache.save_comments=1'; \
+        echo 'opcache.revalidate_freq=0'; \
+        echo 'realpath_cache_size=4096K'; \
+        echo 'realpath_cache_ttl=600'; \
+    } > /usr/local/etc/php/conf.d/zz-opcache.ini \
+    && { \
+        echo 'memory_limit=256M'; \
+        echo 'expose_php=Off'; \
+    } > /usr/local/etc/php/conf.d/zz-runtime.ini
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
