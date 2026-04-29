@@ -1,20 +1,36 @@
-# Render.com free-tier blueprint. Push this repo to GitHub, then on
-# Render → New → Blueprint → pick this repo and Render reads everything
-# from here. No credit card required for the Free plan.
+# Render.com blueprint with a managed Postgres database so events,
+# bug reports, users, and every other admin-created row survive
+# redeploys (Render's container filesystem is wiped on every push,
+# so SQLite would reset every deploy).
 #
-# Free-tier constraints we work around:
-#  - No persistent disk → SQLite resets on each deploy. Entrypoint
-#    re-seeds when the DB is empty so the admin user always exists.
+# Push this repo to GitHub, then on Render → New → Blueprint → pick
+# this repo and Render provisions both the web service and the
+# Postgres instance from this file.
+#
+# Free-tier constraints we still work around:
 #  - One service only (no background worker) → QUEUE_CONNECTION=sync
 #    so notifications + Discord webhooks fire inline with the request.
-#  - Sleeps after 15 min idle, ~30s cold start. Acceptable for a demo.
+#  - Free Postgres expires after 90 days; copy the data to a paid
+#    instance before then or re-seed on a fresh DB.
+#  - No persistent disk on the free web plan → user-uploaded images
+#    under storage/app/public are still wiped on redeploy. Switch
+#    FILESYSTEM_DISK to s3 (R2 / Backblaze B2 / S3) if you need
+#    uploads to survive too.
+#  - Web service sleeps after 15 min idle, ~30s cold start.
+
+databases:
+  - name: evrst-postgres
+    plan: free
+    databaseName: evrst
+    user: evrst
+    region: frankfurt          # keep the DB in the same region as the web service
 
 services:
   - type: web
     name: evrst-admin
     runtime: docker
     plan: free
-    region: frankfurt          # or oregon / virginia / singapore — pick yours
+    region: frankfurt          # match the database's region for low-latency queries
     rootDir: backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /admin/login
@@ -32,10 +48,35 @@ services:
         value: https://evrst-admin.onrender.com
       - key: ADMIN_URL
         value: https://evrst-admin.onrender.com/admin
+
+      # ---- Database (managed Postgres, wired from the block above) ----
       - key: DB_CONNECTION
-        value: sqlite
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: evrst-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: evrst-postgres
+          property: port
       - key: DB_DATABASE
-        value: /var/www/html/database/database.sqlite
+        fromDatabase:
+          name: evrst-postgres
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: evrst-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: evrst-postgres
+          property: password
+      # Render's Postgres requires TLS. Laravel's pgsql connection
+      # config reads `DB_SSLMODE` (config/database.php → 'sslmode').
+      - key: DB_SSLMODE
+        value: require
+
       - key: SESSION_DRIVER
         value: database
       - key: SESSION_SECURE_COOKIE
@@ -48,6 +89,8 @@ services:
         value: sync               # No worker on free tier → run jobs inline
       - key: LOG_CHANNEL
         value: stderr
+      - key: FILESYSTEM_DISK
+        value: local              # change to "s3" + add bucket creds for upload persistence
       - key: MAIL_MAILER
         value: log                # Switch to resend/postmark + add the API key when ready
       - key: MAIL_FROM_ADDRESS
