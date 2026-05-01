@@ -218,6 +218,7 @@ return [
         'due_date'    => 'Due date',
         'position'    => 'Order',
         'kanban'      => 'Kanban',
+        'table_view'  => 'Table view',
         'new_task'    => 'New task',
         'open'        => 'Open',
         'kanban_filtered_banner' => 'Drag-and-drop is disabled while filters are active — clear the filters to reorder cards.',

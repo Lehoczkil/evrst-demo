@@ -9,11 +9,17 @@ use App\Models\User;
 use App\Notifications\TaskAssigned;
 use App\Support\DiscordPayloads;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Notification;
 
 class CreateTask extends CreateRecord
 {
     protected static string $resource = TaskResource::class;
+
+    public function getMaxContentWidth(): Width
+    {
+        return Width::Full;
+    }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {

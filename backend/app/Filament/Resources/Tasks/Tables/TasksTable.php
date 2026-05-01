@@ -10,7 +10,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 
 class TasksTable
@@ -18,10 +17,6 @@ class TasksTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultGroup(Group::make('status')
-                ->label(__('admin.common.status'))
-                ->getTitleFromRecordUsing(fn (Task $r) => __('admin.tasks.statuses.' . $r->status)))
-            ->groupingSettingsHidden()
             ->defaultSort('position')
             ->columns([
                 TextColumn::make('priority')
@@ -33,13 +28,13 @@ class TasksTable
                         Task::PRIORITY_HIGH   => 'warning',
                         Task::PRIORITY_LOW    => 'gray',
                         default               => 'primary',
-                    }),
+                    })->toggleable(),
                 TextColumn::make('title')
                     ->label(__('admin.common.title'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->wrap(),
+                    ->wrap()->toggleable(),
                 TextColumn::make('category')
                     ->label(__('admin.tasks.category'))
                     ->badge()
@@ -59,19 +54,22 @@ class TasksTable
                     ->color(fn ($state) => $state > 0 ? 'primary' : 'gray')
                     ->formatStateUsing(fn ($state) => $state > 0 ? (string) $state : '—')
                     ->toggleable(),
+                // Plain text — the priority + status badges are the
+                // only colour signals in the row, so people / role
+                // columns stay monochrome to keep the row legible.
                 TextColumn::make('supervisor.name')
                     ->label(__('admin.tasks.supervisor'))
-                    ->badge()
-                    ->color('warning'),
+                    ->color('gray')
+                    ->placeholder('—')->toggleable(),
                 TextColumn::make('assignees.name')
                     ->label(__('admin.tasks.assignees'))
-                    ->badge()
-                    ->color('primary')
-                    ->listWithLineBreaks(false),
+                    ->color('gray')
+                    ->listWithLineBreaks(false)
+                    ->placeholder('—')->toggleable(),
                 TextColumn::make('due_date')
                     ->label(__('admin.tasks.due_date'))
                     ->date('d M Y')
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('status')
                     ->label(__('admin.common.status'))
                     ->badge()
@@ -82,7 +80,7 @@ class TasksTable
                         Task::STATUS_TESTING => 'info',
                         Task::STATUS_DONE => 'success',
                         default => 'gray',
-                    }),
+                    })->toggleable(),
             ])
             ->persistFiltersInSession()
             ->persistSearchInSession()

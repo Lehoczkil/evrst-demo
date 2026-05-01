@@ -218,6 +218,7 @@ return [
         'due_date'    => 'Határidő',
         'position'    => 'Sorrend',
         'kanban'      => 'Kanban',
+        'table_view'  => 'Táblanézet',
         'new_task'    => 'Új feladat',
         'open'        => 'Megnyit',
         'kanban_filtered_banner' => 'A drag-and-drop ki van kapcsolva, amíg szűrő aktív — töröld a szűrőket az átrendezéshez.',

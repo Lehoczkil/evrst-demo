@@ -17,8 +17,10 @@ class TaskForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make(__('admin.tasks.section_details'))
+                    ->columnSpanFull()
                     ->columns(12)
                     ->components([
                 TextInput::make('title')

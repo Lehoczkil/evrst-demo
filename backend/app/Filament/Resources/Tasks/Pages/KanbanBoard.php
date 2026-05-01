@@ -35,7 +35,13 @@ class KanbanBoard extends Page
      */
     protected function getHeaderActions(): array
     {
-        $actions = [];
+        $actions = [
+            \Filament\Actions\Action::make('listView')
+                ->label(__('admin.tasks.table_view'))
+                ->icon('heroicon-o-list-bullet')
+                ->color('gray')
+                ->url(TaskResource::getUrl('index')),
+        ];
         if (auth()->user()?->can(Perm::TASKS_CREATE)) {
             $actions[] = \Filament\Actions\Action::make('newTask')
                 ->label(__('admin.tasks.new_task'))
