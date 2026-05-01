@@ -22,9 +22,9 @@
         $m = $pad((int) floor(($delta % 3600) / 60));
         $s = $pad((int) ($delta % 60));
         $cdLabel = match ($state['mode']) {
-            'countdown' => 'T-minus to next event',
-            'sincelast' => 'T+ since last event',
-            default     => 'mission standby',
+            'countdown' => __('admin.widgets.countdown_to'),
+            'sincelast' => __('admin.widgets.countdown_since'),
+            default     => __('admin.widgets.countdown_idle'),
         };
         $cdId = 'evrst-cd-' . substr(md5($state['target']), 0, 8);
     @endphp

@@ -548,6 +548,9 @@ return [
         'recent_apps_empty' => 'No recent applications.',
         'upcoming'        => 'Upcoming this week',
         'no_upcoming'     => 'Nothing scheduled coming up.',
+        'countdown_to'    => 'T-minus to next event',
+        'countdown_since' => 'T+ since last event',
+        'countdown_idle'  => 'mission standby',
     ],
 
     'activity' => [

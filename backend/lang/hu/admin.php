@@ -548,6 +548,9 @@ return [
         'recent_apps_empty' => 'Nincsenek friss jelentkezések.',
         'upcoming'        => 'Közelgő',
         'no_upcoming'     => 'Semmi közelgő esemény.',
+        'countdown_to'    => 'T-mínusz a következő eseményig',
+        'countdown_since' => 'T+ az utolsó esemény óta',
+        'countdown_idle'  => 'küldetés készenlétben',
     ],
 
     'activity' => [
