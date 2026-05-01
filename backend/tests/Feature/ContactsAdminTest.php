@@ -96,19 +96,18 @@ class ContactsAdminTest extends TestCase
         $this->assertFalse($resource::canDelete($contact));
     }
 
-    public function test_manager_can_create_and_edit_contacts(): void
+    public function test_manager_can_create_and_edit_but_not_delete_contacts(): void
     {
-        // KNOWN BUG: per the contacts migration the Manager role should
-        // hold view+create+edit only, but Perm::managerPermissions() grants
-        // every key that isn't sponsors.*/applications.*/notifications.see —
-        // which includes contacts.delete. Once Perm::managerPermissions() is
-        // tightened to exclude contacts.delete, add an assertFalse(...) here
-        // and a Livewire delete-attempt that asserts authorization fails.
         $manager = $this->makeManager();
+        $contact = Contact::create(['name' => 'Manager Test Target']);
 
         $this->assertTrue($manager->can(\App\Auth\Perm::CONTACTS_VIEW));
         $this->assertTrue($manager->can(\App\Auth\Perm::CONTACTS_CREATE));
         $this->assertTrue($manager->can(\App\Auth\Perm::CONTACTS_EDIT));
+        $this->assertFalse($manager->can(\App\Auth\Perm::CONTACTS_DELETE));
+
+        $resource = \App\Filament\Resources\Contacts\ContactResource::class;
+        $this->assertFalse($resource::canDelete($contact));
 
         $this->actingAs($manager);
 
