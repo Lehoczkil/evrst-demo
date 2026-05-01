@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\LogsActivity;
+use App\Models\Cms\AboutProject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,6 +23,7 @@ class CalendarEvent extends Model
 
     protected $fillable = [
         'user_id',
+        'project_id',
         'title',
         'description',
         'start_at',
@@ -40,5 +42,10 @@ class CalendarEvent extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(AboutProject::class, 'project_id', 'id');
     }
 }

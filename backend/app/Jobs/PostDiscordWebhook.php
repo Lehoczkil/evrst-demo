@@ -29,17 +29,32 @@ class PostDiscordWebhook implements ShouldQueue
      * @param  string  $content   Plaintext message above the embed (e.g. "📅 New event").
      * @param  array<string, mixed>  $embed  Discord embed shape — keys: title, description, url, color (int), fields (array), timestamp.
      * @param  string  $reference  Free-form identifier used in failure logs.
+     * @param  ?string $webhookUrl Per-call override that takes precedence over the global DISCORD_WEBHOOK_URL.
      */
     public function __construct(
         public string $content,
         public array $embed,
         public string $reference = '',
+        public ?string $webhookUrl = null,
     ) {
     }
 
     public function handle(): void
     {
-        $webhook = config('services.discord.webhook');
+        $global = config('services.discord.webhook');
+        $webhook = $global;
+
+        if ($this->webhookUrl) {
+            if (str_starts_with($this->webhookUrl, 'https://discord.com/api/webhooks/')) {
+                $webhook = $this->webhookUrl;
+            } else {
+                Log::warning('Discord webhook override looks malformed; falling back to global', [
+                    'reference' => $this->reference,
+                    'override' => $this->webhookUrl,
+                ]);
+            }
+        }
+
         if (! $webhook) return;
 
         $payload = [

@@ -60,6 +60,7 @@ class Calendar extends Page
     public string $eventEnd = '';
     public bool $eventAllDay = false;
     public string $eventColor = '#0ea5e9';
+    public ?string $eventProjectId = null;
 
     // Past-date confirmation. When the user clicks a day that's
     // already passed, we hold the requested date here and surface a
@@ -295,6 +296,7 @@ class Calendar extends Page
         $this->eventEnd = $event->end_at?->format('Y-m-d\TH:i') ?? '';
         $this->eventAllDay = (bool) $event->all_day;
         $this->eventColor = $event->color ?: '#0ea5e9';
+        $this->eventProjectId = $event->project_id;
         $this->showFormModal = true;
     }
 
@@ -314,6 +316,17 @@ class Calendar extends Page
         $this->eventEnd = '';
         $this->eventAllDay = false;
         $this->eventColor = '#0ea5e9';
+        $this->eventProjectId = null;
+    }
+
+    /** @return array<string, string> */
+    public function getProjectOptions(): array
+    {
+        return AboutProject::query()
+            ->orderBy('position')
+            ->get()
+            ->mapWithKeys(fn (AboutProject $p) => [$p->id => (string) ($p->title ?: $p->id)])
+            ->all();
     }
 
     public function saveEvent(): void
@@ -343,6 +356,7 @@ class Calendar extends Page
 
         $payload = [
             'user_id' => auth()->id(),
+            'project_id' => $this->eventProjectId ?: null,
             'title' => mb_substr($title, 0, 200),
             'description' => $this->eventDescription !== '' ? $this->eventDescription : null,
             'location' => $this->eventLocation !== '' ? mb_substr($this->eventLocation, 0, 200) : null,
@@ -365,8 +379,11 @@ class Calendar extends Page
             $event = CalendarEvent::create($payload);
             Notification::make()->title(__('admin.calendar.modal.created'))->success()->send();
 
+            $event->loadMissing('project');
+            $webhookUrl = $event->project?->discord_webhook_url;
+
             $discord = DiscordPayloads::newCalendarEvent($event);
-            PostDiscordWebhook::dispatch($discord['content'], $discord['embed'], $discord['reference'])->afterResponse();
+            PostDiscordWebhook::dispatch($discord['content'], $discord['embed'], $discord['reference'], $webhookUrl)->afterResponse();
         }
 
         $this->closeFormModal();
