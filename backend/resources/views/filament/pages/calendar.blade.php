@@ -381,6 +381,16 @@
                         </div>
 
                         <div class="cal-field">
+                            <label>{{ __('admin.calendar.modal.project') }}</label>
+                            <select class="cal-input" wire:model="eventProjectId">
+                                <option value="">— {{ __('admin.calendar.modal.optional') }} —</option>
+                                @foreach ($this->getProjectOptions() as $pid => $plabel)
+                                    <option value="{{ $pid }}">{{ $plabel }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="cal-field">
                             <label>{{ __('admin.calendar.modal.description') }}</label>
                             <textarea class="cal-input" wire:model="eventDescription" rows="3" placeholder="{{ __('admin.calendar.modal.optional') }}"></textarea>
                         </div>

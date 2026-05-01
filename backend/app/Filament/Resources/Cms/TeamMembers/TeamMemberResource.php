@@ -8,7 +8,7 @@ use App\Filament\Resources\Cms\TeamMembers\Pages\EditTeamMember;
 use App\Filament\Resources\Cms\TeamMembers\Pages\ListTeamMembers;
 use App\Filament\Resources\Cms\TeamMembers\Schemas\TeamMemberForm;
 use App\Filament\Resources\Cms\TeamMembers\Tables\TeamMembersTable;
-use App\Models\Cms\TeamMember;
+use App\Models\TeamMember;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -24,10 +24,9 @@ class TeamMemberResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    // Name + email live in JSON payload; search both via JSON-path.
     public static function getGloballySearchableAttributes(): array
     {
-        return ['payload->name', 'payload->email'];
+        return ['name', 'email', 'discord_nick'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string

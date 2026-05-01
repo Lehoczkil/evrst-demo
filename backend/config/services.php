@@ -37,6 +37,13 @@ return [
 
     'discord' => [
         'webhook' => env('DISCORD_WEBHOOK_URL'),
+        // Future use: bot token for direct-message delivery. When this
+        // is set, App\Services\DiscordBot can DM team members by
+        // snowflake. Until both the token and per-member snowflakes
+        // are populated the channel webhook above remains the only
+        // outbound path.
+        'bot_token' => env('DISCORD_BOT_TOKEN'),
+        'api_base'  => env('DISCORD_API_BASE', 'https://discord.com/api/v10'),
     ],
 
     'onshape' => [

@@ -47,6 +47,14 @@ class AboutProject extends CollectionResource
         );
     }
 
+    protected function discordWebhookUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->readPayload('discord_webhook_url'),
+            set: fn ($value) => $this->writePayload('discord_webhook_url', $value),
+        );
+    }
+
     protected function descriptionEn(): Attribute
     {
         return Attribute::make(

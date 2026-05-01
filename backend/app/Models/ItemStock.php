@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Concerns\LogsActivity;
-use App\Models\Cms\TeamMember;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

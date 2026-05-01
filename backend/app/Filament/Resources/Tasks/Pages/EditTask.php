@@ -61,7 +61,8 @@ class EditTask extends EditRecord
             if ($recipients->isNotEmpty()) {
                 Notification::send($recipients, new TaskAssigned($task));
                 foreach ($recipients as $assignee) {
-                    $payload = DiscordPayloads::newTaskAssigned($task, $assignee);
+                    if (! DiscordPayloads::wantsDiscordPing($assignee)) continue;
+                    $payload = DiscordPayloads::taskAssignedPing($task, $assignee);
                     PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
                 }
             }
@@ -76,6 +77,16 @@ class EditTask extends EditRecord
                     $this->statusBeforeSave,
                     $task->status,
                 ));
+                foreach ($watchers as $watcher) {
+                    if (! DiscordPayloads::wantsDiscordPing($watcher)) continue;
+                    $payload = DiscordPayloads::taskStatusChangedPing(
+                        $task,
+                        $watcher,
+                        $this->statusBeforeSave,
+                        $task->status,
+                    );
+                    PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+                }
             }
         }
     }

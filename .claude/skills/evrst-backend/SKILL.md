@@ -42,8 +42,9 @@ The harness may block long-running web servers (`php artisan serve`, `queue:work
 | `users` | Filament accounts (`role_id`, `password_changed_at` added later) | `0001_01_01_000000_create_users_table.php` + `2026_04_28_000001_add_role_and_password_changed_at_to_users_table.php` |
 | `roles`, `permissions`, `permission_role` | RBAC (one role per user, many perms per role) | `2026_04_28_000000_create_roles_and_permissions_tables.php` |
 | `notifications` | Filament bell + Laravel database channel | `2026_04_26_163354_create_notifications_table.php` |
-| `collections`, `resources`, `object_files` | CMS payload-JSON store (events, sponsors, team, mentors, projects, goals, views) | `2026_04_25_230659_*` |
-| `member_applications` | Join-us submissions under review | `2026_04_27_000000_create_member_applications_table.php` |
+| `collections`, `resources`, `object_files` | CMS payload-JSON store (events, sponsors, mentors, projects, goals, views — team members are no longer here) | `2026_04_25_230659_*` |
+| `team_members`, `team_member_groups`, `team_member_team_member_group` | Dedicated relational tables for the team. Pivot has its own `id` PK so the same role can be held across multiple time spans (`started_at` / `ended_at`); `is_primary` replaces the old `main_position_id`. Indexes on `(left_at, position)`. Discord identity is split across `discord_username` (the @handle, unique), `discord_id` (numeric snowflake 17–20 digits, unique, nullable — pending collection), and `discord_nick` (server-display nickname). | `2026_05_07_000001_create_team_members_table.php`, `…_000002_create_team_member_groups_table.php`, `…_000003_repoint_team_member_fks.php`, `2026_05_10_000000_add_discord_username_to_team_members.php` |
+| `member_applications` | Join-us submissions under review (`team_member_id` is a `bigint` FK → `team_members.id` since `2026_05_07_000003`) | `2026_04_27_000000_create_member_applications_table.php` |
 | `tasks`, `task_user`, `task_comments` | Trello-style task system | `2026_04_29_000000_create_tasks_tables.php` |
 | `task_proofs` | Per-task documentation (image / file / link / note) — gates the TESTING + DONE transitions | `2026_05_03_000006_create_task_proofs_table.php` |
 | `activity_logs` | Auto-logged create/update/delete + custom events (accepted, rejected) | `2026_05_02_000000_create_activity_logs_table.php` |
@@ -84,7 +85,8 @@ Output shape (camelCase):
 Sidebar nav groups (`AdminPanelProvider::navigationGroups`): `Site`, `About`, `Team`, `Tasks`, `Membership`. Two raw-data resources (`Collections`, `Resources`) are admin-only and **hidden from the sidebar** via `shouldRegisterNavigation()=false` — visit `/admin/collections` or `/admin/resources` directly when debugging.
 
 Resources live under `app/Filament/Resources/`:
-- `Cms/Events`, `Cms/Sponsors`, `Cms/AboutGoals`, `Cms/AboutProjects`, `Cms/Mentors`, `Cms/TeamMembers`, `Cms/TeamMemberGroups` — CMS content backed by the `resources` JSON-payload store (each binds to a fixed `collectionId`).
+- `Cms/Events`, `Cms/Sponsors`, `Cms/AboutGoals`, `Cms/AboutProjects`, `Cms/Mentors` — CMS content backed by the `resources` JSON-payload store (each binds to a fixed `collectionId`).
+- `Cms/TeamMembers`, `Cms/TeamMemberGroups` — **no longer CMS-backed.** Bound to the dedicated `team_members` / `team_member_groups` tables and `App\Models\TeamMember` / `App\Models\TeamMemberGroup` via the new pivot. The `Cms/` namespace is a leftover so `/admin/cms/team-members` URLs keep working — fair game to lift out of `Cms\` later.
 - `MemberApplications` — typed table; review/edit/accept/reject flow.
 - `Tasks` — typed table; list grouped by status + custom Kanban page.
 - `Users`, `Roles` — admin-only management of accounts and roles. Both gated through `canViewAny()` + `canAccess()` + `shouldRegisterNavigation()` returning `isAdmin()`.
@@ -144,7 +146,7 @@ The seeded admin (`admin@evrst.test`) has `password_changed_at = now()` so it ne
 
 Accept flow (`Filament/Resources/MemberApplications/Pages/AcceptMemberApplication`) creates:
 1. A `User` with role=Member, random `Str::password(12)`, `password_changed_at = null`.
-2. A `TeamMember` (CMS resource row) with positions chosen by the reviewer + `user_id` snapshot pointing at the new login.
+2. A `TeamMember` row (`TeamMember::create([...])`) with the new column set (`name`, `email`, `email_private`, `discord_username`, `discord_nick`, `discord_id`, etc.) + `user_id` snapshot pointing at the new login. The chosen group is attached via `$member->groups()->sync([$groupId => ['is_primary' => true, 'started_at' => now()]])` and `$member->setPrimaryGroup($groupId)` keeps the `is_primary` flag canonical. **No more virtual-attribute setters or JSON `payload` writes.**
 3. A `TeamMemberAccountCreated` mail notification queued to the new user — includes the temp password and the Filament login URL.
 
 `UserResource::Pages\CreateUser` does the same (auto-generates the temp password when admin leaves the field blank). `Tables\UsersTable` exposes a `Resend temp password` row action that rotates and re-mails.
@@ -163,13 +165,61 @@ The kanban Blade view at `resources/views/filament/resources/tasks/pages/kanban-
 ## Seed data
 
 - `RoleSeeder` — every permission + 3 roles + their pivot rows. Idempotent on `key`.
-- `CollectionSeeder` — 9 fixed CMS collection UUIDs (don't change, the frontend hard-codes them).
+- `CollectionSeeder` — 7 fixed CMS collection UUIDs (don't change, the frontend hard-codes them). The old `team-members` (`00338d38-…`) and `team-member-groups` (`a4b4cb01-…`) UUIDs were removed when team members moved to dedicated tables.
 - `ResourceSeeder` — about-view + projects + goals + mentors + sponsors. Uses `Ramsey\Uuid::uuid5()` for stable IDs (note: **don't** use `Str::uuid5()` — it doesn't exist on Laravel's helper).
-- `TeamSeeder` — wipes + reseeds team-member-groups + team-members from the spreadsheet, including emails (most stub `<slug>@evrst.test`; `Lehocki László` gets the real `evrstrocket@gmail.com`).
+- `TeamSeeder` — wipes + reseeds the dedicated `team_member_groups` + `team_members` + `team_member_team_member_group` tables from `névjegyzék.xlsx` (21 members; was 18). The new `csapat-menedzser` ("Team manager") group is seeded **first** in the org-chart sort order — Bihari Bertalan + Klabacsek Bálint occupy it. Includes emails (most stub `<slug>@evrst.test`; `Lehocki László` gets the real `evrstrocket@gmail.com`). Writes `discord_username` (the @handle) directly — no more `payload.discord` JSON; `discord_id` (the snowflake) is left null pending collection.
 - `TaskSeeder` — four sample tasks across the kanban columns. Idempotent on title.
 - `DatabaseSeeder` — `RoleSeeder → admin user → Collection/Resource/Team/Task seeders`.
 
 Default admin: `admin@evrst.test` / `password`, role=Admin, `password_changed_at` pre-stamped.
+
+## Team members + groups (dedicated tables)
+
+Promoted out of the CMS into real relational tables. **Don't reach for the old `App\Models\Cms\TeamMember` / `Cms\TeamMemberGroup` — they're deleted.** Use the new models in `App\Models`:
+
+- `App\Models\TeamMember` — columns: `id`, `user_id` (FK→users, nullable+unique), `name`, `email` (unique), `email_private`, `discord_username` (the @handle, e.g. `e.1415`, unique), `discord_id` (numeric snowflake 17–20 digits, unique, nullable — pending collection), `discord_nick` (server-display nickname), `degree` (json `{en,hu}`), `bio` (json), `photo_path`, `joined_at`, `left_at`, `is_public`, `position`, `meta` (json escape hatch), timestamps + soft deletes. Relations: `user()`, `groups()` (BelongsToMany via the `TeamMemberAssignment` pivot, withPivot `is_primary` / `title` / `started_at` / `ended_at` / `position`), `currentGroups()` (the `whereNull('ended_at')` subset), `primaryGroup()`. `setPrimaryGroup(?int $groupId)` flips `is_primary` atomically.
+- `App\Models\TeamMemberGroup` — columns: `id`, `parent_id` (self FK, nullable — for org nesting), `slug` (unique 64), `name` (json `{en,hu}`), `description` (json), `kind` (`leadership` / `department` / `squad`), `position`, `is_public`, timestamps + soft deletes. Relations: `parent()`, `children()`, `members()`, `currentMembers()`. Static helper: `TeamMemberGroup::pickLocale($value, ?$lang = null)` — replaces the old `Cms\CollectionResource::pickLocale`.
+- `App\Models\TeamMemberAssignment extends Pivot` — typed pivot for `team_member_team_member_group`. Has its own `id` PK so the same role can be held across multiple time spans. Casts `is_primary => bool`, `started_at` / `ended_at => datetime`, `title => array`.
+
+Typical usage:
+```php
+TeamMember::with('groups')->get();
+$member->groups()->sync([$groupId => ['is_primary' => false, 'started_at' => now()]]);
+$member->setPrimaryGroup($groupId);
+TeamMemberGroup::pickLocale($group->name);
+```
+
+Creating a TeamMember from `AcceptMemberApplication` is now `TeamMember::create([...])` + `$member->groups()->sync([...])` + `$member->setPrimaryGroup(...)`. **No more virtual-attribute setters or `payload` writes.** `payload.discord` is gone — Discord identity is split across three columns: `discord_username` (the @handle, e.g. `e.1415`), `discord_id` (numeric snowflake 17–20 digits, currently null pending collection), and `discord_nick` (server-display nickname). `payload.private_email` is now the `email_private` column.
+
+The Filament TeamMember admin form exposes `discord_username` as a plain text input and `discord_id` as a text input with a `regex:/^\d{17,20}$/` validator (with a helper noting snowflakes are required for DM bot delivery + `<@id>` mentions). The TeamMembers table also gained two toggleable-hidden columns for username + snowflake.
+
+`TeamSeeder` reseeds 21 members from `névjegyzék.xlsx` (was 18). A new `csapat-menedzser` ("Team manager") group is seeded **first** in the org-chart sort order — Bihari Bertalan + Klabacsek Bálint occupy it. The seeder writes spreadsheet @handles into `discord_username` directly; `discord_id` remains null.
+
+## Discord delivery paths
+
+There are two outbound channels and only one is live today:
+
+- **Channel webhook (live).** `App\Jobs\SendDiscordWebhook` posts to `services.discord.webhook` (env `DISCORD_WEBHOOK_URL`). This is the **only** outbound path currently in use — fired for new member applications, new calendar events, and per-recipient task pings (assignment / status change / new comment from `CreateTask` / `EditTask` / `KanbanBoard` / `CommentsRelationManager`). The job no-ops when the URL is empty.
+- **Bot DM (scaffolded, dormant).** `App\Services\DiscordBot` wraps the Discord REST API; `isConfigured()` is false until `DISCORD_BOT_TOKEN` is set. `App\Jobs\SendDiscordDirectMessage::dispatch($snowflake, $content, $embed, $reference)` exists and is queueable, but silently no-ops when the bot isn't configured **or** the snowflake doesn't match the regex. **None of the existing dispatch sites use the DM job yet.** Once the team registers a bot and collects snowflakes into `team_members.discord_id`, swapping the per-recipient `PostDiscordWebhook::dispatch(...)` calls for `SendDiscordDirectMessage::dispatch(...)` is the entire migration.
+
+`App\Support\DiscordPayloads::mention()` is the helper both paths use to render an `@`-mention. It only emits `<@id>` (a real ping) when `discord_id` matches `^\d{17,20}$`; otherwise it falls back to plaintext `@discord_nick`, then `@discord_username`, then `user.name` — so the channel never shows a broken `<@username>` literal. `wantsDiscordPing()` returns true when the user has any of nick / username / id.
+
+`config/services.php` has both `discord.webhook` and `discord.bot_token` + `discord.api_base`. `.env.example` documents `DISCORD_BOT_TOKEN=` (empty default) and an optional `DISCORD_API_BASE` override. `phpunit.xml` forces `DISCORD_BOT_TOKEN=""` so tests can never accidentally hit Discord.
+
+## Test infrastructure
+
+The contract is **"no outbound notification, mail, or Discord traffic ever fires from `php artisan test`"**. `phpunit.xml` already scrubs `DISCORD_WEBHOOK_URL`, `DISCORD_BOT_TOKEN`, and `MAIL_MAILER` to safe values, but every feature test should still fake the relevant facades:
+
+```php
+Notification::fake();
+Mail::fake();
+Bus::fake();   // catches SendDiscordWebhook + SendDiscordDirectMessage dispatches
+Http::fake(); // catches anything that slipped through to the Discord REST API
+```
+
+FK migration `2026_05_07_000003_repoint_team_member_fks.php` repoints `member_applications.team_member_id` and `item_stocks.owner_team_member_id` from `foreignUuid → resources` to `bigint FK → team_members.id`. Anywhere code still typed those columns as `string` / `Uuid` should be updated to `int`.
+
+The Filament admin still lives at `App\Filament\Resources\Cms\TeamMembers\` and `…\TeamMemberGroups\` so `/admin/cms/team-members` URLs keep working — the `Cms\` namespace is leftover and can be moved out as a cleanup.
 
 ## Recent admin features (cheat sheet)
 

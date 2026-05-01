@@ -34,6 +34,13 @@ class AboutProjectForm
                     ->displayFormat('d M Y H:i')
                     ->after('start_at')
                     ->columnSpan(['default' => 12, 'md' => 6]),
+                TextInput::make('discord_webhook_url')
+                    ->label('Discord webhook URL')
+                    ->url()
+                    ->maxLength(255)
+                    ->helperText('Calendar events linked to this project will post to this Discord channel. Leave blank to use the global webhook.')
+                    ->placeholder('https://discord.com/api/webhooks/…')
+                    ->columnSpanFull(),
                 Textarea::make('description_en')
                     ->label(__('admin.common.description') . ' (EN)')
                     ->rows(4)

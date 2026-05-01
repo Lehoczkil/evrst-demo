@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Cms\TeamMember;
 use App\Models\Item;
 use App\Models\ItemStock;
+use App\Models\TeamMember;
 use App\Models\Venue;
 use BackedEnum;
 use Filament\Actions\CreateAction;
@@ -165,8 +165,8 @@ class ItemManagement extends Page implements HasTable
             Select::make('owner_team_member_id')
                 ->label(__('admin.items.owner'))
                 ->options(fn () => TeamMember::query()
-                    ->get()
-                    ->mapWithKeys(fn (TeamMember $tm) => [$tm->id => $tm->name ?? $tm->id])
+                    ->orderBy('name')
+                    ->pluck('name', 'id')
                     ->all())
                 ->searchable()
                 ->placeholder(__('admin.items.owner_placeholder'))

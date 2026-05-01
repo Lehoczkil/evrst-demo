@@ -41,9 +41,9 @@ class CreateTask extends CreateRecord
 
         Notification::send($recipients, new TaskAssigned($task));
 
-        // Discord ping per newly-added assignee.
         foreach ($recipients as $assignee) {
-            $payload = DiscordPayloads::newTaskAssigned($task, $assignee);
+            if (! DiscordPayloads::wantsDiscordPing($assignee)) continue;
+            $payload = DiscordPayloads::taskAssignedPing($task, $assignee);
             PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
         }
     }

@@ -70,6 +70,10 @@ bun run preview # serve frontend/build/
   - Three.js / MDX / rocket-scene chunks remain split (don't get inlined).
   - No "circular chunk" warnings — those come from importing `@/components` barrel inside another `src/components/**` file.
 
+## TODO: team-member endpoint cutover
+
+Team members + groups have moved out of the CMS into dedicated relational tables (`team_members`, `team_member_groups`, `team_member_team_member_group`) on the backend. The SPA still fetches them from the generic `GET /api/resource?collection_id=…` endpoint, so the team section currently breaks against a freshly-seeded backend (the old `team-members` and `team-member-groups` collection UUIDs are no longer seeded). When the backend ships a dedicated `/api/team-members` (or similar) endpoint, swap the team-section queries over and drop the hard-coded `VITE_TEAM_MEMBERS_COLLECTION_ID` / `VITE_TEAM_MEMBER_GROUPS_COLLECTION_ID` env vars. The expected response shape will be relational (`{ id, name, discordUsername, discordNick, discordId, groups: [{ id, slug, name, isPrimary }] }`) — not the wrapped `{ payload: {…} }` envelope the rest of the CMS uses. Note the Discord identity split: `discordUsername` is the @handle, `discordId` is the numeric snowflake (currently null for everyone — pending collection), and `discordNick` is the server-display nickname.
+
 ## Talking to the backend
 
 - All requests go through `src/api/api.ts`. The helper supports a recursive bracket serializer (`where[payload][path][0]=name&where[payload][equals]=foo`) so the dynamic-page `where` clause keeps working.

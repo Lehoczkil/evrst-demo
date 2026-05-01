@@ -8,10 +8,12 @@ use App\Models\TaskComment;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
-class TaskCommented extends Notification
+class TaskCommented extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -21,7 +23,7 @@ class TaskCommented extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     public function toDatabase(object $notifiable): array
@@ -41,5 +43,18 @@ class TaskCommented extends Notification
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $author = $this->comment->author?->name ?? 'Someone';
+        $snippet = Str::limit((string) $this->comment->body, 200);
+
+        return (new MailMessage())
+            ->subject('[EVRST] New comment on ' . $this->task->title)
+            ->greeting('Hi ' . ($notifiable->name ?? 'there') . ',')
+            ->line($author . ' commented on "' . $this->task->title . '":')
+            ->line($snippet)
+            ->action('Open task', TaskResource::getUrl('edit', ['record' => $this->task->id]));
     }
 }

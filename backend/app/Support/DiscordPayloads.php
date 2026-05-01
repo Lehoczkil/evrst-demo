@@ -7,9 +7,11 @@ use App\Filament\Resources\Cms\Events\EventResource;
 use App\Filament\Resources\MemberApplications\MemberApplicationResource;
 use App\Filament\Resources\Tasks\TaskResource;
 use App\Models\CalendarEvent;
+use App\Models\Cms\CollectionResource;
 use App\Models\Cms\Event;
 use App\Models\MemberApplication;
 use App\Models\Task;
+use App\Models\TaskComment;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -140,6 +142,11 @@ class DiscordPayloads
             }
         }
 
+        $projectName = null;
+        if ($event->relationLoaded('project') && $event->project) {
+            $projectName = CollectionResource::pickLocale($event->project->title);
+        }
+
         return [
             'content' => '📅 New event added to the calendar',
             'embed' => [
@@ -150,6 +157,7 @@ class DiscordPayloads
                 'fields' => array_values(array_filter([
                     $when ? ['name' => 'When', 'value' => $when, 'inline' => true] : null,
                     $event->location ? ['name' => 'Where', 'value' => (string) $event->location, 'inline' => true] : null,
+                    $projectName ? ['name' => 'Project', 'value' => (string) $projectName, 'inline' => true] : null,
                 ])),
                 'timestamp' => optional($event->created_at)->toIso8601String(),
             ],
@@ -157,11 +165,48 @@ class DiscordPayloads
         ];
     }
 
+    /**
+     * Build the Discord-mention prefix for a user. `<@…>` only resolves
+     * to a real ping when the value is a numeric snowflake (17–20
+     * digits) — anything else renders as literal text in Discord, so we
+     * fall back to plaintext `@nick` / `@username` when the id is
+     * missing or non-snowflake.
+     */
+    private static function mention(User $user): string
+    {
+        $tm = $user->teamMember()->first();
+        $id = $tm?->discord_id;
+        $nick = $tm?->discord_nick;
+        $username = $tm?->discord_username;
+
+        $isSnowflake = $id && preg_match('/^\d{17,20}$/', $id) === 1;
+        if ($isSnowflake) {
+            return $nick ? "<@{$id}> @{$nick}" : "<@{$id}>";
+        }
+        if ($nick) return "@{$nick}";
+        if ($username) return "@{$username}";
+        return $user->name;
+    }
+
+    /**
+     * True when we have anything Discord-displayable for the user — a
+     * snowflake (real ping), a server nick, or a username. Without any
+     * of those we'd just dump the plain name into the channel, which
+     * the in-app notification already covers.
+     */
+    public static function wantsDiscordPing(User $user): bool
+    {
+        $tm = $user->teamMember()->first();
+        return (bool) ($tm?->discord_id)
+            || (bool) ($tm?->discord_nick)
+            || (bool) ($tm?->discord_username);
+    }
+
     /** @return array{content: string, embed: array<string, mixed>, reference: string} */
-    public static function newTaskAssigned(Task $task, User $assignee): array
+    public static function taskAssignedPing(Task $task, User $assignee): array
     {
         return [
-            'content' => '🛠 ' . $assignee->name . ' assigned to a task',
+            'content' => '🛠 ' . self::mention($assignee) . " you've been assigned to a task",
             'embed' => [
                 'title' => $task->title,
                 'description' => Str::limit((string) ($task->description ?? ''), 200) ?: null,
@@ -174,6 +219,47 @@ class DiscordPayloads
                 'timestamp' => now()->toIso8601String(),
             ],
             'reference' => 'task:assign:' . $task->id . ':' . $assignee->id,
+        ];
+    }
+
+    /** @return array{content: string, embed: array<string, mixed>, reference: string} */
+    public static function taskStatusChangedPing(Task $task, User $watcher, string $prev, string $next): array
+    {
+        return [
+            'content' => '🔁 ' . self::mention($watcher) . ' task status changed',
+            'embed' => [
+                'title' => $task->title,
+                'description' => Str::limit((string) ($task->description ?? ''), 200) ?: null,
+                'url' => TaskResource::getUrl('edit', ['record' => $task->id]),
+                'color' => self::COLOR_TASK,
+                'fields' => array_values(array_filter([
+                    ['name' => 'Status', 'value' => Task::statusLabel($prev) . ' → ' . Task::statusLabel($next), 'inline' => true],
+                    $task->due_date ? ['name' => 'Due', 'value' => $task->due_date->format('d M Y'), 'inline' => true] : null,
+                ])),
+                'timestamp' => now()->toIso8601String(),
+            ],
+            'reference' => 'task:status:' . $task->id . ':' . $watcher->id,
+        ];
+    }
+
+    /** @return array{content: string, embed: array<string, mixed>, reference: string} */
+    public static function taskCommentedPing(Task $task, User $watcher, TaskComment $comment): array
+    {
+        $author = $comment->author?->name ?? 'Someone';
+
+        return [
+            'content' => '💬 ' . self::mention($watcher) . ' new comment on a task you watch',
+            'embed' => [
+                'title' => $task->title,
+                'description' => Str::limit((string) $comment->body, 200) ?: null,
+                'url' => TaskResource::getUrl('edit', ['record' => $task->id]),
+                'color' => self::COLOR_TASK,
+                'fields' => array_values(array_filter([
+                    ['name' => 'Author', 'value' => $author, 'inline' => true],
+                ])),
+                'timestamp' => optional($comment->created_at)->toIso8601String() ?? now()->toIso8601String(),
+            ],
+            'reference' => 'task:comment:' . $task->id . ':' . $comment->id . ':' . $watcher->id,
         ];
     }
 }

@@ -141,8 +141,10 @@ Public form at `/join-us` (`frontend/src/pages/join-us/`) POSTs to
    (no-op when `DISCORD_WEBHOOK_URL` is empty).
 
 Reviewers open the application in `/admin/member-applications`, edit if
-needed, then **Accept** (creates a Member-role User + a TeamMember row,
-links them, emails the temp password) or **Reject**.
+needed, then **Accept** (creates a Member-role User + a `team_members`
+row, attaches it to the chosen group via the
+`team_member_team_member_group` pivot with `is_primary=true`, links the
+user, emails the temp password) or **Reject**.
 
 ### Tasks + kanban
 
@@ -313,8 +315,9 @@ All schema lives in `backend/database/migrations/` and ships seeded.
 | `users` | Filament admin accounts (now with `role_id` + `password_changed_at`). |
 | `roles`, `permissions`, `permission_role` | Role-based access control. |
 | `notifications` | Filament/Laravel database notification bell rows. |
-| `collections`, `resources`, `object_files` | CMS content store (events / sponsors / team / mentors / projects / goals / views). |
-| `member_applications` | Join-us submissions awaiting review. |
+| `collections`, `resources`, `object_files` | CMS content store (events / sponsors / mentors / projects / goals / views). |
+| `team_members`, `team_member_groups`, `team_member_team_member_group` | Dedicated relational tables for team members + their groups + a typed pivot (with `is_primary`, `title` override, `started_at` / `ended_at`, per-group `position`). Promoted out of the CMS. Discord identity is split across `discord_username` (the @handle), `discord_id` (numeric snowflake, currently null pending collection), and `discord_nick` (server-display name). |
+| `member_applications` | Join-us submissions awaiting review (`team_member_id` is now a bigint FK → `team_members.id`). |
 | `tasks`, `task_user`, `task_comments` | Trello-style task management. |
 | `task_proofs` | Per-task documentation (image / file / link / note) — gates the TESTING / DONE transitions. |
 | `activity_logs` | Auto-logged create / update / delete + custom events (accepted / rejected). |
@@ -333,7 +336,16 @@ Key settings in `backend/.env.example`:
   in `backend/storage/logs/laravel.log`. Switch to Postmark/Resend (env
   keys are scaffolded in `config/services.php`) for real delivery.
 - `DISCORD_WEBHOOK_URL` — Discord channel webhook for new-application
-  pings. Leave blank in dev to skip.
+  pings, new calendar events, and per-recipient task pings. Leave blank
+  in dev to skip.
+- `DISCORD_BOT_TOKEN` *(optional, future use)* — bot token for
+  per-person DM delivery via `App\Services\DiscordBot` +
+  `App\Jobs\SendDiscordDirectMessage`. The scaffolding ships dormant —
+  it no-ops until both this token is set **and** the recipient's
+  `team_members.discord_id` (snowflake) is populated. The channel
+  webhook above remains the only live outbound path until the swap
+  happens. `DISCORD_API_BASE` overrides the REST base URL if you proxy
+  it.
 - `ADMIN_URL` — public URL of the Filament admin, used inside Discord
   webhook payloads.
 - `ONSHAPE_ACCESS_KEY`, `ONSHAPE_SECRET_KEY` — generate at
