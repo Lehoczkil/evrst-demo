@@ -596,6 +596,12 @@ return [
             'title_req'    => 'Title is required',
             'start_req'    => 'Start time is required',
         ],
+
+        'past_date' => [
+            'title'   => 'Add event in the past?',
+            'body'    => 'You picked :date, which is already in the past. Are you sure you want to add an event there?',
+            'confirm' => 'Yes, add it',
+        ],
     ],
 
     'drawing' => [

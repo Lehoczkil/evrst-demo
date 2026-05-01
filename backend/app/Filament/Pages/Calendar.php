@@ -61,6 +61,12 @@ class Calendar extends Page
     public bool $eventAllDay = false;
     public string $eventColor = '#0ea5e9';
 
+    // Past-date confirmation. When the user clicks a day that's
+    // already passed, we hold the requested date here and surface a
+    // small confirmation modal first instead of opening the form
+    // immediately. Empty string == nothing pending.
+    public string $pendingPastDate = '';
+
     public function mount(): void
     {
         $this->cursor = now()->startOfMonth()->toDateString();
@@ -233,6 +239,36 @@ class Calendar extends Page
     }
 
     public function openCreateModal(string $date): void
+    {
+        // Guard against scheduling on a past day — surface a small
+        // confirm dialog first. Compare on the day boundary so clicking
+        // "today" never trips the gate.
+        try {
+            $clicked = Carbon::parse($date)->startOfDay();
+        } catch (\Throwable) {
+            return;
+        }
+        if ($clicked->lt(now()->startOfDay())) {
+            $this->pendingPastDate = $date;
+            return;
+        }
+        $this->openCreateModalNow($date);
+    }
+
+    public function confirmPastDate(): void
+    {
+        if ($this->pendingPastDate === '') return;
+        $date = $this->pendingPastDate;
+        $this->pendingPastDate = '';
+        $this->openCreateModalNow($date);
+    }
+
+    public function cancelPastDate(): void
+    {
+        $this->pendingPastDate = '';
+    }
+
+    private function openCreateModalNow(string $date): void
     {
         $this->resetEventForm();
         $this->editingId = null;

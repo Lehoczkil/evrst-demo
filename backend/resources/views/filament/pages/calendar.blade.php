@@ -324,6 +324,25 @@
         @endforeach
     </div>
 
+    @if ($pendingPastDate !== '')
+        <div class="cal-modal-backdrop" wire:click.self="cancelPastDate" wire:keydown.escape.window="cancelPastDate">
+            <div class="cal-modal" role="dialog" aria-modal="true" style="max-width: 440px;">
+                <div class="cal-modal__head">
+                    <div class="cal-modal__title">{{ __('admin.calendar.past_date.title') }}</div>
+                </div>
+                <div class="cal-modal__body">
+                    <p style="margin: 0; font-size: .9rem; line-height: 1.45;">
+                        {{ __('admin.calendar.past_date.body', ['date' => \Carbon\Carbon::parse($pendingPastDate)->translatedFormat('d F Y')]) }}
+                    </p>
+                </div>
+                <div class="cal-modal__foot">
+                    <button type="button" class="cal-btn" wire:click="cancelPastDate">{{ __('admin.calendar.modal.cancel') }}</button>
+                    <button type="button" class="cal-btn cal-btn--primary" wire:click="confirmPastDate">{{ __('admin.calendar.past_date.confirm') }}</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @if ($showFormModal)
         <div class="cal-modal-backdrop" wire:click.self="closeFormModal" wire:keydown.escape.window="closeFormModal">
             <div class="cal-modal" role="dialog" aria-modal="true">

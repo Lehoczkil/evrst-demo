@@ -596,6 +596,12 @@ return [
             'title_req'    => 'A cím kötelező',
             'start_req'    => 'A kezdés időpontja kötelező',
         ],
+
+        'past_date' => [
+            'title'   => 'Esemény a múltba?',
+            'body'    => 'Ezt a napot választottad: :date — ez már elmúlt. Biztosan szeretnél ide eseményt rögzíteni?',
+            'confirm' => 'Igen, rögzítsd',
+        ],
     ],
 
     'drawing' => [
