@@ -123,6 +123,19 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.hooks.help-modal'),
             )
+            // Convert Filament's number-spinner year input inside the
+            // date picker into a real <select> dropdown.
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => view('filament.hooks.year-select-script'),
+            )
+            // Move every .fi-modal under <body> so backdrop-filter
+            // ancestors (sections, tables) don't trap its position:
+            // fixed overlay inside the surrounding card.
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => view('filament.hooks.modal-teleport-script'),
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
