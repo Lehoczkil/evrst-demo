@@ -37,7 +37,7 @@
     --evrst-r-md: 6px;
     --evrst-r-lg: 8px;
     --evrst-blur: blur(22px) saturate(140%);
-    --evrst-container: 1440px;
+    --evrst-container: 100%;
 }
 
 /* Light mode — Filament toggles the .dark class on <html> for dark.
@@ -368,14 +368,41 @@ html:not(.dark) .fi-body::before {
 .evrst-help-pill:hover { color: var(--evrst-text); border-color: var(--evrst-border-strong); }
 
 /* When the sidebar is collapsed (Filament drops `.fi-sidebar-open`),
-   hide the entire sidebar — the topbar chevron stays as the only way
-   to bring it back. */
+   keep its layout slot reserved so the page content doesn't jump
+   sideways every time the user toggles the rail. We only hide the
+   sidebar visually — the 220px column stays in flow so `.fi-main`
+   keeps the same width before/after the toggle. The `lg:` width below
+   already pins the rail to 220px on desktop. */
 .fi-sidebar:not(.fi-sidebar-open) {
-    width: 0 !important;
-    min-width: 0 !important;
-    border-right: 0 !important;
-    overflow: hidden !important;
     visibility: hidden !important;
+    overflow: hidden !important;
+    border-right-color: transparent !important;
+    background: transparent !important;
+    /* Kill the collapse animation. Filament tweens width / nav-item
+       layout while toggling, so without this the rail briefly
+       collapses to an icons-only rail (with the help "?") on its way
+       to hidden — looks like a flicker. */
+    transition: none !important;
+}
+.fi-sidebar:not(.fi-sidebar-open),
+.fi-sidebar:not(.fi-sidebar-open) * {
+    transition: none !important;
+    animation: none !important;
+}
+/* Suppress the collapsed-rail visuals so even mid-transition there's
+   nothing to render — the whole rail just disappears in one paint. */
+.fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-nav,
+.fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-header,
+.fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-footer {
+    opacity: 0 !important;
+}
+@media (max-width: 1023.98px) {
+    /* On mobile the sidebar is a slide-over drawer, not a column. The
+       page content never shifts when it opens/closes — fully hide it. */
+    .fi-sidebar:not(.fi-sidebar-open) {
+        width: 0 !important;
+        min-width: 0 !important;
+    }
 }
 
 /* ---------- Page header ------------------------------------------- */
@@ -639,7 +666,129 @@ html .fi-modal-window-ctn .fi-modal-window,
     box-shadow:
         0 0 0 1px rgba(255,255,255,.85),
         0 24px 80px rgba(0,0,0,.6) !important;
-    overflow: hidden;
+    /* Default: size to content with a viewport cap. Specific width
+       modifiers (xs/sm = compact confirmations, lg+ = roomy forms)
+       are tuned in the rules below. */
+    height: auto !important;
+    max-height: calc(100dvh - 2rem) !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Compact confirmation dialogs (Delete, Force-delete, Detach, Restore,
+   etc.) — Filament defaults these to xs/sm width. Keep them small. */
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-xs,
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-sm {
+    width: min(420px, calc(100vw - 2rem)) !important;
+    max-width: min(420px, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-md {
+    width: min(520px, calc(100vw - 2rem)) !important;
+    max-width: min(520px, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-lg {
+    width: min(640px, calc(100vw - 2rem)) !important;
+    max-width: min(640px, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-xl {
+    width: min(720px, calc(100vw - 2rem)) !important;
+    max-width: min(720px, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-2xl {
+    width: min(800px, calc(100vw - 2rem)) !important;
+    max-width: min(800px, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-3xl {
+    width: min(960px, calc(100vw - 2rem)) !important;
+    max-width: min(960px, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-4xl {
+    width: min(1100px, calc(100vw - 2rem)) !important;
+    max-width: min(1100px, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-5xl {
+    width: min(64rem, calc(100vw - 2rem)) !important;
+    max-width: min(64rem, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-6xl {
+    width: min(72rem, calc(100vw - 2rem)) !important;
+    max-width: min(72rem, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-7xl {
+    width: min(80rem, calc(100vw - 2rem)) !important;
+    max-width: min(80rem, calc(100vw - 2rem)) !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window.fi-width-screen {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+}
+
+/* Filament's compiled CSS positions `.fi-modal-window-ctn` with
+   `position: fixed; inset: 0` so it ALWAYS covers the full viewport
+   regardless of page scroll. BUT a `position: fixed` element is
+   anchored to the nearest ancestor that creates a containing block —
+   any ancestor with `transform`, `filter`, `backdrop-filter`,
+   `perspective`, or `contain` does. This theme uses backdrop-filter
+   on virtually every surface (sections, tables, cards, sidebars),
+   so the modal was getting trapped inside the table's box.
+   While ANY modal is open we strip backdrop-filter / transform /
+   filter / contain from every ancestor of `.fi-modal-open`, freeing
+   the modal to anchor to the actual viewport. As soon as the modal
+   closes the rule no longer matches and the surfaces regain their
+   frosted glass. */
+html:has(.fi-modal-open) *:has(.fi-modal-open) {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transform: none !important;
+    filter: none !important;
+    perspective: none !important;
+    contain: none !important;
+    will-change: auto !important;
+}
+/* When the modal closes, Alpine removes the `fi-modal-open` class
+   immediately but plays a 300ms exit transition on the overlay and
+   window. During that window the rule above no longer matches, so
+   the modal "snaps back" into its trapped-in-table layout for
+   300ms. Kill the leave transition so the modal hides instantly
+   instead of flashing the broken layout. */
+html .fi-modal .fi-transition-leave,
+html .fi-modal .fi-transition-leave * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+}
+html .fi-modal:not(.fi-modal-open) .fi-modal-close-overlay,
+html .fi-modal:not(.fi-modal-open) .fi-modal-window-ctn,
+html .fi-modal:not(.fi-modal-open) .fi-modal-window {
+    display: none !important;
+}
+html .fi-modal,
+html .fi-modal[data-fi-modal-id] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 40 !important;
+    transform: none !important;
+    filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    contain: none !important;
+}
+html .fi-modal .fi-modal-window-ctn,
+html .fi-modal-window-ctn {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 40 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+html .fi-modal .fi-modal-close-overlay,
+html .fi-modal-close-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    z-index: 39 !important;
 }
 html:not(.dark) .fi-modal .fi-modal-window,
 html:not(.dark) .fi-modal-window,
@@ -651,6 +800,92 @@ html:not(.dark) .fi-modal-window-ctn .fi-modal-window {
 }
 .fi-modal-header { border-bottom-color: var(--evrst-border) !important; }
 .fi-modal-footer { border-top-color: var(--evrst-border) !important; background: transparent !important; }
+
+/* All Filament modals (single-record DeleteAction, bulk DeleteBulkAction,
+   detach, force-delete, restore, replicate, generic confirmations,
+   slideovers, action modals with forms, etc.) share the same markup
+   under `.fi-modal-window-ctn > .fi-modal-window`. The window keeps
+   `overflow: hidden` so the dialog itself stays a single non-scrolling
+   card — we just compensate for two of Filament's defaults that
+   otherwise get clipped:
+     • The icon-bg has margin-block:-.5rem, so headers that show an
+       icon (the danger-circle on Delete / Force-delete / etc.) need
+       extra padding-top so the icon isn't decapitated.
+     • The footer-actions row sits flush against the bottom border;
+       bump its padding-block so Cancel + the destructive button have
+       breathing room on every confirmation. */
+/* Confirmation modals with an icon (Delete, ForceDelete, Detach,
+   Restore, Replicate, custom danger actions) draw a circular icon
+   above the heading. Filament defaults to a -0.5rem top margin on
+   the icon-bg and only 1.5rem padding-top on the header — combined
+   with our `overflow:hidden` on the window, the icon ends up half
+   clipped by the rounded top corner. We:
+     1. add ~2.5rem of padding INSIDE the modal-window so the entire
+        header + icon sits comfortably below the rounded top;
+     2. zero out the icon-bg's negative top margin so it never
+        protrudes into the corner. */
+/* Filament's compiled rule applies `margin-block: -0.5rem;
+   margin-inline-start: -0.5rem` to .fi-modal-icon-bg in EVERY mode
+   (the fi-align-center rule only overrides padding, not margin). With
+   our `overflow:hidden` rounded window, that pulls the danger icon
+   into the rounded corner and clips it. Also, the .fi-modal-header is
+   `position: sticky; background: white` — its solid bg paints over the
+   rounded top corners. Reset all of it. */
+html .fi-modal .fi-modal-icon-bg,
+html .fi-modal-window .fi-modal-icon-bg,
+html .fi-modal-window-ctn .fi-modal-icon-bg {
+    margin: 0 !important;
+}
+html .fi-modal-window-ctn > .fi-modal-window-has-icon > .fi-modal-header,
+html .fi-modal-window-ctn > .fi-modal-window-has-icon .fi-modal-header,
+html .fi-modal-window-ctn > .fi-modal-window:has(.fi-modal-icon-bg) > .fi-modal-header,
+html .fi-modal-window-ctn > .fi-modal-window:has(.fi-modal-icon-bg) .fi-modal-header {
+    padding-top: 2.5rem !important;
+    padding-bottom: 1.5rem !important;
+    background: transparent !important;
+}
+/* Make sure the close (X) button doesn't sit on top of the centered
+   icon — push it into the corner with breathing room. */
+html .fi-modal .fi-modal-close-btn {
+    top: 0.75rem !important;
+    right: 0.75rem !important;
+    inset-inline-end: 0.75rem !important;
+}
+/* Modal content hugs its own size so confirmation dialogs stay
+   compact. Form modals with real bodies still expand naturally. */
+html .fi-modal-window-ctn > .fi-modal-window .fi-modal-content {
+    flex: 0 0 auto !important;
+    padding-block: 1.25rem !important;
+}
+.fi-modal-window-ctn > .fi-modal-window > .fi-modal-footer,
+.fi-modal-window-ctn > .fi-modal-window .fi-modal-footer {
+    padding-block: 1.5rem !important;
+    background: transparent !important;
+}
+
+/* The drawing-preview modal needs much more vertical space than a
+   confirmation dialog — the canvas fills the body. Force the wide
+   variants (`5xl`/`6xl`/`7xl`, only used by the View action) close
+   to the full viewport height so the image isn't squeezed into a
+   short letterbox. */
+/* Wide preview modals (View action on Drawings, etc.) — make the
+   window itself tall enough to host the image. The wrapper inside
+   the content slot already pegs its own height to
+   `calc(100dvh - 11rem)`, so the dialog naturally sizes to nearly
+   the full viewport. */
+.fi-modal-window-ctn > .fi-modal-window.fi-width-5xl,
+.fi-modal-window-ctn > .fi-modal-window.fi-width-6xl,
+.fi-modal-window-ctn > .fi-modal-window.fi-width-7xl {
+    max-height: calc(100dvh - 2rem) !important;
+    overflow-y: auto !important;
+}
+.fi-modal-window-ctn > .fi-modal-window.fi-width-5xl > .fi-modal-content,
+.fi-modal-window-ctn > .fi-modal-window.fi-width-6xl > .fi-modal-content,
+.fi-modal-window-ctn > .fi-modal-window.fi-width-7xl > .fi-modal-content {
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+}
 
 /* Help modal already mounted globally — small white hairline border
    so the dialog reads as a discrete card against the dimmed page. */
@@ -743,6 +978,20 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 .fi-sc-actions,
 .fi-sc-actions.fi-sticky {
     z-index: 1;
+}
+
+/* Anchor every form-action row to the LEFT — primary action (Save /
+   Create) reads first, just like the page heading and section labels.
+   Covers Filament's resource Create / Edit pages, the
+   .fi-form-actions block, and any custom page that uses the same
+   class names. */
+.fi-form-actions,
+.fi-fo-actions,
+.fi-sc-actions,
+.fi-fo-form-actions,
+.fi-resource-create-record-page form > .fi-fo-actions,
+.fi-resource-edit-record-page form > .fi-fo-actions {
+    justify-content: flex-start !important;
 }
 
 /* ---------- Tabs --------------------------------------------------- */
@@ -1586,11 +1835,37 @@ input[type="radio"].fi-input:checked {
     border: 1px solid var(--evrst-border) !important;
     border-radius: 999px !important;
     background: rgba(255,255,255,.02);
+    height: 36px !important;
+    padding: 0 .85rem !important;
+    overflow: hidden;
 }
 .fi-ta-search .fi-input-wrp:focus-within,
 .fi-ta-search-field .fi-input-wrp:focus-within {
     border-color: var(--evrst-border-amber) !important;
     box-shadow: 0 0 0 3px var(--evrst-accent-soft) !important;
+}
+/* Strip the underline our generic input rule paints on the inner
+   <input> — inside the pill wrapper it shows up as a stray bar that
+   cuts through the placeholder. */
+.fi-ta-search .fi-input,
+.fi-ta-search .fi-input-wrp .fi-input,
+.fi-ta-search-field .fi-input,
+.fi-ta-search-field .fi-input-wrp .fi-input {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    height: 100% !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+.fi-ta-search .fi-input:focus,
+.fi-ta-search .fi-input:focus-visible,
+.fi-ta-search-field .fi-input:focus,
+.fi-ta-search-field .fi-input:focus-visible {
+    border: 0 !important;
+    box-shadow: none !important;
 }
 html:not(.dark) .fi-ta-search .fi-input-wrp,
 html:not(.dark) .fi-ta-search-field .fi-input-wrp {
@@ -1605,6 +1880,32 @@ html:not(.dark) .fi-ta-search-field .fi-input-wrp {
 .fi-ta-filter-pills button:hover {
     border-color: var(--evrst-border-strong) !important;
     background: var(--evrst-surface-raised) !important;
+}
+
+/* The above-the-table filter row uses a wide responsive grid where
+   each select fills its full grid cell — that left a big gap between
+   the placeholder text and the chevron. Pull the chevron back to the
+   text by sizing the wrapper to its content and trimming the right
+   padding. */
+.fi-ta-filters-form .fi-input-wrp,
+.fi-ta-filters .fi-input-wrp {
+    width: auto !important;
+    min-width: 0 !important;
+}
+.fi-ta-filters-form .fi-input-wrp .fi-input,
+.fi-ta-filters .fi-input-wrp .fi-input {
+    width: auto !important;
+    padding-inline-end: .35rem !important;
+}
+.fi-ta-filters-form .fi-input-wrp-suffix,
+.fi-ta-filters .fi-input-wrp-suffix {
+    padding-inline-end: .5rem !important;
+    padding-inline-start: 0 !important;
+}
+.fi-ta-filters-form .fi-fo-field-wrp,
+.fi-ta-filters .fi-fo-field-wrp {
+    width: max-content;
+    max-width: 100%;
 }
 
 /* Dropdown items: clickable rows already get a bg on hover; add an
