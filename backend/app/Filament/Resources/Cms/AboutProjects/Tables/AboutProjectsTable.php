@@ -19,7 +19,7 @@ class AboutProjectsTable
                     ->label(__('admin.common.title'))
                     ->searchable()
                     ->sortable()
-                    ->weight('semibold'),
+                    ->weight('semibold')->toggleable(),
                 TextColumn::make('description')
                     ->label(__('admin.common.description'))
                     ->limit(80)
@@ -28,7 +28,7 @@ class AboutProjectsTable
                 TextColumn::make('position')
                     ->label(__('admin.common.sort'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
             ])
             ->recordActions([
                 EditAction::make(),

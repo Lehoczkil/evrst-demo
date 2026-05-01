@@ -28,16 +28,16 @@ class MemberApplicationsTable
                     ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
-                    ->weight('semibold'),
+                    ->weight('semibold')->toggleable(),
                 TextColumn::make('email')
                     ->label(__('admin.common.email'))
                     ->searchable()
                     ->copyable()
-                    ->color('gray'),
+                    ->color('gray')->toggleable(),
                 TextColumn::make('department')
                     ->label(__('admin.applications.department'))
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')->toggleable(),
                 TextColumn::make('status')
                     ->label(__('admin.common.status'))
                     ->badge()
@@ -47,11 +47,11 @@ class MemberApplicationsTable
                         'success' => MemberApplication::STATUS_ACCEPTED,
                         'danger' => MemberApplication::STATUS_REJECTED,
                     ])
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('admin.common.submitted_at'))
                     ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->sortable()->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('status')

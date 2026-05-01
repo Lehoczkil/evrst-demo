@@ -20,11 +20,11 @@ class TeamMemberGroupsTable
                     ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
-                    ->weight('semibold'),
+                    ->weight('semibold')->toggleable(),
                 TextColumn::make('position')
                     ->label(__('admin.common.sort'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
             ])
             ->recordActions([
                 EditAction::make(),

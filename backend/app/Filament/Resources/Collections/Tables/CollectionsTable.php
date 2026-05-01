@@ -16,14 +16,14 @@ class CollectionsTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('slug')
                     ->badge()
-                    ->searchable(),
+                    ->searchable()->toggleable(),
                 TextColumn::make('resources_count')
                     ->label('Resources')
                     ->counts('resources')
-                    ->numeric(),
+                    ->numeric()->toggleable(),
                 TextColumn::make('description')
                     ->limit(60)
                     ->toggleable(),

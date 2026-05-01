@@ -29,12 +29,12 @@ class UsersTable
                     ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
-                    ->weight('semibold'),
+                    ->weight('semibold')->toggleable(),
                 TextColumn::make('email')
                     ->label(__('admin.common.email'))
                     ->searchable()
                     ->copyable()
-                    ->color('gray'),
+                    ->color('gray')->toggleable(),
                 TextColumn::make('role.name')
                     ->label(__('admin.common.role'))
                     ->badge()
@@ -48,11 +48,11 @@ class UsersTable
                         'Admin' => 'danger',
                         'Manager' => 'warning',
                         default => 'gray',
-                    }),
+                    })->toggleable(),
                 IconColumn::make('password_changed_at')
                     ->label(__('admin.users.password_set'))
                     ->boolean()
-                    ->getStateUsing(fn (User $r) => $r->password_changed_at !== null),
+                    ->getStateUsing(fn (User $r) => $r->password_changed_at !== null)->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('admin.common.created_at'))
                     ->dateTime('d M Y')

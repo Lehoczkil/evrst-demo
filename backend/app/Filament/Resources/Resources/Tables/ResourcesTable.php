@@ -24,14 +24,14 @@ class ResourcesTable
                         $query->whereRaw("json_extract(payload, '$.name') like ?", ["%{$search}%"])
                             ->orWhereRaw("json_extract(payload, '$.title') like ?", ["%{$search}%"]);
                     })
-                    ->limit(50),
+                    ->limit(50)->toggleable(),
                 TextColumn::make('collection.name')
                     ->label('Collection')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('position')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('id')
                     ->label('ID')
                     ->copyable()
@@ -41,7 +41,7 @@ class ResourcesTable
                 TextColumn::make('updated_at')
                     ->label('Updated')
                     ->since()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('collection_id')

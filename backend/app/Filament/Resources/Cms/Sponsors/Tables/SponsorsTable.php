@@ -19,12 +19,12 @@ class SponsorsTable
                 ImageColumn::make('logo')
                     ->disk('public')
                     ->size(48)
-                    ->label(''),
+                    ->label('')->toggleable(),
                 TextColumn::make('name')
                     ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
-                    ->weight('semibold'),
+                    ->weight('semibold')->toggleable(),
                 TextColumn::make('year')
                     ->label(__('admin.common.year'))
                     ->sortable()
@@ -37,7 +37,7 @@ class SponsorsTable
                 TextColumn::make('position')
                     ->label(__('admin.common.sort'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -20,17 +20,17 @@ class EventsTable
                 ImageColumn::make('image')
                     ->disk('public')
                     ->size(52)
-                    ->label(''),
+                    ->label('')->toggleable(),
                 TextColumn::make('title')
                     ->label(__('admin.common.title'))
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->limit(60),
+                    ->limit(60)->toggleable(),
                 TextColumn::make('date')
                     ->label(__('admin.common.date'))
                     ->date('d M Y')
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('status')
                     ->label(__('admin.common.status'))
                     ->badge()
@@ -42,7 +42,7 @@ class EventsTable
                     ->colors([
                         'gray' => 'DRAFT',
                         'success' => 'PUBLISHED',
-                    ]),
+                    ])->toggleable(),
                 TextColumn::make('position')
                     ->label(__('admin.common.sort'))
                     ->numeric()

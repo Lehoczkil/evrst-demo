@@ -20,12 +20,12 @@ class MentorsTable
                     ->disk('public')
                     ->circular()
                     ->size(48)
-                    ->label(''),
+                    ->label('')->toggleable(),
                 TextColumn::make('name')
                     ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
-                    ->weight('semibold'),
+                    ->weight('semibold')->toggleable(),
                 TextColumn::make('email')
                     ->label(__('admin.common.email'))
                     ->copyable()
@@ -34,7 +34,7 @@ class MentorsTable
                 TextColumn::make('position')
                     ->label(__('admin.common.sort'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
             ])
             ->recordActions([
                 EditAction::make(),

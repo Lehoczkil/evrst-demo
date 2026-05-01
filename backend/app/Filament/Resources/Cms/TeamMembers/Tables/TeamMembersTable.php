@@ -23,12 +23,12 @@ class TeamMembersTable
                     ->disk('public')
                     ->circular()
                     ->size(48)
-                    ->label(''),
+                    ->label('')->toggleable(),
                 TextColumn::make('name')
                     ->label(__('admin.common.name'))
                     ->searchable()
                     ->sortable()
-                    ->weight('semibold'),
+                    ->weight('semibold')->toggleable(),
                 TextColumn::make('email')
                     ->label(__('admin.common.email'))
                     ->searchable()
@@ -52,7 +52,7 @@ class TeamMembersTable
                         $record->payload['main_position']['payload']['name'] ?? null
                     ) ?? '—')
                     ->badge()
-                    ->color('primary'),
+                    ->color('primary')->toggleable(),
                 TextColumn::make('position_ids')
                     ->label(__('admin.team.positions'))
                     ->state(function ($record) {
@@ -64,11 +64,11 @@ class TeamMembersTable
                         )));
                     })
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')->toggleable(),
                 TextColumn::make('position')
                     ->label(__('admin.common.sort'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('main_position_id')

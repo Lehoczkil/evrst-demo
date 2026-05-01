@@ -16,21 +16,21 @@ class RolesTable
                 TextColumn::make('name')
                     ->label(__('admin.common.name'))
                     ->searchable()
-                    ->weight('semibold'),
+                    ->weight('semibold')->toggleable(),
                 TextColumn::make('key')
                     ->label(__('admin.roles.key'))
                     ->color('gray')
-                    ->copyable(),
+                    ->copyable()->toggleable(),
                 TextColumn::make('permissions_count')
                     ->label(__('admin.roles.permissions'))
                     ->badge()
                     ->counts('permissions')
-                    ->color('primary'),
+                    ->color('primary')->toggleable(),
                 TextColumn::make('users_count')
                     ->label(__('admin.resources.user.p'))
                     ->badge()
                     ->counts('users')
-                    ->color('gray'),
+                    ->color('gray')->toggleable(),
             ])
             ->recordActions([
                 EditAction::make(),

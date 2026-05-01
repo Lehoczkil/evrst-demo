@@ -27,13 +27,13 @@ class OnshapeModelsTable
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->wrap(),
+                    ->wrap()->toggleable(),
                 TextColumn::make('user.name')
                     ->label(__('admin.drawing.author'))
                     ->searchable()
                     ->sortable()
                     ->color('gray')
-                    ->placeholder('—'),
+                    ->placeholder('—')->toggleable(),
                 TextColumn::make('document_id')
                     ->label(__('admin.onshape.document_id'))
                     ->limit(12)
@@ -54,11 +54,11 @@ class OnshapeModelsTable
                         $state === OnshapeModel::GLB_RUNNING || $state === OnshapeModel::GLB_QUEUED => 'warning',
                         $r->hasGlb() => 'success',
                         default => 'gray',
-                    }),
+                    })->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('admin.common.created_at'))
                     ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->sortable()->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('user_id')

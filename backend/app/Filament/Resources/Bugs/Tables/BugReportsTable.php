@@ -25,7 +25,7 @@ class BugReportsTable
                     ->sortable()
                     ->weight('semibold')
                     ->limit(60)
-                    ->wrap(),
+                    ->wrap()->toggleable(),
                 TextColumn::make('severity')
                     ->label(__('admin.bugs.severity'))
                     ->badge()
@@ -36,7 +36,7 @@ class BugReportsTable
                         BugReport::SEVERITY_MEDIUM   => 'info',
                         default                       => 'gray',
                     })
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('status')
                     ->label(__('admin.bugs.status'))
                     ->badge()
@@ -50,13 +50,13 @@ class BugReportsTable
                         BugReport::STATUS_WONT_FIX    => 'gray',
                         default                       => 'gray',
                     })
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('reporter.name')
                     ->label(__('admin.bugs.reporter'))
                     ->searchable()
                     ->sortable()
                     ->color('gray')
-                    ->placeholder('—'),
+                    ->placeholder('—')->toggleable(),
                 TextColumn::make('assignee.name')
                     ->label(__('admin.bugs.assignee'))
                     ->searchable()
@@ -71,7 +71,7 @@ class BugReportsTable
                 TextColumn::make('created_at')
                     ->label(__('admin.bugs.reported_at'))
                     ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->sortable()->toggleable(),
                 TextColumn::make('resolved_at')
                     ->label(__('admin.bugs.resolved_at'))
                     ->dateTime('d M Y H:i')
