@@ -2,7 +2,7 @@
     <form wire:submit="save" class="space-y-6">
         {{ $this->form }}
 
-        <div class="flex justify-end gap-2">
+        <div class="flex justify-start gap-2">
             @foreach ($this->getFormActions() as $action)
                 {{ $action }}
             @endforeach

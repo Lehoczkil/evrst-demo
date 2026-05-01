@@ -1,8 +1,8 @@
 <x-filament-panels::page>
-    <form wire:submit="save" class="space-y-6">
+    <form wire:submit="save" style="display: flex; flex-direction: column; gap: 1.75rem;">
         {{ $this->form }}
 
-        <div class="flex justify-end">
+        <div style="display: flex; justify-content: flex-start; gap: .5rem; margin-top: .5rem;">
             @foreach ($this->getFormActions() as $action)
                 {{ $action }}
             @endforeach
