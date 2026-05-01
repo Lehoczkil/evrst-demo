@@ -51,6 +51,11 @@ final class Perm
     public const BUGS_TRIAGE = 'bugs.triage';
     public const BUGS_DELETE = 'bugs.delete';
 
+    public const CONTACTS_VIEW   = 'contacts.view';
+    public const CONTACTS_CREATE = 'contacts.create';
+    public const CONTACTS_EDIT   = 'contacts.edit';
+    public const CONTACTS_DELETE = 'contacts.delete';
+
     public const NOTIFICATIONS_SEE = 'notifications.see';
 
     public const ROLE_ADMIN   = 'admin';
@@ -93,6 +98,10 @@ final class Perm
             ['key' => self::BUGS_VIEW,           'label' => 'View bug reports'],
             ['key' => self::BUGS_TRIAGE,         'label' => 'Triage / resolve bug reports'],
             ['key' => self::BUGS_DELETE,         'label' => 'Delete bug reports'],
+            ['key' => self::CONTACTS_VIEW,       'label' => 'View outer contacts'],
+            ['key' => self::CONTACTS_CREATE,     'label' => 'Create outer contacts'],
+            ['key' => self::CONTACTS_EDIT,       'label' => 'Edit outer contacts'],
+            ['key' => self::CONTACTS_DELETE,     'label' => 'Delete outer contacts'],
             ['key' => self::NOTIFICATIONS_SEE,   'label' => 'See notifications about new member entries'],
         ];
     }
@@ -128,6 +137,7 @@ final class Perm
         return [
             self::BUGS_REPORT,
             self::BUGS_VIEW,
+            self::CONTACTS_VIEW,
         ];
     }
 }
