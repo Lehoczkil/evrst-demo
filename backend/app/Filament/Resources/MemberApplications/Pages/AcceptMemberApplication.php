@@ -7,8 +7,8 @@ use App\Filament\Resources\Cms\TeamMembers\TeamMemberResource;
 use App\Filament\Resources\MemberApplications\MemberApplicationResource;
 use App\Filament\Schemas\MemberPositionFields;
 use App\Jobs\PostDiscordWebhook;
-use App\Models\Cms\TeamMember;
 use App\Models\MemberApplication;
+use App\Models\TeamMember;
 use App\Models\Role;
 use App\Models\User;
 use App\Notifications\TeamMemberAccountCreated;
@@ -70,7 +70,7 @@ class AcceptMemberApplication extends Page implements HasForms
             'email' => $this->record->email,
             'degree_en' => null,
             'degree_hu' => null,
-            'position_ids' => [],
+            'group_ids' => [],
             'main_position_id' => null,
         ]);
     }
@@ -122,15 +122,25 @@ class AcceptMemberApplication extends Page implements HasForms
             ],
         );
 
-        $member = new TeamMember();
-        $member->name = $data['name'];
-        $member->email = $data['email'];
-        $member->degree_en = $data['degree_en'] ?? null;
-        $member->degree_hu = $data['degree_hu'] ?? null;
-        $member->position_ids = $data['position_ids'] ?? [];
-        $member->main_position_id = $data['main_position_id'] ?? null;
-        $member->user_id = $user->id;
-        $member->save();
+        $degree = [];
+        if (! empty($data['degree_en'])) $degree['en'] = $data['degree_en'];
+        if (! empty($data['degree_hu'])) $degree['hu'] = $data['degree_hu'];
+
+        $member = TeamMember::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'degree' => $degree === [] ? null : $degree,
+            'user_id' => $user->id,
+            'joined_at' => now()->toDateString(),
+        ]);
+
+        $groupIds = array_values(array_filter((array) ($data['group_ids'] ?? [])));
+        if ($groupIds !== []) {
+            $member->groups()->sync(array_fill_keys($groupIds, ['is_primary' => false]));
+        }
+        if (! empty($data['main_position_id'])) {
+            $member->setPrimaryGroup((int) $data['main_position_id']);
+        }
 
         $this->record->withoutActivityLog(fn () => $this->record->update([
             'status' => MemberApplication::STATUS_ACCEPTED,

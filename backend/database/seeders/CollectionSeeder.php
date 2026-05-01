@@ -18,16 +18,6 @@ class CollectionSeeder extends Seeder
             'name' => 'Events',
             'description' => 'Past and upcoming team events.',
         ],
-        'team-members' => [
-            'id' => '00338d38-b302-4653-bb4e-9a734f46470e',
-            'name' => 'Team members',
-            'description' => 'Active team roster.',
-        ],
-        'team-member-groups' => [
-            'id' => 'a4b4cb01-f2a2-4be6-9c39-2c01b6fb1c70',
-            'name' => 'Team member groups',
-            'description' => 'Sub-team groups (e.g. Propulsion, Avionics).',
-        ],
         'mentors' => [
             'id' => '8639b34c-3415-40cc-85d0-e5ac0eb8d456',
             'name' => 'Mentors',

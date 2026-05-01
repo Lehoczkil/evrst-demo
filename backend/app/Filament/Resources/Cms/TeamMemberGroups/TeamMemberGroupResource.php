@@ -7,7 +7,7 @@ use App\Filament\Resources\Cms\TeamMemberGroups\Pages\EditTeamMemberGroup;
 use App\Filament\Resources\Cms\TeamMemberGroups\Pages\ListTeamMemberGroups;
 use App\Filament\Resources\Cms\TeamMemberGroups\Schemas\TeamMemberGroupForm;
 use App\Filament\Resources\Cms\TeamMemberGroups\Tables\TeamMemberGroupsTable;
-use App\Models\Cms\TeamMemberGroup;
+use App\Models\TeamMemberGroup;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -21,17 +21,16 @@ class TeamMemberGroupResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = 'slug';
 
-    // Name lives in JSON payload as { en, hu }; search both locales.
     public static function getGloballySearchableAttributes(): array
     {
-        return ['payload->name->en', 'payload->name->hu'];
+        return ['slug', 'name->en', 'name->hu'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return (string) ($record->name ?? __('admin.resources.position.s'));
+        return (string) (TeamMemberGroup::pickLocale($record->name) ?? $record->slug ?? __('admin.resources.position.s'));
     }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Team';

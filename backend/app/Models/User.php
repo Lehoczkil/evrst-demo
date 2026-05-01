@@ -9,6 +9,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -47,17 +48,28 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->belongsTo(Role::class);
     }
 
-    /**
-     * Look up the TeamMember row that points at this user via
-     * payload.user.id. There's no FK in the schema (TeamMember is a
-     * JSON-payload Resource) so we filter the resources table directly.
-     * Returns null when the user hasn't been linked to a member yet.
-     */
-    public function teamMember(): ?\App\Models\Cms\TeamMember
+    public function teamMember(): HasOne
     {
-        return \App\Models\Cms\TeamMember::query()
-            ->whereRaw("json_extract(payload, '$.user.id') = ?", [$this->id])
-            ->first();
+        return $this->hasOne(TeamMember::class);
+    }
+
+    /**
+     * Prefer the team member's private contact email over the account
+     * email so notifications land in the user's personal inbox.
+     *
+     * @return array<string, string>|null
+     */
+    public function routeNotificationForMail($notification): array|null
+    {
+        $this->loadMissing('teamMember');
+        $private = $this->teamMember?->email_private;
+        if ($private) {
+            return [$private => $this->name];
+        }
+        if ($this->email) {
+            return [$this->email => $this->name];
+        }
+        return null;
     }
 
     /**

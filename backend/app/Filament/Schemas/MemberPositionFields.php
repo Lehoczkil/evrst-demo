@@ -2,7 +2,7 @@
 
 namespace App\Filament\Schemas;
 
-use App\Models\Cms\TeamMemberGroup;
+use App\Models\TeamMemberGroup;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Facades\Cache;
@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Cache;
  * Shared form fragment: positions multi-select + a main-position single
  * select constrained to the chosen positions. Used by both the team
  * member form and the application-accept form.
+ *
+ * The form fields are `group_ids` (array<int>) and `main_position_id`
+ * (int|null). Pages persist them via TeamMember::groups()->sync(...) +
+ * TeamMember::setPrimaryGroup(...) — see CreateTeamMember/EditTeamMember.
  */
 class MemberPositionFields
 {
@@ -24,7 +28,7 @@ class MemberPositionFields
         $mainSpan = $columnSpans['main'] ?? ['default' => 12, 'md' => 6];
 
         return [
-            Select::make('position_ids')
+            Select::make('group_ids')
                 ->label(__('admin.team.positions'))
                 ->options(fn () => self::groupOptions())
                 ->multiple()
@@ -35,7 +39,7 @@ class MemberPositionFields
             Select::make('main_position_id')
                 ->label(__('admin.team.main_position'))
                 ->options(function (Get $get) {
-                    $ids = (array) ($get('position_ids') ?? []);
+                    $ids = (array) ($get('group_ids') ?? []);
                     $all = self::groupOptions();
                     if (empty($ids)) return $all;
                     return array_intersect_key($all, array_flip($ids));
@@ -47,15 +51,19 @@ class MemberPositionFields
     }
 
     /**
-     * Cached id => name map for the position selects. 5 min TTL with
-     * automatic invalidation in AppServiceProvider on save / delete.
+     * Cached id => localized-name map for the position selects. 5 min
+     * TTL with auto invalidation in AppServiceProvider on save / delete.
      *
      * @return array<int|string, string>
      */
     private static function groupOptions(): array
     {
-        return Cache::remember('options:team-member-groups', 300, fn () => TeamMemberGroup::all()
-            ->mapWithKeys(fn ($g) => [$g->id => $g->name ?? $g->id])
+        return Cache::remember('options:team-member-groups', 300, fn () => TeamMemberGroup::query()
+            ->orderBy('position')
+            ->get()
+            ->mapWithKeys(fn (TeamMemberGroup $g) => [
+                $g->id => TeamMemberGroup::pickLocale($g->name) ?? $g->slug,
+            ])
             ->all());
     }
 }
