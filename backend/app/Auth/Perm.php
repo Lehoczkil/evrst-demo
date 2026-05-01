@@ -113,16 +113,24 @@ final class Perm
     }
 
     /**
-     * Manager: every permission except sponsors, applications, notifications.
+     * Manager: most admin perms minus sponsors, applications,
+     * notifications, and any explicit deny-listed key. Every new
+     * admin-only key MUST be added to $deny below — otherwise it
+     * falls through and managers automatically receive it.
      *
      * @return array<int, string>
      */
     public static function managerPermissions(): array
     {
-        return array_values(array_filter(self::adminPermissions(), function (string $key) {
-            return ! str_starts_with($key, 'sponsors.')
-                && ! str_starts_with($key, 'applications.')
-                && $key !== self::NOTIFICATIONS_SEE;
+        $deny = [
+            self::NOTIFICATIONS_SEE,
+            self::CONTACTS_DELETE,
+        ];
+
+        return array_values(array_filter(self::adminPermissions(), function (string $key) use ($deny) {
+            return ! in_array($key, $deny, true)
+                && ! str_starts_with($key, 'sponsors.')
+                && ! str_starts_with($key, 'applications.');
         }));
     }
 
