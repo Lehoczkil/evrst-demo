@@ -741,7 +741,10 @@
 
                     if (sourceUrl) {
                         const img = new Image();
-                        img.crossOrigin = 'anonymous';
+                        // Same-origin URL (Draw::sameOriginUrl strips host),
+                        // so no `crossOrigin` is needed — and setting it
+                        // forces a CORS preflight that fails when the
+                        // /storage path doesn't echo CORS headers.
                         img.onload = () => {
                             this.ctx.drawImage(img, 0, 0, this.width, this.height);
                             this.pushHistory();

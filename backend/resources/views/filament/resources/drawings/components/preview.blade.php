@@ -1,31 +1,31 @@
-<div class="space-y-3">
+<div style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 1rem;
+    width: 100%;
+    height: calc(100dvh - 11rem);
+    min-height: 480px;
+">
     @if ($drawing->url)
-        <div class="rounded-lg border border-gray-200 dark:border-white/10 bg-[repeating-conic-gradient(#f3f4f6_0_25%,#fff_0_50%)] dark:bg-gray-900 p-2 overflow-auto">
-            <img
-                src="{{ $drawing->url }}"
-                alt="{{ $drawing->title }}"
-                class="block max-h-[70vh] mx-auto"
-            />
-        </div>
+        <img
+            src="{{ $drawing->url }}"
+            alt="{{ $drawing->title }}"
+            style="
+                display: block;
+                max-width: 100%;
+                max-height: 100%;
+                width: auto;
+                height: auto;
+                object-fit: contain;
+                border-radius: 4px;
+            "
+        />
     @else
-        <p class="text-sm text-gray-500">File missing.</p>
+        <p style="color: #475569; font-size: .9rem; margin: 0;">
+            {{ __('admin.drawing.empty_heading') }}
+        </p>
     @endif
-
-    <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-        <dt class="text-gray-500">Author</dt>
-        <dd class="text-gray-900 dark:text-white">{{ $drawing->user?->name ?? '—' }}</dd>
-
-        <dt class="text-gray-500">Created</dt>
-        <dd class="text-gray-900 dark:text-white">{{ $drawing->created_at?->format('d M Y H:i') }}</dd>
-
-        @if ($drawing->width && $drawing->height)
-            <dt class="text-gray-500">Dimensions</dt>
-            <dd class="text-gray-900 dark:text-white">{{ $drawing->width }} × {{ $drawing->height }} px</dd>
-        @endif
-
-        @if ($drawing->size)
-            <dt class="text-gray-500">Size</dt>
-            <dd class="text-gray-900 dark:text-white">{{ number_format($drawing->size / 1024, 1) }} KB</dd>
-        @endif
-    </dl>
 </div>
