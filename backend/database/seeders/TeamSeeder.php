@@ -129,22 +129,42 @@ class TeamSeeder extends Seeder
         $rolesByKey = Role::whereIn('key', [Perm::ROLE_ADMIN, Perm::ROLE_MANAGER, Perm::ROLE_MEMBER])
             ->get()->keyBy('key');
 
+        // Track every fresh-provisioning so the admin can distribute the
+        // temp passwords once at the end (not emailed — that would spam
+        // 21 inboxes on every reseed).
+        $tempPasswords = [];
+
         foreach (self::MEMBERS as $i => $info) {
             $email = $info['email'] ?? $this->defaultEmail($info['name']);
             $roleKey = $info['role'] ?? Perm::ROLE_MEMBER;
 
-            // Account password is the project-wide dev value `password`,
-            // and password_changed_at is pre-stamped so the seeded users
-            // skip the first-login password change like admin@evrst.test.
-            $user = User::updateOrCreate(
-                ['email' => $email],
-                [
+            // First seed → mint a unique 16-char temp password and leave
+            // password_changed_at null so the RequirePasswordChange
+            // middleware forces a reset on first login. Re-runs preserve
+            // the existing User row's password (don't lock anyone out).
+            $existing = User::where('email', $email)->first();
+            if ($existing) {
+                $existing->forceFill([
                     'name' => $info['name'],
-                    'password' => Hash::make('password'),
                     'role_id' => $rolesByKey[$roleKey]?->id,
-                    'password_changed_at' => now(),
-                ],
-            );
+                ])->save();
+                $user = $existing;
+            } else {
+                $temp = Str::password(16);
+                $user = User::create([
+                    'email' => $email,
+                    'name' => $info['name'],
+                    'password' => Hash::make($temp),
+                    'role_id' => $rolesByKey[$roleKey]?->id,
+                    'password_changed_at' => null,
+                ]);
+                $tempPasswords[] = [
+                    'name' => $info['name'],
+                    'email' => $email,
+                    'role' => $roleKey,
+                    'password' => $temp,
+                ];
+            }
 
             $member = TeamMember::create([
                 'name' => $info['name'],
@@ -171,5 +191,39 @@ class TeamSeeder extends Seeder
             $member->groups()->sync($pivotData);
             $member->setPrimaryGroup($groups[$info['main']]->id);
         }
+
+        $this->reportTempPasswords($tempPasswords);
+    }
+
+    /**
+     * Print the freshly-minted temp passwords once at the end of seeding
+     * so the admin can distribute them out-of-band. Also persisted to
+     * `storage/app/seeded-team-passwords.txt` (gitignored under
+     * `storage/app/`) for retrieval after the console scrolls past.
+     *
+     * @param  array<int, array{name: string, email: string, role: string, password: string}>  $rows
+     */
+    private function reportTempPasswords(array $rows): void
+    {
+        if ($rows === []) {
+            $this->command?->info('TeamSeeder: no new users provisioned (existing rows kept their passwords).');
+            return;
+        }
+
+        $this->command?->newLine();
+        $this->command?->warn('TeamSeeder provisioned ' . count($rows) . ' new login(s). Distribute these out-of-band:');
+        $this->command?->table(
+            ['Name', 'Email', 'Role', 'Temporary password'],
+            array_map(fn ($r) => [$r['name'], $r['email'], $r['role'], $r['password']], $rows),
+        );
+        $this->command?->info('Each user will be redirected to set a new password on first sign-in at /admin.');
+
+        $path = storage_path('app/seeded-team-passwords.txt');
+        $body = "Generated " . now()->toDateTimeString() . PHP_EOL . PHP_EOL;
+        foreach ($rows as $r) {
+            $body .= sprintf("%-30s %-40s %-10s %s%s", $r['name'], $r['email'], $r['role'], $r['password'], PHP_EOL);
+        }
+        @file_put_contents($path, $body);
+        $this->command?->comment('Also written to ' . $path);
     }
 }
