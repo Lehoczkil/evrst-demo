@@ -388,6 +388,12 @@ return [
         'resend_modal'    => 'Send a new temporary password?',
         'temp_sent'       => 'Temporary password emailed',
         'temp_sent_body'  => 'A new temp password has been sent to :email.',
+        'temp_logged'     => 'Temp password written to log, NOT emailed',
+        'temp_logged_body' => 'MAIL_MAILER=log on this environment — the message for :email landed in storage/logs/laravel.log instead of being delivered. Switch to resend / postmark / smtp in .env to actually send mail.',
+        'temp_send_failed' => 'Sending the temp-password email failed',
+        'notification_email' => 'Notification email',
+        'notification_email_private_tip' => 'Routed to the team member\'s email_private — set on the TeamMember row.',
+        'notification_email_fallback_tip' => 'No email_private set on the linked TeamMember; falls back to the account email (which may be a stub like *@evrst.test).',
     ],
 
     'roles' => [

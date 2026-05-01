@@ -16,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Str;
 
 class UsersTable
@@ -35,6 +36,16 @@ class UsersTable
                     ->searchable()
                     ->copyable()
                     ->color('gray')->toggleable(),
+                TextColumn::make('notification_email')
+                    ->label(__('admin.users.notification_email'))
+                    ->state(fn (User $r) => $r->teamMember?->email_private ?: $r->email)
+                    ->copyable()
+                    ->badge()
+                    ->color(fn (User $r) => $r->teamMember?->email_private ? 'success' : 'gray')
+                    ->tooltip(fn (User $r) => $r->teamMember?->email_private
+                        ? __('admin.users.notification_email_private_tip')
+                        : __('admin.users.notification_email_fallback_tip'))
+                    ->toggleable(),
                 TextColumn::make('role.name')
                     ->label(__('admin.common.role'))
                     ->badge()
@@ -82,10 +93,39 @@ class UsersTable
                             'password' => Hash::make($temp),
                             'password_changed_at' => null,
                         ]);
-                        $record->notify(new TeamMemberAccountCreated($temp));
+
+                        $route = $record->routeNotificationForMail(null);
+                        $destination = $route ? array_key_first($route) : null;
+
+                        // sendNow bypasses the queue so the admin gets
+                        // immediate feedback instead of "queued" silence
+                        // when no worker is running on the deploy box.
+                        try {
+                            NotificationFacade::sendNow($record, new TeamMemberAccountCreated($temp));
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title(__('admin.users.temp_send_failed'))
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                            return;
+                        }
+
+                        $mailer = config('mail.default');
+                        if ($mailer === 'log') {
+                            Notification::make()
+                                ->title(__('admin.users.temp_logged'))
+                                ->body(__('admin.users.temp_logged_body', ['email' => $destination ?? '—']))
+                                ->warning()
+                                ->persistent()
+                                ->send();
+                            return;
+                        }
+
                         Notification::make()
                             ->title(__('admin.users.temp_sent'))
-                            ->body(__('admin.users.temp_sent_body', ['email' => $record->email]))
+                            ->body(__('admin.users.temp_sent_body', ['email' => $destination ?? $record->email]))
                             ->success()
                             ->send();
                     }),

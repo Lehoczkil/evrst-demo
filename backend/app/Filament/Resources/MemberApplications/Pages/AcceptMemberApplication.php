@@ -152,16 +152,40 @@ class AcceptMemberApplication extends Page implements HasForms
             'team_member' => ['id' => $member->id, 'name' => $member->name],
         ]);
 
-        $user->notify(new TeamMemberAccountCreated($temp));
+        $route = $user->fresh('teamMember')->routeNotificationForMail(null);
+        $destination = $route ? array_key_first($route) : $user->email;
+
+        $mailFailure = null;
+        try {
+            \Illuminate\Support\Facades\Notification::sendNow($user, new TeamMemberAccountCreated($temp));
+        } catch (\Throwable $e) {
+            $mailFailure = $e->getMessage();
+        }
 
         $payload = DiscordPayloads::applicationAccepted($this->record, auth()->user());
         PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
 
-        Notification::make()
-            ->title('Application accepted')
-            ->body('Team member created and a temporary password emailed to ' . $user->email . '.')
-            ->success()
-            ->send();
+        if ($mailFailure) {
+            Notification::make()
+                ->title('Application accepted, mail failed')
+                ->body('Team member created but the temp-password email could not be sent: ' . $mailFailure)
+                ->danger()
+                ->persistent()
+                ->send();
+        } elseif (config('mail.default') === 'log') {
+            Notification::make()
+                ->title('Application accepted (mail logged)')
+                ->body('Temp password written to storage/logs/laravel.log for ' . $destination . '. Switch MAIL_MAILER off `log` to deliver real email.')
+                ->warning()
+                ->persistent()
+                ->send();
+        } else {
+            Notification::make()
+                ->title('Application accepted')
+                ->body('Team member created and a temporary password emailed to ' . $destination . '.')
+                ->success()
+                ->send();
+        }
 
         $this->redirect(TeamMemberResource::getUrl('edit', ['record' => $member->id]));
     }
