@@ -388,6 +388,12 @@ return [
         'resend_modal'    => 'Új ideiglenes jelszót küldjünk?',
         'temp_sent'       => 'Ideiglenes jelszó elküldve',
         'temp_sent_body'  => 'Új ideiglenes jelszó kiküldve a :email címre.',
+        'temp_logged'     => 'Ideiglenes jelszó naplózva, NEM lett kiküldve',
+        'temp_logged_body' => 'MAIL_MAILER=log van beállítva — a(z) :email címnek szóló üzenet a storage/logs/laravel.log fájlba került, nem lett kiküldve. Állítsd át resend / postmark / smtp értékre az .env-ben a valódi küldéshez.',
+        'temp_send_failed' => 'Az ideiglenes jelszó kiküldése meghiúsult',
+        'notification_email' => 'Értesítési cím',
+        'notification_email_private_tip' => 'A csapattag email_private mezőjére küldjük — a TeamMember soron lehet beállítani.',
+        'notification_email_fallback_tip' => 'Nincs email_private a kapcsolt TeamMember soron; a fiók e-mail címére esik vissza (ez lehet @evrst.test placeholder is).',
     ],
 
     'roles' => [

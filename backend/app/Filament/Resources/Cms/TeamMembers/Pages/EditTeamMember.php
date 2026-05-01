@@ -93,13 +93,36 @@ class EditTeamMember extends EditRecord
                     $record->user_id = $user->id;
                     $record->save();
 
-                    $user->notify(new TeamMemberAccountCreated($temp));
+                    $route = $user->fresh('teamMember')->routeNotificationForMail(null);
+                    $destination = $route ? array_key_first($route) : $user->email;
 
-                    Notification::make()
-                        ->title('Login created')
-                        ->body('Temporary password emailed to ' . $user->email . '.')
-                        ->success()
-                        ->send();
+                    try {
+                        \Illuminate\Support\Facades\Notification::sendNow($user, new TeamMemberAccountCreated($temp));
+                    } catch (\Throwable $e) {
+                        Notification::make()
+                            ->title(__('admin.users.temp_send_failed'))
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->persistent()
+                            ->send();
+                        $this->fillForm();
+                        return;
+                    }
+
+                    if (config('mail.default') === 'log') {
+                        Notification::make()
+                            ->title(__('admin.users.temp_logged'))
+                            ->body(__('admin.users.temp_logged_body', ['email' => $destination]))
+                            ->warning()
+                            ->persistent()
+                            ->send();
+                    } else {
+                        Notification::make()
+                            ->title(__('admin.users.temp_sent'))
+                            ->body(__('admin.users.temp_sent_body', ['email' => $destination]))
+                            ->success()
+                            ->send();
+                    }
 
                     $this->fillForm();
                 }),

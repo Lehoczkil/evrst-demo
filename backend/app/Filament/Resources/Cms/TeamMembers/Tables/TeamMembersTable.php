@@ -38,6 +38,13 @@ class TeamMembersTable
                     ->copyable()
                     ->color('gray')
                     ->toggleable(),
+                TextColumn::make('email_private')
+                    ->label(__('admin.team.private_email'))
+                    ->searchable()
+                    ->copyable()
+                    ->color('gray')
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('discord_nick')
                     ->label(__('admin.team.discord'))
                     ->searchable()
