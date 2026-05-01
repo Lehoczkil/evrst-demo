@@ -7,9 +7,11 @@ use App\Models\Task;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TaskStatusChanged extends Notification
+class TaskStatusChanged extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -21,7 +23,7 @@ class TaskStatusChanged extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     public function toDatabase(object $notifiable): array
@@ -45,5 +47,17 @@ class TaskStatusChanged extends Notification
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $prev = Task::statusLabel($this->previousStatus);
+        $next = Task::statusLabel($this->newStatus);
+
+        return (new MailMessage())
+            ->subject('[EVRST] Task status: ' . $this->task->title)
+            ->greeting('Hi ' . ($notifiable->name ?? 'there') . ',')
+            ->line('Status of "' . $this->task->title . '" changed: ' . $prev . ' → ' . $next . '.')
+            ->action('Open task', TaskResource::getUrl('edit', ['record' => $this->task->id]));
     }
 }

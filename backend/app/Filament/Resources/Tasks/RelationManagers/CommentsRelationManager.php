@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Tasks\RelationManagers;
 
+use App\Jobs\PostDiscordWebhook;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Notifications\TaskCommented;
+use App\Support\DiscordPayloads;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -72,6 +74,11 @@ class CommentsRelationManager extends RelationManager
                         $watchers = $task->watchers(auth()->id());
                         if ($watchers->isNotEmpty()) {
                             Notification::send($watchers, new TaskCommented($task, $record));
+                            foreach ($watchers as $watcher) {
+                                if (! DiscordPayloads::wantsDiscordPing($watcher)) continue;
+                                $payload = DiscordPayloads::taskCommentedPing($task, $watcher, $record);
+                                PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+                            }
                         }
                     })
                     ->visible(fn () => $this->canCommentOnOwner()),
