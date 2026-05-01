@@ -14,9 +14,37 @@ Before each deploy, bump the version in **`backend/config/app.php`**
 `version` field — already gated by `.github/workflows/deploy.yaml`),
 then add a one-line entry under the matching section below.
 
+## 0.5.1 (unreleased)
+
+### Schema
+- **Discord identity split.** Added `discord_username` column to `team_members` (the @handle, e.g. `e.1415`, unique). The existing `discord_id` column is now reserved for the **numeric Discord snowflake** (17–20 digits, unique, currently null for everyone — pending collection over time). `discord_nick` continues to hold the server-display nickname. Migration: `2026_05_10_000000_add_discord_username_to_team_members.php`.
+
+### Added
+- **Discord bot scaffolding.** New `App\Services\DiscordBot` (wraps the Discord REST API) + `App\Jobs\SendDiscordDirectMessage` (queueable, takes `(snowflake, content, embed, reference)`). Both no-op until `DISCORD_BOT_TOKEN` is set in `.env` and silently skip when the snowflake doesn't match `^\d{17,20}$`. `config/services.php` gains `discord.bot_token` + `discord.api_base`; `.env.example` documents `DISCORD_BOT_TOKEN=` and an optional `DISCORD_API_BASE` override. **No dispatch sites use the DM job yet** — channel webhook (`SendDiscordWebhook`) remains the only live outbound path; this is groundwork for the eventual swap once a bot is registered and snowflakes are collected.
+- **TeamMember roster reseeded** from `névjegyzék.xlsx` — 21 members (was 18). New `csapat-menedzser` ("Team manager") group seeded **first** in the org-chart sort order; Bihari Bertalan + Klabacsek Bálint occupy it.
+- **Filament TeamMember admin form** split the old single "Discord" field into `discord_username` (plain text) and `discord_id` (text input with a `regex:/^\d{17,20}$/` validator + helper noting snowflakes are required for DM bot delivery + `<@id>` mentions). The TeamMembers table also gained two toggleable-hidden columns for username + snowflake.
+
+### Changed
+- **`DiscordPayloads::mention()` is snowflake-aware.** Only emits a real `<@id>` ping when `discord_id` matches `^\d{17,20}$`; otherwise falls back to plaintext `@discord_nick`, then `@discord_username`, then `user.name` — so the channel never shows broken `<@username>` markup. `wantsDiscordPing()` returns true when the user has any of nick / username / id.
+
+### Test infrastructure
+- **`phpunit.xml` forces `DISCORD_BOT_TOKEN=""`** (alongside the existing `DISCORD_WEBHOOK_URL=""` + `MAIL_MAILER=array` scrubs) so the test suite can never accidentally hit Discord. Feature tests are expected to call `Notification::fake()` / `Mail::fake()` / `Bus::fake()` / `Http::fake()` so no outbound notification, mail, or Discord webhook ever fires from `php artisan test`.
+
 ## 0.4.0 (unreleased)
 
 Tracked on the `feature/0.4.0` branch.
+
+### Schema
+
+- **Team members + groups out of the CMS.** Promoted `TeamMember` and `TeamMemberGroup` from polymorphic `resources` rows to dedicated relational tables (`team_members`, `team_member_groups`) with a typed `team_member_team_member_group` pivot (own `id` PK, `is_primary`, per-assignment `title` override, `started_at` / `ended_at`, per-group `position`). New Eloquent models `App\Models\TeamMember`, `App\Models\TeamMemberGroup`, and `App\Models\TeamMemberAssignment` (typed `Pivot`); the old `App\Models\Cms\TeamMember` + `App\Models\Cms\TeamMemberGroup` classes are deleted. `TeamSeeder` writes directly to the new tables and `CollectionSeeder` no longer seeds the legacy `team-members` / `team-member-groups` collection UUIDs.
+- **Discord field reshape.** Replaced the JSON `payload.discord` string with two columns: `team_members.discord_nick` (display name) and `team_members.discord_id` (snowflake, unique).
+- **`email_private` column.** The old `payload.private_email` is now a real column on `team_members`.
+- **FKs repointed.** `2026_05_07_000003_repoint_team_member_fks.php` swaps `member_applications.team_member_id` and `item_stocks.owner_team_member_id` from `foreignUuid → resources` to `bigint FK → team_members.id`.
+
+### Known follow-ups
+
+- The SPA still fetches team members via the generic `/api/resource?collection_id=…` endpoint, which now returns nothing because the seeded CMS collections are gone. Frontend cutover to a dedicated team-members endpoint + relational response shape is pending.
+- Filament admin resources for team members + groups still live under `App\Filament\Resources\Cms\TeamMembers\` so the `/admin/cms/team-members` URLs keep working — namespace cleanup deferred.
 
 ### Tooling
 - **Package manager → bun.** `package-lock.json` removed, `bun.lock` committed. `README` updated to use `bun install` / `bun run build` / `bun run dev`. The Heroku Node.js buildpack on Dokku detects `bun.lock` from v300+ (we pin `@master`, so the deploy installs Bun automatically and runs `bun install` + `bun run build`).
