@@ -9,7 +9,12 @@ import {
 } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { api } from '@/api';
+import {
+  fetchTeamGroups,
+  fetchTeamMembers,
+  type TeamGroup,
+  type TeamMember,
+} from '@/api';
 import { useTranslation } from '@/i18n';
 
 import { motion } from 'motion/react';
@@ -18,18 +23,14 @@ import { SectionButton } from '@/components/section-button';
 
 import { Reveal } from '../reveal';
 
-import type { TeamMemberResource } from './types';
-import { TEAM_MEMBERS_COLLECTION_ID } from './constants';
 import classes from './team-members.module.css';
 
 interface MemberCardProps {
-  member: TeamMemberResource;
+  member: TeamMember;
 }
 
 function MemberCard({ member }: MemberCardProps) {
-  const photo =
-    member.payload.photo ??
-    member.objects?.find((o) => o.key === 'photo')?.url;
+  const primary = member.groups.find((g) => g.is_primary);
   return (
     <Card
       padding='md'
@@ -44,17 +45,17 @@ function MemberCard({ member }: MemberCardProps) {
     >
       <Stack align='center' gap='8px' justify='flex-start' h='100%'>
         <Avatar
-          src={photo}
-          name={member.payload.name}
+          src={member.photo_url ?? undefined}
+          name={member.name}
           size={80}
           radius='50%'
           color='primary'
         />
         <Text fz='14px' fw='600' ta='center' lh='1.2' lineClamp={2}>
-          {member.payload.name}
+          {member.name}
         </Text>
         <Text fz='12px' c='dimmed' ta='center' lh='1.2' lineClamp={2}>
-          {member.payload.degree || member.payload.main_position?.payload?.name}
+          {member.degree || primary?.name}
         </Text>
       </Stack>
     </Card>
@@ -62,34 +63,53 @@ function MemberCard({ member }: MemberCardProps) {
 }
 
 export function TeamMembers() {
-  const { t } = useTranslation();
-  const { data: members } = useQuery<TeamMemberResource[]>({
-    queryKey: ['team'],
-    queryFn: () => {
-      return api.request({
-        url: '/resource',
-        query: { collectionId: TEAM_MEMBERS_COLLECTION_ID },
-      });
-    },
+  const { t, language } = useTranslation();
+
+  const { data: members } = useQuery<TeamMember[]>({
+    queryKey: ['team', 'members', language],
+    queryFn: () => fetchTeamMembers(language),
   });
 
-  const grouped = (members ?? []).reduce<
-    Record<string, { name: string; members: TeamMemberResource[] }>
-  >((acc, member) => {
-    const groupId = member.payload.main_position?.id ?? 'ungrouped';
-    const groupName = member.payload.main_position?.payload?.name ?? '';
-    if (!acc[groupId]) acc[groupId] = { name: groupName, members: [] };
-    acc[groupId].members.push(member);
-    return acc;
-  }, {});
+  const { data: groups } = useQuery<TeamGroup[]>({
+    queryKey: ['team', 'groups', language],
+    queryFn: () => fetchTeamGroups(language),
+  });
 
-  const groups = Object.values(grouped);
+  const groupedMembers = (members ?? []).reduce<Map<string, TeamMember[]>>(
+    (acc, member) => {
+      const slug = member.groups.find((g) => g.is_primary)?.slug ?? 'ungrouped';
+      const bucket = acc.get(slug) ?? [];
+      bucket.push(member);
+      acc.set(slug, bucket);
+      return acc;
+    },
+    new Map(),
+  );
+
+  const orderedGroups: { slug: string; name: string; members: TeamMember[] }[] =
+    [];
+
+  for (const group of groups ?? []) {
+    const bucket = groupedMembers.get(group.slug);
+    if (bucket && bucket.length > 0) {
+      orderedGroups.push({
+        slug: group.slug,
+        name: group.name,
+        members: bucket,
+      });
+      groupedMembers.delete(group.slug);
+    }
+  }
+
+  for (const [slug, bucket] of groupedMembers) {
+    orderedGroups.push({ slug, name: '', members: bucket });
+  }
 
   return (
     <Stack gap='40px' align='center'>
       <Stack gap='32px' w='100%' align='center'>
-        {groups.map((group, idx) => (
-          <Box key={`${group.name}-${idx}`} style={{ width: '100%' }}>
+        {orderedGroups.map((group) => (
+          <Box key={group.slug} style={{ width: '100%' }}>
             <Stack gap='12px' align='center'>
               <Text
                 fz='14px'
