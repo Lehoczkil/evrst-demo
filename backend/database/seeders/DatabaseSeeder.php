@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
             ResourceSeeder::class,
             TeamSeeder::class,
             TaskSeeder::class,
+            DemoSeeder::class,
         ]);
     }
 }
