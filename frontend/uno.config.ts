@@ -12,6 +12,7 @@ export default defineConfig({
       lg: '992px',
       xl: '1200px',
       xxl: '1366px',
+      xxxl: '1500px',
     },
     colors: {
       primary: 'var(--color-primary)',
