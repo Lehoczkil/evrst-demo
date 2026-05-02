@@ -160,9 +160,22 @@ Team uses `member.photo_path` directly (the backend returns both `photo_path` an
 
 - **UnoCSS** for layout / spacing / responsive utilities. `container` shortcut is `w-full max-w-[1440px] mx-auto px-16px`.
 - Custom rules: `fs-{size}` (font-size), `lh-{size}` (line-height), `ls-{value}` (letter-spacing).
-- Breakpoints: `sm=576`, `md=768`, `lg=992`, `xl=1200`, `xxl=1366` (smaller than petrolszolg's because EVRST design ends at xxl). Match the SCSS map in `_breakpoints.scss`.
+- Breakpoints: `sm=576`, `md=768`, `lg=992`, `xl=1200`, `xxl=1366`, `xxxl=1500`. Match the SCSS map in `_breakpoints.scss`.
 - **SCSS** in `<style scoped lang="scss">` per component. `vite.config.ts` adds `src/styles` to `loadPaths`, so `@import 'breakpoints'` works from anywhere.
 - The breakpoint mixin map starts at `xs: 0`. Don't pass `xs` to `media-down(...)` — Sass rejects `calc(0 - 1px)`. Use `media-down(sm)` to mean "below the `sm` breakpoint."
+
+### Styling conventions
+
+Prefer UnoCSS utility classes in `<template>` for layout, spacing, colors, typography, flex/grid, and responsive variants. Reserve `<style scoped lang="scss">` for the cases utilities cannot express cleanly:
+
+- `:deep(...)` selectors targeting child component or `v-html` internals.
+- Pseudo-elements with non-trivial `content` (e.g. `::before { content: "→" }`).
+- `@keyframes` definitions.
+- CSS custom properties consumed by JS (e.g. `--rocket-scale`).
+- Complex pseudo-class combinations like `:hover:not(:disabled)` or attribute selectors (`[data-checked='true']`).
+- Linear-gradient backgrounds with `background-clip: text`.
+
+Keep an empty `<style lang="scss" scoped></style>` block when everything migrated — never delete the block, since the SFC convention reserves all three (`<script>`, `<template>`, `<style>`) slots. UnoCSS theme tokens are exposed as `primary`, `bgDark`, `bgGray`, `cardBg`, `cardBorder`, `cardBorderAccent`; reach for `text-[var(--color-dimmed)]` etc. when a CSS variable isn't surfaced in `theme.colors`.
 
 ## 3D rocket
 
