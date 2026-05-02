@@ -4,26 +4,31 @@ Monorepo for the **Escape Velocity Rocketry Student Team** site.
 
 ```
 .
-├── frontend/   React 19 + Vite SPA (uses bun)
+├── frontend/   Vue 3.5 + Vite SPA (uses bun)
 └── backend/    Laravel 12 + Filament v4 admin (uses Composer + PHP 8.4)
 ```
 
 ## Frontend (`frontend/`)
 
-React 19, TypeScript, Vite, Mantine v9, react-router v7, react-three-fiber.
+Vue 3.5 (Composition API + `<script setup lang="ts">`), TypeScript strict,
+Vite 7, PrimeVue 4 (Aura preset), Pinia, vue-router, vue-i18n, vue-formify,
+UnoCSS, motion-v, Three.js (vanilla). Auto-imports + auto-component
+registration via `unplugin-auto-import` + `unplugin-vue-components`.
 
 ```sh
 cd frontend
 bun install
 bun run dev      # http://localhost:5173
 bun run build    # outputs to frontend/build
+bun run lint     # eslint + vue-tsc
 ```
 
 `frontend/.env` (copy from `.env.example`) sets `VITE_API_URL`. By default
 it points at the local Laravel backend at `http://localhost:8000/api`.
-Language switching (EN/HU) lives in `src/i18n/`; the active locale is sent
-on every API call via the `X-Lang` header (see `src/api/api.ts` +
-`src/i18n/locale-sync.tsx`).
+Language switching (EN/HU) lives in `src/translations/{en,hu}/index.ts`;
+the active locale is sent on every API call via the `X-Lang` header
+(`LanguageRequestInterceptor` in `src/lib/http/interceptors/`). Persistence
+is via `localStorage('evrst:language')`.
 
 ## Backend (`backend/`)
 

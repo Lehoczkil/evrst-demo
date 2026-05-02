@@ -4,7 +4,7 @@ Monorepo for the **Escape Velocity Rocketry Student Team** site.
 
 ```
 .
-├── frontend/   React 19 + Vite SPA, package manager: bun
+├── frontend/   Vue 3.5 + PrimeVue + Pinia + Vite SPA, package manager: bun
 ├── backend/    Laravel 12 + Filament v4 admin, SQLite
 ├── .github/    Dokku deploy workflow (tag-driven)
 ├── .buildpacks heroku-buildpack-nodejs @ master + dokku/heroku-buildpack-nginx
@@ -58,9 +58,10 @@ Frontend `.env` already points `VITE_API_URL` at `http://localhost:8000/api`.
 - The Vite dev server may pick a non-default port (5174/5175) if 5173 is held — read the actual port from the server log before opening the browser.
 - The harness blocks long-running web servers unless the user has approved them; if a `php artisan serve` / `bun run dev` background task is denied, surface the blocker rather than retrying.
 - The Heroku buildpack we deploy with detects `bun.lock` only at recent versions — `.buildpacks` pins `@master` for that reason; do not pin to a specific commit without checking.
-- Mantine **does not** accept responsive-object syntax for `gap` on `Stack` / `Group` (only spacing-token strings). It does accept it for `w`, `h`, `mih`, `miw`, `pt`, `p` etc.
-- A subset of `react/jsx-runtime` types are deprecated under `React.FormEvent` in React 19 — type form handlers as inline `(event) => …` or use the `FormEventHandler` alias only if necessary.
 - The Heroku buildpack will run `npm run build` if it can't detect bun, so don't rely on `bun:` prefixed scripts in `frontend/package.json`.
+- **Frontend is Vue 3, not React** (rewritten in 0.5.2). Build runs `vue-tsc --noEmit --skipLibCheck && vite build`. Auto-imports + auto-component registration are handled by `unplugin-auto-import` + `unplugin-vue-components`; the generated `.d.ts` files appear after the first `vite build`/`dev` run, so a freshly cloned tree must build once before `vue-tsc` succeeds.
+- Vue rewrite removed Mantine, TanStack Query, react-icons, MDX, react-three-fiber, react-router. Replacements: PrimeVue (Aura preset) + custom `useQuery` composable + plain Three.js wrapped in `useRocketScene` + vue-router + `v-html` for CMS content.
+- SCSS breakpoint mixin map starts at `xs: 0`. Don't pass `xs` to `media-down(...)` — Sass rejects `calc(0 - 1px)`. Use `media-down(sm)` for "below sm".
 - `MAIL_MAILER=log` is the default in `.env.example`. The temp passwords sent by the Accept-application / Create-user / Resend-temp-password actions land in `backend/storage/logs/laravel.log` (queued through the database queue worker). Switch to Postmark/Resend (env keys are scaffolded in `config/services.php`) for real email delivery.
 - The seeded `admin@evrst.test` has `password_changed_at` pre-stamped so it never trips the first-login redirect. Every other user provisioned through the admin must set a new password before reaching any admin page.
 - Switch to a real mailer to actually deliver temp passwords: in `backend/.env` set `MAIL_MAILER=resend` plus `RESEND_API_KEY=...` (or `MAIL_MAILER=postmark` + `POSTMARK_API_KEY=...` — both have config stubs in `config/services.php`). Local dev keeps `MAIL_MAILER=log` so the password lands in `storage/logs/laravel.log`.

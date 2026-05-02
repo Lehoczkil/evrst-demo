@@ -14,6 +14,20 @@ Before each deploy, bump the version in **`backend/config/app.php`**
 `version` field — already gated by `.github/workflows/deploy.yaml`),
 then add a one-line entry under the matching section below.
 
+## 0.5.2 (unreleased)
+
+### Frontend rewrite — React → Vue 3
+
+- Replaced the React 19 + Mantine + TanStack Query SPA with a Vue 3.5 + PrimeVue 4 (Aura) + Pinia + UnoCSS + vue-formify + vue-i18n + motion-v + vanilla Three.js stack. The old React tree is gone from the working copy but lives in git history.
+- Routing moved to `vue-router` (`createWebHistory`); routes are lazy-loaded. The `/:slug(.*)*` catch-all renders dynamic CMS pages by querying the pages collection and rendering `payload.content` via `v-html`.
+- Data fetching ported to a custom `useQuery` composable under `src/composables/useQuery/` with FRESH / STALE / REVALIDATE caching and request deduplication. HTTP layer is a `FetchWrapper` + interceptor pipeline (`src/lib/http/`); language interceptor reads `localStorage('evrst:language')` so a locale flip auto-applies to subsequent requests.
+- Locale switcher in the header (PrimeVue `SelectButton`) drives `useLocale()` which updates vue-i18n + persists + dispatches a `locale-changed` event. Translation strings ported from the React `i18n/translations.ts` into nested objects under `src/translations/{en,hu}/index.ts`.
+- Auto-imports + auto-component registration via `unplugin-auto-import` + `unplugin-vue-components` — generates `src/auto-imports.d.ts` + `src/components.d.ts` on first build.
+- Three.js rocket scene handled by a single composable `useRocketScene(canvasRef, options)`; `<RocketScene>` is a thin wrapper that mounts a canvas. HomePage queries the home resource and passes the GLB url + scale + position from `payload.data.rocket`.
+- Join-us application form rebuilt with `vue-formify` + PrimeVue inputs (`InputText`, `Textarea`, `RadioButton`, `Checkbox`); on success it shows a confirmation card with a reset; on failure it surfaces a PrimeVue `Toast`.
+- Build output stays at `frontend/build/` for Dokku compatibility. `bun run build` is `vue-tsc --noEmit --skipLibCheck && vite build`.
+- New CLI scaffolder at `bin/generate.ts` (run via `bun bin/generate.ts component MyName`).
+
 ## 0.5.1 (unreleased)
 
 ### Schema
