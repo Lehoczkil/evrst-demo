@@ -67,15 +67,15 @@ const notFound = computed(() => status.value === 'SUCCESS' && !page.value);
   }
 
   &__title {
-    font-size: clamp(2rem, 7vw, 3.75rem);
     margin: 0;
-    text-align: center;
+    font-size: clamp(2rem, 7vw, 3.75rem);
     font-family: var(--font-family-headline);
+    text-align: center;
   }
 
   &__body {
-    line-height: 1.6;
     font-size: 16px;
+    line-height: 1.6;
 
     :deep(p) {
       margin: 0 0 16px;
@@ -86,13 +86,13 @@ const notFound = computed(() => status.value === 'SUCCESS' && !page.value);
     }
 
     :deep(h2) {
-      font-size: 28px;
       margin-top: 32px;
+      font-size: 28px;
     }
 
     :deep(h3) {
-      font-size: 22px;
       margin-top: 24px;
+      font-size: 22px;
     }
   }
 }

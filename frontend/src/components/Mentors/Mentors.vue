@@ -65,14 +65,14 @@ const initials = (name: string) =>
 
   &__card {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 20px;
     width: 280px;
-    background: var(--card-bg);
+    padding: 20px;
     border: 1px solid var(--card-border);
     border-radius: 8px;
+    background: var(--card-bg);
+    flex-direction: column;
+    gap: 8px;
 
     @include media-down(sm) {
       width: 100%;
@@ -80,15 +80,15 @@ const initials = (name: string) =>
   }
 
   &__name {
-    font-size: 15px;
     font-weight: 600;
-    text-align: center;
+    font-size: 15px;
     line-height: 1.2;
+    text-align: center;
   }
 
   &__email {
-    font-size: 12px;
     color: var(--color-dimmed);
+    font-size: 12px;
     text-decoration: none;
     word-break: break-all;
     text-align: center;

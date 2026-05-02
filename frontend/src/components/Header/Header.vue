@@ -130,17 +130,17 @@ onBeforeUnmount(() => {
 .header {
   position: fixed;
   top: 0;
-  left: 0;
   right: 0;
-  z-index: 100;
-  background-color: transparent;
+  left: 0;
   border-bottom: 1px solid transparent;
+  background-color: transparent;
   transition: background-color 200ms ease, backdrop-filter 200ms ease, border-color 200ms ease;
+  z-index: 100;
 
   &.scrolled {
-    background-color: rgba(20, 21, 23, 0.6);
+    background-color: rgb(20 21 23 / 60%);
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     border-bottom-color: var(--card-border);
 
     .header__inner {
@@ -230,24 +230,24 @@ onBeforeUnmount(() => {
 
   &__burger {
     display: none;
-    flex-direction: column;
     justify-content: space-around;
     width: 32px;
     height: 32px;
     padding: 6px;
-    background: transparent;
     border: none;
+    background: transparent;
+    flex-direction: column;
     cursor: pointer;
+
+    @include media-down(md) {
+      display: flex;
+    }
 
     span {
       display: block;
       width: 100%;
       height: 2px;
       background-color: white;
-    }
-
-    @include media-down(md) {
-      display: flex;
     }
   }
 
@@ -259,9 +259,9 @@ onBeforeUnmount(() => {
 
   &__drawer-link {
     color: white;
-    text-transform: uppercase;
-    font-size: 18px;
     font-weight: 500;
+    font-size: 18px;
+    text-transform: uppercase;
     text-decoration: none;
   }
 }

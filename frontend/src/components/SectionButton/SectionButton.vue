@@ -45,22 +45,22 @@ withDefaults(
 .section-button {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 20px;
   height: 36px;
-  background: transparent;
-  color: var(--color-primary);
+  padding: 0 20px;
   border: 1px solid var(--color-primary);
   border-radius: 999px;
+  color: var(--color-primary);
+  background: transparent;
   font-size: 14px;
+  transition: background-color 150ms ease, color 150ms ease;
+  gap: 8px;
   text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
 
   &:hover:not(:disabled) {
-    background-color: var(--color-primary);
     color: var(--bg-dark);
+    background-color: var(--color-primary);
   }
 
   &:disabled {

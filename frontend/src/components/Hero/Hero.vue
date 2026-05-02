@@ -84,14 +84,14 @@ const rocketInfo = computed(() => [
 
   &__title {
     display: flex;
-    flex-direction: column;
     align-items: flex-start;
-    color: var(--color-primary);
-    text-transform: uppercase;
-    line-height: 1.16;
-    font-size: clamp(1.125rem, 5.5vw, 3rem);
-    font-family: var(--font-family-headline);
     margin: 0;
+    color: var(--color-primary);
+    font-size: clamp(1.125rem, 5.5vw, 3rem);
+    line-height: 1.16;
+    font-family: var(--font-family-headline);
+    flex-direction: column;
+    text-transform: uppercase;
   }
 
   &__title-line {
@@ -99,9 +99,9 @@ const rocketInfo = computed(() => [
   }
 
   &__info-col {
+    display: none;
     width: 100%;
     max-width: 420px;
-    display: none;
     flex-direction: column;
     gap: 12px;
 
@@ -126,9 +126,9 @@ const rocketInfo = computed(() => [
   &__info-card {
     width: 160px;
     padding: 12px 16px;
-    background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 4px;
+    background: var(--card-bg);
     text-align: center;
   }
 
@@ -138,8 +138,8 @@ const rocketInfo = computed(() => [
   }
 
   &__info-label {
-    font-size: 12px;
     color: var(--color-dimmed);
+    font-size: 12px;
     text-transform: uppercase;
   }
 }

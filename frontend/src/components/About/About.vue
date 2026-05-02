@@ -92,18 +92,18 @@ const goals = computed(() => {
   }
 
   &__subtitle {
-    font-size: 24px;
-    font-weight: 600;
-    text-transform: uppercase;
-    line-height: 1.2;
-    color: var(--color-primary);
     margin: 0;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.2;
+    text-transform: uppercase;
   }
 
   &__body {
+    margin: 0;
     font-size: 16px;
     line-height: 1.6;
-    margin: 0;
   }
 
   &__grid {
@@ -121,24 +121,24 @@ const goals = computed(() => {
   }
 
   &__card {
+    height: 100%;
     padding: 20px;
-    background: var(--card-bg);
     border: 1px solid var(--card-border-accent);
     border-radius: 8px;
-    height: 100%;
+    background: var(--card-bg);
   }
 
   &__card-title {
-    font-size: 18px;
-    font-weight: 600;
     margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 18px;
   }
 
   &__card-body {
-    font-size: 14px;
-    color: var(--color-dimmed);
-    line-height: 1.5;
     margin: 0;
+    color: var(--color-dimmed);
+    font-size: 14px;
+    line-height: 1.5;
   }
 }
 </style>

@@ -42,10 +42,10 @@ const number = computed(() => `0${props.index + 1}`.slice(-2));
 .section {
   &__head {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 16px;
+    justify-content: space-between;
     margin-bottom: 32px;
+    gap: 16px;
 
     @include media-down(sm) {
       flex-direction: column;
@@ -60,22 +60,22 @@ const number = computed(() => `0${props.index + 1}`.slice(-2));
   }
 
   &__number {
+    color: transparent;
+    background: linear-gradient(to right, transparent, var(--color-primary));
+    font-weight: 500;
     font-size: clamp(28px, 6vw, 40px);
     line-height: 1;
     text-transform: uppercase;
-    font-weight: 500;
-    background: linear-gradient(to right, transparent, var(--color-primary));
     background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
+    background-clip: text;
   }
 
   &__title {
-    font-size: clamp(28px, 6vw, 40px);
-    text-transform: uppercase;
-    line-height: 1;
     margin: 0;
+    font-size: clamp(28px, 6vw, 40px);
+    line-height: 1;
     font-family: var(--font-family-headline);
+    text-transform: uppercase;
   }
 }
 </style>

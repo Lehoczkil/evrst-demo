@@ -63,12 +63,12 @@ const logoSrc = (logo: string | undefined) => {
   &__card {
     display: flex;
     align-items: center;
-    gap: 12px;
     width: 300px;
     padding: 8px 16px;
-    background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 4px;
+    background: var(--card-bg);
+    gap: 12px;
   }
 
   &__meta {
@@ -77,8 +77,8 @@ const logoSrc = (logo: string | undefined) => {
   }
 
   &__name {
-    font-size: 14px;
     font-weight: 600;
+    font-size: 14px;
     line-height: 1.2;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -86,8 +86,8 @@ const logoSrc = (logo: string | undefined) => {
   }
 
   &__year {
-    font-size: 12px;
     color: var(--color-primary);
+    font-size: 12px;
     line-height: 1.2;
   }
 }

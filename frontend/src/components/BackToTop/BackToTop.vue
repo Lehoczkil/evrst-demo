@@ -48,21 +48,21 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .back-to-top {
-  position: fixed;
-  right: 24px;
-  bottom: 48px;
-  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: fixed;
+  right: 24px;
+  bottom: 48px;
   width: 40px;
   height: 40px;
-  background-color: rgba(0, 0, 0, 0.4);
-  color: white;
   border: 1px solid var(--card-border);
   border-radius: 999px;
-  cursor: pointer;
+  color: white;
+  background-color: rgb(0 0 0 / 40%);
   transition: background-color 150ms ease, border-color 150ms ease;
+  z-index: 100;
+  cursor: pointer;
 
   &:hover {
     background-color: var(--color-primary);

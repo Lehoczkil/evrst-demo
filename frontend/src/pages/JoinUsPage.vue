@@ -301,11 +301,11 @@ const submitting = computed(() => status.value === 'submitting');
   &__hero {
     position: relative;
     padding: clamp(28px, 4vw, 56px);
-    background: var(--card-bg);
+    margin-bottom: 32px;
     border: 1px solid var(--card-border);
     border-radius: 12px;
+    background: var(--card-bg);
     overflow: hidden;
-    margin-bottom: 32px;
   }
 
   &__hero-grid {
@@ -322,53 +322,53 @@ const submitting = computed(() => status.value === 'submitting');
   &__kicker {
     display: inline-block;
     padding: 4px 12px;
-    background: rgba(242, 172, 60, 0.18);
-    color: var(--color-primary);
+    margin-bottom: 16px;
     border-radius: 999px;
-    font-size: 12px;
+    color: var(--color-primary);
+    background: rgb(242 172 60 / 18%);
     font-weight: 600;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 16px;
   }
 
   &__title {
-    font-size: clamp(40px, 8vw, 84px);
-    text-transform: uppercase;
+    margin: 0 0 16px;
     color: var(--color-primary);
+    font-size: clamp(40px, 8vw, 84px);
     line-height: 0.96;
     font-family: var(--font-family-headline);
-    margin: 0 0 16px;
+    text-transform: uppercase;
   }
 
   &__intro {
-    font-size: 17px;
-    color: var(--color-dimmed);
-    line-height: 1.6;
     max-width: 56ch;
+    color: var(--color-dimmed);
+    font-size: 17px;
+    line-height: 1.6;
   }
 
   &__plus-card {
     padding: 20px;
-    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--card-border);
     border-radius: 8px;
+    background: rgb(255 255 255 / 4%);
   }
 
   &__plus-heading {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--color-primary);
     margin-bottom: 12px;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
     letter-spacing: 0.08em;
   }
 
   &__plus-list {
-    list-style: none;
+    display: flex;
     padding: 0;
     margin: 0;
-    display: flex;
+    list-style: none;
     flex-direction: column;
     gap: 10px;
   }
@@ -382,52 +382,52 @@ const submitting = computed(() => status.value === 'submitting');
   }
 
   &__plus-bullet {
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
-    background: rgba(242, 172, 60, 0.22);
-    color: var(--color-primary);
-    border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    width: 18px;
+    height: 18px;
     margin-top: 1px;
+    border-radius: 999px;
+    color: var(--color-primary);
+    background: rgb(242 172 60 / 22%);
+    font-size: 11px;
+    flex-shrink: 0;
   }
 
   &__section {
     padding: clamp(24px, 3vw, 40px);
-    background: var(--card-bg);
+    margin-bottom: 32px;
     border: 1px solid var(--card-border);
     border-radius: 12px;
-    margin-bottom: 32px;
+    background: var(--card-bg);
   }
 
   &__section-head {
     display: flex;
     align-items: baseline;
-    gap: 16px;
     padding-bottom: 16px;
-    border-bottom: 1px dashed var(--card-border);
     margin-bottom: 24px;
+    border-bottom: 1px dashed var(--card-border);
+    gap: 16px;
   }
 
   &__section-num {
-    font-size: 32px;
-    font-weight: 500;
-    line-height: 1;
-    background: linear-gradient(to right, transparent, var(--color-primary));
-    background-clip: text;
-    -webkit-background-clip: text;
     color: transparent;
+    background: linear-gradient(to right, transparent, var(--color-primary));
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1;
+    background-clip: text;
+    background-clip: text;
   }
 
   &__section-title {
-    font-size: clamp(20px, 3vw, 28px);
-    text-transform: uppercase;
-    font-weight: 600;
-    line-height: 1;
     margin: 0;
+    font-weight: 600;
+    font-size: clamp(20px, 3vw, 28px);
+    line-height: 1;
+    text-transform: uppercase;
   }
 
   &__fields {
@@ -442,13 +442,13 @@ const submitting = computed(() => status.value === 'submitting');
     gap: 6px;
 
     label {
-      font-size: 14px;
       font-weight: 500;
+      font-size: 14px;
     }
 
     small {
-      font-size: 12px;
       color: var(--color-dimmed);
+      font-size: 12px;
     }
   }
 
@@ -480,21 +480,21 @@ const submitting = computed(() => status.value === 'submitting');
   &__option-pill {
     display: flex;
     align-items: center;
-    gap: 10px;
     padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    cursor: pointer;
+    background: rgb(255 255 255 / 2%);
     transition: border-color 150ms ease, background-color 150ms ease;
+    gap: 10px;
+    cursor: pointer;
 
     &:hover {
-      border-color: rgba(242, 172, 60, 0.6);
+      border-color: rgb(242 172 60 / 60%);
     }
 
     &[data-checked='true'] {
       border-color: var(--color-primary);
-      background: rgba(242, 172, 60, 0.12);
+      background: rgb(242 172 60 / 12%);
     }
   }
 
@@ -505,32 +505,32 @@ const submitting = computed(() => status.value === 'submitting');
     margin-top: 8px;
 
     @include media-up(sm) {
-      flex-direction: row;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      flex-direction: row;
     }
   }
 
   &__success {
     padding: clamp(32px, 4vw, 56px);
-    background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 12px;
+    background: var(--card-bg);
     text-align: center;
   }
 
   &__success-title {
+    margin: 0 0 16px;
     font-size: clamp(28px, 5vw, 40px);
     text-transform: uppercase;
-    margin: 0 0 16px;
   }
 
   &__success-body {
-    font-size: 16px;
-    color: var(--color-dimmed);
-    line-height: 1.6;
     max-width: 520px;
     margin: 0 auto 24px;
+    color: var(--color-dimmed);
+    font-size: 16px;
+    line-height: 1.6;
   }
 }
 </style>

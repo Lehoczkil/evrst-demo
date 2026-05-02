@@ -1,0 +1,6 @@
+node_modules
+build
+dist
+# Owned by the image-pipeline agent — do not auto-fix here.
+src/components/Team/Team.vue
+src/components/ResponsiveImg/ResponsiveImage.vue

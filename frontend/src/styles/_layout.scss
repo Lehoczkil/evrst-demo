@@ -11,8 +11,8 @@ html,
 body,
 #vue {
   height: 100%;
-  background-color: var(--bg-dark);
   color: var(--color-text);
+  background-color: var(--bg-dark);
 }
 
 body,
@@ -27,6 +27,6 @@ main {
 }
 
 ::selection {
-  background-color: var(--color-primary);
   color: var(--bg-dark);
+  background-color: var(--color-primary);
 }

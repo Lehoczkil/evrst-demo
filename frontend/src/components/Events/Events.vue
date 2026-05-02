@@ -95,14 +95,14 @@ const imagePathFor = (event: EventResource) => pathFromStorageUrl(imageFor(event
 
   &__card {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
     padding: 16px;
-    background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    cursor: pointer;
+    background: var(--card-bg);
     transition: transform 150ms ease;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
 
     &:hover {
       transform: scale(1.01);
@@ -115,14 +115,14 @@ const imagePathFor = (event: EventResource) => pathFromStorageUrl(imageFor(event
   }
 
   &__title {
-    font-size: 16px;
-    font-weight: 500;
     color: var(--color-bright);
+    font-weight: 500;
+    font-size: 16px;
   }
 
   &__date {
-    font-size: 12px;
     color: var(--color-dimmed);
+    font-size: 12px;
     text-transform: uppercase;
   }
 }

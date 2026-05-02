@@ -70,12 +70,12 @@ const groups = computed(() => [
 .outro {
   &__inner {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
-    gap: 32px;
-    flex-wrap: wrap;
+    justify-content: space-between;
     padding-top: 64px;
     padding-bottom: 64px;
+    gap: 32px;
+    flex-wrap: wrap;
 
     @include media-down(sm) {
       flex-direction: column;
@@ -89,14 +89,14 @@ const groups = computed(() => [
   }
 
   &__powered {
-    font-size: 11px;
     color: var(--color-dimmed);
+    font-size: 11px;
   }
 
   &__university {
-    font-size: 14px;
-    font-weight: 500;
     color: var(--color-bright);
+    font-weight: 500;
+    font-size: 14px;
     line-height: 1.2;
   }
 
@@ -113,15 +113,15 @@ const groups = computed(() => [
   }
 
   &__group-title {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
     color: var(--color-bright);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
   }
 
   &__link {
-    font-size: 12px;
     color: var(--color-dimmed);
+    font-size: 12px;
     text-decoration: none;
 
     &:hover {
