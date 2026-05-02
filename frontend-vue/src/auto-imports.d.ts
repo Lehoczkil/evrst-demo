@@ -81,6 +81,7 @@ declare global {
   const useId: typeof import('vue').useId
   const useInput: typeof import('vue-formify').useInput
   const useLink: typeof import('vue-router').useLink
+  const useLocale: typeof import('./composables/useLocale').useLocale
   const useMetaStore: typeof import('./store/metaStore/metaStore').useMetaStore
   const useModel: typeof import('vue').useModel
   const useQuery: typeof import('./composables/useQuery/useQuery').useQuery
@@ -186,6 +187,7 @@ declare module 'vue' {
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useInput: UnwrapRef<typeof import('vue-formify')['useInput']>
     readonly useLink: UnwrapRef<typeof import('vue-router')['useLink']>
+    readonly useLocale: UnwrapRef<typeof import('./composables/useLocale')['useLocale']>
     readonly useMetaStore: UnwrapRef<typeof import('./store/metaStore/metaStore')['useMetaStore']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useQuery: UnwrapRef<typeof import('./composables/useQuery/useQuery')['useQuery']>
