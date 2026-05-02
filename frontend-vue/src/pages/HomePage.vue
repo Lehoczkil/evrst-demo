@@ -52,7 +52,7 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
   <div class="section-wrap section-wrap--dark">
     <div class="container">
       <Section id="team" :index="2" :title="t('section.team')">
-        <p style="color: var(--color-dimmed)">{{ t('placeholder.team') }}</p>
+        <Team />
       </Section>
     </div>
   </div>
