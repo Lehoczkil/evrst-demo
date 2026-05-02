@@ -7,6 +7,7 @@
 export {}
 declare global {
   const EffectScope: typeof import('vue').EffectScope
+  const HomeRequests: typeof import('./services/requests/HomeRequests').HomeRequests
   const K: typeof import('./composables/useQuery/useQuery').K
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const cacheStorage: typeof import('./composables/useQuery/utils').cacheStorage
@@ -85,6 +86,7 @@ declare global {
   const useMetaStore: typeof import('./store/metaStore/metaStore').useMetaStore
   const useModel: typeof import('vue').useModel
   const useQuery: typeof import('./composables/useQuery/useQuery').useQuery
+  const useRocketScene: typeof import('./composables/useRocketScene').useRocketScene
   const useRoute: typeof import('vue-router').useRoute
   const useRouter: typeof import('vue-router').useRouter
   const useSlots: typeof import('vue').useSlots
@@ -105,6 +107,12 @@ declare global {
   // @ts-ignore
   export type { QueryKey, useQueryType, RequestQueue, RequestState, CacheData, CacheState } from './composables/useQuery/types'
   import('./composables/useQuery/types')
+  // @ts-ignore
+  export type { RocketSceneOptions } from './composables/useRocketScene'
+  import('./composables/useRocketScene')
+  // @ts-ignore
+  export type { HomePageData } from './services/requests/HomeRequests'
+  import('./services/requests/HomeRequests')
 }
 
 // for vue template auto import
@@ -113,6 +121,7 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly HomeRequests: UnwrapRef<typeof import('./services/requests/HomeRequests')['HomeRequests']>
     readonly K: UnwrapRef<typeof import('./composables/useQuery/useQuery')['K']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly cacheStorage: UnwrapRef<typeof import('./composables/useQuery/utils')['cacheStorage']>
@@ -191,6 +200,7 @@ declare module 'vue' {
     readonly useMetaStore: UnwrapRef<typeof import('./store/metaStore/metaStore')['useMetaStore']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useQuery: UnwrapRef<typeof import('./composables/useQuery/useQuery')['useQuery']>
+    readonly useRocketScene: UnwrapRef<typeof import('./composables/useRocketScene')['useRocketScene']>
     readonly useRoute: UnwrapRef<typeof import('vue-router')['useRoute']>
     readonly useRouter: UnwrapRef<typeof import('vue-router')['useRouter']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>

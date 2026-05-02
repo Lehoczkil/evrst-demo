@@ -21,6 +21,7 @@ declare module 'vue' {
     Meta: typeof import('./components/Meta/Meta.vue')['default']
     Outro: typeof import('./components/Outro/Outro.vue')['default']
     ResponsiveImage: typeof import('./components/ResponsiveImg/ResponsiveImage.vue')['default']
+    RocketScene: typeof import('./components/RocketScene/RocketScene.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Section: typeof import('./components/Section/Section.vue')['default']

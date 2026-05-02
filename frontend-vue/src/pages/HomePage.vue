@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { HomeRequests } from '@/services/requests/HomeRequests';
+
 /*---------------------------------------------
 /  PROPS & EMITS
 ---------------------------------------------*/
@@ -6,12 +8,22 @@
 /  VARIABLES
 ---------------------------------------------*/
 const { t } = useI18n();
-/*---------------------------------------------
-/  METHODS
----------------------------------------------*/
+
+const { data: page } = useQuery({
+  key: ['home-page'],
+  request: () => HomeRequests.page(),
+  cache: true,
+  staleTime: 60,
+  refetchTime: 600,
+});
 /*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
+const rocketObject = computed(() =>
+  page.value?.objects?.find((o) => o.key === 'rocket'),
+);
+const rocketScale = computed(() => page.value?.payload?.data?.rocket?.scale);
+const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.position);
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
@@ -19,6 +31,13 @@ const { t } = useI18n();
 
 <template>
   <Hero />
+
+  <RocketScene
+    v-if="rocketObject?.url"
+    :url="rocketObject.url"
+    :scale="rocketScale"
+    :position="rocketPosition"
+  />
 
   <div style="height: 32px" />
 
