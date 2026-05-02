@@ -11,6 +11,7 @@ declare global {
   const HomeRequests: typeof import('./services/requests/HomeRequests').HomeRequests
   const K: typeof import('./composables/useQuery/useQuery').K
   const MemberApplicationRequests: typeof import('./services/requests/MemberApplicationRequests').MemberApplicationRequests
+  const PageRequests: typeof import('./services/requests/PageRequests').PageRequests
   const TeamRequests: typeof import('./services/requests/TeamRequests').TeamRequests
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const cacheStorage: typeof import('./composables/useQuery/utils').cacheStorage
@@ -137,6 +138,7 @@ declare module 'vue' {
     readonly HomeRequests: UnwrapRef<typeof import('./services/requests/HomeRequests')['HomeRequests']>
     readonly K: UnwrapRef<typeof import('./composables/useQuery/useQuery')['K']>
     readonly MemberApplicationRequests: UnwrapRef<typeof import('./services/requests/MemberApplicationRequests')['MemberApplicationRequests']>
+    readonly PageRequests: UnwrapRef<typeof import('./services/requests/PageRequests')['PageRequests']>
     readonly TeamRequests: UnwrapRef<typeof import('./services/requests/TeamRequests')['TeamRequests']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly cacheStorage: UnwrapRef<typeof import('./composables/useQuery/utils')['cacheStorage']>
