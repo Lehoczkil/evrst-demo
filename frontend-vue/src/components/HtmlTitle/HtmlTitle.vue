@@ -2,43 +2,26 @@
 /*---------------------------------------------
 /  PROPS & EMITS
 ---------------------------------------------*/
+const props = defineProps<{ title: string }>();
 /*---------------------------------------------
 /  VARIABLES
 ---------------------------------------------*/
 const metaStore = useMetaStore();
 /*---------------------------------------------
-/  METHODS
----------------------------------------------*/
-/*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
+const fullTitle = computed(() => `${props.title} – Escape Velocity Rocketry Student Team`);
 /*---------------------------------------------
 /  WATCHERS
 ---------------------------------------------*/
+watchEffect(() => {
+  metaStore.setMeta({ title: fullTitle.value });
+});
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
-onMounted(() => {
-  metaStore.setMeta({
-    title: 'Escape Velocity Rocketry Student Team',
-    description: 'Escape Velocity Rocketry Student Team — Óbuda University.',
-    theme: '#0c0d0e',
-  });
-});
 </script>
 
 <template>
-  <Meta />
-  <Header />
-  <main>
-    <RouterView v-slot="{ Component }">
-      <transition name="router-fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </RouterView>
-  </main>
-  <Footer />
-  <BackToTop />
+  <span style="display: none" />
 </template>
-
-<style src="./App.scss" lang="scss"></style>

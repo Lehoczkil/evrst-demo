@@ -11,6 +11,11 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BackToTop: typeof import('./components/BackToTop/BackToTop.vue')['default']
+    EvrstLogo: typeof import('./components/EvrstLogo/EvrstLogo.vue')['default']
+    Footer: typeof import('./components/Footer/Footer.vue')['default']
+    Header: typeof import('./components/Header/Header.vue')['default']
+    HtmlTitle: typeof import('./components/HtmlTitle/HtmlTitle.vue')['default']
     Meta: typeof import('./components/Meta/Meta.vue')['default']
     ResponsiveImage: typeof import('./components/ResponsiveImg/ResponsiveImage.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

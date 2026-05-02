@@ -2,10 +2,15 @@
 /*---------------------------------------------
 /  PROPS & EMITS
 ---------------------------------------------*/
+withDefaults(
+  defineProps<{
+    height?: string;
+  }>(),
+  { height: '80px' },
+);
 /*---------------------------------------------
 /  VARIABLES
 ---------------------------------------------*/
-const metaStore = useMetaStore();
 /*---------------------------------------------
 /  METHODS
 ---------------------------------------------*/
@@ -18,27 +23,21 @@ const metaStore = useMetaStore();
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
-onMounted(() => {
-  metaStore.setMeta({
-    title: 'Escape Velocity Rocketry Student Team',
-    description: 'Escape Velocity Rocketry Student Team — Óbuda University.',
-    theme: '#0c0d0e',
-  });
-});
 </script>
 
 <template>
-  <Meta />
-  <Header />
-  <main>
-    <RouterView v-slot="{ Component }">
-      <transition name="router-fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </RouterView>
-  </main>
-  <Footer />
-  <BackToTop />
+  <RouterLink to="/" class="evrst-logo">
+    <img src="/evrst_logo.svg" :style="{ height }" alt="EVRST" />
+  </RouterLink>
 </template>
 
-<style src="./App.scss" lang="scss"></style>
+<style lang="scss" scoped>
+.evrst-logo {
+  display: inline-flex;
+
+  img {
+    width: auto;
+    transition: height 200ms ease, margin 200ms ease;
+  }
+}
+</style>
