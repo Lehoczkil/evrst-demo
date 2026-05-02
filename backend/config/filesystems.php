@@ -62,7 +62,15 @@ return [
             : [
                 'driver' => 'local',
                 'root' => storage_path('app/public'),
-                'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+                // Local dev returns a relative `/storage` URL so the SPA
+                // fetches it from its own origin via the Vite dev proxy
+                // (see frontend/vite.config.ts) — `php artisan serve`
+                // bypasses Laravel middleware on /storage so CORS headers
+                // never get added for cross-origin browser fetches.
+                // Production (Render / S3) keeps the absolute URL.
+                'url' => env('APP_ENV') === 'local'
+                    ? '/storage'
+                    : rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
                 'visibility' => 'public',
                 'throw' => false,
                 'report' => false,
