@@ -1,1 +1,0 @@
-export const SPONSOR_COLLECTION_ID = "8aadff44-5a0b-4d84-b570-324db3f11a94";

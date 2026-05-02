@@ -1,1 +1,0 @@
-export const MENTOR_COLLECTION_ID = "8639b34c-3415-40cc-85d0-e5ac0eb8d456"
