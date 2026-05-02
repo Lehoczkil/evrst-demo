@@ -38,23 +38,33 @@ const groups = computed(() => [
 </script>
 
 <template>
-  <section class="outro">
-    <div class="container outro__inner">
-      <div class="outro__brand">
-        <div class="outro__brand-text">
-          <div class="outro__powered">{{ t('outro.poweredBy') }}</div>
-          <div class="outro__university">Obuda University</div>
+  <section>
+    <div
+      class="container flex flex-col sm:(flex-row flex-wrap items-start justify-between) gap-32px py-64px"
+    >
+      <div class="flex items-center gap-16px">
+        <div>
+          <div class="text-[var(--color-dimmed)] fs-11px">
+            {{ t('outro.poweredBy') }}
+          </div>
+          <div class="text-[var(--color-bright)] font-500 fs-14px lh-[1.2]">
+            Obuda University
+          </div>
         </div>
       </div>
-      <div class="outro__groups">
-        <div v-for="g in groups" :key="g.title" class="outro__group">
-          <div class="outro__group-title">{{ g.title }}</div>
+      <div class="flex flex-wrap gap-32px">
+        <div v-for="g in groups" :key="g.title" class="flex flex-col gap-6px">
+          <div
+            class="text-[var(--color-bright)] font-600 fs-12px uppercase"
+          >
+            {{ g.title }}
+          </div>
           <a
             v-for="(link, i) in g.links"
             :key="i"
             :href="link.url"
             :target="(link as { target?: string }).target"
-            class="outro__link"
+            class="text-[var(--color-dimmed)] fs-12px no-underline hover:text-primary"
           >
             {{ link.label }}
           </a>
@@ -64,69 +74,4 @@ const groups = computed(() => [
   </section>
 </template>
 
-<style lang="scss" scoped>
-@import 'breakpoints';
-
-.outro {
-  &__inner {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding-top: 64px;
-    padding-bottom: 64px;
-    gap: 32px;
-    flex-wrap: wrap;
-
-    @include media-down(sm) {
-      flex-direction: column;
-    }
-  }
-
-  &__brand {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  &__powered {
-    color: var(--color-dimmed);
-    font-size: 11px;
-  }
-
-  &__university {
-    color: var(--color-bright);
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 1.2;
-  }
-
-  &__groups {
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-
-  &__group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  &__group-title {
-    color: var(--color-bright);
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-  }
-
-  &__link {
-    color: var(--color-dimmed);
-    font-size: 12px;
-    text-decoration: none;
-
-    &:hover {
-      color: var(--color-primary);
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

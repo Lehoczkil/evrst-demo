@@ -49,96 +49,50 @@ const goals = computed(() => {
 </script>
 
 <template>
-  <div class="about">
-    <div class="about__block">
-      <h3 class="about__subtitle">{{ t('about.whoWeAre') }}</h3>
-      <p class="about__body">{{ t('about.whoWeAreBody') }}</p>
+  <div class="flex flex-col gap-40px">
+    <div class="flex flex-col gap-16px">
+      <h3 class="m-0 text-primary font-600 fs-24px lh-[1.2] uppercase">
+        {{ t('about.whoWeAre') }}
+      </h3>
+      <p class="m-0 fs-16px lh-[1.6]">{{ t('about.whoWeAreBody') }}</p>
     </div>
 
-    <div class="about__block">
-      <h3 class="about__subtitle">{{ t('about.projects') }}</h3>
-      <div class="about__grid">
-        <div v-for="(item, idx) in projects" :key="`p-${idx}`" class="about__card">
-          <div class="about__card-title">{{ item.title }}</div>
-          <p class="about__card-body">{{ item.description }}</p>
+    <div class="flex flex-col gap-16px">
+      <h3 class="m-0 text-primary font-600 fs-24px lh-[1.2] uppercase">
+        {{ t('about.projects') }}
+      </h3>
+      <div class="grid grid-cols-1 gap-16px sm:grid-cols-2 md:grid-cols-3">
+        <div
+          v-for="(item, idx) in projects"
+          :key="`p-${idx}`"
+          class="h-full p-20px border border-cardBorderAccent rounded-8px bg-cardBg"
+        >
+          <div class="mb-8px font-600 fs-18px">{{ item.title }}</div>
+          <p class="m-0 text-[var(--color-dimmed)] fs-14px lh-[1.5]">
+            {{ item.description }}
+          </p>
         </div>
       </div>
     </div>
 
-    <div class="about__block">
-      <h3 class="about__subtitle">{{ t('about.goals') }}</h3>
-      <div class="about__grid">
-        <div v-for="(item, idx) in goals" :key="`g-${idx}`" class="about__card">
-          <div class="about__card-title">{{ item.title }}</div>
-          <p class="about__card-body">{{ item.description }}</p>
+    <div class="flex flex-col gap-16px">
+      <h3 class="m-0 text-primary font-600 fs-24px lh-[1.2] uppercase">
+        {{ t('about.goals') }}
+      </h3>
+      <div class="grid grid-cols-1 gap-16px sm:grid-cols-2 md:grid-cols-3">
+        <div
+          v-for="(item, idx) in goals"
+          :key="`g-${idx}`"
+          class="h-full p-20px border border-cardBorderAccent rounded-8px bg-cardBg"
+        >
+          <div class="mb-8px font-600 fs-18px">{{ item.title }}</div>
+          <p class="m-0 text-[var(--color-dimmed)] fs-14px lh-[1.5]">
+            {{ item.description }}
+          </p>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style lang="scss" scoped>
-@import 'breakpoints';
-
-.about {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-
-  &__block {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  &__subtitle {
-    margin: 0;
-    color: var(--color-primary);
-    font-weight: 600;
-    font-size: 24px;
-    line-height: 1.2;
-    text-transform: uppercase;
-  }
-
-  &__body {
-    margin: 0;
-    font-size: 16px;
-    line-height: 1.6;
-  }
-
-  &__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-
-    @include media-up(sm) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @include media-up(md) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  &__card {
-    height: 100%;
-    padding: 20px;
-    border: 1px solid var(--card-border-accent);
-    border-radius: 8px;
-    background: var(--card-bg);
-  }
-
-  &__card-title {
-    margin-bottom: 8px;
-    font-weight: 600;
-    font-size: 18px;
-  }
-
-  &__card-body {
-    margin: 0;
-    color: var(--color-dimmed);
-    font-size: 14px;
-    line-height: 1.5;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

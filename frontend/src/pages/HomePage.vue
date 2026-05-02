@@ -39,9 +39,9 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
     :position="rocketPosition"
   />
 
-  <div style="height: 32px" />
+  <div class="h-32px" />
 
-  <div class="section-wrap section-wrap--dark">
+  <div class="relative py-40px bg-bgDark">
     <div class="container">
       <Section id="events" :index="0" :title="t('section.events')">
         <Events />
@@ -49,7 +49,7 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
     </div>
   </div>
 
-  <div class="section-wrap section-wrap--gray">
+  <div class="relative py-40px bg-bgGray">
     <div class="container">
       <Section id="about" :index="1" :title="t('section.about')">
         <About />
@@ -57,7 +57,7 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
     </div>
   </div>
 
-  <div class="section-wrap section-wrap--dark">
+  <div class="relative py-40px bg-bgDark">
     <div class="container">
       <Section id="team" :index="2" :title="t('section.team')">
         <Team />
@@ -65,7 +65,7 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
     </div>
   </div>
 
-  <div class="section-wrap section-wrap--dark">
+  <div class="relative py-40px bg-bgDark">
     <div class="container">
       <Section id="mentors" :index="3" :title="t('section.mentors')">
         <Mentors />
@@ -73,7 +73,7 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
     </div>
   </div>
 
-  <div class="section-wrap section-wrap--gray">
+  <div class="relative py-40px bg-bgGray">
     <div class="container">
       <Section id="sponsors" :index="4" :title="t('section.sponsors')">
         <template #right>
@@ -89,17 +89,4 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
   <Outro />
 </template>
 
-<style lang="scss" scoped>
-.section-wrap {
-  padding-block: 40px;
-  position: relative;
-
-  &--dark {
-    background-color: var(--bg-dark);
-  }
-
-  &--gray {
-    background-color: var(--bg-gray);
-  }
-}
-</style>
+<style lang="scss" scoped></style>
