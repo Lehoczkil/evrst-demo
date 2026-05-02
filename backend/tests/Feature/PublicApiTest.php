@@ -6,6 +6,7 @@ use App\Jobs\PostDiscordWebhook;
 use App\Models\Collection;
 use App\Models\MemberApplication;
 use App\Models\Resource;
+use App\Models\TeamMember;
 use Database\Seeders\CollectionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -100,6 +101,42 @@ class PublicApiTest extends TestCase
         // Discord webhook is dispatched even when the URL is empty —
         // the job no-ops in that case but the dispatch must happen.
         Bus::assertDispatched(PostDiscordWebhook::class);
+    }
+
+    public function test_team_members_returns_photo_path_alongside_photo_url(): void
+    {
+        TeamMember::create([
+            'name' => 'Test Member',
+            'email' => 'test@example.com',
+            'photo_path' => 'team-members/test.png',
+            'is_public' => true,
+            'position' => 0,
+        ]);
+
+        $response = $this->getJson('/api/team/members');
+
+        $response->assertOk();
+        $payload = collect($response->json())->firstWhere('name', 'Test Member');
+        $this->assertNotNull($payload);
+        $this->assertSame('team-members/test.png', $payload['photo_path']);
+        $this->assertStringContainsString('team-members/test.png', (string) $payload['photo_url']);
+    }
+
+    public function test_team_members_photo_path_is_null_when_unset(): void
+    {
+        TeamMember::create([
+            'name' => 'No Photo',
+            'email' => 'np@example.com',
+            'is_public' => true,
+            'position' => 0,
+        ]);
+
+        $payload = collect($this->getJson('/api/team/members')->json())
+            ->firstWhere('name', 'No Photo');
+
+        $this->assertNotNull($payload);
+        $this->assertNull($payload['photo_path']);
+        $this->assertNull($payload['photo_url']);
     }
 
     public function test_member_application_post_validates_required_fields(): void

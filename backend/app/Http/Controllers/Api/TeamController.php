@@ -29,6 +29,7 @@ class TeamController extends Controller
                 'id' => $member->id,
                 'name' => $member->name,
                 'degree' => TeamMemberGroup::pickLocale($member->degree, $lang),
+                'photo_path' => $member->photo_path,
                 'photo_url' => $member->photo_path
                     ? Storage::disk('public')->url($member->photo_path)
                     : null,
