@@ -26,17 +26,17 @@ withDefaults(
 <template>
   <RouterLink v-if="to" :to="to" class="section-button">
     <slot name="left" />
-    <span class="section-button__label"><slot /></span>
+    <span><slot /></span>
     <slot name="right" />
   </RouterLink>
   <a v-else-if="href" :href="href" :target="target" class="section-button">
     <slot name="left" />
-    <span class="section-button__label"><slot /></span>
+    <span><slot /></span>
     <slot name="right" />
   </a>
   <button v-else :type="type" :disabled="disabled" class="section-button">
     <slot name="left" />
-    <span class="section-button__label"><slot /></span>
+    <span><slot /></span>
     <slot name="right" />
   </button>
 </template>
@@ -45,6 +45,7 @@ withDefaults(
 .section-button {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   height: 36px;
   padding: 0 20px;
   border: 1px solid var(--color-primary);
@@ -52,11 +53,10 @@ withDefaults(
   color: var(--color-primary);
   background: transparent;
   font-size: 14px;
-  transition: background-color 150ms ease, color 150ms ease;
-  gap: 8px;
   text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
 
   &:hover:not(:disabled) {
     color: var(--bg-dark);

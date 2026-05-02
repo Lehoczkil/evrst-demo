@@ -20,62 +20,36 @@ const number = computed(() => `0${props.index + 1}`.slice(-2));
 </script>
 
 <template>
-  <section :id="id" class="section">
-    <div class="section__head">
-      <div class="section__title-row">
-        <span class="section__number">{{ number }}</span>
-        <h2 class="section__title">{{ title }}</h2>
+  <section :id="id">
+    <div
+      class="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between gap-16px mb-32px"
+    >
+      <div class="flex items-end gap-8px">
+        <span
+          class="section__number fs-[clamp(28px,6vw,40px)] lh-1 uppercase font-500"
+        >
+          {{ number }}
+        </span>
+        <h2
+          class="m-0 fs-[clamp(28px,6vw,40px)] lh-1 uppercase font-[var(--font-family-headline)]"
+        >
+          {{ title }}
+        </h2>
       </div>
-      <div v-if="$slots.right" class="section__right">
+      <div v-if="$slots.right">
         <slot name="right" />
       </div>
     </div>
-    <div class="section__body">
+    <div>
       <slot />
     </div>
   </section>
 </template>
 
 <style lang="scss" scoped>
-@import 'breakpoints';
-
-.section {
-  &__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
-    gap: 16px;
-
-    @include media-down(sm) {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  }
-
-  &__title-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-  }
-
-  &__number {
-    color: transparent;
-    background: linear-gradient(to right, transparent, var(--color-primary));
-    font-weight: 500;
-    font-size: clamp(28px, 6vw, 40px);
-    line-height: 1;
-    text-transform: uppercase;
-    background-clip: text;
-    background-clip: text;
-  }
-
-  &__title {
-    margin: 0;
-    font-size: clamp(28px, 6vw, 40px);
-    line-height: 1;
-    font-family: var(--font-family-headline);
-    text-transform: uppercase;
-  }
+.section__number {
+  color: transparent;
+  background: linear-gradient(to right, transparent, var(--color-primary));
+  background-clip: text;
 }
 </style>

@@ -58,24 +58,34 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="header" :class="{ scrolled }">
-    <div class="container header__inner">
-      <div class="header__col header__col--logo">
-        <span class="header__logo-wrap">
+  <header
+    class="header fixed top-0 right-0 left-0 z-100 border-b border-transparent bg-transparent transition-[background-color,backdrop-filter,border-color] duration-200"
+    :class="{ scrolled }"
+  >
+    <div
+      class="container header__inner flex items-center justify-between gap-16px py-16px transition-[padding] duration-200"
+    >
+      <div class="flex flex-1 items-center justify-start relative">
+        <span class="header__logo-wrap inline-flex">
           <EvrstLogo :height="scrolled ? '36px' : '80px'" />
         </span>
       </div>
 
-      <div class="header__col header__col--center">
-        <nav class="header__nav">
-          <RouterLink v-for="item in menuItems" :key="item.to" :to="item.to" class="header__link">
+      <div class="hidden md:flex flex-1 items-center justify-center">
+        <nav class="flex gap-32px uppercase whitespace-nowrap">
+          <RouterLink
+            v-for="item in menuItems"
+            :key="item.to"
+            :to="item.to"
+            class="text-white fs-14px no-underline transition-colors duration-150 hover:text-primary"
+          >
             {{ item.label }}
           </RouterLink>
         </nav>
       </div>
 
-      <div class="header__col header__col--end">
-        <div class="header__locale">
+      <div class="flex flex-1 items-center justify-end gap-12px">
+        <div class="hidden md:block">
           <SelectButton
             v-model="localeModel"
             :options="localeOptions"
@@ -87,24 +97,24 @@ onBeforeUnmount(() => {
         </div>
         <button
           type="button"
-          class="header__burger"
+          class="w-32px h-32px p-6px border-none bg-transparent flex-col justify-around cursor-pointer flex md:hidden"
           aria-label="Toggle navigation"
           @click="drawerOpen = true"
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          <span class="block w-full h-2px bg-white"></span>
+          <span class="block w-full h-2px bg-white"></span>
+          <span class="block w-full h-2px bg-white"></span>
         </button>
       </div>
     </div>
 
     <Drawer v-model:visible="drawerOpen" position="right" class="header__drawer">
-      <nav class="header__drawer-nav">
+      <nav class="flex flex-col gap-16px">
         <RouterLink
           v-for="item in menuItems"
           :key="item.to"
           :to="item.to"
-          class="header__drawer-link"
+          class="text-white uppercase fs-18px font-500 no-underline"
           @click="closeDrawer"
         >
           {{ item.label }}
@@ -128,18 +138,8 @@ onBeforeUnmount(() => {
 @import 'breakpoints';
 
 .header {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  border-bottom: 1px solid transparent;
-  background-color: transparent;
-  transition: background-color 200ms ease, backdrop-filter 200ms ease, border-color 200ms ease;
-  z-index: 100;
-
   &.scrolled {
     background-color: rgb(20 21 23 / 60%);
-    backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-bottom-color: var(--card-border);
 
@@ -149,43 +149,7 @@ onBeforeUnmount(() => {
     }
   }
 
-  &__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding-top: 16px;
-    padding-bottom: 16px;
-    transition: padding 200ms ease;
-  }
-
-  &__col {
-    flex: 1 1 0;
-    display: flex;
-    align-items: center;
-
-    &--logo {
-      justify-content: flex-start;
-      position: relative;
-    }
-
-    &--center {
-      justify-content: center;
-
-      @include media-down(md) {
-        display: none;
-      }
-    }
-
-    &--end {
-      justify-content: flex-end;
-      gap: 12px;
-    }
-  }
-
   &__logo-wrap {
-    display: inline-flex;
-
     :deep(img) {
       margin-bottom: -40px;
 
@@ -202,67 +166,6 @@ onBeforeUnmount(() => {
     @include media-down(sm) {
       height: 28px !important;
     }
-  }
-
-  &__nav {
-    display: flex;
-    gap: 32px;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  &__link {
-    color: white;
-    font-size: 14px;
-    text-decoration: none;
-    transition: color 150ms ease;
-
-    &:hover {
-      color: var(--color-primary);
-    }
-  }
-
-  &__locale {
-    @include media-down(md) {
-      display: none;
-    }
-  }
-
-  &__burger {
-    display: none;
-    justify-content: space-around;
-    width: 32px;
-    height: 32px;
-    padding: 6px;
-    border: none;
-    background: transparent;
-    flex-direction: column;
-    cursor: pointer;
-
-    @include media-down(md) {
-      display: flex;
-    }
-
-    span {
-      display: block;
-      width: 100%;
-      height: 2px;
-      background-color: white;
-    }
-  }
-
-  &__drawer-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  &__drawer-link {
-    color: white;
-    font-weight: 500;
-    font-size: 18px;
-    text-transform: uppercase;
-    text-decoration: none;
   }
 }
 </style>

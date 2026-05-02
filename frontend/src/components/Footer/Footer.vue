@@ -19,36 +19,15 @@ const version = __APP_VERSION__;
 </script>
 
 <template>
-  <footer class="footer">
-    <div class="container footer__inner">
-      <span class="footer__copy">
+  <footer>
+    <div
+      class="container flex flex-col sm:flex-row sm:items-center sm:justify-between gap-16px py-16px border-t border-cardBorder"
+    >
+      <span class="text-[var(--color-dimmed)] fs-11px">
         © {{ year }} Escape Velocity Rocketry Student Team. Build: v{{ version }}
       </span>
     </div>
   </footer>
 </template>
 
-<style lang="scss" scoped>
-@import 'breakpoints';
-
-.footer {
-  &__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding-top: 16px;
-    padding-bottom: 16px;
-    border-top: 1px solid var(--card-border);
-
-    @include media-down(sm) {
-      flex-direction: column;
-    }
-  }
-
-  &__copy {
-    color: var(--color-dimmed);
-    font-size: 11px;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

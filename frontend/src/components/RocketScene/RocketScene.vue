@@ -24,32 +24,11 @@ useRocketScene(canvasRef, {
 </script>
 
 <template>
-  <div class="rocket-scene">
-    <canvas ref="canvasRef" />
+  <div
+    class="absolute left-0 w-full pointer-events-none top-auto bottom-0 h-60vh md:(top-0 bottom-auto h-100vh)"
+  >
+    <canvas ref="canvasRef" class="block w-full h-full" />
   </div>
 </template>
 
-<style lang="scss" scoped>
-@import 'breakpoints';
-
-.rocket-scene {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  pointer-events: none;
-
-  @include media-down(md) {
-    top: auto;
-    bottom: 0;
-    height: 60vh;
-  }
-
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -35,7 +35,7 @@ onBeforeUnmount(() => {
     <button
       v-if="visible"
       type="button"
-      class="back-to-top"
+      class="fixed right-24px bottom-48px z-100 flex items-center justify-center w-40px h-40px rounded-full border border-cardBorder text-white bg-[rgb(0_0_0_/_40%)] cursor-pointer transition-[background-color,border-color] duration-150 hover:(bg-primary border-primary)"
       :aria-label="t('button.backToTop')"
       @click="scrollToTop"
     >
@@ -46,27 +46,4 @@ onBeforeUnmount(() => {
   </transition>
 </template>
 
-<style lang="scss" scoped>
-.back-to-top {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: fixed;
-  right: 24px;
-  bottom: 48px;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--card-border);
-  border-radius: 999px;
-  color: white;
-  background-color: rgb(0 0 0 / 40%);
-  transition: background-color 150ms ease, border-color 150ms ease;
-  z-index: 100;
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
-  }
-}
-</style>
+<style lang="scss" scoped></style>

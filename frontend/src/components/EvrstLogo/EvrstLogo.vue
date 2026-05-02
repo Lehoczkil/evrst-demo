@@ -26,18 +26,14 @@ withDefaults(
 </script>
 
 <template>
-  <RouterLink to="/" class="evrst-logo">
-    <img src="/evrst_logo.svg" :style="{ height }" alt="EVRST" />
+  <RouterLink to="/" class="inline-flex">
+    <img
+      src="/evrst_logo.svg"
+      alt="EVRST"
+      :style="{ height }"
+      class="w-auto transition-[height,margin] duration-200"
+    />
   </RouterLink>
 </template>
 
-<style lang="scss" scoped>
-.evrst-logo {
-  display: inline-flex;
-
-  img {
-    width: auto;
-    transition: height 200ms ease, margin 200ms ease;
-  }
-}
-</style>
+<style lang="scss" scoped></style>
