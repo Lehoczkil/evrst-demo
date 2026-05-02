@@ -144,8 +144,17 @@ When you add a new endpoint, put it in a new file under `services/requests/` (au
 
 ## Image handling
 
-- **API images** (`/storage/...` paths returned by the backend) — render as plain `<img loading="lazy" :src="url">`. No LQIP, no srcset; the backend serves originals.
-- **Static assets in `src/assets/img/`** (none ship right now) would go through `<ResponsiveImage src="…" alt="…" aspect-ratio="16 / 9">`. v1 of `<ResponsiveImage>` is a thin lazy `<img>` wrapper — extend it later if we add LQIP/srcset.
+`<ResponsiveImage>` has two modes:
+
+- **API mode** — pass `path="team-members/abc.png"` (the bare disk path under the public disk). The component renders a `<picture>` with avif/webp/jpg `<source>`s, 1x/2x/3x DPR srcsets pointing at `/api/img`, and (when `lqip` is true, the default) a blurred LQIP `background-image` fetched from `/api/img/meta` on mount and cleared on `@load`. `width`/`height` set the CSS-px target (the component multiplies by DPR for srcset candidates) and seed the intrinsic dimensions for CLS. Optional props: `quality` (default 82), `fit` (cover/contain/inside), `formats` (default `['avif','webp','jpg']`), `sizes`.
+- **Static mode** — pass `src="…"` for build-time-optimized assets in `src/assets/img/` (none ship right now). The component falls back to a plain lazy `<img>` wrapper.
+
+`src/lib/imgUrl.ts` exports two helpers used together:
+
+- `imgUrl(path, opts)` — build a `/api/img?path=…&w=…&dpr=…&f=…&q=…` URL. Used by Avatar consumers (Team / Sponsors / Mentors) where the surrounding component shape is already a circle/square and a single transformed URL is enough — no `<picture>` benefit.
+- `pathFromStorageUrl(value)` — strip the `/storage/...` prefix off a backend-returned URL. CMS payload values (`logo`, `photo`, `image`) are resolved to public URLs by `ResourceResource`, so callers funnel them through this helper to recover the bare disk path before feeding `imgUrl` or `<ResponsiveImage path=…>`.
+
+Team uses `member.photo_path` directly (the backend returns both `photo_path` and `photo_url`, so no string manipulation is needed). Sponsors / Mentors strip `/storage/` from `payload.logo` / `payload.photo`. SVG values short-circuit (the helpers detect `.svg` and the backend `/api/img` passes them through untouched).
 
 ## Styling
 

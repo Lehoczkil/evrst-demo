@@ -16,6 +16,10 @@ then add a one-line entry under the matching section below.
 
 ## 0.5.2 (unreleased)
 
+### Image transform pipeline
+- **Backend** — new `/api/img` endpoint (intervention/image v4 + GD) generates resized avif/webp/jpg variants on demand, cached on the public disk under `cache/img/{prefix}/{hash}.{ext}` and streamed with long-lived immutable headers. SVG + animated GIF requests pass through to the original bytes. Sibling `/api/img/meta` returns intrinsic dimensions plus a 24px webp LQIP data URI for blurred-placeholder rendering. New `image-cache:prune --days=30` artisan command scheduled daily at 03:30. `Api\TeamController@members` now returns `photo_path` alongside `photo_url` so the SPA can build transform URLs without string-manipulating /storage/ prefixes.
+- **Frontend** — `<ResponsiveImage>` gained an API mode (`path` prop) that builds a `<picture>` with avif/webp/jpg `<source>`s, 1x/2x/3x DPR srcsets, and a blurred LQIP background fetched from `/api/img/meta` on mount. New `lib/imgUrl.ts` ships `imgUrl(path, opts)` for direct callers (used by the Avatar consumers) and `pathFromStorageUrl()` to extract bare paths from backend-returned URLs. Team / Sponsors / Mentors / Events updated to consume the transform endpoint instead of full-size originals.
+
 ### Frontend rewrite — React → Vue 3
 
 - Replaced the React 19 + Mantine + TanStack Query SPA with a Vue 3.5 + PrimeVue 4 (Aura) + Pinia + UnoCSS + vue-formify + vue-i18n + motion-v + vanilla Three.js stack. The old React tree is gone from the working copy but lives in git history.

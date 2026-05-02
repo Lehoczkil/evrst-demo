@@ -69,6 +69,10 @@ Mounted under `/api/*` (`routes/api.php`).
 | ---- | ---- | ---------- | ----- |
 | GET  | `/api/resource` | `Api\ResourceController@index` | filters: `collectionId`, `where[payload][path][i]`+`where[payload][equals]`, `include=objects` |
 | GET  | `/api/resource/{id}` | `Api\ResourceController@show` | optional `?include=objects` |
+| GET  | `/api/team/members` | `Api\TeamController@members` | returns `photo_path` (raw disk path, for `/api/img`) + `photo_url` (resolved public URL) |
+| GET  | `/api/team/groups` | `Api\TeamController@groups` | |
+| GET  | `/api/img` | `Api\ImageController@transform` | on-the-fly transform; params `path`, `w`, `h`, `f`, `q`, `dpr`, `fit`; cached on disk |
+| GET  | `/api/img/meta` | `Api\ImageController@meta` | returns `{width, height, lqip}` (24px webp data URI) for placeholder rendering |
 | POST | `/api/member-applications` | `Api\MemberApplicationController@store` | rate-limited `throttle:10,1`; fans out admin notification + queues Discord webhook |
 
 The `SetLocale` middleware (registered globally for `api`) reads the locale from `?lang=`, the `X-Lang` header, or `Accept-Language`. The active locale is then read by `App\Http\Resources\ResourceResource` to flatten any `{en, hu}` translation map inside the payload before returning.
@@ -79,6 +83,18 @@ Output shape (camelCase):
 ```json
 { "id": "...", "collectionId": "...", "payload": { ... }, "createdAt": "...", "updatedAt": "...", "objects": [ { "id": "...", "key": "...", "url": "..." } ] }
 ```
+
+## Image transform pipeline
+
+`Api\ImageController` powers `/api/img` (variant generator) and `/api/img/meta` (intrinsic dimensions + LQIP). Built on `intervention/image` v4 with the GD driver (Imagick is supported by the package but not required by the runtime). Path inputs are validated against traversal (`..`, absolute paths, NUL bytes) and resolved against the public disk; SVG and animated-GIF requests short-circuit to the original bytes.
+
+Variants are written to `storage/app/public/cache/img/{prefix}/{hash}.{ext}` where `{prefix}` is the first 2 chars of `md5(path|serialize(params))` for filesystem hygiene. Subsequent hits stream the cached file directly with `Cache-Control: public, max-age=31536000, immutable` + ETag. The whole transform is wrapped in a try/catch — any encoder failure logs and falls back to streaming the original.
+
+Meta lookups cache their JSON to `cache/img/{prefix}/{hash}.meta.json`. The LQIP is a 24px-wide webp at quality 30, base64-encoded into a data URI; the SPA renders it as a `background-image` on the `<img>` until `@load` fires.
+
+The cache directory is gitignored (covered by the existing `storage/app/public/.gitignore`). `php artisan image-cache:prune --days=30` walks the tree and removes anything older; it's scheduled daily at 03:30 alongside `activity-log:prune`.
+
+When a frontend consumer asks for the cleanest path → URL conversion: the value stored on the model (`team_members.photo_path`) is already the relative disk path, so it can be returned as-is. CMS payload values (`logo`, `photo`, `image`) are resolved to public URLs by `ResourceResource`, so the SPA strips the `/storage/` prefix client-side via `pathFromStorageUrl()` before feeding `/api/img`.
 
 ## Filament admin
 
