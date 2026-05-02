@@ -6,6 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const CmsRequests: typeof import('./services/requests/CmsRequests').CmsRequests
   const EffectScope: typeof import('vue').EffectScope
   const HomeRequests: typeof import('./services/requests/HomeRequests').HomeRequests
   const K: typeof import('./composables/useQuery/useQuery').K
@@ -112,6 +113,9 @@ declare global {
   export type { RocketSceneOptions } from './composables/useRocketScene'
   import('./composables/useRocketScene')
   // @ts-ignore
+  export type { SponsorPayload, MentorPayload, EventPayload, AboutItemPayload, SponsorResource, MentorResource, EventResource, AboutItemResource } from './services/requests/CmsRequests'
+  import('./services/requests/CmsRequests')
+  // @ts-ignore
   export type { HomePageData } from './services/requests/HomeRequests'
   import('./services/requests/HomeRequests')
   // @ts-ignore
@@ -124,6 +128,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly CmsRequests: UnwrapRef<typeof import('./services/requests/CmsRequests')['CmsRequests']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly HomeRequests: UnwrapRef<typeof import('./services/requests/HomeRequests')['HomeRequests']>
     readonly K: UnwrapRef<typeof import('./composables/useQuery/useQuery')['K']>

@@ -43,6 +43,14 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
 
   <div class="section-wrap section-wrap--dark">
     <div class="container">
+      <Section id="events" :index="0" :title="t('section.events')">
+        <Events />
+      </Section>
+    </div>
+  </div>
+
+  <div class="section-wrap section-wrap--gray">
+    <div class="container">
       <Section id="about" :index="1" :title="t('section.about')">
         <About />
       </Section>
@@ -53,6 +61,27 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
     <div class="container">
       <Section id="team" :index="2" :title="t('section.team')">
         <Team />
+      </Section>
+    </div>
+  </div>
+
+  <div class="section-wrap section-wrap--dark">
+    <div class="container">
+      <Section id="mentors" :index="3" :title="t('section.mentors')">
+        <Mentors />
+      </Section>
+    </div>
+  </div>
+
+  <div class="section-wrap section-wrap--gray">
+    <div class="container">
+      <Section id="sponsors" :index="4" :title="t('section.sponsors')">
+        <template #right>
+          <SectionButton href="mailto:evrstrocket@gmail.com?subject=Sponsorship Inquiry">
+            {{ t('button.becomeSponsor') }}
+          </SectionButton>
+        </template>
+        <Sponsors />
       </Section>
     </div>
   </div>

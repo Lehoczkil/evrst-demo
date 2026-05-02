@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CmsRequests, type AboutItemResource } from '@/services/requests/CmsRequests';
+
 /*---------------------------------------------
 /  PROPS & EMITS
 ---------------------------------------------*/
@@ -7,17 +9,40 @@
 ---------------------------------------------*/
 const { t } = useI18n();
 
-const projects = computed(() => [
-  { title: t('about.project1.title'), description: t('about.project1.description') },
-  { title: t('about.project2.title'), description: t('about.project2.description') },
-  { title: t('about.project3.title'), description: t('about.project3.description') },
-]);
+const projectsCollectionId = import.meta.env.VITE_ABOUT_PROJECTS_COLLECTION_ID ?? '';
+const goalsCollectionId = import.meta.env.VITE_ABOUT_GOALS_COLLECTION_ID ?? '';
 
-const goals = computed(() => [
-  { title: t('about.goal1.title'), description: t('about.goal1.description') },
-  { title: t('about.goal2.title'), description: t('about.goal2.description') },
-  { title: t('about.goal3.title'), description: t('about.goal3.description') },
-]);
+const { data: projectsData } = useQuery<AboutItemResource[]>({
+  key: ['about-projects'],
+  request: () => CmsRequests.aboutProjects(),
+  enabled: Boolean(projectsCollectionId),
+});
+
+const { data: goalsData } = useQuery<AboutItemResource[]>({
+  key: ['about-goals'],
+  request: () => CmsRequests.aboutGoals(),
+  enabled: Boolean(goalsCollectionId),
+});
+/*---------------------------------------------
+/  COMPUTED
+---------------------------------------------*/
+const projects = computed(() => {
+  if (projectsData.value?.length) return projectsData.value.map((r) => r.payload);
+  return [
+    { title: t('about.project1.title'), description: t('about.project1.description') },
+    { title: t('about.project2.title'), description: t('about.project2.description') },
+    { title: t('about.project3.title'), description: t('about.project3.description') },
+  ];
+});
+
+const goals = computed(() => {
+  if (goalsData.value?.length) return goalsData.value.map((r) => r.payload);
+  return [
+    { title: t('about.goal1.title'), description: t('about.goal1.description') },
+    { title: t('about.goal2.title'), description: t('about.goal2.description') },
+    { title: t('about.goal3.title'), description: t('about.goal3.description') },
+  ];
+});
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/

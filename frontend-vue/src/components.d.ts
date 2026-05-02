@@ -13,11 +13,13 @@ declare module 'vue' {
   export interface GlobalComponents {
     About: typeof import('./components/About/About.vue')['default']
     BackToTop: typeof import('./components/BackToTop/BackToTop.vue')['default']
+    Events: typeof import('./components/Events/Events.vue')['default']
     EvrstLogo: typeof import('./components/EvrstLogo/EvrstLogo.vue')['default']
     Footer: typeof import('./components/Footer/Footer.vue')['default']
     Header: typeof import('./components/Header/Header.vue')['default']
     Hero: typeof import('./components/Hero/Hero.vue')['default']
     HtmlTitle: typeof import('./components/HtmlTitle/HtmlTitle.vue')['default']
+    Mentors: typeof import('./components/Mentors/Mentors.vue')['default']
     Meta: typeof import('./components/Meta/Meta.vue')['default']
     Outro: typeof import('./components/Outro/Outro.vue')['default']
     ResponsiveImage: typeof import('./components/ResponsiveImg/ResponsiveImage.vue')['default']
@@ -26,6 +28,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Section: typeof import('./components/Section/Section.vue')['default']
     SectionButton: typeof import('./components/SectionButton/SectionButton.vue')['default']
+    Sponsors: typeof import('./components/Sponsors/Sponsors.vue')['default']
     Team: typeof import('./components/Team/Team.vue')['default']
   }
 }
