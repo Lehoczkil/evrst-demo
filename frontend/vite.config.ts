@@ -15,8 +15,15 @@ export default defineConfig({
     },
   },
   server: {
-    host: '0.0.0.0',
+    port: 4200,
+    host: true,
+    allowedHosts: true,
     proxy: {
+      '/api': {
+        ws: false,
+        target: backendUrl,
+        changeOrigin: true,
+      },
       '/storage': {
         target: backendUrl,
         changeOrigin: true,
@@ -32,13 +39,24 @@ export default defineConfig({
           join(fileURLToPath(new URL('.', import.meta.url)), 'node_modules'),
         ],
         quietDeps: true,
+        logger: {
+          warn(message) {
+            if (message.includes('Sass @import rules are deprecated')) {
+              return;
+            }
+          },
+        },
       },
     },
   },
   build: {
     outDir: 'build',
-    chunkSizeWarningLimit: 800,
+    assetsDir: 'assets',
+    target: 'es2015',
     sourcemap: true,
+    manifest: true,
+    chunkSizeWarningLimit: 800,
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -52,5 +70,8 @@ export default defineConfig({
         },
       },
     },
+  },
+  optimizeDeps: {
+    exclude: ['x----x----x'],
   },
 });
