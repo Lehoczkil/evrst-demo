@@ -4,6 +4,7 @@ import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { MotionPlugin } from 'motion-v';
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
 import Aura from '@primevue/themes/aura';
 import { definePreset } from '@primevue/themes';
 
@@ -64,6 +65,7 @@ app
       },
     },
   })
+  .use(ToastService)
   .use(MotionPlugin);
 
 if (import.meta.env.VITE_SENTRY_DSN && import.meta.env.VITE_ENV && import.meta.env.VITE_ENV !== 'develop') {

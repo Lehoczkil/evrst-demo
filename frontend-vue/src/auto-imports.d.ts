@@ -10,6 +10,7 @@ declare global {
   const EffectScope: typeof import('vue').EffectScope
   const HomeRequests: typeof import('./services/requests/HomeRequests').HomeRequests
   const K: typeof import('./composables/useQuery/useQuery').K
+  const MemberApplicationRequests: typeof import('./services/requests/MemberApplicationRequests').MemberApplicationRequests
   const TeamRequests: typeof import('./services/requests/TeamRequests').TeamRequests
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const cacheStorage: typeof import('./composables/useQuery/utils').cacheStorage
@@ -119,6 +120,9 @@ declare global {
   export type { HomePageData } from './services/requests/HomeRequests'
   import('./services/requests/HomeRequests')
   // @ts-ignore
+  export type { MemberApplicationPayload } from './services/requests/MemberApplicationRequests'
+  import('./services/requests/MemberApplicationRequests')
+  // @ts-ignore
   export type { TeamMemberGroupRef, TeamMember, TeamGroup } from './services/requests/TeamRequests'
   import('./services/requests/TeamRequests')
 }
@@ -132,6 +136,7 @@ declare module 'vue' {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly HomeRequests: UnwrapRef<typeof import('./services/requests/HomeRequests')['HomeRequests']>
     readonly K: UnwrapRef<typeof import('./composables/useQuery/useQuery')['K']>
+    readonly MemberApplicationRequests: UnwrapRef<typeof import('./services/requests/MemberApplicationRequests')['MemberApplicationRequests']>
     readonly TeamRequests: UnwrapRef<typeof import('./services/requests/TeamRequests')['TeamRequests']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly cacheStorage: UnwrapRef<typeof import('./composables/useQuery/utils')['cacheStorage']>
