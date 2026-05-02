@@ -33,67 +33,57 @@ const notFound = computed(() => status.value === 'SUCCESS' && !page.value);
 </script>
 
 <template>
-  <div class="container dynamic-page">
-    <div class="dynamic-page__back">
+  <div
+    class="container pt-[calc(var(--header-height)+32px)] pb-64px"
+  >
+    <div class="mb-32px">
       <SectionButton to="/">{{ t('button.home') }}</SectionButton>
     </div>
 
     <template v-if="notFound">
-      <h1 class="dynamic-page__title">{{ t('placeholder.comingSoon') }}</h1>
+      <h1
+        class="m-0 text-center fs-[clamp(2rem,7vw,3.75rem)] font-[var(--font-family-headline)]"
+      >
+        {{ t('placeholder.comingSoon') }}
+      </h1>
     </template>
 
     <template v-else-if="page">
       <HtmlTitle :title="page.payload.title" />
-      <header class="dynamic-page__header">
-        <h1 class="dynamic-page__title">{{ page.payload.title }}</h1>
+      <header class="mb-32px text-center">
+        <h1
+          class="m-0 text-center fs-[clamp(2rem,7vw,3.75rem)] font-[var(--font-family-headline)]"
+        >
+          {{ page.payload.title }}
+        </h1>
       </header>
-      <div v-if="page.payload.content" class="dynamic-page__body" v-html="page.payload.content" />
+      <div
+        v-if="page.payload.content"
+        class="dynamic-page__body fs-16px lh-[1.6]"
+        v-html="page.payload.content"
+      />
     </template>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.dynamic-page {
-  padding-top: calc(var(--header-height) + 32px);
-  padding-bottom: 64px;
-
-  &__back {
-    margin-bottom: 32px;
+.dynamic-page__body {
+  :deep(p) {
+    margin: 0 0 16px;
   }
 
-  &__header {
-    margin-bottom: 32px;
-    text-align: center;
+  :deep(a) {
+    color: var(--color-primary);
   }
 
-  &__title {
-    margin: 0;
-    font-size: clamp(2rem, 7vw, 3.75rem);
-    font-family: var(--font-family-headline);
-    text-align: center;
+  :deep(h2) {
+    margin-top: 32px;
+    font-size: 28px;
   }
 
-  &__body {
-    font-size: 16px;
-    line-height: 1.6;
-
-    :deep(p) {
-      margin: 0 0 16px;
-    }
-
-    :deep(a) {
-      color: var(--color-primary);
-    }
-
-    :deep(h2) {
-      margin-top: 32px;
-      font-size: 28px;
-    }
-
-    :deep(h3) {
-      margin-top: 24px;
-      font-size: 22px;
-    }
+  :deep(h3) {
+    margin-top: 24px;
+    font-size: 22px;
   }
 }
 </style>
