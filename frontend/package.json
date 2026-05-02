@@ -7,20 +7,24 @@
     "feat": "bin/generate.ts"
   },
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "start": "vite --host",
+    "dev": "vite",
     "build": "vue-tsc --noEmit --skipLibCheck && vite build",
-    "preview": "vite preview --host 0.0.0.0",
+    "preview": "vite preview --host",
     "lint:eslint": "eslint 'src/**/*.{ts,js,vue}' --no-fix",
     "lint:tsc": "vue-tsc --noEmit --skipLibCheck",
     "lint:fix": "eslint 'src/**/*.{ts,js,vue}' --fix",
     "lint:scss": "stylelint 'src/**/*.{scss,vue}'",
-    "lint": "bun run lint:eslint && bun run lint:tsc",
-    "test": "playwright test"
+    "lint:scss:fix": "bun run lint:scss -- --fix",
+    "lint": "bun run lint:eslint && bun run lint:scss && bun run lint:tsc",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "postinstall": "playwright install chromium"
   },
   "dependencies": {
     "@primevue/themes": "^4.3",
     "@sentry/vue": "^10.17",
-    "@vueuse/core": "^14.0",
+    "@vueuse/core": "^14.2.1",
     "maska": "^3.1",
     "motion-v": "^2.0",
     "pinia": "^3.0",
@@ -33,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21",
+    "@playwright/test": "^1.59.1",
     "@rollup/plugin-strip": "^3.0",
     "@types/node": "^25.0",
     "@types/three": "^0.183.1",
@@ -54,7 +59,7 @@
     "stylelint": "^17.0",
     "stylelint-config-html": "^1.1",
     "stylelint-config-standard-scss": "^17.0",
-    "stylelint-config-standard-vue": "^1.0",
+    "stylelint-config-standard-vue": "^1.0.0",
     "stylelint-order": "^8.1",
     "stylelint-prettier": "^5.0",
     "stylelint-scss": "^7.0",
