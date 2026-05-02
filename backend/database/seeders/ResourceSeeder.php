@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\ObjectFile;
 use App\Models\Resource;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 use Ramsey\Uuid\Uuid;
 
 class ResourceSeeder extends Seeder
@@ -21,7 +23,7 @@ class ResourceSeeder extends Seeder
 
         // Home page (rocket model placement data). The brand name is intentionally
         // not translated.
-        Resource::updateOrCreate(
+        $home = Resource::updateOrCreate(
             ['id' => 'f8e49c86-d46a-4720-8f26-3d01499b13c4'],
             [
                 'collection_id' => $collections['pages']['id'],
@@ -31,14 +33,29 @@ class ResourceSeeder extends Seeder
                     'content' => null,
                     'data' => [
                         'rocket' => [
-                            'scale' => 1.2,
-                            'position' => [0, -1.4, 0],
+                            'scale' => 5,
+                            'position' => [0, -2, 0],
                         ],
                     ],
                 ],
                 'position' => 0,
             ],
         );
+
+        $rocketGlbPath = 'pages/evrst-rocket-v3.glb';
+        if (Storage::disk('public')->exists($rocketGlbPath)) {
+            ObjectFile::updateOrCreate(
+                ['id' => $this->deterministicUuid('home-rocket-glb')],
+                [
+                    'resource_id' => $home->id,
+                    'key' => 'rocket',
+                    'disk' => 'public',
+                    'path' => $rocketGlbPath,
+                    'mime_type' => 'model/gltf-binary',
+                    'size' => Storage::disk('public')->size($rocketGlbPath),
+                ],
+            );
+        }
 
         // About view. "Escape Velocity Rocketry Student Team" stays untranslated
         // inside the localized strings.
