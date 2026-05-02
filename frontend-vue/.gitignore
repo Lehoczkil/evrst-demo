@@ -1,0 +1,25 @@
+node_modules
+.DS_Store
+build
+dist
+dist-ssr
+coverage
+*.local
+playwright-report
+test-results
+/cypress/videos/
+/cypress/screenshots/
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build artefacts
+_stats.html
+.vite/

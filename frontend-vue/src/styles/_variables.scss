@@ -1,0 +1,27 @@
+@layer colors {
+  :root {
+    --color-primary: #f2ac3c;
+    --bg-dark: #0c0d0e;
+    --bg-gray: #15171a;
+    --card-bg: #1a1c20;
+    --card-border: #2a2c31;
+    --card-border-accent: var(--color-primary);
+    --color-text: #e7e8ea;
+    --color-dimmed: #9aa0a6;
+    --color-bright: #ffffff;
+  }
+}
+
+@layer typography {
+  :root {
+    --font-family-primary: 'Space Grotesk', system-ui, sans-serif;
+    --font-family-headline: 'Panchang-Bold', 'Space Grotesk', sans-serif;
+    --font-family-mono: 'IBM Plex Mono', monospace;
+  }
+}
+
+@layer header {
+  :root {
+    --header-height: 96px;
+  }
+}

@@ -1,0 +1,32 @@
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable both-edges;
+}
+
+[id] {
+  scroll-margin-top: 80px;
+}
+
+html,
+body,
+#vue {
+  height: 100%;
+  background-color: var(--bg-dark);
+  color: var(--color-text);
+}
+
+body,
+#vue {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+main {
+  flex: 1 1 auto;
+}
+
+::selection {
+  background-color: var(--color-primary);
+  color: var(--bg-dark);
+}
