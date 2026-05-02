@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Avatar from 'primevue/avatar';
 import { TeamRequests, type TeamGroup, type TeamMember } from '@/services/requests/TeamRequests';
+import { imgUrl } from '@/lib/imgUrl';
 
 /*---------------------------------------------
 /  PROPS & EMITS
@@ -52,6 +53,13 @@ const initials = (name: string) => {
     .map((p) => p[0]?.toUpperCase() ?? '')
     .join('');
 };
+
+const avatarSrc = (member: TeamMember) => {
+  if (member.photo_path) {
+    return imgUrl(member.photo_path, { width: 96, format: 'webp', fit: 'cover' });
+  }
+  return member.photo_url ?? undefined;
+};
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
@@ -64,8 +72,8 @@ const initials = (name: string) => {
       <div class="team__cards">
         <div v-for="member in group.members" :key="member.id" class="team__card">
           <Avatar
-            v-if="member.photo_url"
-            :image="member.photo_url"
+            v-if="member.photo_path || member.photo_url"
+            :image="avatarSrc(member)"
             shape="circle"
             size="xlarge"
             class="team__avatar"

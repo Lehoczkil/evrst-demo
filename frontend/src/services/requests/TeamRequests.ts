@@ -11,6 +11,7 @@ export interface TeamMember {
   id: number;
   name: string;
   degree: string | null;
+  photo_path: string | null;
   photo_url: string | null;
   groups: TeamMemberGroupRef[];
   position: number;

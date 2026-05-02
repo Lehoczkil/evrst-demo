@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CmsRequests, type EventResource } from '@/services/requests/CmsRequests';
+import { pathFromStorageUrl } from '@/lib/imgUrl';
 
 /*---------------------------------------------
 /  PROPS & EMITS
@@ -51,6 +52,8 @@ const formatRange = (event: EventResource) => {
 
 const imageFor = (event: EventResource) =>
   event.payload.image ?? event.objects?.[0]?.url ?? '';
+
+const imagePathFor = (event: EventResource) => pathFromStorageUrl(imageFor(event)) ?? undefined;
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
@@ -60,7 +63,13 @@ const imageFor = (event: EventResource) =>
   <div class="events">
     <div v-for="event in visibleEvents" :key="event.id" class="events__card">
       <div class="events__image-wrap">
-        <ResponsiveImage :src="imageFor(event)" :alt="event.payload.title" aspect-ratio="16 / 9" />
+        <ResponsiveImage
+          :path="imagePathFor(event)"
+          :src="imagePathFor(event) ? undefined : imageFor(event)"
+          :alt="event.payload.title"
+          :width="480"
+          aspect-ratio="16 / 9"
+        />
       </div>
       <div class="events__title">{{ event.payload.title }}</div>
       <div class="events__date">{{ formatRange(event) }}</div>

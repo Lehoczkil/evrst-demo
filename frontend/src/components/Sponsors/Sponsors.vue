@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Avatar from 'primevue/avatar';
 import { CmsRequests, type SponsorResource } from '@/services/requests/CmsRequests';
+import { imgUrl, pathFromStorageUrl } from '@/lib/imgUrl';
 
 /*---------------------------------------------
 /  PROPS & EMITS
@@ -12,6 +13,18 @@ const { data: sponsors } = useQuery<SponsorResource[]>({
   key: ['sponsors'],
   request: () => CmsRequests.sponsors(),
 });
+/*---------------------------------------------
+/  METHODS
+---------------------------------------------*/
+const logoSrc = (logo: string | undefined) => {
+  if (!logo) return undefined;
+  // SVGs are passed straight to /api/img — the backend short-circuits
+  // them to the original bytes since vector resize is meaningless.
+  const path = pathFromStorageUrl(logo);
+  if (!path) return logo;
+  if (/\.svg($|\?)/i.test(path)) return logo;
+  return imgUrl(path, { width: 96, format: 'webp', fit: 'contain' });
+};
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
@@ -25,7 +38,7 @@ const { data: sponsors } = useQuery<SponsorResource[]>({
       class="sponsors__card"
     >
       <Avatar
-        :image="sponsor.payload.logo"
+        :image="logoSrc(sponsor.payload.logo)"
         :label="sponsor.payload.name?.[0]"
         shape="square"
         size="large"

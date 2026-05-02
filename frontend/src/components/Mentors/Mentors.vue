@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Avatar from 'primevue/avatar';
 import { CmsRequests, type MentorResource } from '@/services/requests/CmsRequests';
+import { imgUrl, pathFromStorageUrl } from '@/lib/imgUrl';
 
 /*---------------------------------------------
 /  PROPS & EMITS
@@ -15,8 +16,14 @@ const { data: mentors } = useQuery<MentorResource[]>({
 /*---------------------------------------------
 /  METHODS
 ---------------------------------------------*/
-const photoFor = (m: MentorResource) =>
-  m.payload.photo ?? m.objects?.find((o) => o.key === 'photo')?.url ?? undefined;
+const photoFor = (m: MentorResource) => {
+  const raw = m.payload.photo ?? m.objects?.find((o) => o.key === 'photo')?.url ?? undefined;
+  if (!raw) return undefined;
+  const path = pathFromStorageUrl(raw);
+  if (!path) return raw;
+  if (/\.svg($|\?)/i.test(path)) return raw;
+  return imgUrl(path, { width: 160, format: 'webp', fit: 'cover' });
+};
 
 const initials = (name: string) =>
   name
