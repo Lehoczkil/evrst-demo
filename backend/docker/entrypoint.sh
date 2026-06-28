@@ -83,11 +83,18 @@ if [ "${RUN_RELEASE_TASKS:-1}" = "1" ]; then
   # Apply pending schema on every boot. Idempotent.
   php artisan migrate --force --no-interaction
 
-  # Seed every boot. All seeders use `updateOrCreate` / `firstOrCreate`,
-  # so this is safe to re-run and guarantees the admin user exists even
-  # if a previous deploy's seed step failed silently. Stderr is NOT
-  # suppressed so any seeder failure surfaces in the logs.
-  php artisan db:seed --force --no-interaction
+  # Seed ONCE — not on every boot. DatabaseSeeder updateOrCreate's the admin
+  # with Hash::make('password'), so re-seeding every boot would reset a changed
+  # admin password back to the default and clobber runtime role/data edits made
+  # in Filament. The marker lives on the persistent volume when mounted (so it
+  # survives redeploys), else in storage/. With `set -e`, a failed seed exits
+  # before the marker is written, so it safely retries on the next boot.
+  SEED_MARKER="storage/.seeded"
+  [ -d "$VOLUME" ] && SEED_MARKER="$VOLUME/.seeded"
+  if [ ! -f "$SEED_MARKER" ]; then
+    php artisan db:seed --force --no-interaction
+    touch "$SEED_MARKER"
+  fi
 fi
 
 # Tighten caches in production.
