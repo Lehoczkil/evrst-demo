@@ -67,14 +67,23 @@ php artisan package:discover --ansi --no-interaction || true
 # Public storage symlink — no-op if it already exists.
 php artisan storage:link --quiet 2>/dev/null || true
 
-# Apply pending schema on every boot. Idempotent.
-php artisan migrate --force --no-interaction
+# Schema + seed are release tasks: run them in exactly one container. The queue
+# worker and scheduler share this image and the same /persistent SQLite file, so
+# if they ran migrate/seed too you'd get three processes writing the database on
+# boot (lock contention), and the seeders would re-run on every worker restart —
+# clobbering runtime permission changes admins made in Filament. compose.yaml
+# sets RUN_RELEASE_TASKS=0 on those. Defaults to 1 so single-container hosts
+# (Fly/Render) are unaffected.
+if [ "${RUN_RELEASE_TASKS:-1}" = "1" ]; then
+  # Apply pending schema on every boot. Idempotent.
+  php artisan migrate --force --no-interaction
 
-# Seed every boot. All seeders use `updateOrCreate` / `firstOrCreate`,
-# so this is safe to re-run and guarantees the admin user exists even
-# if a previous deploy's seed step failed silently. Stderr is NOT
-# suppressed so any seeder failure surfaces in the Render logs.
-php artisan db:seed --force --no-interaction
+  # Seed every boot. All seeders use `updateOrCreate` / `firstOrCreate`,
+  # so this is safe to re-run and guarantees the admin user exists even
+  # if a previous deploy's seed step failed silently. Stderr is NOT
+  # suppressed so any seeder failure surfaces in the logs.
+  php artisan db:seed --force --no-interaction
+fi
 
 # Tighten caches in production.
 if [ "${APP_ENV:-production}" = "production" ]; then

@@ -2,44 +2,46 @@
 /*---------------------------------------------
 /  PROPS & EMITS
 ---------------------------------------------*/
+const {
+  bg = 'dark',
+  withGridOverlay = false,
+} = defineProps<{
+  bg?: 'dark' | 'gray';
+  withGridOverlay?: boolean;
+}>();
 /*---------------------------------------------
 /  VARIABLES
 ---------------------------------------------*/
-const metaStore = useMetaStore();
 /*---------------------------------------------
 /  METHODS
 ---------------------------------------------*/
 /*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
+const bgClass = computed(() => (bg === 'dark' ? 'bg-bgDark' : 'bg-bgGray'));
 /*---------------------------------------------
 /  WATCHERS
 ---------------------------------------------*/
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
-onMounted(() => {
-  metaStore.setMeta({
-    title: 'Escape Velocity Rocketry Student Team',
-    description: 'Escape Velocity Rocketry Student Team — Óbuda University.',
-    theme: '#0c0d0e',
-  });
-});
 </script>
 
 <template>
-  <Meta />
-  <NoiseFilter />
-  <Header />
-  <main>
-    <RouterView v-slot="{ Component }">
-      <transition name="router-fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </RouterView>
-  </main>
-  <Footer />
-  <BackToTop />
+  <div
+    class="relative py-40px"
+    :class="[bgClass, withGridOverlay ? 'overflow-visible' : 'overflow-hidden']"
+  >
+    <div
+      v-if="withGridOverlay"
+      aria-hidden="true"
+      class="absolute left-0 right-0 top-1/2 h-[calc(50%+80px)] bg-no-repeat bg-cover bg-center pointer-events-none opacity-40 z-0"
+      :style="{ backgroundImage: 'url(/grid.svg)' }"
+    />
+    <div class="relative z-1 container">
+      <slot />
+    </div>
+  </div>
 </template>
 
-<style src="./App.scss" lang="scss"></style>
+<style lang="scss" scoped></style>

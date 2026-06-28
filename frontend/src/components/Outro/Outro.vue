@@ -6,7 +6,12 @@
 /  VARIABLES
 ---------------------------------------------*/
 const { t } = useI18n();
-
+/*---------------------------------------------
+/  METHODS
+---------------------------------------------*/
+/*---------------------------------------------
+/  COMPUTED
+---------------------------------------------*/
 const groups = computed(() => [
   {
     title: t('outro.contact'),
@@ -33,16 +38,20 @@ const groups = computed(() => [
   },
 ]);
 /*---------------------------------------------
+/  WATCHERS
+---------------------------------------------*/
+/*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
 </script>
 
 <template>
-  <section>
+  <section class="bg-bgDark">
     <div
-      class="container flex flex-col sm:(flex-row flex-wrap items-start justify-between) gap-32px py-64px"
+      class="container flex flex-col gap-32px py-64px sm:(flex-row flex-wrap items-start justify-between)"
     >
       <div class="flex items-center gap-16px">
+        <ObudaLogo />
         <div>
           <div class="text-[var(--color-dimmed)] fs-11px">
             {{ t('outro.poweredBy') }}
@@ -52,11 +61,9 @@ const groups = computed(() => [
           </div>
         </div>
       </div>
-      <div class="flex flex-wrap gap-32px">
+      <div class="flex flex-col w-full gap-24px sm:(flex-row flex-wrap w-auto gap-32px)">
         <div v-for="g in groups" :key="g.title" class="flex flex-col gap-6px">
-          <div
-            class="text-[var(--color-bright)] font-600 fs-12px uppercase"
-          >
+          <div class="text-[var(--color-bright)] font-600 fs-12px uppercase">
             {{ g.title }}
           </div>
           <a
@@ -64,7 +71,7 @@ const groups = computed(() => [
             :key="i"
             :href="link.url"
             :target="(link as { target?: string }).target"
-            class="text-[var(--color-dimmed)] fs-12px no-underline hover:text-primary"
+            class="text-[var(--color-dimmed)] fs-12px no-underline transition-colors duration-150 hover:text-primary"
           >
             {{ link.label }}
           </a>

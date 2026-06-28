@@ -17,6 +17,9 @@ const { data: page } = useQuery({
   refetchTime: 600,
 });
 /*---------------------------------------------
+/  METHODS
+---------------------------------------------*/
+/*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
 const rocketObject = computed(() =>
@@ -25,56 +28,57 @@ const rocketObject = computed(() =>
 const rocketScale = computed(() => page.value?.payload?.data?.rocket?.scale);
 const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.position);
 /*---------------------------------------------
+/  WATCHERS
+---------------------------------------------*/
+/*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
 </script>
 
 <template>
-  <Hero />
+  <div class="relative">
+    <Hero />
 
-  <RocketScene
-    v-if="rocketObject?.url"
-    :url="rocketObject.url"
-    :scale="rocketScale"
-    :position="rocketPosition"
-  />
+    <RocketScene
+      v-if="rocketObject?.url"
+      :url="rocketObject.url"
+      :scale="rocketScale"
+      :position="rocketPosition"
+    />
 
-  <div class="h-32px" />
+    <div class="h-32px sm:h-93px" />
 
-  <div class="relative py-40px bg-bgDark">
-    <div class="container">
+    <SectionWrap bg="dark">
       <Section id="events" :index="0" :title="t('section.events')">
         <Events />
       </Section>
-    </div>
-  </div>
+    </SectionWrap>
 
-  <div class="relative py-40px bg-bgGray">
-    <div class="container">
+    <DiagonalDivider top-color="var(--bg-dark)" bottom-color="var(--bg-gray)" />
+
+    <SectionWrap bg="gray">
       <Section id="about" :index="1" :title="t('section.about')">
         <About />
       </Section>
-    </div>
-  </div>
+    </SectionWrap>
 
-  <div class="relative py-40px bg-bgDark">
-    <div class="container">
+    <DiagonalDivider top-color="var(--bg-gray)" bottom-color="var(--bg-dark)" />
+
+    <SectionWrap bg="dark">
       <Section id="team" :index="2" :title="t('section.team')">
         <Team />
       </Section>
-    </div>
-  </div>
+    </SectionWrap>
 
-  <div class="relative py-40px bg-bgDark">
-    <div class="container">
+    <SectionWrap bg="dark" with-grid-overlay>
       <Section id="mentors" :index="3" :title="t('section.mentors')">
         <Mentors />
       </Section>
-    </div>
-  </div>
+    </SectionWrap>
 
-  <div class="relative py-40px bg-bgGray">
-    <div class="container">
+    <DiagonalDivider top-color="var(--bg-dark)" bottom-color="var(--bg-gray)" />
+
+    <SectionWrap bg="gray">
       <Section id="sponsors" :index="4" :title="t('section.sponsors')">
         <template #right>
           <SectionButton href="mailto:evrstrocket@gmail.com?subject=Sponsorship Inquiry">
@@ -83,10 +87,12 @@ const rocketPosition = computed(() => page.value?.payload?.data?.rocket?.positio
         </template>
         <Sponsors />
       </Section>
-    </div>
-  </div>
+    </SectionWrap>
 
-  <Outro />
+    <EvrstMarquee />
+
+    <Outro />
+  </div>
 </template>
 
 <style lang="scss" scoped></style>

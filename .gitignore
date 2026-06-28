@@ -65,3 +65,6 @@ backend/composer.phar
 *.njsproj
 *.sln
 *.sw?
+
+# Docker Compose deploy (repo root) — local overrides, never commit (.env.example is tracked)
+/.env

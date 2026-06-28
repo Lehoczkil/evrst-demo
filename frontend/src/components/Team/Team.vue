@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Avatar from 'primevue/avatar';
+import { motion } from 'motion-v';
 import { TeamRequests, type TeamGroup, type TeamMember } from '@/services/requests/TeamRequests';
 import { imgUrl } from '@/lib/imgUrl';
 
@@ -20,6 +21,25 @@ const { data: groups } = useQuery<TeamGroup[]>({
   key: ['team-groups', locale],
   request: () => TeamRequests.groups(locale.value as string),
 });
+
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
+/*---------------------------------------------
+/  METHODS
+---------------------------------------------*/
+const initials = (name: string) => {
+  const parts = name.trim().split(/\s+/);
+  return parts
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? '')
+    .join('');
+};
+
+const avatarSrc = (member: TeamMember) => {
+  if (member.photo_path) {
+    return imgUrl(member.photo_path, { width: 96, format: 'webp', fit: 'cover' });
+  }
+  return member.photo_url ?? undefined;
+};
 /*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
@@ -45,124 +65,67 @@ const orderedGroups = computed(() => {
   }
   return out;
 });
-
-const initials = (name: string) => {
-  const parts = name.trim().split(/\s+/);
-  return parts
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? '')
-    .join('');
-};
-
-const avatarSrc = (member: TeamMember) => {
-  if (member.photo_path) {
-    return imgUrl(member.photo_path, { width: 96, format: 'webp', fit: 'cover' });
-  }
-  return member.photo_url ?? undefined;
-};
+/*---------------------------------------------
+/  WATCHERS
+---------------------------------------------*/
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
 </script>
 
 <template>
-  <div class="team">
-    <div v-for="group in orderedGroups" :key="group.slug" class="team__group">
-      <div class="team__group-name">{{ group.name }}</div>
-      <div class="team__cards">
-        <div v-for="member in group.members" :key="member.id" class="team__card">
-          <Avatar
-            v-if="member.photo_path || member.photo_url"
-            :image="avatarSrc(member)"
-            shape="circle"
-            size="xlarge"
-            class="team__avatar"
-          />
-          <Avatar v-else shape="circle" size="xlarge" :label="initials(member.name)" class="team__avatar" />
-          <div class="team__name">{{ member.name }}</div>
-          <div class="team__degree">
-            {{ member.degree || member.groups.find((g) => g.is_primary)?.name }}
-          </div>
+  <div class="flex flex-col gap-40px items-center">
+    <div class="flex flex-col gap-32px w-full items-center">
+      <div
+        v-for="group in orderedGroups"
+        :key="group.slug"
+        class="w-full flex flex-col items-center gap-12px"
+      >
+        <div class="text-[var(--color-dimmed)] font-500 fs-14px uppercase ls-[0.08em]">
+          {{ group.name }}
+        </div>
+        <div class="flex flex-wrap justify-center gap-16px w-full">
+          <motion.div
+            v-for="(member, mIdx) in group.members"
+            :key="member.id"
+            class="flex flex-col items-center gap-8px p-16px w-full sm:(w-200px h-220px) bg-cardBg border border-cardBorder rounded-8px"
+            :initial="{ opacity: 0, y: 24, scale: 0.92 }"
+            :while-in-view="{ opacity: 1, y: 0, scale: 1 }"
+            :in-view-options="{ once: true, amount: 0.2 }"
+            :while-hover="{ y: -6 }"
+            :transition="{ duration: 0.45, delay: mIdx * 0.05, ease }"
+          >
+            <Avatar
+              v-if="member.photo_path || member.photo_url"
+              :image="avatarSrc(member)"
+              shape="circle"
+              size="xlarge"
+              class="mb-4px"
+            />
+            <Avatar
+              v-else
+              shape="circle"
+              size="xlarge"
+              :label="initials(member.name)"
+              class="mb-4px"
+            />
+            <div class="font-600 fs-14px lh-[1.2] text-center">
+              {{ member.name }}
+            </div>
+            <div class="text-[var(--color-dimmed)] fs-12px lh-[1.2] text-center">
+              {{ member.degree || member.groups.find((g) => g.is_primary)?.name }}
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
 
-    <div class="team__cta">
-      <SectionButton to="/join-us">{{ t('team.joinUs') }}</SectionButton>
-    </div>
+    <Reveal :duration="0.3" :y="8">
+      <div class="flex justify-center mt-16px">
+        <SectionButton to="/join-us">{{ t('team.joinUs') }}</SectionButton>
+      </div>
+    </Reveal>
   </div>
 </template>
 
-<style lang="scss" scoped>
-@import 'breakpoints';
-
-.team {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  align-items: center;
-
-  &__group {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-
-  &__group-name {
-    font-size: 14px;
-    text-transform: uppercase;
-    color: var(--color-dimmed);
-    font-weight: 500;
-    letter-spacing: 0.08em;
-  }
-
-  &__cards {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
-    width: 100%;
-  }
-
-  &__card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 16px;
-    width: 200px;
-    height: 220px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-
-    @include media-down(sm) {
-      width: 100%;
-    }
-  }
-
-  &__avatar {
-    margin-bottom: 4px;
-  }
-
-  &__name {
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.2;
-  }
-
-  &__degree {
-    font-size: 12px;
-    color: var(--color-dimmed);
-    text-align: center;
-    line-height: 1.2;
-  }
-
-  &__cta {
-    margin-top: 16px;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

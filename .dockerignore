@@ -1,0 +1,18 @@
+# Build context for deploy/web.Dockerfile = repo root, but the SPA build only
+# needs frontend/ + deploy/Caddyfile. Trim everything else for speed and
+# determinism. (The backend image uses backend/.dockerignore, not this file.)
+.git
+.github
+.claude
+backend
+**/node_modules
+frontend/build
+frontend/.vite
+frontend/test-results
+frontend/playwright-report
+**/*.log
+
+# Local env overrides must never enter the image; the build writes its own
+# .env.production.local (VITE_API_URL=/api) for the single-origin deploy.
+**/.env.local
+**/.env.*.local

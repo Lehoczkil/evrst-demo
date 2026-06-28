@@ -1,0 +1,23 @@
+# Single domain: Caddy serves the Vue SPA and reverse-proxies every Laravel /
+# Filament path to the backend container. Set SITE_ADDRESS in the repo-root .env
+# (e.g. SITE_ADDRESS=evrst.hu, or "evrst.hu www.evrst.hu" for both). Defaults to
+# localhost for a local `docker compose up` (Caddy issues an internal cert).
+{$SITE_ADDRESS:localhost} {
+	encode zstd gzip
+
+	# Everything Laravel + Filament owns. /livewire is REQUIRED for the admin
+	# panel to be interactive; /css|js/filament are its published assets;
+	# /storage is the public-disk symlink; /up is the health route.
+	@backend path /admin /admin/* /api/* /livewire/* /sanctum/* /storage/* /css/filament/* /js/filament/* /up
+	handle @backend {
+		reverse_proxy backend:8080
+	}
+
+	# Everything else is the SPA: serve the static build, falling back to
+	# index.html so vue-router history-mode deep links (e.g. /team) resolve.
+	handle {
+		root * /srv/spa
+		try_files {path} /index.html
+		file_server
+	}
+}

@@ -14,6 +14,15 @@ const props = defineProps<{
 ---------------------------------------------*/
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 /*---------------------------------------------
+/  METHODS
+---------------------------------------------*/
+/*---------------------------------------------
+/  COMPUTED
+---------------------------------------------*/
+/*---------------------------------------------
+/  WATCHERS
+---------------------------------------------*/
+/*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
 useRocketScene(canvasRef, {
@@ -25,7 +34,7 @@ useRocketScene(canvasRef, {
 
 <template>
   <div
-    class="absolute left-0 w-full pointer-events-none top-auto bottom-0 h-60vh md:(top-0 bottom-auto h-100vh)"
+    class="absolute inset-x-0 z-0 pointer-events-none top-auto bottom-0 h-60vh md:(top-0 bottom-auto h-100vh)"
   >
     <canvas ref="canvasRef" class="block w-full h-full" />
   </div>

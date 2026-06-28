@@ -78,7 +78,13 @@ Every Vue SFC follows the section-comment convention:
 <style lang="scss" scoped>…</style>
 ```
 
-Keep these landmarks even when a section is empty.
+**Keep all six landmarks in every SFC, always — never trim a block because
+it's empty.** When scaffolding a new component, paste all six in the order
+above before adding any code. When editing an existing SFC, never delete a
+landmark even if you're removing the last item under it; leave the empty
+block in place. Order is fixed: `PROPS & EMITS` → `VARIABLES` → `METHODS`
+→ `COMPUTED` → `WATCHERS` → `HOOKS`. Trimmed or out-of-order blocks have
+been flagged as a regression in the past — match the convention exactly.
 
 ## Auto-imports
 

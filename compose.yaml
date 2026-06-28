@@ -1,0 +1,82 @@
+# ── Single-domain production stack (see deploy/README.md) ─────────────────
+#   web (Caddy) ─ /admin,/api,/livewire,/storage,/css|js/filament,/up ─▶ backend
+#               └ everything else ─────────────────────────────────────▶ Vue SPA
+#
+# Bring up:  cp backend/.env.production.example backend/.env.production   # then edit
+#            cp .env.example .env                                         # set SITE_ADDRESS
+#            docker compose up -d --build
+name: evrst
+
+services:
+  # Laravel 12 + Filament admin (php:8.4-apache). Serves /admin + /api and owns
+  # the schema: RUN_RELEASE_TASKS defaults to 1, so this is the one container
+  # that runs migrate + seed on boot.
+  backend:
+    build: ./backend
+    image: evrst-backend:latest
+    restart: unless-stopped
+    env_file: ./backend/.env.production
+    environment:
+      PORT: "8080"
+    volumes:
+      - app-data:/persistent          # SQLite + storage/ survive redeploys (see entrypoint.sh)
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+
+  # Queue worker (member-application mails, temp passwords, Discord webhooks).
+  queue:
+    image: evrst-backend:latest        # reuses the image built by `backend`
+    restart: unless-stopped
+    env_file: ./backend/.env.production
+    environment:
+      RUN_RELEASE_TASKS: "0"           # never migrate/seed from a worker (shared SQLite)
+    command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=3", "--max-time=3600"]
+    volumes:
+      - app-data:/persistent
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # Cron replacement: ticks the Laravel scheduler (nightly prune jobs) every 60s.
+  scheduler:
+    image: evrst-backend:latest
+    restart: unless-stopped
+    env_file: ./backend/.env.production
+    environment:
+      RUN_RELEASE_TASKS: "0"
+    command: ["sh", "-c", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
+    volumes:
+      - app-data:/persistent
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # Front door: serves the built SPA and reverse-proxies the Laravel paths.
+  # Auto-provisions a Let's Encrypt cert for SITE_ADDRESS (needs DNS + 80/443).
+  web:
+    build:
+      context: .
+      dockerfile: deploy/web.Dockerfile
+    image: evrst-web:latest
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro   # tweak routing without a rebuild
+      - caddy-data:/data                              # persists issued TLS certs
+      - caddy-config:/config
+    depends_on:
+      backend:
+        condition: service_started     # serve the SPA even while the API is still booting
+
+volumes:
+  app-data:
+  caddy-data:
+  caddy-config:

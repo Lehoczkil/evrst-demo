@@ -14,14 +14,17 @@ const version = __APP_VERSION__;
 /  COMPUTED
 ---------------------------------------------*/
 /*---------------------------------------------
+/  WATCHERS
+---------------------------------------------*/
+/*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
 </script>
 
 <template>
-  <footer>
+  <footer class="bg-bgDark">
     <div
-      class="container flex flex-col sm:flex-row sm:items-center sm:justify-between gap-16px py-16px border-t border-cardBorder"
+      class="container flex flex-col gap-16px py-16px border-t border-cardBorder sm:(flex-row items-center justify-between)"
     >
       <span class="text-[var(--color-dimmed)] fs-11px">
         © {{ year }} Escape Velocity Rocketry Student Team. Build: v{{ version }}
