@@ -11,7 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git unzip libicu-dev libzip-dev zlib1g-dev libpng-dev \
         libonig-dev libxml2-dev libsqlite3-dev sqlite3 \
         libpq-dev \
+        libwebp-dev libjpeg-dev libfreetype6-dev \
         ca-certificates curl gnupg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" \
         bcmath intl pdo_sqlite pdo_pgsql pgsql mbstring xml zip exif pcntl gd opcache \
     && a2enmod rewrite headers expires \
