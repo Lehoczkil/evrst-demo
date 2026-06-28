@@ -38,8 +38,12 @@ class DatabaseSeeder extends Seeder
             CollectionSeeder::class,
             ResourceSeeder::class,
             TeamSeeder::class,
-            TaskSeeder::class,
-            DemoSeeder::class,
+            // TaskSeeder + DemoSeeder only produce demo-quality operational
+            // data (sample tasks, member applications, bug reports, calendar
+            // events, contacts, inventory, onshape placeholders). Excluded
+            // from the production seed. To repopulate a demo environment:
+            //   php artisan db:seed --class=TaskSeeder
+            //   php artisan db:seed --class=DemoSeeder
         ]);
     }
 }
