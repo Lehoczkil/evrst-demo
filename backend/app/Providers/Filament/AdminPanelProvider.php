@@ -33,9 +33,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName('EVRST Admin')
-            ->brandLogo(asset('evrst_logo.svg'))
+            ->brandLogo('/evrst_logo.svg')
             ->brandLogoHeight('1.75rem')
-            ->favicon(asset('evrst_logo.svg'))
+            ->favicon('/evrst_logo.svg')
             ->login()
             ->profile(ForceChangeProfile::class)
             ->colors([
