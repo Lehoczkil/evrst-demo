@@ -14,9 +14,14 @@ if [ -d "$VOLUME" ]; then
     touch "$VOLUME/.bootstrapped"
   fi
   [ -f "$VOLUME/database/database.sqlite" ] || touch "$VOLUME/database/database.sqlite"
-  rm -rf /var/www/html/storage /var/www/html/database
+  # storage/ is entirely user data → the whole directory lives on the volume.
+  rm -rf /var/www/html/storage
   ln -s "$VOLUME/storage" /var/www/html/storage
-  ln -s "$VOLUME/database" /var/www/html/database
+  # database/ ships migrations + seeders + factories in the image — keep them.
+  # Persist ONLY the SQLite file on the volume (symlink the file, not the dir),
+  # otherwise migrate finds no migrations and db:seed can't load DatabaseSeeder.
+  rm -f /var/www/html/database/database.sqlite
+  ln -s "$VOLUME/database/database.sqlite" /var/www/html/database/database.sqlite
   chown -R www-data:www-data "$VOLUME"
 fi
 
