@@ -183,9 +183,21 @@ class MailDoctor extends Command
             return;
         }
 
-        if ($response->status() === 401) {
-            $this->components->error('Resend rejected the key (HTTP 401). It is wrong, revoked, or from another account.');
-            $this->failed = true;
+        // A "Sending access" key can post /emails but cannot list /domains,
+        // so a 401/403 here is ambiguous: the key may be perfectly able to
+        // send. Do not fail the run on it -- that would block a go-live on
+        // a working key. Point at the one check that disambiguates.
+        if (in_array($response->status(), [401, 403], true)) {
+            $this->components->warn(
+                'Resend refused the domain listing (HTTP ' . $response->status() . '). '
+                . 'That is expected for a Sending-access key, which can send but not list. '
+                . 'It also looks like this if the key is wrong or revoked -- the two are '
+                . 'indistinguishable from here.'
+            );
+            $this->components->warn(
+                'Settle it by actually sending: mail:doctor --send=you@example.com '
+                . '(a delivered message means the key is fine).'
+            );
 
             return;
         }
@@ -292,6 +304,9 @@ class MailDoctor extends Command
             return;
         }
 
-        $this->components->info("Handed to the mailer for {$address}. Confirm delivery in the provider's logs.");
+        $this->components->info(
+            "Accepted by the mailer for {$address} -- the key can send. "
+            . "Confirm delivery in the provider's logs."
+        );
     }
 }

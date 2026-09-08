@@ -77,12 +77,35 @@ class MailDoctorCommandTest extends TestCase
         $this->assertStringNotContainsString($reachable->name, $output, 'a reachable member is not flagged');
     }
 
-    public function test_it_reports_a_rejected_provider_key(): void
+    public function test_a_refused_domain_listing_is_inconclusive_not_fatal(): void
     {
+        // A Sending-access key can post /emails but not list /domains.
+        // Failing the run here would block a go-live on a working key.
         $this->configureHealthyMailer();
         Http::fake(['api.resend.com/*' => Http::response([], 401)]);
 
-        $this->artisan('mail:doctor')->assertFailed();
+        $exit = Artisan::call('mail:doctor');
+        $output = Artisan::output();
+
+        $this->assertSame(Command::SUCCESS, $exit, 'an ambiguous listing refusal must not fail the run');
+        $this->assertStringContainsString('Sending-access key', $output);
+        $this->assertStringContainsString('--send=', $output, 'it must name the check that disambiguates');
+    }
+
+    public function test_a_forbidden_domain_listing_is_treated_the_same_way(): void
+    {
+        $this->configureHealthyMailer();
+        Http::fake(['api.resend.com/*' => Http::response([], 403)]);
+
+        $this->assertSame(Command::SUCCESS, Artisan::call('mail:doctor'));
+    }
+
+    public function test_other_provider_errors_still_fail(): void
+    {
+        $this->configureHealthyMailer();
+        Http::fake(['api.resend.com/*' => Http::response([], 500)]);
+
+        $this->assertSame(Command::FAILURE, Artisan::call('mail:doctor'));
     }
 
     public function test_it_reports_an_unverified_sending_domain(): void
