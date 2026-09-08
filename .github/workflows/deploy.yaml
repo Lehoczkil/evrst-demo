@@ -18,13 +18,13 @@ jobs:
       - name: Validate tag version
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"  # Remove 'v' prefix from tag (e.g., v1.2.3 -> 1.2.3)
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PACKAGE_VERSION=$(node -p "require('./frontend/package.json').version")
           
           echo "Tag version: $TAG_VERSION"
-          echo "package.json version: $PACKAGE_VERSION"
+          echo "frontend/package.json version: $PACKAGE_VERSION"
           
           if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
-            echo "ERROR: Tag version ($TAG_VERSION) does not match package.json version ($PACKAGE_VERSION)"
+            echo "ERROR: Tag version ($TAG_VERSION) does not match frontend/package.json version ($PACKAGE_VERSION)"
             exit 1
           fi
           
