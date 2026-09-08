@@ -18,9 +18,21 @@ primary_region = "fra"
 # Two process groups share one image.
 #   `app`    — Apache fronting Laravel + Filament.
 #   `worker` — queue:work for notifications + Discord webhooks.
+#
+# ⚠ UNRESOLVED: both groups run the same entrypoint against the same
+# /persistent SQLite file, so both run `migrate --force` (and, on an empty
+# volume, `db:seed`) on boot — lock contention, and a re-seed on every worker
+# restart clobbers runtime role/permission edits made in Filament. The compose
+# stack fixes this with `RUN_RELEASE_TASKS: "0"` on its queue + scheduler
+# services, but fly.toml has no per-process env, and the entrypoint reads the
+# variable before exec'ing the process command, so it can't be set from here.
+# Deploying this config needs a real fix first (a second image/Dockerfile with
+# the variable baked in, or a release_command + entrypoint guard).
+# `compose.yaml` on Hetzner is the supported path — see deploy/README.md.
 [processes]
   app = "apache2-foreground"
   worker = "php artisan queue:work --tries=3 --sleep=3 --timeout=60"
+
 
 [[mounts]]
   source = "evrst_data"
