@@ -5,6 +5,7 @@ namespace App\Filament\Auth;
 use Filament\Auth\Pages\EditProfile;
 use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class ForceChangeProfile extends EditProfile
@@ -48,8 +49,25 @@ class ForceChangeProfile extends EditProfile
                     ->description(__('admin.profile.password_help'))
                     ->components([
                         $this->getPasswordFormComponent(),
-                        $this->getPasswordConfirmationFormComponent(),
-                        $this->getCurrentPasswordFormComponent()->columnSpanFull(),
+                        // Filament hides the confirmation + current-password
+                        // inputs until `password` has a value, and the reveal
+                        // rides on the password field's 500 ms live debounce.
+                        // On this page that reads as a broken form: a member
+                        // arriving from the temp-password mail sees a single
+                        // "New password" box, types it, submits before the
+                        // debounce fires, and only meets the other two fields
+                        // through a validation error. Show all three up front
+                        // and move the conditions onto required() — the rules
+                        // are non-implicit, so an empty box is simply skipped
+                        // when someone edits only their name or avatar.
+                        $this->getPasswordConfirmationFormComponent()
+                            ->visible()
+                            ->required(fn (Get $get): bool => filled($get('password'))),
+                        $this->getCurrentPasswordFormComponent()
+                            ->visible()
+                            ->required(fn (Get $get): bool => filled($get('password'))
+                                || $get('email') !== $this->getUser()->getAttributeValue('email'))
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
             ]);

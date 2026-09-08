@@ -606,6 +606,27 @@ html:not(.dark) tr.fi-ta-group-header {
     color: var(--evrst-text-muted) !important;
 }
 
+/* iOS Safari zooms the whole page in whenever a focused field renders
+   its text below 16px, and Filament's inputs are text-sm (14px) — so on
+   an iPhone every tap into a form left the layout blown up and scrolled
+   sideways. Lifting the touch rendering to 16px is the only fix that
+   keeps pinch-zoom available to the user (`maximum-scale=1` would take
+   it away). Skipped while the force-desktop viewport is on: there the
+   user deliberately opted into a scaled-down 1280px layout and drives
+   the zoom themselves. */
+@media (pointer: coarse) and (max-width: 1023.98px) {
+    html:not(.evrst-force-desktop) :is(
+        input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+        select,
+        textarea
+    ) {
+        font-size: 16px !important;
+    }
+    html:not(.evrst-force-desktop) textarea {
+        line-height: 1.4 !important;
+    }
+}
+
 /* Toggle / checkbox / radio — keep amber for the "on" state. */
 .fi-fo-toggle [role="switch"][aria-checked="true"] { background: var(--evrst-accent) !important; }
 

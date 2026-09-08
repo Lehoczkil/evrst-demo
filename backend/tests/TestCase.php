@@ -26,7 +26,11 @@ abstract class TestCase extends BaseTestCase
             'email' => $overrides['email'] ?? $roleKey . '-' . uniqid() . '@example.test',
             'password' => Hash::make($overrides['password'] ?? 'test1234'),
             'role_id' => $role->id,
-            'password_changed_at' => $overrides['password_changed_at'] ?? now(),
+            // array_key_exists, not `??` — a caller that explicitly passes
+            // null wants a user still inside the first-login gate.
+            'password_changed_at' => array_key_exists('password_changed_at', $overrides)
+                ? $overrides['password_changed_at']
+                : now(),
         ]);
     }
 
