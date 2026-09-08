@@ -31,7 +31,17 @@ class ForceChangeProfile extends EditProfile
                             ->maxSize(2048)
                             ->columnSpanFull(),
                         $this->getNameFormComponent(),
-                        $this->getEmailFormComponent(),
+                        // The email IS the login — the org address handed
+                        // out by the team — so only an admin may move it.
+                        // Members change their password here, not their
+                        // identity. Not dehydrated when locked, so the
+                        // value can't be smuggled in via the payload.
+                        $this->getEmailFormComponent()
+                            ->disabled(fn () => ! static::canEditEmail())
+                            ->dehydrated(fn () => static::canEditEmail())
+                            ->helperText(fn () => static::canEditEmail()
+                                ? null
+                                : __('admin.profile.email_locked')),
                     ])
                     ->columns(2),
                 Section::make(__('admin.users.password'))
@@ -43,6 +53,11 @@ class ForceChangeProfile extends EditProfile
                     ])
                     ->columns(2),
             ]);
+    }
+
+    private static function canEditEmail(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
     }
 
     /**

@@ -58,6 +58,48 @@ class EditTeamMember extends EditRecord
         $record = $this->record;
         $record->groups()->sync(array_fill_keys($this->pendingGroupIds, ['is_primary' => false]));
         $record->setPrimaryGroup($this->pendingMainPositionId);
+
+        $this->syncLoginEmail($record);
+    }
+
+    /**
+     * The org address is the login, so editing it here has to move
+     * users.email too — otherwise the member would still be signing in
+     * with the old address while the panel shows the new one.
+     *
+     * Bails out if another account already holds the address rather than
+     * blowing up on the unique index, and tells the admin why.
+     */
+    private function syncLoginEmail(TeamMember $record): void
+    {
+        $user = $record->user;
+
+        if (! $user || ! filled($record->email) || $user->email === $record->email) {
+            return;
+        }
+
+        if (User::where('email', $record->email)->whereKeyNot($user->getKey())->exists()) {
+            Notification::make()
+                ->title(__('admin.team.login_email_conflict'))
+                ->body(__('admin.team.login_email_conflict_body', ['email' => $record->email]))
+                ->warning()
+                ->persistent()
+                ->send();
+
+            return;
+        }
+
+        $previous = $user->email;
+        $user->forceFill(['email' => $record->email])->save();
+
+        Notification::make()
+            ->title(__('admin.team.login_email_synced'))
+            ->body(__('admin.team.login_email_synced_body', [
+                'old' => $previous,
+                'new' => $record->email,
+            ]))
+            ->success()
+            ->send();
     }
 
     protected function getHeaderActions(): array
@@ -93,8 +135,7 @@ class EditTeamMember extends EditRecord
                     $record->user_id = $user->id;
                     $record->save();
 
-                    $route = $user->fresh('teamMember')->routeNotificationForMail(null);
-                    $destination = $route ? array_key_first($route) : $user->email;
+                    $destination = $user->fresh('teamMember')->deliveryEmail() ?? $user->email;
 
                     try {
                         \Illuminate\Support\Facades\Notification::sendNow($user, new TeamMemberAccountCreated($temp));

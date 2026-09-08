@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\TeamMember;
 use App\Models\TeamMemberGroup;
 use App\Models\User;
+use App\Support\OrgEmail;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -39,10 +40,10 @@ class TeamSeeder extends Seeder
      *                          snowflakes resolve `<@id>` mentions / can be
      *                          targeted by the future DM bot)
      *   email_private        — personal contact email from the spreadsheet
-     *   email                — EVRST account email; defaults to a
-     *                          deterministic <slug>@evrst.test stub except
-     *                          where overridden (Lehocki keeps the team's
-     *                          shared address).
+     *   email                — EVRST org address; defaults to the
+     *                          <given>.<surname>@evrst.hu form minted by
+     *                          App\Support\OrgEmail. Override only for a
+     *                          shared/functional mailbox.
      *   role                 — Perm::ROLE_* assigned to the linked User;
      *                          defaults to ROLE_MEMBER when omitted.
      */
@@ -92,14 +93,28 @@ class TeamSeeder extends Seeder
             'discord_username' => 'gyurka',           'discord_nick' => 'Gyurka',           'email_private' => null],
         ['name' => 'Mosberger Péter',        'positions' => ['jog'],                                  'main' => 'jog',
             'discord_id' => null,               'discord_nick' => null,               'email_private' => 'mosbergerpeti@gmail.com'],
-        ['name' => 'Lehocki László',         'positions' => ['webfejleszto'],                         'main' => 'webfejleszto',
-            'discord_username' => 'lehoczkilaci',     'discord_nick' => 'lehoczkilaci',     'email_private' => 'lehoczkilaszlo2002@gmail.com',
-            'email' => 'evrstrocket@gmail.com'],
+        ['name' => 'Lehoczki László',        'positions' => ['webfejleszto'],                         'main' => 'webfejleszto',
+            'discord_username' => 'lehoczkilaci',     'discord_nick' => 'lehoczkilaci',     'email_private' => 'lehoczkilaszlo2002@gmail.com'],
         ['name' => 'Som Nemere',             'positions' => ['webfejleszto'],                         'main' => 'webfejleszto',
             'discord_username' => 'somnenie',         'discord_nick' => 'Somnenie',         'email_private' => null],
     ];
 
-    private function defaultEmail(string $name): string
+    /**
+     * The member's org address — the one they sign in with and, once the
+     * mailboxes exist, receive mail at. See App\Support\OrgEmail for the
+     * format rules.
+     */
+    private function orgEmail(string $name): string
+    {
+        return OrgEmail::forName($name) ?? 'member@' . OrgEmail::domain();
+    }
+
+    /**
+     * The pre-org `<slug>@evrst.test` stub this roster used to mint. Kept
+     * only so a re-seed over an older database matches the existing User
+     * row by its old login instead of creating a duplicate account.
+     */
+    private function legacyStubEmail(string $name): string
     {
         $local = Str::ascii($name);
         $local = Str::lower($local);
@@ -135,24 +150,38 @@ class TeamSeeder extends Seeder
         $tempPasswords = [];
 
         foreach (self::MEMBERS as $i => $info) {
-            $email = $info['email'] ?? $this->defaultEmail($info['name']);
+            // The org address is both the team_members row's email on
+            // record and the login (users.email). Mail delivery is a
+            // separate concern — see User::deliveryEmail(), which keeps
+            // sending to email_private until the mailboxes go live.
+            $orgEmail = $info['email'] ?? $this->orgEmail($info['name']);
             $roleKey = $info['role'] ?? Perm::ROLE_MEMBER;
 
             // First seed → mint a unique 16-char temp password and leave
             // password_changed_at null so the RequirePasswordChange
             // middleware forces a reset on first login. Re-runs preserve
-            // the existing User row's password (don't lock anyone out).
-            $existing = User::where('email', $email)->first();
+            // the existing User row's password (don't lock anyone out) but
+            // normalise the login to the org address. Match on every
+            // address this account may historically have used — org, the
+            // personal one, and the retired @evrst.test stub — so a
+            // re-seed relinks instead of minting a duplicate login.
+            $candidates = array_values(array_filter(array_unique([
+                $orgEmail,
+                $info['email_private'] ?? null,
+                $this->legacyStubEmail($info['name']),
+            ])));
+            $existing = User::whereIn('email', $candidates)->first();
             if ($existing) {
                 $existing->forceFill([
                     'name' => $info['name'],
+                    'email' => $orgEmail,
                     'role_id' => $rolesByKey[$roleKey]?->id,
                 ])->save();
                 $user = $existing;
             } else {
                 $temp = Str::password(16);
                 $user = User::create([
-                    'email' => $email,
+                    'email' => $orgEmail,
                     'name' => $info['name'],
                     'password' => Hash::make($temp),
                     'role_id' => $rolesByKey[$roleKey]?->id,
@@ -160,7 +189,7 @@ class TeamSeeder extends Seeder
                 ]);
                 $tempPasswords[] = [
                     'name' => $info['name'],
-                    'email' => $email,
+                    'email' => $orgEmail,
                     'role' => $roleKey,
                     'password' => $temp,
                 ];
@@ -168,7 +197,7 @@ class TeamSeeder extends Seeder
 
             $member = TeamMember::create([
                 'name' => $info['name'],
-                'email' => $email,
+                'email' => $orgEmail,
                 'email_private' => $info['email_private'] ?? null,
                 'discord_nick' => $info['discord_nick'] ?? null,
                 'discord_username' => $info['discord_username'] ?? null,

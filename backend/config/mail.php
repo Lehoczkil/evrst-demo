@@ -115,4 +115,38 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Org Mail Domain
+    |--------------------------------------------------------------------------
+    |
+    | The domain the team's own addresses live on. Every team member gets a
+    | "<given>.<surname>@<org_domain>" login minted from their roster name
+    | by App\Support\OrgEmail.
+    |
+    */
+
+    'org_domain' => env('MAIL_ORG_DOMAIN', 'evrst.hu'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Deliver To Org Addresses
+    |--------------------------------------------------------------------------
+    |
+    | The org address is always the login. This flag decides where mail is
+    | actually delivered.
+    |
+    | false (default) — deliver to the member's personal address
+    |   (team_members.email_private), falling back to the login. Use this
+    |   while the @<org_domain> mailboxes don't exist yet: members sign in
+    |   with the org address, but temp passwords and reset links land in an
+    |   inbox they can actually open, so nobody is locked out.
+    |
+    | true — deliver to the org address itself, falling back to the personal
+    |   one. Flip this once every member has a real mailbox at the mail host.
+    |
+    */
+
+    'deliver_to_org_addresses' => env('MAIL_DELIVER_TO_ORG', false),
+
 ];

@@ -33,10 +33,11 @@ class TeamMembersTable
                     ->sortable()
                     ->weight('semibold')->toggleable(),
                 TextColumn::make('email')
-                    ->label(__('admin.common.email'))
+                    ->label(__('admin.team.org_email'))
                     ->searchable()
                     ->copyable()
                     ->color('gray')
+                    ->placeholder('—')
                     ->toggleable(),
                 TextColumn::make('email_private')
                     ->label(__('admin.team.private_email'))

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Models\Role;
+use App\Support\OrgEmail;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -20,11 +21,13 @@ class UserForm
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email')
-                    ->label(__('admin.common.email'))
+                    ->label(__('admin.users.login_email'))
                     ->required()
                     ->email()
                     ->unique(ignoreRecord: true)
                     ->maxLength(180)
+                    ->placeholder(fn () => OrgEmail::forName('Lehoczki László'))
+                    ->helperText(__('admin.users.login_email_help'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Select::make('role_id')
                     ->label(__('admin.common.role'))

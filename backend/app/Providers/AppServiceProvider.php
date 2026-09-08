@@ -10,6 +10,7 @@ use App\Models\TeamMemberGroup;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +29,27 @@ class AppServiceProvider extends ServiceProvider
         $this->wireWidgetCacheInvalidation();
         $this->wireSelectOptionsCacheInvalidation();
         $this->configureDatePickerDefaults();
+        $this->wirePasswordResetStamp();
+    }
+
+    /**
+     * A completed self-service password reset is a genuine password change,
+     * so stamp password_changed_at. Without this a freshly-provisioned user
+     * who resets their password would still have a null timestamp and get
+     * bounced straight back to /admin/profile by RequirePasswordChange —
+     * asked to change the password they just set. (ForceChangeProfile does
+     * the equivalent stamp for the in-panel profile form.)
+     */
+    private function wirePasswordResetStamp(): void
+    {
+        // NB: the `Event` short name in this file is the CMS model, so the
+        // event dispatcher facade is referenced fully-qualified here.
+        \Illuminate\Support\Facades\Event::listen(PasswordReset::class, function (PasswordReset $event): void {
+            $user = $event->user;
+            if ($user instanceof User) {
+                $user->forceFill(['password_changed_at' => now()])->saveQuietly();
+            }
+        });
     }
 
     /**

@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -14,7 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable implements FilamentUser, HasAvatar
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -54,22 +55,56 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
-     * Prefer the team member's private contact email over the account
-     * email so notifications land in the user's personal inbox.
+     * Where mail for this user actually goes.
      *
+     * `email` is the login — the org address (laszlo.lehoczki@evrst.hu) for
+     * every provisioned team member. Delivery is a separate question,
+     * because an org address only receives once a real mailbox exists at
+     * the mail host. `mail.deliver_to_org_addresses` picks the order:
+     * off (default) prefers the member's personal inbox so temp passwords
+     * and reset links are never sent into a void; on prefers the org
+     * address. Either way the other address is the fallback, so a member
+     * missing one of the two still gets their mail.
+     */
+    /**
+     * Render notifications in the language the member picked in the panel.
+     * Returning null (nobody has touched the switcher yet) lets Laravel fall
+     * through to the app locale, which is also what the queue worker boots
+     * with — set APP_LOCALE=hu to make that the Hungarian default.
+     */
+    public function preferredLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    public function deliveryEmail(): ?string
+    {
+        $this->loadMissing('teamMember');
+
+        $private = $this->teamMember?->email_private;
+        $account = $this->email ?: null;
+
+        $preferred = config('mail.deliver_to_org_addresses')
+            ? [$account, $private]
+            : [$private, $account];
+
+        foreach ($preferred as $candidate) {
+            if ($candidate) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @return array<string, string>|null
      */
     public function routeNotificationForMail($notification): array|null
     {
-        $this->loadMissing('teamMember');
-        $private = $this->teamMember?->email_private;
-        if ($private) {
-            return [$private => $this->name];
-        }
-        if ($this->email) {
-            return [$this->email => $this->name];
-        }
-        return null;
+        $email = $this->deliveryEmail();
+
+        return $email === null ? null : [$email => $this->name];
     }
 
     /**

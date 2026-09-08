@@ -13,7 +13,9 @@ use App\Models\Role;
 use App\Models\User;
 use App\Notifications\TeamMemberAccountCreated;
 use App\Support\DiscordPayloads;
+use App\Support\OrgEmail;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -31,7 +33,13 @@ class AcceptMemberApplication extends Page implements HasForms
 
     protected string $view = 'filament.resources.member-applications.pages.accept-member-application';
 
-    public MemberApplication $record;
+    /**
+     * Livewire assigns the route parameter to any public property it
+     * matches by name *before* mount() runs, so this has to accept the
+     * raw key as well as the resolved model — the same union Filament's
+     * own InteractsWithRecord uses. mount() replaces it with the model.
+     */
+    public MemberApplication | int | string | null $record = null;
 
     public ?array $data = [];
 
@@ -67,7 +75,10 @@ class AcceptMemberApplication extends Page implements HasForms
 
         $this->form->fill([
             'name' => $this->record->name,
-            'email' => $this->record->email,
+            // The address on the application is the applicant's personal
+            // inbox — it becomes email_private, not the login.
+            'email_private' => $this->record->email,
+            'email' => OrgEmail::uniqueForName($this->record->name ?? ''),
             'degree_en' => null,
             'degree_hu' => null,
             'group_ids' => [],
@@ -83,9 +94,33 @@ class AcceptMemberApplication extends Page implements HasForms
                     ->label(__('admin.common.name'))
                     ->required()
                     ->maxLength(120)
+                    // Retyping the name re-derives the org address, but only
+                    // while the admin hasn't hand-edited it — an override
+                    // must survive a later typo fix in the name.
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        if (($get('email_is_custom') ?? false) === true) {
+                            return;
+                        }
+                        $set('email', OrgEmail::uniqueForName((string) $state));
+                    })
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email')
-                    ->label(__('admin.common.email'))
+                    ->label(__('admin.applications.org_email'))
+                    ->required()
+                    ->email()
+                    ->maxLength(180)
+                    ->unique(table: User::class, column: 'email')
+                    ->validationAttribute(__('admin.applications.org_email'))
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (callable $set) => $set('email_is_custom', true))
+                    ->helperText(__('admin.applications.org_email_help'))
+                    ->columnSpan(['default' => 12, 'md' => 6]),
+                Hidden::make('email_is_custom')
+                    ->default(false)
+                    ->dehydrated(false),
+                TextInput::make('email_private')
+                    ->label(__('admin.team.private_email'))
                     ->required()
                     ->email()
                     ->maxLength(180)
@@ -112,6 +147,8 @@ class AcceptMemberApplication extends Page implements HasForms
         $temp = Str::password(12);
         $memberRole = Role::where('key', Perm::ROLE_MEMBER)->first();
 
+        // Login is the org address. password_changed_at stays null so
+        // RequirePasswordChange forces a reset on first sign-in.
         $user = User::updateOrCreate(
             ['email' => $data['email']],
             [
@@ -129,6 +166,7 @@ class AcceptMemberApplication extends Page implements HasForms
         $member = TeamMember::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'email_private' => $data['email_private'],
             'degree' => $degree === [] ? null : $degree,
             'user_id' => $user->id,
             'joined_at' => now()->toDateString(),
@@ -152,8 +190,7 @@ class AcceptMemberApplication extends Page implements HasForms
             'team_member' => ['id' => $member->id, 'name' => $member->name],
         ]);
 
-        $route = $user->fresh('teamMember')->routeNotificationForMail(null);
-        $destination = $route ? array_key_first($route) : $user->email;
+        $destination = $user->fresh('teamMember')->deliveryEmail() ?? $user->email;
 
         $mailFailure = null;
         try {

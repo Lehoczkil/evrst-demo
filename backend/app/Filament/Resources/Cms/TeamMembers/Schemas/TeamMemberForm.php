@@ -3,7 +3,10 @@
 namespace App\Filament\Resources\Cms\TeamMembers\Schemas;
 
 use App\Filament\Schemas\MemberPositionFields;
+use App\Models\TeamMember;
 use App\Models\User;
+use App\Support\OrgEmail;
+use Filament\Actions\Action as FormAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -29,9 +32,27 @@ class TeamMemberForm
                     ->preload()
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email')
-                    ->label(__('admin.common.email'))
+                    ->label(__('admin.team.org_email'))
                     ->email()
                     ->maxLength(180)
+                    ->unique(ignoreRecord: true)
+                    ->placeholder(fn () => OrgEmail::forName('Lehoczki László'))
+                    ->helperText(__('admin.team.org_email_help'))
+                    // Fill from the roster name on demand rather than
+                    // live — an address already handed out is a login, and
+                    // silently rewriting it would lock the member out.
+                    ->suffixAction(
+                        FormAction::make('deriveOrgEmail')
+                            ->label(__('admin.team.org_email_generate'))
+                            ->icon('heroicon-m-sparkles')
+                            ->action(function (callable $get, callable $set, ?TeamMember $record) {
+                                $set('email', OrgEmail::uniqueForName(
+                                    (string) $get('name'),
+                                    ignoreUserId: $record?->user_id,
+                                    ignoreTeamMemberId: $record?->getKey(),
+                                ));
+                            }),
+                    )
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email_private')
                     ->label(__('admin.team.private_email'))

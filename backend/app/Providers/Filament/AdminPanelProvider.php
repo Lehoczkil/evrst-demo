@@ -37,6 +37,13 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('1.75rem')
             ->favicon('/evrst_logo.svg')
             ->login()
+            // "Forgot password?" on the login screen. Members sign in with
+            // their personal email (see the login-email repoint migration),
+            // so a reset link lands in an inbox they actually read — no
+            // admin-distributed temp passwords required. A completed reset
+            // stamps password_changed_at (AppServiceProvider) so it also
+            // clears the RequirePasswordChange gate.
+            ->passwordReset()
             ->profile(ForceChangeProfile::class)
             ->colors([
                 'primary' => Color::Amber,

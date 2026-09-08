@@ -45,6 +45,42 @@ class RouteNotificationForMailTest extends TestCase
         );
     }
 
+    public function test_prefers_the_org_login_when_org_delivery_is_enabled(): void
+    {
+        config(['mail.deliver_to_org_addresses' => true]);
+
+        $user = $this->makeMember(['name' => 'Routed', 'email' => 'laszlo.lehoczki@evrst.hu']);
+        TeamMember::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'email_private' => 'private@example.test',
+        ]);
+
+        $this->assertSame(
+            ['laszlo.lehoczki@evrst.hu' => 'Routed'],
+            $user->fresh()->routeNotificationForMail(new \stdClass()),
+        );
+    }
+
+    public function test_falls_back_to_the_private_email_when_org_delivery_finds_no_login(): void
+    {
+        config(['mail.deliver_to_org_addresses' => true]);
+
+        $user = $this->makeMember(['name' => 'Routed', 'email' => 'account@example.test']);
+        TeamMember::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'email_private' => 'private@example.test',
+        ]);
+        // Blank the login the hard way — `email` is required upstream.
+        $user->forceFill(['email' => ''])->save();
+
+        $this->assertSame(
+            ['private@example.test' => 'Routed'],
+            $user->fresh()->routeNotificationForMail(new \stdClass()),
+        );
+    }
+
     public function test_returns_null_when_no_email_anywhere(): void
     {
         // makeUser/makeMember always sets an email; build a user with an
