@@ -46,10 +46,16 @@ class OrgLoginEmailTest extends TestCase
             ->filter()
             ->values();
 
-        $this->assertCount(21, $emails);
+        // Derived from the roster rather than hardcoded: the point is that
+        // every entry yields exactly one login, not what today's headcount
+        // happens to be. The floor still catches a roster wiped by accident.
+        $expected = count(self::rosterNames());
+        $this->assertGreaterThan(10, $expected, 'the roster looks truncated');
+
+        $this->assertCount($expected, $emails);
         // A roster name collision would otherwise surface as a unique-index
         // crash on the next reseed rather than as a failing assertion.
-        $this->assertCount(21, $emails->unique());
+        $this->assertCount($expected, $emails->unique());
 
         foreach ($emails as $email) {
             $this->assertTrue(OrgEmail::isOrgAddress($email), $email . ' is not an org address');
@@ -72,10 +78,20 @@ class OrgLoginEmailTest extends TestCase
         $this->seed(TeamSeeder::class);
 
         $this->assertSame(1, User::where('email', 'laszlo.lehoczki@evrst.hu')->count());
-        $this->assertSame(21, User::whereIn(
+        $this->assertSame(count(self::rosterNames()), User::whereIn(
             'id',
             TeamMember::pluck('user_id')->filter()->all(),
         )->count());
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function rosterNames(): array
+    {
+        $members = (new \ReflectionClass(TeamSeeder::class))->getConstant('MEMBERS');
+
+        return array_column($members, 'name');
     }
 
     public function test_a_reset_requested_for_the_org_login_is_delivered_to_the_personal_inbox(): void

@@ -42,7 +42,7 @@ Address format, from `App\Support\OrgEmail`:
 
 ---
 
-## 2. The 21 roster addresses
+## 2. The 18 roster addresses
 
 | Name | Org login (the login) | Delivery address (the inbox) |
 | --- | --- | --- |
@@ -53,12 +53,9 @@ Address format, from `App\Support\OrgEmail`:
 | Bába Kíra | `kira.baba@evrst.hu` | `babakira520@gmail.com` |
 | Czirják Péter | `peter.czirjak@evrst.hu` | `peterczirjak1998@gmail.com` |
 | Kürtösi Simon | `simon.kurtosi@evrst.hu` | `kurtosi.simon@gmail.com` |
-| Lázár Ruben | `ruben.lazar@evrst.hu` | `rubenlazar@stud.uni-obuda.hu` |
-| Kerek Gábor | `gabor.kerek@evrst.hu` | `kerek.gabo@gmail.com` |
 | Tello-Pálfy Sebastián | `sebastian.tellopalfy@evrst.hu` | `sebastian.tellopalfy@gmail.com` |
 | Kriston Zoltán | `zoltan.kriston@evrst.hu` | `kristonzoli2002@gmail.com` |
 | Horváth Márton Antal | `marton.horvath@evrst.hu` | `marton.horvath302@gmail.com` |
-| Bagi Roland | `roland.bagi@evrst.hu` | `roland.bagi007@gmail.com` |
 | Obsitos Péter | `peter.obsitos@evrst.hu` | `obsitospeti04@gmail.com` |
 | Laschek Ádám | `adam.laschek@evrst.hu` | `adam.laschek@gmail.com` |
 | Bába Csaba | `csaba.baba@evrst.hu` | `baba.csabi@gmail.com` |
@@ -67,6 +64,14 @@ Address format, from `App\Support\OrgEmail`:
 | Mosberger Péter | `peter.mosberger@evrst.hu` | `mosbergerpeti@gmail.com` |
 | Lehoczki László | `laszlo.lehoczki@evrst.hu` | `lehoczkilaszlo2002@gmail.com` |
 | Som Nemere | `nemere.som@evrst.hu` | **none on file** |
+
+> **Three members left on 2026-09-09** — Lázár Ruben, Kerek Gábor and Bagi Roland.
+> They are marked with `team_members.left_at`, which drops them from the public site
+> (`TeamController@members` filters `whereNull('left_at')`) while keeping their record,
+> activity log and task comments. Their `users` rows still exist, so revoke the login
+> separately if that is wanted — note that hard-deleting a user cascades
+> `task_comments.user_id` and destroys their comments. They are also removed from
+> `TeamSeeder`, so a fresh install never creates them.
 
 Regenerate this list any time without touching the database:
 

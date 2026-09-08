@@ -24,7 +24,12 @@ class TeamMemberSeederTest extends TestCase
     {
         $this->seed(TeamSeeder::class);
 
-        $this->assertSame(21, TeamMember::query()->count());
+        // One member row per roster entry. Derived so a roster change is a
+        // one-file edit, with a floor to catch an accidentally emptied list.
+        $roster = (new \ReflectionClass(TeamSeeder::class))->getConstant('MEMBERS');
+        $this->assertGreaterThan(10, count($roster), 'the roster looks truncated');
+
+        $this->assertSame(count($roster), TeamMember::query()->count());
         $this->assertSame(9, TeamMemberGroup::query()->count());
 
         $manager = TeamMemberGroup::where('slug', 'csapat-menedzser')->firstOrFail();
