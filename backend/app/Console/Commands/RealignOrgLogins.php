@@ -65,6 +65,18 @@ class RealignOrgLogins extends Command
         }
 
         if ($drifted === []) {
+            // Don't claim everything matches when rows were listed as
+            // skipped just above — that reads as "nothing was wrong" and
+            // sends the reader looking for a different problem.
+            if ($skippedInUse !== []) {
+                $this->components->info(
+                    'Nothing left to change. The drifted row(s) above were skipped, '
+                    . 'not fixed — re-run with --include-signed-in to move them.'
+                );
+
+                return self::SUCCESS;
+            }
+
             $this->components->info('Every org login matches its team member name.');
 
             return self::SUCCESS;

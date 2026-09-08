@@ -60,6 +60,20 @@ class RealignOrgLoginsCommandTest extends TestCase
         $this->assertStringContainsString('already signed in', $output);
     }
 
+    public function test_it_does_not_claim_success_when_rows_were_only_skipped(): void
+    {
+        // The skip warning followed by "every login matches" read as
+        // "nothing was wrong", which sent a real reader hunting elsewhere.
+        $this->drifted(signedIn: true);
+
+        Artisan::call('org-email:realign', ['--apply' => true]);
+        $output = Artisan::output();
+
+        $this->assertStringNotContainsString('Every org login matches', $output);
+        $this->assertStringContainsString('were skipped', $output);
+        $this->assertStringContainsString('--include-signed-in', $output);
+    }
+
     public function test_include_signed_in_overrides_that(): void
     {
         [$user] = $this->drifted(signedIn: true);
