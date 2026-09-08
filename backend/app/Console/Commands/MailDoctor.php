@@ -65,7 +65,6 @@ class MailDoctor extends Command
     private function configTable(): void
     {
         $mailer = (string) config('mail.default');
-        $key = (string) config('services.' . $mailer . '.key');
         $from = (string) config('mail.from.address');
         $appUrl = (string) config('app.url');
 
@@ -79,15 +78,24 @@ class MailDoctor extends Command
             'nothing is delivered on this driver — set MAIL_MAILER=resend',
         );
 
-        if (in_array($mailer, ['resend', 'postmark'], true)) {
-            // Never print the key itself.
-            $rows[] = $this->row(
-                strtoupper($mailer) . ' key',
-                $key === '' ? 'empty' : sprintf('set (%d chars, %s…)', strlen($key), substr($key, 0, 3)),
-                $key !== '',
-                'the driver cannot authenticate without it',
-            );
-        }
+        // Show the provider key even on the log driver. Otherwise "the key
+        // is set but MAIL_MAILER was never switched" looks identical to
+        // "there is no key" — and that is the single most likely go-live
+        // mistake, since the two live on separate lines of the same file.
+        $provider = in_array($mailer, ['resend', 'postmark'], true) ? $mailer : 'resend';
+        $providerKey = (string) config('services.' . $provider . '.key');
+
+        // Never print the key itself.
+        $rows[] = $this->row(
+            strtoupper($provider) . '_API_KEY',
+            $providerKey === '' ? 'empty' : sprintf('set (%d chars, %s…)', strlen($providerKey), substr($providerKey, 0, 3)),
+            $providerKey !== '',
+            // On log/array the driver row already failed the run; don't
+            // double-report, just say what it means.
+            in_array($mailer, ['log', 'array'], true)
+                ? ''
+                : 'the driver cannot authenticate without it',
+        );
 
         $rows[] = $this->row(
             'MAIL_FROM_ADDRESS',

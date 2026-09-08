@@ -6,8 +6,10 @@ use App\Models\TeamMember;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Console\Command;
 use Tests\TestCase;
 
 /**
@@ -67,11 +69,12 @@ class MailDoctorCommandTest extends TestCase
         $reachable = $this->rosterMember('kira.baba@evrst.hu', 'babakira@example.test');
         $stranded = $this->rosterMember('gyorgy.nyari@evrst.hu', null);
 
-        $this->artisan('mail:doctor', ['--no-api' => true])
-            ->expectsOutputToContain($stranded->name)
-            ->assertSuccessful();
+        $exit = Artisan::call('mail:doctor', ['--no-api' => true]);
+        $output = Artisan::output();
 
-        $this->assertNotNull($reachable->deliveryEmail());
+        $this->assertSame(Command::SUCCESS, $exit);
+        $this->assertStringContainsString($stranded->name, $output, 'the unreachable member is named');
+        $this->assertStringNotContainsString($reachable->name, $output, 'a reachable member is not flagged');
     }
 
     public function test_it_reports_a_rejected_provider_key(): void
@@ -100,6 +103,34 @@ class MailDoctorCommandTest extends TestCase
         ], 200)]);
 
         $this->artisan('mail:doctor')->assertSuccessful();
+    }
+
+    public function test_it_surfaces_a_present_key_even_on_the_log_driver(): void
+    {
+        // The real go-live mistake: the key is in .env.production but
+        // MAIL_MAILER was never switched off log. Both facts have to show.
+        config([
+            'mail.default' => 'log',
+            'services.resend.key' => 're_a_real_looking_key',
+        ]);
+
+        $exit = Artisan::call('mail:doctor', ['--no-api' => true]);
+        $output = Artisan::output();
+
+        $this->assertSame(Command::FAILURE, $exit, 'the log driver still fails the run');
+        $this->assertStringContainsString('RESEND_API_KEY', $output);
+        $this->assertStringContainsString('set (', $output, 'a present key must not read as missing');
+        $this->assertStringNotContainsString('re_a_real_looking_key', $output, 'the key itself is never printed');
+    }
+
+    public function test_it_reports_a_missing_key_on_the_log_driver_too(): void
+    {
+        config(['mail.default' => 'log', 'services.resend.key' => '']);
+
+        $exit = Artisan::call('mail:doctor', ['--no-api' => true]);
+
+        $this->assertSame(Command::FAILURE, $exit);
+        $this->assertStringContainsString('empty', Artisan::output());
     }
 
     public function test_the_send_option_warns_instead_of_pretending_on_the_log_driver(): void
