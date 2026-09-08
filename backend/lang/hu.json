@@ -1,0 +1,11 @@
+{
+    "Hello!": "Szia!",
+    "If you did not request a password reset, no further action is required.": "Ha nem te kérted a jelszó visszaállítását, nincs semmi tennivalód.",
+    "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\ninto your web browser:": "Ha a(z) „:actionText\" gombra kattintás nem működik, másold be az alábbi címet\na böngésző címsorába:",
+    "Regards,": "Üdvözlettel,",
+    "Reset Password": "Új jelszó beállítása",
+    "Reset Password Notification": "Jelszó-visszaállítás",
+    "This password reset link will expire in :count minutes.": "Ez a jelszó-visszaállító link :count perc múlva lejár.",
+    "Whoops!": "Hoppá!",
+    "You are receiving this email because we received a password reset request for your account.": "Azért kaptad ezt a levelet, mert jelszó-visszaállítási kérés érkezett a fiókodhoz."
+}

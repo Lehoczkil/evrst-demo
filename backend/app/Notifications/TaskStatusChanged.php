@@ -28,21 +28,20 @@ class TaskStatusChanged extends Notification implements ShouldQueue
 
     public function toDatabase(object $notifiable): array
     {
-        $body = sprintf(
-            '%s — %s → %s',
-            $this->task->title,
-            Task::statusLabel($this->previousStatus),
-            Task::statusLabel($this->newStatus),
-        );
+        $body = __('admin.mail.status_body', [
+            'title' => $this->task->title,
+            'from' => $this->statusLabel($this->previousStatus),
+            'to' => $this->statusLabel($this->newStatus),
+        ]);
 
         return FilamentNotification::make()
-            ->title('Task status changed')
+            ->title(__('admin.mail.status_title'))
             ->body($body)
             ->icon('heroicon-o-arrow-path')
             ->iconColor('warning')
             ->actions([
                 Action::make('view')
-                    ->label('Open task')
+                    ->label(__('admin.mail.open_task'))
                     ->url(TaskResource::getUrl('edit', ['record' => $this->task->id]))
                     ->markAsRead(),
             ])
@@ -51,13 +50,33 @@ class TaskStatusChanged extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $prev = Task::statusLabel($this->previousStatus);
-        $next = Task::statusLabel($this->newStatus);
-
         return (new MailMessage())
-            ->subject('[EVRST] Task status: ' . $this->task->title)
-            ->greeting('Hi ' . ($notifiable->name ?? 'there') . ',')
-            ->line('Status of "' . $this->task->title . '" changed: ' . $prev . ' → ' . $next . '.')
-            ->action('Open task', TaskResource::getUrl('edit', ['record' => $this->task->id]));
+            ->subject(__('admin.mail.status_subject', ['title' => $this->task->title]))
+            ->greeting(__('admin.mail.greeting', ['name' => $notifiable->name ?? '']))
+            ->line(__('admin.mail.status_line', [
+                'title' => $this->task->title,
+                'from' => $this->statusLabel($this->previousStatus),
+                'to' => $this->statusLabel($this->newStatus),
+            ]))
+            ->action(
+                __('admin.mail.open_task'),
+                TaskResource::getUrl('edit', ['record' => $this->task->id]),
+            );
+    }
+
+    /**
+     * Task::statusLabels() is hardcoded English (it feeds internal state,
+     * not the UI). The panel's own translated map is keyed by the same
+     * status constants, so prefer it and fall back to the raw key.
+     * `admin.tasks.statuses` is an array, hence trans() + array lookup
+     * rather than a dotted __() call.
+     */
+    private function statusLabel(string $status): string
+    {
+        $labels = trans('admin.tasks.statuses');
+
+        return is_array($labels)
+            ? ($labels[$status] ?? Task::statusLabel($status))
+            : Task::statusLabel($status);
     }
 }

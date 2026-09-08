@@ -27,13 +27,13 @@ class TaskAssigned extends Notification implements ShouldQueue
     public function toDatabase(object $notifiable): array
     {
         return FilamentNotification::make()
-            ->title('Assigned to a task')
+            ->title(__('admin.mail.assigned_title'))
             ->body($this->task->title)
             ->icon('heroicon-o-clipboard-document-check')
             ->iconColor('primary')
             ->actions([
                 Action::make('view')
-                    ->label('Open task')
+                    ->label(__('admin.mail.open_task'))
                     ->url(TaskResource::getUrl('edit', ['record' => $this->task->id]))
                     ->markAsRead(),
             ])
@@ -43,9 +43,12 @@ class TaskAssigned extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage())
-            ->subject('[EVRST] Assigned to a task: ' . $this->task->title)
-            ->greeting('Hi ' . ($notifiable->name ?? 'there') . ',')
-            ->line('You have been assigned to the task "' . $this->task->title . '".')
-            ->action('Open task', TaskResource::getUrl('edit', ['record' => $this->task->id]));
+            ->subject(__('admin.mail.assigned_subject', ['title' => $this->task->title]))
+            ->greeting(__('admin.mail.greeting', ['name' => $notifiable->name ?? '']))
+            ->line(__('admin.mail.assigned_line', ['title' => $this->task->title]))
+            ->action(
+                __('admin.mail.open_task'),
+                TaskResource::getUrl('edit', ['record' => $this->task->id]),
+            );
     }
 }

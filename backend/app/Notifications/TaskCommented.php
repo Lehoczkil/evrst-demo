@@ -28,17 +28,17 @@ class TaskCommented extends Notification implements ShouldQueue
 
     public function toDatabase(object $notifiable): array
     {
-        $author = $this->comment->author?->name ?? 'Someone';
+        $author = $this->comment->author?->name ?? __('admin.mail.comment_someone');
         $snippet = Str::limit($this->comment->body, 120);
 
         return FilamentNotification::make()
-            ->title('New comment on ' . $this->task->title)
+            ->title(__('admin.mail.comment_title', ['title' => $this->task->title]))
             ->body($author . ': ' . $snippet)
             ->icon('heroicon-o-chat-bubble-left-right')
             ->iconColor('info')
             ->actions([
                 Action::make('view')
-                    ->label('Open task')
+                    ->label(__('admin.mail.open_task'))
                     ->url(TaskResource::getUrl('edit', ['record' => $this->task->id]))
                     ->markAsRead(),
             ])
@@ -47,14 +47,20 @@ class TaskCommented extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $author = $this->comment->author?->name ?? 'Someone';
+        $author = $this->comment->author?->name ?? __('admin.mail.comment_someone');
         $snippet = Str::limit((string) $this->comment->body, 200);
 
         return (new MailMessage())
-            ->subject('[EVRST] New comment on ' . $this->task->title)
-            ->greeting('Hi ' . ($notifiable->name ?? 'there') . ',')
-            ->line($author . ' commented on "' . $this->task->title . '":')
+            ->subject(__('admin.mail.comment_subject', ['title' => $this->task->title]))
+            ->greeting(__('admin.mail.greeting', ['name' => $notifiable->name ?? '']))
+            ->line(__('admin.mail.comment_line', [
+                'author' => $author,
+                'title' => $this->task->title,
+            ]))
             ->line($snippet)
-            ->action('Open task', TaskResource::getUrl('edit', ['record' => $this->task->id]));
+            ->action(
+                __('admin.mail.open_task'),
+                TaskResource::getUrl('edit', ['record' => $this->task->id]),
+            );
     }
 }
