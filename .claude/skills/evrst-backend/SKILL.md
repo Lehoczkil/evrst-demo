@@ -16,6 +16,16 @@ Laravel 12 + Sanctum + Filament v4 + SQLite. Lives in `backend/`. Serves the pub
 - **Composer** for dep management. `composer.lock` is committed.
 - **`QUEUE_CONNECTION=database`** — every notification + Discord post goes through the queue. Run `php artisan queue:work` alongside `serve` in dev.
 - **`MAIL_MAILER=log`** by default — temp passwords land in `storage/logs/laravel.log`.
+- **Org logins vs. mail delivery.** Every team member signs in with an org address —
+  `<given>.<surname>@evrst.hu`, minted from the roster name by `App\Support\OrgEmail`
+  (Hungarian order swapped, accents stripped, hyphens collapsed, `.2` suffix on a
+  collision). It is stored in **both** `users.email` (the login) and
+  `team_members.email` (the address on record). Where mail actually *goes* is a
+  separate switch: `config('mail.deliver_to_org_addresses')` / `MAIL_DELIVER_TO_ORG`.
+  Off (the default) delivers to `team_members.email_private` so temp passwords and
+  reset links reach an inbox that exists; on delivers to the org address. Resolve it
+  through **`User::deliveryEmail()`** — never re-derive the preference at a call site.
+  Rollout checklist + DNS notes live in `docs/org-email-logins.md`.
 
 ## Commands
 
@@ -117,7 +127,7 @@ Custom Filament `Page`s in `app/Filament/Pages/`:
 - `DatabaseInspector` — `/admin/database-inspector` (Advanced group), admin-only schema browser using `Schema::getTables/getColumns/getIndexes/getForeignKeys`.
 
 Custom resource pages:
-- `MemberApplications/Pages/AcceptMemberApplication` — provisions a User (Member role, temp password) + a TeamMember + emails the credentials.
+- `MemberApplications/Pages/AcceptMemberApplication` — provisions a User (Member role, temp password) + a TeamMember + emails the credentials. The form's **org address** field (auto-derived from the name, editable) becomes the login; the address from the application becomes `email_private`.
 - `Tasks/Pages/KanbanBoard` — Trello-style drag-and-drop board with SortableJS, persists position + status changes via Livewire `reorder()`. Validates each card's status transition against `Task::canTransitionTo()` before saving and snaps illegal moves back.
 - `Drawings/Pages/Draw` — vanilla-JS canvas studio at `/admin/drawings/draw`. Pen / line / arrow / rect / ellipse / polygon / text / bucket fill / eyedropper / eraser, image insertion (file picker + `window:paste`), 40-step undo/redo, PNG/JPG export. Mobile breakpoint at 900 px collapses to single column with a fixed bottom toolbar; defaults to 1080×1350 portrait on first mobile mount. Save POSTs a base64 PNG data URL to a Livewire `save()` action.
 - `OnshapeModels/Pages/EditOnshapeModel` — header action **Re-export GLB** runs `App\Jobs\ExportOnshapeModelToGlb` synchronously (so the demo works without a queue worker), then redirects to itself so the embed Section gets a fresh schema render. **Test connection** action on the list page hits `/users/sessioninfo` for a cheap pre-flight check.
@@ -163,13 +173,13 @@ The seeded admin (`admin@evrst.test`) has `password_changed_at = now()` so it ne
 Accept flow (`Filament/Resources/MemberApplications/Pages/AcceptMemberApplication`) creates:
 1. A `User` with role=Member, random `Str::password(12)`, `password_changed_at = null`.
 2. A `TeamMember` row (`TeamMember::create([...])`) with the new column set (`name`, `email`, `email_private`, `discord_username`, `discord_nick`, `discord_id`, etc.) + `user_id` snapshot pointing at the new login. The chosen group is attached via `$member->groups()->sync([$groupId => ['is_primary' => true, 'started_at' => now()]])` and `$member->setPrimaryGroup($groupId)` keeps the `is_primary` flag canonical. **No more virtual-attribute setters or JSON `payload` writes.**
-3. A `TeamMemberAccountCreated` mail notification queued to the new user — includes the temp password and the Filament login URL.
+3. A `TeamMemberAccountCreated` mail notification sent to the new user — temp password, login URL, and an explainer that the org address is a sign-in name rather than a mailbox. **Not** `ShouldQueue`: it's sent inline (and via `sendNow` from the Users-table actions) so the admin gets real delivery feedback instead of "queued" silence, and so it works with no worker running.
 
-`UserResource::Pages\CreateUser` does the same (auto-generates the temp password when admin leaves the field blank). `Tables\UsersTable` exposes a `Resend temp password` row action that rotates and re-mails.
+`UserResource::Pages\CreateUser` does the same (auto-generates the temp password when admin leaves the field blank). `Tables\UsersTable` exposes a `Resend temp password` row action that rotates and re-mails, plus a **`Send temp password` bulk action** (`sendTempPasswords()`) for onboarding the whole roster at once. The bulk action skips anyone whose `deliveryEmail()` resolves to an `@evrst.hu` address while `MAIL_DELIVER_TO_ORG=false` — rotating a password we can't deliver would lock the member out — and reports who was skipped or failed.
 
 ## Tasks + notifications
 
-Three notification classes, all on the `database` channel:
+Three notification classes, all on **both** the `database` and `mail` channels (`ShouldQueue`, so they need a worker). Mail copy comes from `lang/{en,hu}/admin.php` `mail.*` and renders in the recipient's locale via `User::preferredLocale()`; Laravel's own mail chrome comes from `lang/hu.json`. Because they're queued they render with no request in scope, so `TaskResource::getUrl()` falls back to `APP_URL` — it must be correct in production:
 - `TaskAssigned` — fired in `CreateTask::afterCreate` and `EditTask::afterSave` for newly added assignees.
 - `TaskStatusChanged` — fired from `EditTask::afterSave` and `KanbanBoard::reorder` whenever a task moves columns.
 - `TaskCommented` — fired by the create-comment hook on `CommentsRelationManager`.
@@ -183,7 +193,7 @@ The kanban Blade view at `resources/views/filament/resources/tasks/pages/kanban-
 - `RoleSeeder` — every permission + 3 roles + their pivot rows. Idempotent on `key`.
 - `CollectionSeeder` — 7 fixed CMS collection UUIDs (don't change, the frontend hard-codes them). The old `team-members` (`00338d38-…`) and `team-member-groups` (`a4b4cb01-…`) UUIDs were removed when team members moved to dedicated tables.
 - `ResourceSeeder` — about-view + projects + goals + mentors + sponsors. Uses `Ramsey\Uuid::uuid5()` for stable IDs (note: **don't** use `Str::uuid5()` — it doesn't exist on Laravel's helper).
-- `TeamSeeder` — wipes + reseeds the dedicated `team_member_groups` + `team_members` + `team_member_team_member_group` tables from `névjegyzék.xlsx` (21 members; was 18). The new `csapat-menedzser` ("Team manager") group is seeded **first** in the org-chart sort order — Bihari Bertalan + Klabacsek Bálint occupy it. Includes emails (most stub `<slug>@evrst.test`; `Lehocki László` gets the real `evrstrocket@gmail.com`). Writes `discord_username` (the @handle) directly — no more `payload.discord` JSON; `discord_id` (the snowflake) is left null pending collection.
+- `TeamSeeder` — wipes + reseeds the dedicated `team_member_groups` + `team_members` + `team_member_team_member_group` tables from `névjegyzék.xlsx` (21 members; was 18). The new `csapat-menedzser` ("Team manager") group is seeded **first** in the org-chart sort order — Bihari Bertalan + Klabacsek Bálint occupy it. Every member gets an org login minted by `OrgEmail::forName()` (`<given>.<surname>@evrst.hu`) plus their `email_private` from the spreadsheet; two members (Nyári György, Som Nemere) have no private address on file. Freshly minted temp passwords are printed as a table and written to `storage/app/seeded-team-passwords.txt` — the seeder deliberately does **not** email them. Writes `discord_username` (the @handle) directly — no more `payload.discord` JSON; `discord_id` (the snowflake) is left null pending collection.
 - `TaskSeeder` — four sample tasks across the kanban columns. Idempotent on title.
 - `DatabaseSeeder` — `RoleSeeder → admin user → Collection/Resource/Team/Task seeders`.
 
@@ -274,8 +284,11 @@ The Filament admin still lives at `App\Filament\Resources\Cms\TeamMembers\` and 
 - Don't run `composer require` for unscoped Filament plugins without checking compat with Filament v4 (the API differs from v3).
 - Don't enable `auth:sanctum` on `/api/resource` — that endpoint is public-read for the SPA. Same for `POST /api/member-applications` — the public Join-us form must reach it.
 - Don't reintroduce the Advanced sidebar group — Collections + Resources are deliberately hidden via `shouldRegisterNavigation()=false`. The Database inspector + the All-resources / Collections raw inspectors all live under that group on purpose.
+- **Don't hand-roll the org-address format.** `App\Support\OrgEmail` is the single source of truth shared by `TeamSeeder`, `2026_07_21_000000_assign_org_login_emails.php` and the Filament forms; a second implementation will drift.
+- **Don't read `teamMember->email_private` directly to decide where to send mail.** Use `User::deliveryEmail()` so the `MAIL_DELIVER_TO_ORG` switch is honoured everywhere.
+- **Don't redeclare `public Model $record` on a Filament resource Page.** Livewire assigns the route parameter to any name-matching public property *before* `mount()` runs, so a narrowly-typed property throws `Cannot assign string to property …`. Match Filament's own union (`Model | int | string | null`) — see `AcceptMemberApplication`.
 - **Don't add a new `Perm::*` key without a backfill migration.** `RoleSeeder` runs once at install; existing seeded Admin / Manager rows do not pick up new keys from `Perm::catalog()` automatically. Mirror `2026_05_03_000007_attach_models_permissions.php`: insert the row into `permissions` and the pivot row into `permission_role` for every role that should have it.
-- **Don't queue the Onshape export with `dispatch()`.** It must be `dispatchSync()` so the action works without `php artisan queue:work` running (the local + Render dev setups don't run a worker). The Filament action then redirects to itself so the embed Section re-renders with the new `glb_url`.
+- **Don't queue the Onshape export with `dispatch()`.** It must be `dispatchSync()` so the action works without `php artisan queue:work` running (local dev typically has no worker; the Hetzner `queue` container does run one, but keeping the export synchronous means the Filament action never depends on it). The Filament action then redirects to itself so the embed Section re-renders with the new `glb_url`.
 - **Don't put the Three.js `<script type="module">` inside an `@if` branch.** Livewire DOM diffs do not re-execute module scripts, so `window.evrstMountOnshapeViewer` would never get defined when the `@if` flips. The viewer Blade renders the importmap + module unconditionally for that reason.
 - **Don't call `__('admin.help.pages.<dotted-key>.title')`** — the lang file uses literal dotted strings as array keys (e.g. `'resources.cms.events.index' => […]`) and Laravel's `__()` would split on the dots. Use `trans('admin.help.pages')` and array-lookup.
 - **Don't write a new file-handling model from scratch.** Add `use HasFileUrl;` and (if the columns aren't named `disk` / `path`) override `fileDiskAttribute()` / `filePathAttribute()`. Filament tables hook the cleanup via `DeleteAction::make()->before(fn ($r) => $r->deleteFile())`.
