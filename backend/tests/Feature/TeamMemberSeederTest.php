@@ -33,6 +33,29 @@ class TeamMemberSeederTest extends TestCase
         $this->assertContains('Bihari Bertalan', $managerNames);
     }
 
+    public function test_the_operator_account_is_seeded_as_admin(): void
+    {
+        // TeamSeeder overwrites role_id on every run, so a promotion made
+        // with `user:role` reverts unless the roster itself says admin.
+        // Losing this locks the operator out of Users, Roles and
+        // Applications, which are all gated on isAdmin().
+        $this->seed(\Database\Seeders\TeamSeeder::class);
+
+        $user = \App\Models\User::where('email', 'laszlo.lehoczki@evrst.hu')->first();
+
+        $this->assertNotNull($user, 'the operator account must exist');
+        $this->assertTrue($user->isAdmin());
+    }
+
+    public function test_the_roster_has_at_least_one_admin(): void
+    {
+        $this->seed(\Database\Seeders\TeamSeeder::class);
+
+        $admins = \App\Models\User::whereHas('role', fn ($q) => $q->where('key', 'admin'))->count();
+
+        $this->assertGreaterThan(0, $admins, 'an adminless roster cannot manage itself');
+    }
+
     public function test_klabacsek_balint_has_expected_handles(): void
     {
         $this->seed(TeamSeeder::class);

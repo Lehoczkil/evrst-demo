@@ -94,6 +94,9 @@ class TeamSeeder extends Seeder
         ['name' => 'Mosberger Péter',        'positions' => ['jog'],                                  'main' => 'jog',
             'discord_id' => null,               'discord_nick' => null,               'email_private' => 'mosbergerpeti@gmail.com'],
         ['name' => 'Lehoczki László',        'positions' => ['webfejleszto'],                         'main' => 'webfejleszto',
+            // Operates the panel and the deploy — needs Users, Roles and
+            // Applications, all of which are gated on isAdmin().
+            'role' => Perm::ROLE_ADMIN,
             'discord_username' => 'lehoczkilaci',     'discord_nick' => 'lehoczkilaci',     'email_private' => 'lehoczkilaszlo2002@gmail.com'],
         ['name' => 'Som Nemere',             'positions' => ['webfejleszto'],                         'main' => 'webfejleszto',
             'discord_username' => 'somnenie',         'discord_nick' => 'Somnenie',         'email_private' => null],
