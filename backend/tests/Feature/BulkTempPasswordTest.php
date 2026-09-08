@@ -91,6 +91,18 @@ class BulkTempPasswordTest extends TestCase
         Notification::assertNotSentTo($skipped, TeamMemberAccountCreated::class);
     }
 
+    public function test_the_action_is_a_visible_toolbar_button_not_a_dropdown_entry(): void
+    {
+        // It sits next to the per-row action and does something very
+        // different. Hidden in the BulkActionGroup dropdown the two were
+        // indistinguishable, and a real run mailed one person instead of 14.
+        $this->actingAs($this->makeAdmin());
+
+        Livewire::test(ListUsers::class)
+            ->assertTableBulkActionExists('send_temp_password')
+            ->assertTableBulkActionVisible('send_temp_password');
+    }
+
     private function memberWithPrivateEmail(string $login, ?string $private): User
     {
         $user = $this->makeMember(['name' => 'Roster Member', 'email' => $login]);

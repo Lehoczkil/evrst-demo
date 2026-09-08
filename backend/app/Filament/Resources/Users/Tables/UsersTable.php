@@ -139,16 +139,21 @@ class UsersTable
                     ->visible(fn (User $r) => $r->id !== auth()->id()),
             ])
             ->toolbarActions([
+                // Deliberately NOT inside the BulkActionGroup dropdown.
+                // This is the roster onboarding path, and burying it next to
+                // "Delete selected" made it indistinguishable from the
+                // per-row action — a real run selected every row, clicked the
+                // row button, and mailed exactly one person.
+                BulkAction::make('send_temp_password')
+                    ->label(__('admin.users.bulk_temp'))
+                    ->icon('heroicon-o-envelope')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading(__('admin.users.bulk_temp_modal'))
+                    ->modalDescription(__('admin.users.bulk_temp_modal_body'))
+                    ->deselectRecordsAfterCompletion()
+                    ->action(fn (EloquentCollection $records) => self::sendTempPasswords($records)),
                 BulkActionGroup::make([
-                    BulkAction::make('send_temp_password')
-                        ->label(__('admin.users.bulk_temp'))
-                        ->icon('heroicon-o-envelope')
-                        ->color('warning')
-                        ->requiresConfirmation()
-                        ->modalHeading(__('admin.users.bulk_temp_modal'))
-                        ->modalDescription(__('admin.users.bulk_temp_modal_body'))
-                        ->deselectRecordsAfterCompletion()
-                        ->action(fn (EloquentCollection $records) => self::sendTempPasswords($records)),
                     DeleteBulkAction::make(),
                 ]),
             ])
