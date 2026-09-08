@@ -3,6 +3,11 @@
 .env
 .env.backup
 .env.production
+# Any hand-made copy of a real env file — a .bak of .env.production holds
+# APP_KEY and the mail/Discord secrets, and must never be committable.
+.env*.bak
+.env*.old
+.env*.orig
 .phpactor.json
 .phpunit.result.cache
 /.fleet
