@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Optional persistent volume (Fly etc.). On Render free tier nothing is
-# mounted at /persistent and the script falls through to the in-image
-# storage/ + database/ paths — SQLite resets on each redeploy, but the
-# bootstrap-if-empty block below re-creates the admin user automatically.
+# Optional persistent volume (the compose stack's app-data, Fly, etc.).
+# When nothing is mounted at /persistent the script falls through to the
+# in-image storage/ + database/ paths — SQLite then resets on each redeploy,
+# but the bootstrap-if-empty block below re-creates the admin user
+# automatically so the app still boots into a usable state.
 VOLUME=/persistent
 if [ -d "$VOLUME" ]; then
   mkdir -p "$VOLUME/storage" "$VOLUME/database"
@@ -27,11 +28,11 @@ fi
 
 cd /var/www/html
 
-# Refuse to boot without APP_KEY in the right shape. Catches the case
-# where Render's `generateValue: true` produced raw bytes instead of
-# the `base64:<base64>` prefix Laravel needs.
+# Refuse to boot without APP_KEY in the right shape. Catches the case where
+# a host's auto-generated secret is raw bytes instead of the
+# `base64:<base64>` prefix Laravel needs.
 if [ -z "${APP_KEY:-}" ]; then
-    echo "FATAL: APP_KEY is empty. Set it in Render → Environment to base64:\$(openssl rand -base64 32)"
+    echo "FATAL: APP_KEY is empty. Set it in the container environment to base64:\$(openssl rand -base64 32)"
     exit 1
 fi
 case "$APP_KEY" in
@@ -41,8 +42,9 @@ case "$APP_KEY" in
        exit 1;;
 esac
 
-# Bind Apache to whatever port the host injected ($PORT). Render sets
-# 10000 on free tier, Fly uses 8080. Default 8080 covers local docker run.
+# Bind Apache to whatever port the host injected ($PORT) — Fly uses 8080
+# (its `internal_port`), compose.yaml sets it explicitly. Default 8080
+# covers a bare `docker run` too.
 PORT="${PORT:-8080}"
 sed -ri "s!^Listen [0-9]+!Listen ${PORT}!g" /etc/apache2/ports.conf
 sed -ri "s!:[0-9]+>!:${PORT}>!g" /etc/apache2/sites-available/000-default.conf
@@ -78,7 +80,7 @@ php artisan storage:link --quiet 2>/dev/null || true
 # boot (lock contention), and the seeders would re-run on every worker restart —
 # clobbering runtime permission changes admins made in Filament. compose.yaml
 # sets RUN_RELEASE_TASKS=0 on those. Defaults to 1 so single-container hosts
-# (Fly/Render) are unaffected.
+# (Fly, a bare `docker run`) are unaffected.
 if [ "${RUN_RELEASE_TASKS:-1}" = "1" ]; then
   # Apply pending schema on every boot. Idempotent.
   php artisan migrate --force --no-interaction

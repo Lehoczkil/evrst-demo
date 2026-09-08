@@ -63,7 +63,7 @@ COPY . .
 # Run the test suite as part of the build. phpunit.xml configures
 # DB_CONNECTION=sqlite + DB_DATABASE=:memory: so no external services
 # are needed. A red suite fails the Docker build, which fails the
-# Render deploy — bad code never replaces a known-good production.
+# deploy — bad code never replaces a known-good production.
 RUN composer dump-autoload --no-scripts \
     && mkdir -p \
         storage/framework/cache/data \
@@ -107,13 +107,11 @@ COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-# PORT is whatever the host injects at runtime — Render sets 10000 by
-# default for free-tier web services; Fly uses 8080 (its `internal_port`).
-# The entrypoint substitutes it into Apache's config on boot, so this
-# image works on either platform without rebuilding. EXPOSE is purely
-# documentation; container hosts ignore it.
+# PORT is whatever the host injects at runtime — 8080 here and on Fly
+# (its `internal_port`). The entrypoint substitutes it into Apache's config
+# on boot, so a host that injects a different port works without a rebuild.
+# EXPOSE is purely documentation; container hosts ignore it.
 EXPOSE 8080
-EXPOSE 10000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"]

@@ -42,8 +42,9 @@ return [
         // The `public` disk is what Filament FileUpload writes to via
         // `->disk('public')` (drawings / sponsor logos / event banners
         // / Onshape GLBs / bug-report screenshots). Local in dev,
-        // S3-compatible (R2 / B2 / S3) in production so uploads aren't
-        // wiped on every Render redeploy. Switch by setting
+        // S3-compatible (R2 / B2 / S3) in production when uploads should
+        // not live on the container filesystem at all (see
+        // docs/r2-setup.md). Switch by setting
         // FILESYSTEM_PUBLIC_DRIVER=s3 plus the AWS_* keys.
         'public' => env('FILESYSTEM_PUBLIC_DRIVER', 'local') === 's3'
             ? [
@@ -67,7 +68,7 @@ return [
                 // (see frontend/vite.config.ts) — `php artisan serve`
                 // bypasses Laravel middleware on /storage so CORS headers
                 // never get added for cross-origin browser fetches.
-                // Production (Render / S3) keeps the absolute URL.
+                // Production keeps the absolute URL.
                 'url' => env('APP_ENV') === 'local'
                     ? '/storage'
                     : rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',

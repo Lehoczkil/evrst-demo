@@ -1,6 +1,6 @@
 # Cloudflare R2 setup for EVRST
 
-Step-by-step guide for wiring a free, S3-compatible bucket so user uploads (sponsor logos, drawings, Onshape GLBs, event banners, bug-report screenshots) survive Render redeploys.
+Step-by-step guide for wiring a free, S3-compatible bucket so user uploads (sponsor logos, drawings, Onshape GLBs, event banners, bug-report screenshots) live outside the container filesystem instead of inside it.
 
 ---
 
@@ -32,7 +32,7 @@ Cloudflare R2 is the recommended choice because the free tier gives you 10 GB of
 R2 has its **own** token UI. Do not use Cloudflare → My Profile → API Tokens; those are different.
 
 1. R2 (left sidebar) → **Manage R2 API Tokens** → **Create API Token**.
-2. **Token name**: `evrst-render-uploads`.
+2. **Token name**: `evrst-uploads`.
 3. **Permissions**: `Object Read & Write`.
 4. **Specify bucket**: pick `evrst-uploads` only (least-privilege; the token cannot touch other buckets).
 5. **TTL**: leave `Forever`, or set 1 year and rotate annually.
@@ -77,36 +77,36 @@ Skip this section. The EVRST stack uploads through Laravel — the SPA and Filam
 
 ---
 
-## 6. Wire the credentials into Render
+## 6. Wire the credentials into the backend env
 
-1. Render dashboard → service `evrst-admin` → **Environment**.
-2. Add or update the following keys. The canonical list is in `render.yaml` (the `FILESYSTEM_*` / `AWS_*` block around lines 109–126):
+1. Open `backend/.env.production` on the deploy host (the file `compose.yaml` loads into the `backend`, `queue` and `scheduler` services). On another host, set the same keys wherever that host injects environment variables.
+2. Add or update the following keys. `config/filesystems.php` holds the defaults each one overrides:
 
    | Key | Value |
    | --- | --- |
-   | `FILESYSTEM_PUBLIC_DRIVER` | `s3` (already defaulted in `render.yaml`) |
+   | `FILESYSTEM_PUBLIC_DRIVER` | `s3` (defaults to `local`) |
    | `FILESYSTEM_DISK` | `local` (leave alone — only the `public` disk goes to R2) |
    | `AWS_ACCESS_KEY_ID` | from step 3 |
    | `AWS_SECRET_ACCESS_KEY` | from step 3 |
    | `AWS_BUCKET` | `evrst-uploads` |
-   | `AWS_DEFAULT_REGION` | `auto` (already defaulted in `render.yaml`) |
+   | `AWS_DEFAULT_REGION` | `auto` |
    | `AWS_ENDPOINT` | `https://<account-id>.r2.cloudflarestorage.com` |
    | `AWS_URL` | public URL from step 4, no trailing slash |
-   | `AWS_USE_PATH_STYLE_ENDPOINT` | `true` (already defaulted in `render.yaml`) |
+   | `AWS_USE_PATH_STYLE_ENDPOINT` | `true` |
 
-3. Click **Save Changes**. Render redeploys automatically.
+3. Recreate the containers so they pick up the new env: `docker compose up -d`. The queue worker and scheduler read the same file, so all three need the restart.
 
 ---
 
 ## 7. Verify it works
 
-1. After the redeploy finishes, open `/admin` and sign in.
+1. Once the containers are back up, open `/admin` and sign in.
 2. Upload something that hits the public disk:
    - Sponsors → create a sponsor with a logo, **or**
    - Drawings → open the drawing studio and save a sketch.
 3. Cloudflare dashboard → R2 → `evrst-uploads` → **Objects** tab. The new file should appear under `sponsors/<filename>` or `drawings/<filename>`.
 4. Reload the admin page. The image should render from the bucket (right-click → Inspect → confirm the `src` is your `AWS_URL`).
-5. In Render, click **Manual Deploy** → **Clear build cache & deploy**. After it comes back up, the same image should still load. Before R2 was wired, this would 404 because the container filesystem was wiped.
+5. Rebuild from scratch (`docker compose up -d --build`) and reload. The same image should still load, because the bytes now live in the bucket rather than in the container image — a fresh image no longer has to carry them.
 
 ---
 
@@ -124,4 +124,4 @@ The free tier is **10 GB stored**, **1 M Class A operations** (writes / list), a
 
 ## 10. Rotating or revoking the token
 
-If the Render env leaks (or a contributor walks away with the secret), go to R2 → **Manage R2 API Tokens**, find `evrst-render-uploads`, and click **Roll** (rotate) or **Revoke** (kill it). Then update `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in the Render dashboard so the new redeploy picks up the fresh credentials.
+If the production env leaks (or a contributor walks away with the secret), go to R2 → **Manage R2 API Tokens**, find the token from step 3, and click **Roll** (rotate) or **Revoke** (kill it). Then update `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `backend/.env.production` and `docker compose up -d` so the containers pick up the fresh credentials.

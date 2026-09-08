@@ -5,8 +5,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
-// This Render service hosts the admin panel only — the SPA is deployed
-// separately. Redirect root-URL hits to the Filament login so we don't
+// This container hosts the admin panel + API only — the SPA is served
+// separately (Caddy fronts both in the compose stack). Redirect root-URL
+// hits to the Filament login so we don't
 // serve Laravel's default welcome view (which expects a Vite manifest
 // that isn't shipped in this image and 500s in production builds).
 Route::get('/', fn () => redirect('/admin'));
