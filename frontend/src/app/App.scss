@@ -1,5 +1,10 @@
 @use 'sass:meta';
-@include meta.load-css('variables');
+
+/* Order matters: tokens declare the custom properties every later sheet
+   reads, and _base paints the document with them. */
+@include meta.load-css('tokens');
 @include meta.load-css('typography');
-@include meta.load-css('layout');
+@include meta.load-css('base');
+@include meta.load-css('controls');
+@include meta.load-css('prose');
 @include meta.load-css('animations');

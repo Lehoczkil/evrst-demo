@@ -1,0 +1,129 @@
+/*
+  The design system's tokens — see docs/frontend-redesign.md §2.
+
+  Replaces _variables.scss. Every colour on the site resolves to something
+  declared here; a component that needs a value not in this file either
+  wants a token added, or wants a different design.
+
+  Layered so a component's own @layer-less rules always win over these
+  defaults without a specificity fight.
+*/
+@layer tokens {
+  :root {
+    /* ── Ground ───────────────────────────────────────────────────────
+       Cool graphite on purpose, so the logo's gold ends up the only warm
+       thing on the page: one light source, at night.
+
+       --ink-0 is #050506 rather than #000 because the hero paints a gold
+       radial over it, and a gradient into pure black bands visibly on
+       6-bit mobile panels. It needs somewhere to go. */
+    --ink-0: #050506;
+    --ink-1: #0b0c0e;
+    --ink-2: #14161a;
+    --line: #22252b;
+    --line-hi: #32363e;
+
+    /* ── Signal ───────────────────────────────────────────────────────
+       --gold-500 is the logo's own #F1AB3C, normalised from the four
+       near-identical hexes the SVG export carries.
+
+       Contrast, because it decides where gold is allowed to be text:
+         10.3:1 against --ink-0   → a legitimate text colour on dark
+          1.87:1 against --paper  → a FILL ONLY on light surfaces
+       So on a paper surface, body copy and headings are --on-paper and
+       gold appears only as button fills, rules and graphic marks. */
+    --gold-400: #f7c368;
+    --gold-500: #f1ab3c;
+    --gold-600: #c6871f;
+    --gold-dim: rgb(241 171 60 / 16%);
+
+    /* ── Paper — the one inverted surface, the logo's own off-white ── */
+    --paper: #f8f7f4;
+    --paper-2: #efeee9;
+    --paper-line: #dedcd6;
+
+    /* ── Type ─────────────────────────────────────────────────────── */
+    --text-hi: #f4f4f5;
+    --text-mid: #a2a6ad;
+    --text-low: #6b7078;
+    --on-paper: #05060a;
+    --on-paper-mid: #55595f;
+
+    /* ── Status. Separate from the accent: gold means "action or live",
+       and a semantic colour must not have to compete with it. ─────── */
+    --live: #43d68a;
+    --warn: var(--gold-500);
+    --error: #f2685c;
+
+    /* ── Families ─────────────────────────────────────────────────────
+       Panchang carries the display voice, Space Grotesk the body, IBM
+       Plex Mono the data voice (eyebrows, specs, dates, counters). All
+       three self-hosted — see _typography.scss. */
+    --font-display: 'Panchang-Bold', 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+    /* ── Type scale. One clamp per step, no per-breakpoint overrides. */
+    --fs-display: clamp(2.6rem, 8.4vw, 7.4rem);
+    --fs-h1: clamp(2.25rem, 5.5vw, 4.5rem);
+    --fs-h2: clamp(1.85rem, 4vw, 3.1rem);
+    --fs-h3: clamp(1.12rem, 1.7vw, 1.42rem);
+    --fs-body-lg: clamp(1.02rem, 1.5vw, 1.22rem);
+    --fs-body: 1rem;
+    --fs-eyebrow: 11.5px;
+    --fs-meta: 13px;
+
+    /* ── Space and shape ──────────────────────────────────────────── */
+    --gutter: 16px;
+    --gutter-md: 24px;
+    --gutter-lg: 32px;
+    --container: 1440px;
+    --radius: 4px;
+    --radius-lg: 8px;
+    --section-y: clamp(84px, 11vw, 190px);
+
+    /* The fixed wordmark is 8px + 40px tall; hash targets clear it. */
+    --header-offset: 64px;
+
+    /* ── Motion. The CSS half of the pair — the motion-v mirror lives in
+       components/Motion/springs.ts, and neither may drift. ─────────── */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-pop: cubic-bezier(0.34, 1.7, 0.4, 1);
+    --dur-fast: 0.18s;
+    --dur: 0.35s;
+    --dur-slow: 0.75s;
+
+    /* ── Stacking. Declared together so a new fixed thing cannot be
+       given a number that happens to collide. ──────────────────────── */
+    --z-nav: 100;
+    --z-header: 99;
+    --z-burst: 98;
+    --z-float: 90;
+
+    /* ── TEMPORARY: the pre-redesign names ────────────────────────────
+       The old section components (About, Team, Events, Mentors,
+       Sponsors, Outro, Section*, DiagonalDivider) are replaced one at a
+       time in phase 3, and until then they still read these. Aliasing
+       them keeps the tree rendering through the transition instead of
+       leaving every unconverted section unstyled for the length of a
+       phase.
+
+       DELETE THIS BLOCK when the last of those components is gone —
+       `grep -rn 'color-dimmed\|font-family-headline' src` says whether
+       anything still needs it. Nothing new may reference these. */
+    --bg-dark: var(--ink-0);
+    --bg-gray: var(--ink-1);
+    --card-bg: var(--ink-2);
+    --card-border: var(--line);
+    --card-border-accent: var(--gold-500);
+    --color-primary: var(--gold-500);
+    --color-text: var(--text-hi);
+    --color-dimmed: var(--text-mid);
+    --color-bright: #fff;
+    --font-family-primary: var(--font-body);
+    --font-family-headline: var(--font-display);
+    --font-family-mono: var(--font-mono);
+    --header-height: var(--header-offset);
+  }
+}

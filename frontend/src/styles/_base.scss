@@ -1,0 +1,105 @@
+/*
+  Document-level rules. Replaces _layout.scss, which painted the old
+  --bg-dark / --color-text palette.
+*/
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Reserves the scrollbar's width on both sides so a page that grows or
+     shrinks past the viewport height does not shift horizontally. */
+  scrollbar-gutter: stable both-edges;
+
+  /*
+    `clip`, not `hidden`, and on html rather than body.
+
+    The marquee and the hero's oversized parallax layers are both wider
+    than the viewport by design, and neither may give the page a sideways
+    scrollbar. This used to be `overflow-x: hidden` on `body` — which,
+    together with `height: 100%`, made BODY the scroll container instead
+    of the document. Everything downstream broke quietly:
+
+      · `animation-timeline: scroll(root block)` tracks the root
+        scroller, which then never scrolled — so every scroll-driven
+        animation on the site sat frozen at its start state.
+      · `window.scrollY` stayed 0, so the JS fallback was dead too.
+      · The chrome's surface sampling and the back-to-top's threshold
+        both read scrollY, so they never fired either.
+
+    `clip` suppresses the overflow WITHOUT creating a scroll container,
+    so the document keeps scrolling and the root timeline works.
+  */
+  overflow-x: clip;
+}
+
+/*
+  `scroll-behavior: smooth` is a motion preference like any other — and
+  unlike the motion-v animations, MotionConfig cannot see it.
+*/
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Hash targets clear the fixed wordmark. */
+[id] {
+  scroll-margin-top: var(--header-offset);
+}
+
+html,
+body,
+#vue {
+  color: var(--text-hi);
+  background-color: var(--ink-0);
+}
+
+/*
+  No `height: 100%` here — that was the other half of the scroll-container
+  bug. `min-height: 100dvh` on a flex column is what actually holds the
+  footer down on a short page, and it leaves the document as the scroller.
+*/
+body,
+#vue {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  margin: 0;
+}
+
+main {
+  flex: 1 1 auto;
+}
+
+a {
+  color: inherit;
+}
+
+/* Keyboard parity. The gold ring reads on every surface the site has,
+   which is why it is the one focus treatment rather than one per
+   surface. */
+:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--gold-500);
+  outline-offset: 3px;
+}
+
+::selection {
+  color: var(--ink-0);
+  background-color: var(--gold-500);
+}
+
+/*
+  The container. A shortcut with the same name exists in uno.config.ts for
+  template use; this is the class for the cases that reach for it from
+  SCSS.
+*/
+.container,
+.wrap {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 56px);
+}

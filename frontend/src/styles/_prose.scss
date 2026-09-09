@@ -1,0 +1,137 @@
+/*
+  The prose scale for CMS content.
+
+  DynamicPage renders `payload.content` through v-html, which means every
+  CMS page looks unstyled unless this exists — and until now it did not.
+  Applied with :deep() from the page component, since markup from v-html
+  never carries a scoped attribute.
+*/
+.prose {
+  max-width: 66ch;
+
+  h2,
+  h3 {
+    margin: 34px 0 12px;
+    font-size: clamp(1.3rem, 2.1vw, 1.7rem);
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  p {
+    margin-bottom: 16px;
+    color: var(--text-mid);
+  }
+
+  /*
+    Bullets are a gold 8px rule, not a disc. This page has no other round
+    marks on it, and a disc list is the one place a CMS page reverts to
+    looking like a default stylesheet.
+  */
+  ul,
+  ol {
+    padding-left: 0;
+    margin: 0 0 16px;
+    color: var(--text-mid);
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 8px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.62em;
+      left: 0;
+      width: 8px;
+      height: 1px;
+      background: var(--gold-500);
+    }
+  }
+
+  ol {
+    counter-reset: prose-ol;
+
+    li {
+      counter-increment: prose-ol;
+
+      // A numbered list is a sequence, so it keeps its numbers — the rule
+      // is only for unordered items.
+      &::before {
+        top: 0;
+        width: auto;
+        height: auto;
+        color: var(--gold-500);
+        background: none;
+        font-size: 0.85em;
+        font-family: var(--font-mono);
+        content: counter(prose-ol) '.';
+      }
+    }
+  }
+
+  blockquote {
+    padding: 4px 0 4px 20px;
+    margin: 0 0 16px;
+    border-left: 2px solid var(--gold-500);
+    color: var(--text-hi);
+    font-size: 1.08em;
+  }
+
+  code {
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--ink-2);
+    font-size: 0.88em;
+    font-family: var(--font-mono);
+  }
+
+  pre {
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--ink-1);
+    // CMS code blocks are authored at whatever width the author felt
+    // like; it scrolls in its own box rather than widening the page.
+    overflow-x: auto;
+
+    code {
+      padding: 0;
+      border: 0;
+      background: none;
+    }
+  }
+
+  a {
+    border-bottom: 1px solid var(--gold-600);
+    color: var(--gold-500);
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+  }
+
+  // Same reason as pre: a CMS table must not give the page a sideways
+  // scrollbar.
+  .prose__table,
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  hr {
+    margin: 34px 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+}

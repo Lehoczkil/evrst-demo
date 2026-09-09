@@ -1,17 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
   <head>
     <base href="/">
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      Panchang carries the hero headline, so it is on the LCP path and gets
+      a preload. crossorigin is required even for a same-origin font
+      preload, or the browser fetches it twice.
+    -->
+    <link rel="preload" href="/fonts/Panchang-Bold.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!--
+      Space Grotesk (body) and IBM Plex Mono (data voice). Declared here
+      rather than with a CSS @import inside _typography.scss, which was a
+      render-blocking serial request chain and a third-party font request
+      from an EU-facing site. vite-plugin-webfont-dl rewrites these at
+      build time to self-hosted copies, so nothing reaches Google in
+      production.
+    -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+
     <title>Escape Velocity Rocketry Student Team</title>
-    <meta name="description" content="Escape Velocity Rocketry Student Team — Óbuda University." />
+    <meta name="description" content="Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk." />
     <meta property="og:title" content="Escape Velocity Rocketry Student Team" />
-    <meta property="og:description" content="Escape Velocity Rocketry Student Team — Óbuda University." />
+    <meta property="og:description" content="Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata." />
     <meta property="og:image" content="/share.jpg" />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#0c0d0e" />
+    <meta name="theme-color" content="#050506" />
   </head>
   <body>
     <div id="vue"></div>
