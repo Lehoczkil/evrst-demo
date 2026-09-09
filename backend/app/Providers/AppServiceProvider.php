@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\ActivityLog;
+use App\Models\BugReport;
+use App\Models\CalendarEvent;
 use App\Models\Cms\Event;
 use App\Models\MemberApplication;
 use App\Models\Role;
@@ -86,31 +89,47 @@ class AppServiceProvider extends ServiceProvider
             }
         };
 
-        MemberApplication::saved(fn () => $forget([
+        $applicationKeys = [
             'widgets:admin-stats',
+            // Read by the dashboard's "recent applications" tile.
             'widgets:recent-applications',
             'nav:applications-pending-count',
-        ]));
-        MemberApplication::deleted(fn () => $forget([
-            'widgets:admin-stats',
-            'widgets:recent-applications',
-            'nav:applications-pending-count',
-        ]));
+        ];
+        MemberApplication::saved(fn () => $forget($applicationKeys));
+        MemberApplication::deleted(fn () => $forget($applicationKeys));
 
-        Task::saved(function (Task $task) use ($forget) {
+        // My-tasks is cached per user, and a task write can change *which*
+        // users it belongs to — so the set of keys to drop isn't knowable
+        // from the row alone. It used to forget only the current assignees,
+        // which left a stale list behind for anyone just removed from a
+        // task, and cost an assignees() query on every single save (a
+        // 40-card kanban drag paid it 40 times). A version stamp in the key
+        // invalidates every user's list at once, for free; the orphaned
+        // entries fall out with their own 60 s TTL.
+        Task::saved(function () use ($forget) {
             $forget(['widgets:admin-stats', 'widgets:upcoming-schedule']);
-            // My-tasks is per-user; bust supervisor + every assignee.
-            $userIds = collect([$task->supervisor_id])
-                ->merge($task->assignees()->pluck('users.id'))
-                ->filter()->unique();
-            foreach ($userIds as $uid) {
-                Cache::forget("widgets:my-tasks:{$uid}");
-            }
+            Task::bumpMyTasksCacheVersion();
         });
-        Task::deleted(fn () => $forget(['widgets:admin-stats', 'widgets:upcoming-schedule']));
+        Task::deleted(function () use ($forget) {
+            $forget(['widgets:admin-stats', 'widgets:upcoming-schedule']);
+            Task::bumpMyTasksCacheVersion();
+        });
 
         Event::saved(fn () => $forget(['widgets:admin-stats', 'widgets:upcoming-schedule']));
         Event::deleted(fn () => $forget(['widgets:admin-stats', 'widgets:upcoming-schedule']));
+
+        // Calendar entries are half of widgets:upcoming-schedule and drive
+        // the dashboard's countdown strip; nothing used to invalidate them.
+        CalendarEvent::saved(fn () => $forget(['widgets:upcoming-schedule']));
+        CalendarEvent::deleted(fn () => $forget(['widgets:upcoming-schedule']));
+
+        // The dashboard activity feed reads every model's writes, so the
+        // log row itself is the one thing all of them have in common.
+        ActivityLog::created(fn () => $forget(['widgets:dashboard-activity']));
+
+        // The bug nav badge counts open reports.
+        BugReport::saved(fn () => $forget(['bugs:open-count']));
+        BugReport::deleted(fn () => $forget(['bugs:open-count']));
 
         User::saved(fn () => $forget(['widgets:admin-stats']));
         User::deleted(fn () => $forget(['widgets:admin-stats']));

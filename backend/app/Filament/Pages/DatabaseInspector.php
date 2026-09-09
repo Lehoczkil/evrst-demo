@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -86,14 +87,22 @@ class DatabaseInspector extends Page
     /** @return array<int, array{name: string, rows: int}> */
     public function getTablesIndex(): array
     {
-        return array_map(function (string $name) {
-            try {
-                $rows = (int) DB::table($name)->count();
-            } catch (\Throwable) {
-                $rows = 0;
-            }
-            return ['name' => $name, 'rows' => $rows];
-        }, $this->tableNames());
+        // A COUNT(*) per table on every render — including every Livewire
+        // round trip on this page — is the most expensive thing here and
+        // the least time-sensitive. A minute of staleness on a row count
+        // an admin is browsing costs nothing.
+        return Cache::remember('db-inspector:table-counts', 60, fn () => array_map(
+            function (string $name) {
+                try {
+                    $rows = (int) DB::table($name)->count();
+                } catch (\Throwable) {
+                    $rows = 0;
+                }
+
+                return ['name' => $name, 'rows' => $rows];
+            },
+            $this->tableNames(),
+        ));
     }
 
     /**

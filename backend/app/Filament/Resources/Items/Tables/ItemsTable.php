@@ -8,12 +8,17 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ItemsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            // Eager-load what the columns read — Filament does no
+            // automatic eager loading, so without this totalQuantity()
+            // fire one query per row.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['stocks:id,item_id,quantity']))
             ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')

@@ -14,12 +14,17 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class OnshapeModelsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            // Eager-load what the columns read — Filament does no
+            // automatic eager loading, so without this the owner column
+            // fire one query per row.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['user:id,name']))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('title')
