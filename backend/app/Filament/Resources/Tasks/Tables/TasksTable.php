@@ -11,12 +11,17 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TasksTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            // Eager-load what the columns read — Filament does no
+            // automatic eager loading, so without this the assignee, supervisor and parent columns
+            // fire one query per row.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['assignees:id,name', 'supervisor:id,name', 'parent:id,title']))
             ->defaultSort('position')
             ->columns([
                 TextColumn::make('priority')

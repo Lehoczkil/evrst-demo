@@ -55,7 +55,17 @@ class TaskResource extends Resource
 
     public static function canViewAny(): bool { return auth()->check(); }
     public static function canCreate(): bool  { return auth()->user()?->can(Perm::TASKS_CREATE) ?? false; }
-    public static function canEdit($record): bool   { return auth()->user()?->can(Perm::TASKS_EDIT) ?? false; }
+    /**
+     * Per record, not per role: TASKS_EDIT opens any task, TASKS_PROGRESS
+     * opens the ones you are assigned to or supervise. See
+     * Task::canBeProgressedBy(). TaskForm locks the definition fields for
+     * the second group, so they can attach proof and move the status
+     * without rewriting the task.
+     */
+    public static function canEdit($record): bool
+    {
+        return $record instanceof Task && $record->canBeProgressedBy(auth()->user());
+    }
     public static function canDelete($record): bool { return auth()->user()?->can(Perm::TASKS_DELETE) ?? false; }
     public static function canDeleteAny(): bool     { return auth()->user()?->can(Perm::TASKS_DELETE) ?? false; }
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tasks\Schemas;
 
+use App\Auth\Perm;
 use App\Models\Task;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
@@ -14,6 +15,21 @@ use Illuminate\Support\Facades\Cache;
 
 class TaskForm
 {
+    /**
+     * True when this viewer may move the task along but not redefine it.
+     *
+     * TASKS_PROGRESS (the Member role) opens the edit page for a task you
+     * are assigned to or supervise — so you can attach proof and change the
+     * status. It is not permission to retitle the task, reassign it or move
+     * its deadline, so every field that defines the task is locked. Filament
+     * does not dehydrate a disabled field, so the stored values survive the
+     * save untouched rather than depending on what the form posted.
+     */
+    public static function definitionLocked(?Task $record): bool
+    {
+        return $record !== null && ! (auth()->user()?->can(Perm::TASKS_EDIT) ?? false);
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -27,6 +43,7 @@ class TaskForm
                     ->label(__('admin.common.title'))
                     ->required()
                     ->maxLength(180)
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 8]),
                 // Status select narrows to the moves $user is allowed to
                 // make from the current row's status. On create the task
@@ -59,6 +76,7 @@ class TaskForm
                     ->maxLength(5000)
                     ->helperText(__('admin.tasks.description_help'))
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_description'))
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(12),
                 Select::make('supervisor_id')
                     ->label(__('admin.tasks.supervisor'))
@@ -71,6 +89,7 @@ class TaskForm
                     ->searchable()
                     ->preload()
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_supervisor'))
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Select::make('assignees')
                     ->label(__('admin.tasks.assignees'))
@@ -81,12 +100,14 @@ class TaskForm
                     ->preload()
                     ->searchable()
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_assignees'))
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 DatePicker::make('due_date')
                     ->label(__('admin.tasks.due_date'))
                     ->required()
                     ->displayFormat('d M Y')
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_due_date'))
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 Select::make('priority')
                     ->label(__('admin.tasks.priority'))
@@ -96,6 +117,7 @@ class TaskForm
                     ->default(Task::PRIORITY_NORMAL)
                     ->required()
                     ->native(false)
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 Select::make('category')
                     ->label(__('admin.tasks.category'))
@@ -105,6 +127,7 @@ class TaskForm
                     ->searchable()
                     ->native(false)
                     ->placeholder(__('admin.tasks.no_category'))
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 Select::make('parent_task_id')
                     ->label(__('admin.tasks.parent'))
@@ -120,11 +143,13 @@ class TaskForm
                     ->native(false)
                     ->placeholder(__('admin.tasks.no_parent'))
                     ->helperText(__('admin.tasks.parent_help'))
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 8]),
                 TextInput::make('position')
                     ->label(__('admin.tasks.position'))
                     ->numeric()
                     ->default(0)
+                    ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 4]),
                     ]),
             ]);

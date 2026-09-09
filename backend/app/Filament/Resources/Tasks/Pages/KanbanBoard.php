@@ -123,9 +123,19 @@ class KanbanBoard extends Page
         return $cols;
     }
 
+    /**
+     * May this viewer drag *anything* on the board.
+     *
+     * Deliberately coarse: it only decides whether Sortable is enabled at
+     * all. What actually happens to each card is decided per card, by
+     * Task::canTransitionTo() inside reorder() — a TASKS_PROGRESS holder
+     * can move their own cards and has every other card snapped back.
+     */
     public function canEditTasks(): bool
     {
-        return auth()->user()?->can(Perm::TASKS_EDIT) ?? false;
+        $user = auth()->user();
+
+        return $user?->can(Perm::TASKS_EDIT) || $user?->can(Perm::TASKS_PROGRESS);
     }
 
     /**
@@ -155,14 +165,17 @@ class KanbanBoard extends Page
     public function reorder(array $payload): void
     {
         if (! $this->canEditTasks()) {
-            FilamentNotification::make()->title('Not allowed')->danger()->send();
+            FilamentNotification::make()
+                ->title(__('admin.tasks.drag_not_allowed'))
+                ->danger()
+                ->send();
             return;
         }
 
         if ($this->isFiltered()) {
             FilamentNotification::make()
-                ->title('Drag disabled while filters are active')
-                ->body('Clear filters to reorder cards.')
+                ->title(__('admin.tasks.drag_filtered'))
+                ->body(__('admin.tasks.drag_filtered_body'))
                 ->warning()
                 ->send();
             return;
@@ -172,16 +185,29 @@ class KanbanBoard extends Page
         $movedAcrossColumns = [];
         $rejected = [];
 
-        DB::transaction(function () use ($payload, $allowedStatuses, &$movedAcrossColumns, &$rejected) {
-            foreach ($payload as $status => $ids) {
+        // One query for the whole board instead of Task::find() per card,
+        // with assignees eager-loaded: the cache-invalidation hook on
+        // Task::saved reads them, and would otherwise fire its own query
+        // for every card in a 40-card drag.
+        $ids = collect($payload)
+            ->filter(fn ($cardIds, $status) => is_array($cardIds) && in_array($status, $allowedStatuses, true))
+            ->flatten()
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique();
+
+        $tasks = Task::with('assignees')->findMany($ids)->keyBy('id');
+
+        DB::transaction(function () use ($payload, $allowedStatuses, $tasks, &$movedAcrossColumns, &$rejected) {
+            foreach ($payload as $status => $cardIds) {
                 if (! in_array($status, $allowedStatuses, true)) continue;
-                if (! is_array($ids)) continue;
+                if (! is_array($cardIds)) continue;
 
                 $position = 0;
-                foreach ($ids as $rawId) {
+                foreach ($cardIds as $rawId) {
                     $taskId = (int) $rawId;
                     if ($taskId <= 0) continue;
-                    $task = Task::find($taskId);
+                    $task = $tasks->get($taskId);
                     if (! $task) continue;
 
                     $statusChanged = $task->status !== $status;
@@ -225,8 +251,9 @@ class KanbanBoard extends Page
                 Notification::send($watchers, new TaskStatusChanged($task, $entry['previous'], $entry['next']));
                 foreach ($watchers as $watcher) {
                     if (! DiscordPayloads::wantsDiscordPing($watcher)) continue;
-                    $payload = DiscordPayloads::taskStatusChangedPing($task, $watcher, $entry['previous'], $entry['next']);
-                    PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+                    // Not $payload — that is this method's own parameter.
+                    $ping = DiscordPayloads::taskStatusChangedPing($task, $watcher, $entry['previous'], $entry['next']);
+                    PostDiscordWebhook::dispatch($ping['content'], $ping['embed'], $ping['reference'])->afterResponse();
                 }
             }
         }
@@ -241,7 +268,9 @@ class KanbanBoard extends Page
 
         if (! empty($movedAcrossColumns)) {
             FilamentNotification::make()
-                ->title(count($movedAcrossColumns) === 1 ? 'Task moved' : count($movedAcrossColumns) . ' tasks moved')
+                ->title(trans_choice('admin.tasks.drag_moved', count($movedAcrossColumns), [
+                    'count' => count($movedAcrossColumns),
+                ]))
                 ->success()
                 ->send();
         }

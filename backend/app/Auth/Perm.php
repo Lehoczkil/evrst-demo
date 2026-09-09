@@ -40,6 +40,15 @@ final class Perm
     public const TASKS_EDIT   = 'tasks.edit';
     public const TASKS_DELETE = 'tasks.delete';
 
+    /**
+     * Move a task you are on through the workflow — open its edit page,
+     * attach proof, change the status — *without* being able to edit
+     * anyone's task or rewrite its definition. Held by Member, and always
+     * checked together with "am I the assignee or the supervisor here".
+     * TASKS_EDIT remains the unrestricted one.
+     */
+    public const TASKS_PROGRESS = 'tasks.progress';
+
     public const MODELS_VIEW   = 'models.view';
     public const MODELS_CREATE = 'models.create';
     public const MODELS_EDIT   = 'models.edit';
@@ -90,6 +99,7 @@ final class Perm
             ['key' => self::TASKS_CREATE,        'label' => 'Create tasks'],
             ['key' => self::TASKS_EDIT,          'label' => 'Edit tasks'],
             ['key' => self::TASKS_DELETE,        'label' => 'Delete tasks'],
+            ['key' => self::TASKS_PROGRESS,      'label' => 'Progress own tasks'],
             ['key' => self::MODELS_VIEW,         'label' => 'View 3D models'],
             ['key' => self::MODELS_CREATE,       'label' => 'Create 3D models'],
             ['key' => self::MODELS_EDIT,         'label' => 'Edit 3D models'],
@@ -136,7 +146,9 @@ final class Perm
 
     /**
      * Member: read-only — except they can file + view bug reports so the
-     * report-a-bug page is reachable without admin privileges.
+     * report-a-bug page is reachable without admin privileges, and move
+     * their own tasks through the workflow (TASKS_PROGRESS is always
+     * paired with an assignee / supervisor check on the record itself).
      *
      * @return array<int, string>
      */
@@ -146,6 +158,7 @@ final class Perm
             self::BUGS_REPORT,
             self::BUGS_VIEW,
             self::CONTACTS_VIEW,
+            self::TASKS_PROGRESS,
         ];
     }
 }

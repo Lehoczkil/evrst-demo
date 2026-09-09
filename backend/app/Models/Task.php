@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class Task extends Model
 {
@@ -189,6 +190,59 @@ class Task extends Model
      *    child is at least TESTING, and cannot reach DONE until every
      *    child is DONE.
      */
+    /** Cache key holding the version stamp for the per-user my-tasks lists. */
+    public const MY_TASKS_CACHE_VERSION_KEY = 'widgets:my-tasks:version';
+
+    /**
+     * The current stamp, as part of a my-tasks cache key.
+     *
+     * Any task write bumps it, which invalidates every user's cached list
+     * at once — including the list of someone who was just removed from a
+     * task, whose key isn't derivable from the row being saved.
+     */
+    public static function myTasksCacheVersion(): int
+    {
+        return (int) Cache::get(self::MY_TASKS_CACHE_VERSION_KEY, 1);
+    }
+
+    public static function bumpMyTasksCacheVersion(): void
+    {
+        // increment() is a no-op on a missing key for some stores, so seed
+        // it first. Both calls are forever — this is a counter, not data.
+        Cache::add(self::MY_TASKS_CACHE_VERSION_KEY, 1);
+        Cache::increment(self::MY_TASKS_CACHE_VERSION_KEY);
+    }
+
+    /**
+     * Is this user on this task — assigned to it, or supervising it?
+     */
+    public function isOnTask(?User $user): bool
+    {
+        if (! $user) return false;
+
+        return $this->supervisor_id === $user->id
+            || $this->assignees()->where('users.id', $user->id)->exists();
+    }
+
+    /**
+     * May this user move this task along — open its edit page, attach
+     * proof, change its status?
+     *
+     * Two ways in: the blanket TASKS_EDIT (any task), or TASKS_PROGRESS on
+     * a task you are actually on. The second is what the Member role holds:
+     * the documented state machine (assignee → TESTING with proof,
+     * supervisor → DONE) was written for them, but every gate asked for
+     * TASKS_EDIT, so the edit page 403'd and the proof / comment relation
+     * managers they were built for never rendered.
+     */
+    public function canBeProgressedBy(?User $user): bool
+    {
+        if (! $user) return false;
+        if ($user->can(\App\Auth\Perm::TASKS_EDIT)) return true;
+
+        return $user->can(\App\Auth\Perm::TASKS_PROGRESS) && $this->isOnTask($user);
+    }
+
     public function canTransitionTo(?User $user, string $nextStatus): bool
     {
         if (! $user) return false;
@@ -205,7 +259,7 @@ class Task extends Model
         if ($user->isAdmin()) {
             return $nextStatus !== self::STATUS_DONE || $this->hasProof();
         }
-        if (! $user->can(\App\Auth\Perm::TASKS_EDIT)) return false;
+        if (! $this->canBeProgressedBy($user)) return false;
 
         $isAssignee = $this->assignees()->where('users.id', $user->id)->exists();
         $isSupervisor = $this->supervisor_id === $user->id;

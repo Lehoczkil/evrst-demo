@@ -154,8 +154,9 @@ class ProofsRelationManager extends RelationManager
 
     /**
      * Anyone tied to the task — assignee, supervisor, or admin — may
-     * attach a proof. Members without TASKS_EDIT can still upload
-     * evidence on a task they're assigned to.
+     * attach a proof. Members without TASKS_EDIT can still upload evidence
+     * on a task they're assigned to: TASKS_PROGRESS gets them onto the edit
+     * page where this relation manager renders.
      */
     protected function canPostProof(): bool
     {
@@ -164,9 +165,8 @@ class ProofsRelationManager extends RelationManager
         if ($u->isAdmin()) return true;
         /** @var Task $task */
         $task = $this->getOwnerRecord();
-        $task->loadMissing(['assignees']);
-        return $task->supervisor_id === $u->id
-            || $task->assignees->contains('id', $u->id);
+
+        return $task->isOnTask($u);
     }
 
     protected function canEditProof(TaskProof $proof): bool
