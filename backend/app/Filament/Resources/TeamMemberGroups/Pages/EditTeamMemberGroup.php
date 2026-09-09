@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMemberGroups\Pages;
+namespace App\Filament\Resources\TeamMemberGroups\Pages;
 
-use App\Filament\Resources\Cms\TeamMemberGroups\TeamMemberGroupResource;
+use App\Filament\Resources\TeamMemberGroups\TeamMemberGroupResource;
 use App\Models\TeamMemberGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;

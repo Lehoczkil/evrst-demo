@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMemberGroups\Schemas;
+namespace App\Filament\Resources\TeamMemberGroups\Schemas;
 
 use App\Models\TeamMemberGroup;
 use Filament\Forms\Components\Select;
@@ -32,15 +32,15 @@ class TeamMemberGroupForm
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('slug')
-                    ->label('Slug')
+                    ->label(__('admin.team.group_slug'))
                     ->required()
                     ->maxLength(64)
                     ->alphaDash()
-                    ->helperText('Stable code-side identifier; survives renames.')
+                    ->helperText(__('admin.team.group_slug_help'))
                     ->unique(table: 'team_member_groups', column: 'slug', ignoreRecord: true)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Select::make('kind')
-                    ->label('Kind')
+                    ->label(__('admin.team.group_kind'))
                     ->options([
                         'leadership' => 'Leadership',
                         'department' => 'Department',
@@ -50,7 +50,7 @@ class TeamMemberGroupForm
                     ->required()
                     ->columnSpan(['default' => 12, 'md' => 3]),
                 Select::make('parent_id')
-                    ->label('Parent group')
+                    ->label(__('admin.team.group_parent'))
                     ->options(fn ($record) => TeamMemberGroup::query()
                         ->when($record, fn ($q) => $q->where('id', '!=', $record->id))
                         ->orderBy('position')
@@ -66,7 +66,7 @@ class TeamMemberGroupForm
                     ->default(0)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 Toggle::make('is_public')
-                    ->label('Show on public team page')
+                    ->label(__('admin.team.group_public'))
                     ->default(true)
                     ->columnSpan(['default' => 12, 'md' => 6]),
             ])

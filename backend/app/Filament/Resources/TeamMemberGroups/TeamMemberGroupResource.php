@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMemberGroups;
+namespace App\Filament\Resources\TeamMemberGroups;
 
-use App\Filament\Resources\Cms\TeamMemberGroups\Pages\CreateTeamMemberGroup;
-use App\Filament\Resources\Cms\TeamMemberGroups\Pages\EditTeamMemberGroup;
-use App\Filament\Resources\Cms\TeamMemberGroups\Pages\ListTeamMemberGroups;
-use App\Filament\Resources\Cms\TeamMemberGroups\Schemas\TeamMemberGroupForm;
-use App\Filament\Resources\Cms\TeamMemberGroups\Tables\TeamMemberGroupsTable;
+use App\Filament\Resources\TeamMemberGroups\Pages\CreateTeamMemberGroup;
+use App\Filament\Resources\TeamMemberGroups\Pages\EditTeamMemberGroup;
+use App\Filament\Resources\TeamMemberGroups\Pages\ListTeamMemberGroups;
+use App\Filament\Resources\TeamMemberGroups\Schemas\TeamMemberGroupForm;
+use App\Filament\Resources\TeamMemberGroups\Tables\TeamMemberGroupsTable;
 use App\Models\TeamMemberGroup;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -18,6 +18,15 @@ use Illuminate\Database\Eloquent\Model;
 class TeamMemberGroupResource extends Resource
 {
     protected static ?string $model = TeamMemberGroup::class;
+
+    /**
+     * These moved out of App\Filament\Resources\Cms\ when the models
+     * stopped being CMS-backed. The slug is pinned to the old path so
+     * the /admin/cms/… URLs people have bookmarked, the route names,
+     * and the help-modal keys that are looked up by route name all
+     * keep working — only the PHP namespace changed.
+     */
+    protected static ?string $slug = 'cms/team-member-groups';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 

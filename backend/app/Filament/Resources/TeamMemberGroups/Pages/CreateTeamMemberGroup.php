@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMemberGroups\Pages;
+namespace App\Filament\Resources\TeamMemberGroups\Pages;
 
-use App\Filament\Resources\Cms\TeamMemberGroups\TeamMemberGroupResource;
+use App\Filament\Resources\TeamMemberGroups\TeamMemberGroupResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateTeamMemberGroup extends CreateRecord

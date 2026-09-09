@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMemberGroups\Tables;
+namespace App\Filament\Resources\TeamMemberGroups\Tables;
 
 use App\Models\TeamMemberGroup;
 use Filament\Actions\BulkActionGroup;
@@ -10,12 +10,17 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TeamMemberGroupsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            // Eager-load what the columns read — Filament does no
+            // automatic eager loading, so without this the parent-group column
+            // fire one query per row.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['parent']))
             ->defaultSort('position')
             ->columns([
                 TextColumn::make('name')
@@ -35,12 +40,12 @@ class TeamMemberGroupsTable
                     ->color('info')
                     ->toggleable(),
                 TextColumn::make('parent.name')
-                    ->label('Parent')
+                    ->label(__('admin.team.group_parent_col'))
                     ->state(fn ($record) => $record->parent ? (TeamMemberGroup::pickLocale($record->parent->name) ?? $record->parent->slug) : '—')
                     ->color('gray')
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_public')
-                    ->label('Public')
+                    ->label(__('admin.team.group_public_col'))
                     ->boolean()
                     ->toggleable(),
                 TextColumn::make('position')
