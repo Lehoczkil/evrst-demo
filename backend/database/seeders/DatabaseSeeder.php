@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
             CollectionSeeder::class,
             ResourceSeeder::class,
             TeamSeeder::class,
+            ApplicationFormSeeder::class,
             // TaskSeeder + DemoSeeder only produce demo-quality operational
             // data (sample tasks, member applications, bug reports, calendar
             // events, contacts, inventory, onshape placeholders). Excluded
