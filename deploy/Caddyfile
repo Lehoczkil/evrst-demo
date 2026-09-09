@@ -5,15 +5,19 @@
 {$SITE_ADDRESS:localhost} {
 	encode zstd gzip
 
-	# Everything Laravel + Filament owns. /livewire is REQUIRED for the admin
-	# panel to be interactive; /css|js/filament are its published assets;
-	# /css/admin-theme.css is the mission-console override sheet and
-	# /vendor/* the assets vendored into backend/public (SortableJS, for the
-	# kanban) — both are linked with asset() from render hooks, so without
-	# them here the SPA's try_files answers index.html and the panel renders
-	# unstyled and un-draggable; /storage is the public-disk symlink;
-	# /up is the health route.
-	@backend path /admin /admin/* /api/* /livewire/* /sanctum/* /storage/* /css/filament/* /js/filament/* /css/admin-theme.css /vendor/* /up
+	# Everything Laravel + Filament owns. Anything the panel requests that is
+	# missing here falls through to the SPA handler below, whose try_files
+	# answers index.html — a 200 of the wrong content type, so the browser
+	# drops it silently and the panel degrades with nothing in the console.
+	#   /livewire/*            REQUIRED for the admin panel to be interactive
+	#   /css|js/filament/*     Filament's published assets
+	#   /fonts/filament/*      its Inter font (the SPA has its own /fonts/,
+	#                          hence the /filament/ segment rather than /fonts/*)
+	#   /css/admin-theme.css   the mission-console override sheet
+	#   /vendor/*              vendored into backend/public (SortableJS)
+	#   /storage/*             the public-disk symlink
+	#   /up                    the health route
+	@backend path /admin /admin/* /api/* /livewire/* /sanctum/* /storage/* /css/filament/* /js/filament/* /fonts/filament/* /css/admin-theme.css /vendor/* /up
 	handle @backend {
 		reverse_proxy backend:8080
 	}
