@@ -119,4 +119,33 @@ class PermissionsTest extends TestCase
             $this->actingAs($admin)->get($path)->assertOk();
         }
     }
+
+    /**
+     * The counterpart to the list above: pages the whole team is meant to
+     * reach. They are here so that "a member can open it" stays a decision
+     * rather than an oversight — the inventory and the calendar were both
+     * wide open by accident before, and only the calendar was supposed to
+     * change.
+     *
+     * @dataProvider memberReadableRoutesProvider
+     */
+    public function test_member_readable_routes_stay_open(string $path): void
+    {
+        $member = $this->makeMember();
+
+        $this->actingAs($member)->get($path)->assertOk();
+    }
+
+    public static function memberReadableRoutesProvider(): array
+    {
+        return [
+            // Deliberately open to everyone: the whole team moves hardware
+            // around, and every change is traced in the inventory log.
+            'items'           => ['/admin/items'],
+            'item-management' => ['/admin/item-management'],
+            'item-log'        => ['/admin/item-log'],
+            // Readable by all, writable by admins — see the calendar tests.
+            'calendar'        => ['/admin/calendar'],
+        ];
+    }
 }
