@@ -12,10 +12,10 @@ Vue 3.5 + TypeScript (strict) + Vite SPA in `frontend/`. Talks to the Laravel ba
 - **Vue 3.5** Composition API + `<script setup lang="ts">`. TypeScript strict.
 - **Vite 7** with `@vitejs/plugin-vue` + `vite-plugin-vue-devtools` + `unplugin-auto-import` + `unplugin-vue-components`. Output dir is `frontend/build/`.
 - **Pinia** for shared client state (`configStore` for HTTP loading + 429 modal flag, `metaStore` for SEO/meta tags).
-- **PrimeVue 4** with custom Aura preset (primary `#f2ac3c`); registered in `main.ts`. ToastService is plugged in for the join-us form's submit feedback. Components used so far: `Drawer`, `SelectButton`, `Avatar`, `InputText`, `Textarea`, `RadioButton`, `Checkbox`, `Toast`.
+- **PrimeVue 4** with custom Aura preset (primary `#f2ac3c`); registered in `main.ts`. ToastService is plugged in for the join-us form's submit feedback. Components used so far: `Drawer`, `SelectButton`, `Avatar`, `InputText`, `Textarea`, `RadioButton`, `Checkbox`, `Select`, `Toast`.
 - **vue-router** with `createWebHistory`. Routes lazy-loaded (`component: () => import(...)`). The `/:slug(.*)*` catch-all renders the dynamic CMS page.
 - **vue-i18n v11** in non-legacy mode. Translation maps live under `src/translations/{en,hu}/index.ts`. The active locale is read from `localStorage('evrst:language')` on bootstrap and persisted there on change via `useLocale()`.
-- **vue-formify** for the join-us application form. The `useForm()` composable manages bound state + reset.
+- **vue-formify** for the join-us application form. The `useForm()` composable manages bound state + reset; the form state is a `Record<string, string | string[]>` keyed by field key, because the question set comes from the API.
 - **motion-v** for animations (Vue port of motion/Framer-motion).
 - **Three.js** for the rocket GLB. Wrapped in a single composable `useRocketScene(canvasRef, options)` (no react-three-fiber equivalent, plain Three.js API).
 - **UnoCSS** (presetWind3) for utility classes; theme breakpoints `sm` / `md` / `lg` / `xl` / `xxl`. SCSS for component-scoped styles. Variables in `src/styles/_variables.scss`, breakpoint mixins in `_breakpoints.scss`.
@@ -44,7 +44,7 @@ Plugin order: `router` → `pinia` → `i18n` → `PrimeVue` → `ToastService` 
 ## Routing (`src/router.ts` + `src/routes.ts`)
 
 - `/` → `HomePage.vue` (Hero + RocketScene + Events + About + Team + Mentors + Sponsors + Outro)
-- `/join-us` → `JoinUsPage.vue` (vue-formify + PrimeVue form)
+- `/join-us` → `JoinUsPage.vue` (vue-formify + PrimeVue form, **rendered from the API**: `MemberApplicationRequests.form(lang)` returns the sections and questions, and the page builds the inputs from them — the questions are edited in the admin panel, not in this file)
 - `/:slug(.*)*` → `DynamicPage.vue` (catch-all for CMS pages; renders `payload.content` as `v-html`; falls back to a "Coming soon" placeholder when no match)
 
 `scrollBehavior` resolves `to.hash` by waiting one tick then scrolling with an 80 px header offset; saved positions take priority on back/forward.
@@ -137,7 +137,8 @@ One file per logical domain:
 - `TeamRequests.members(lang)` / `TeamRequests.groups(lang)` — relational `/team/*` endpoints.
 - `CmsRequests.{sponsors,mentors,events,aboutProjects,aboutGoals}` — collection fetches keyed off env IDs.
 - `PageRequests.bySlug(slug)` — `/resource?collectionId=…&where[payload][path][0]=name&where[payload][equals]={slug}`.
-- `MemberApplicationRequests.submit(payload)` — POST to `/member-applications`.
+- `MemberApplicationRequests.form(lang)` — GET `/application-form`, the question set for the join-us page. Types in `src/types/applicationForm.ts`.
+- `MemberApplicationRequests.submit(payload)` — POST to `/member-applications`. The payload is `Record<string, string | string[]>` keyed by field key; empty answers are dropped before sending, since the API validates against the same questions.
 
 When you add a new endpoint, put it in a new file under `services/requests/` (auto-import will pick it up — no barrel needed).
 
@@ -210,6 +211,24 @@ Keep an empty `<style lang="scss" scoped></style>` block when everything migrate
   ```
   Defined in `src/types/api.ts` (`Resource<T>`, `PageResource`, `ResourceWithObjects`). Don't drop the `objects` optionality — only `?include=objects` queries return them.
 - The backend recursively flattens any `{en, hu}` translation map inside `payload` to a single string for the active locale, so the frontend reads e.g. `event.payload.title` as a plain string.
+
+## Join-us form
+
+`JoinUsPage.vue` renders whatever `/api/application-form` returns: sections
+become the numbered cards, and each field's `type` picks the input (`text` /
+`email` → InputText, `textarea` → Textarea, `select` → Select, `radio` /
+`checkbox` → the option pills). Adding a question is an admin-panel edit, not a
+frontend change.
+
+Two things to keep in mind when touching it:
+
+- The schema query is keyed on `locale`, so a language switch refetches the
+  translated labels. `syncValues()` therefore *merges* — it seeds missing keys
+  and leaves typed-in answers alone, so switching language mid-form does not
+  wipe what the applicant has written.
+- The surrounding copy (tagline, intro, the "it's a plus if" list, success and
+  error messages) is still i18n in `src/translations/**`. Only the questions
+  come from the API.
 
 ## Don'ts
 

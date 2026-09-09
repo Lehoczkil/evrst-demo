@@ -54,7 +54,8 @@ The harness may block long-running web servers (`php artisan serve`, `queue:work
 | `notifications` | Filament bell + Laravel database channel | `2026_04_26_163354_create_notifications_table.php` |
 | `collections`, `resources`, `object_files` | CMS payload-JSON store (events, sponsors, mentors, projects, goals, views — team members are no longer here) | `2026_04_25_230659_*` |
 | `team_members`, `team_member_groups`, `team_member_team_member_group` | Dedicated relational tables for the team. Pivot has its own `id` PK so the same role can be held across multiple time spans (`started_at` / `ended_at`); `is_primary` replaces the old `main_position_id`. Indexes on `(left_at, position)`. Discord identity is split across `discord_username` (the @handle, unique), `discord_id` (numeric snowflake 17–20 digits, unique, nullable — pending collection), and `discord_nick` (server-display nickname). | `2026_05_07_000001_create_team_members_table.php`, `…_000002_create_team_member_groups_table.php`, `…_000003_repoint_team_member_fks.php`, `2026_05_10_000000_add_discord_username_to_team_members.php` |
-| `member_applications` | Join-us submissions under review (`team_member_id` is a `bigint` FK → `team_members.id` since `2026_05_07_000003`) | `2026_04_27_000000_create_member_applications_table.php` |
+| `member_applications` | Join-us submissions under review. `name` + `email` are columns; every other answer lives in the `answers` JSON map keyed by the form field's key (`2026_09_09_000003`). `team_member_id` is a `bigint` FK → `team_members.id` since `2026_05_07_000003` | `2026_04_27_000000_create_member_applications_table.php` |
+| `application_form_sections`, `application_form_fields` | The public join-us form, as data: the numbered cards and the questions on them (type, `{en,hu}` label / help / placeholder, choice `options`, required, position, active). `is_system` marks `name` + `email`, which the accept flow provisions a login from | `2026_09_09_000002_create_application_form_tables.php` |
 | `tasks`, `task_user`, `task_comments` | Trello-style task system | `2026_04_29_000000_create_tasks_tables.php` |
 | `task_proofs` | Per-task documentation (image / file / link / note) — gates the TESTING + DONE transitions | `2026_05_03_000006_create_task_proofs_table.php` |
 | `activity_logs` | Auto-logged create/update/delete + custom events (accepted, rejected) | `2026_05_02_000000_create_activity_logs_table.php` |
@@ -83,7 +84,8 @@ Mounted under `/api/*` (`routes/api.php`).
 | GET  | `/api/team/groups` | `Api\TeamController@groups` | |
 | GET  | `/api/img` | `Api\ImageController@transform` | on-the-fly transform; params `path`, `w`, `h`, `f`, `q`, `dpr`, `fit`; cached on disk |
 | GET  | `/api/img/meta` | `Api\ImageController@meta` | returns `{width, height, lqip}` (24px webp data URI) for placeholder rendering |
-| POST | `/api/member-applications` | `Api\MemberApplicationController@store` | rate-limited `throttle:10,1`; fans out admin notification + queues Discord webhook |
+| GET  | `/api/application-form` | `Api\MemberApplicationController@form` | the join-us form definition (sections + questions + choices), resolved to `?lang` |
+| POST | `/api/member-applications` | `Api\MemberApplicationController@store` | rate-limited `throttle:10,1`; validates against the *stored* form; fans out admin notification + queues Discord webhook |
 
 The `SetLocale` middleware (registered globally for `api`) reads the locale from `?lang=`, the `X-Lang` header, or `Accept-Language`. The active locale is then read by `App\Http\Resources\ResourceResource` to flatten any `{en, hu}` translation map inside the payload before returning.
 
@@ -165,8 +167,39 @@ The seeded admin (`admin@evrst.test`) has `password_changed_at = now()` so it ne
 
 ## Member applications + Discord
 
+**The join-us form is editable, not hardcoded.** Questions live in
+`application_form_fields`, grouped into `application_form_sections`, and
+`App\Support\ApplicationForm` is the single reader:
+
+- `schema(?lang)` — what `GET /api/application-form` serves and the SPA renders.
+- `rules()` — the validation for `POST /api/member-applications`, generated
+  from the same fields, so a question the admin adds is validated and one they
+  remove is not. It always forces `name` + `email` on top, whatever the form says.
+- `split($validated)` — `name` / `email` into columns, the rest into
+  `member_applications.answers`.
+- `summaryField()` — the first choice question, used wherever a submission needs
+  one-line summarising (applications table, dashboard tile, Discord embed).
+
+`ApplicationFormField::validationRules()` maps type → rules (choice types get
+`Rule::in` over their option values; `checkbox` is the one multi-value type).
+`MemberApplication::answeredFields()` pairs stored answers back with their
+questions for the admin view, and keeps answers whose question was later deleted
+under their raw key rather than dropping them.
+
+Edited under Membership → **Application form** (questions) and **Form sections**,
+gated on `content.*` — it is public-facing site content, not the submissions.
+`name` and `email` are `is_system`: relabel and reorder freely, but the key,
+type, visibility and existence are fixed, because the accept flow provisions a
+login from them. A field's `key` is likewise write-once — it is what every
+collected answer is filed under.
+
+The seeded form reproduces what JoinUsPage.vue used to hardcode, field for
+field, and is installed by `2026_09_09_000004_seed_application_form` as well as
+`ApplicationFormSeeder`, because `db:seed` only runs once per volume and a
+deployed instance would otherwise have no questions at all.
+
 `Api\MemberApplicationController@store`:
-1. Validates and creates a `member_applications` row.
+1. Validates against `ApplicationForm::rules()` and creates a `member_applications` row.
 2. Sends `App\Notifications\NewMemberApplication` to `User::whereHas('role.permissions', key=notifications.see)` — i.e. Admins.
 3. Dispatches `App\Jobs\SendDiscordWebhook` to ping a Discord channel using `services.discord.webhook` (env `DISCORD_WEBHOOK_URL`). The job no-ops silently when the URL is empty so dev doesn't fail.
 
