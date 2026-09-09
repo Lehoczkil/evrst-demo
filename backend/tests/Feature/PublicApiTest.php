@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\PostDiscordWebhook;
 use App\Models\Collection;
+use App\Models\ApplicationFormField;
 use App\Models\MemberApplication;
 use App\Models\Resource;
 use App\Models\TeamMember;
@@ -83,13 +84,10 @@ class PublicApiTest extends TestCase
     {
         Bus::fake();
 
-        $this->postJson('/api/member-applications', [
+        $this->postJson('/api/member-applications', self::application([
             'email' => 'smoke@example.com',
             'name' => 'Smoke Person',
-            'department' => 'Propulsion',
-            'why' => 'I want to launch rockets.',
-            'languages' => ['English'],
-        ])
+        ]))
             ->assertCreated()
             ->assertJsonStructure(['id']);
 
@@ -97,6 +95,12 @@ class PublicApiTest extends TestCase
             'email' => 'smoke@example.com',
             'status' => MemberApplication::STATUS_PENDING,
         ]);
+
+        // Everything but name and email is stored under the form field's
+        // key, so a question added in the panel needs no column.
+        $application = MemberApplication::where('email', 'smoke@example.com')->firstOrFail();
+        $this->assertSame('Propulsion', $application->answer('department'));
+        $this->assertSame(['English'], $application->answer('languages'));
 
         // Discord webhook is dispatched even when the URL is empty —
         // the job no-ops in that case but the dispatch must happen.
@@ -157,15 +161,91 @@ class PublicApiTest extends TestCase
         // Throttle key is per-IP; hammer the same endpoint and the
         // 11th call must trip 429.
         for ($i = 0; $i < 10; $i++) {
-            $this->postJson('/api/member-applications', [
+            $this->postJson('/api/member-applications', self::application([
                 'email' => "rl-$i@example.com",
                 'name' => "RL $i",
-            ])->assertCreated();
+            ]))->assertCreated();
         }
 
-        $this->postJson('/api/member-applications', [
+        $this->postJson('/api/member-applications', self::application([
             'email' => 'rl-11@example.com',
             'name' => 'RL 11',
-        ])->assertStatus(429);
+        ]))->assertStatus(429);
+    }
+
+    public function test_the_form_endpoint_serves_the_seeded_questions(): void
+    {
+        $response = $this->getJson('/api/application-form?lang=hu')->assertOk();
+
+        $sections = collect($response->json('sections'));
+        $this->assertSame(['about', 'availability', 'contribution'], $sections->pluck('key')->all());
+
+        $fields = $sections->pluck('fields')->flatten(1);
+        $this->assertSame('Név', $fields->firstWhere('key', 'name')['label']);
+
+        $department = $fields->firstWhere('key', 'department');
+        $this->assertSame('radio', $department['type']);
+        $this->assertCount(5, $department['options']);
+    }
+
+    public function test_a_question_the_form_marks_required_is_enforced_by_the_api(): void
+    {
+        // The old hand-written rule set had everything but name and email
+        // as nullable, so "required" on the form was decoration the client
+        // could skip. The rules come from the questions now.
+        $payload = self::application();
+        unset($payload['university']);
+
+        $this->postJson('/api/member-applications', $payload)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['university']);
+    }
+
+    public function test_an_answer_outside_a_choice_list_is_rejected(): void
+    {
+        $this->postJson('/api/member-applications', self::application(['department' => 'Ministry of Silly Walks']))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['department']);
+    }
+
+    public function test_a_deactivated_question_is_neither_served_nor_accepted(): void
+    {
+        ApplicationFormField::where('key', 'skills')->update(['is_active' => false]);
+
+        $fields = collect($this->getJson('/api/application-form')->json('sections'))
+            ->pluck('fields')
+            ->flatten(1)
+            ->pluck('key');
+        $this->assertNotContains('skills', $fields->all());
+
+        Bus::fake();
+        $this->postJson('/api/member-applications', self::application(['skills' => 'Welding']))
+            ->assertCreated();
+
+        $application = MemberApplication::latest('created_at')->firstOrFail();
+        $this->assertNull($application->answer('skills'), 'an unasked question must not be stored');
+    }
+
+    /**
+     * A complete submission for the seeded form.
+     *
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    private static function application(array $overrides = []): array
+    {
+        return array_merge([
+            'email' => 'applicant@example.com',
+            'name' => 'Applicant Person',
+            'university' => 'Óbudai Egyetem',
+            'education' => 'BSc',
+            'faculty' => 'Bánki',
+            'why' => 'I want to launch rockets.',
+            'hours' => '5',
+            'languages' => ['English'],
+            'department' => 'Propulsion',
+            'tasks' => 'Anything on the propulsion side.',
+            'skills' => 'CAD, machining.',
+        ], $overrides);
     }
 }

@@ -20,5 +20,9 @@ Route::get('/team/groups', [TeamController::class, 'groups']);
 Route::get('/img', [ImageController::class, 'transform']);
 Route::get('/img/meta', [ImageController::class, 'meta']);
 
+// The join-us form definition — sections, questions and choices, editable
+// under Membership → Application form.
+Route::get('/application-form', [MemberApplicationController::class, 'form']);
+
 Route::post('/member-applications', [MemberApplicationController::class, 'store'])
     ->middleware('throttle:10,1');
