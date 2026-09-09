@@ -1,5 +1,8 @@
 @php
     $rows = $this->getCalendarGrid();
+    // Read-only for everyone but admins — the page itself re-checks this
+    // on every write, this only removes the affordances.
+    $canManage = $this->canManageEvents();
     // HU weekday abbreviations follow the conventional 1-3 char form
     // used in Hungarian calendars (H, K, Sze, Cs, P, Szo, V) so the row
     // has consistent visual rhythm under the centred header style.
@@ -253,11 +256,13 @@
             @endforeach
         </select>
 
-        <button
-            type="button"
-            class="cal-btn cal-btn--primary"
-            wire:click="openCreateModal('{{ now()->toDateString() }}')"
-        >{{ __('admin.calendar.new_event') }}</button>
+        @if ($canManage)
+            <button
+                type="button"
+                class="cal-btn cal-btn--primary"
+                wire:click="openCreateModal('{{ now()->toDateString() }}')"
+            >{{ __('admin.calendar.new_event') }}</button>
+        @endif
     </div>
 
     <div class="cal-grid">
@@ -277,8 +282,10 @@
                         'cal-day--out' => ! $cell['inMonth'],
                         'cal-day--today' => $isToday,
                     ])
-                    wire:click="openCreateModal('{{ $dateString }}')"
-                    title="{{ __('admin.calendar.click_hint') }}"
+                    @if ($canManage)
+                        wire:click="openCreateModal('{{ $dateString }}')"
+                        title="{{ __('admin.calendar.click_hint') }}"
+                    @endif
                 >
                     <div class="cal-day__num">
                         @if ($isToday)
@@ -286,7 +293,9 @@
                         @else
                             <span>{{ $cell['date']->day }}</span>
                         @endif
-                        <span class="cal-day__add">+</span>
+                        @if ($canManage)
+                            <span class="cal-day__add">+</span>
+                        @endif
                     </div>
                     <div class="cal-day__cards" style="display:contents;">
                         @foreach ($cell['items'] as $item)
@@ -300,7 +309,7 @@
                                         ? $start->format('H:i') . '–' . $end->format('H:i')
                                         : ($start ? $start->format('H:i') : null));
                                 $clickAttr = $item['kind'] === 'event'
-                                    ? 'wire:click.stop="openEditModal(' . $item['id'] . ')"'
+                                    ? ($canManage ? 'wire:click.stop="openEditModal(' . $item['id'] . ')"' : '')
                                     : 'onclick="event.stopPropagation();window.location=' . "'" . ($item['url'] ?? '#') . "'" . '"';
                             @endphp
                             <div

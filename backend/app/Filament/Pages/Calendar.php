@@ -18,11 +18,15 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * Admin-only month calendar — shows {@see CalendarEvent} entries created
- * inside the panel (separate from the public-facing CMS Event collection),
- * plus project ranges and task due dates.
+ * Month calendar — shows {@see CalendarEvent} entries created inside the
+ * panel (separate from the public-facing CMS Event collection), plus
+ * project ranges and task due dates.
  *
- * Days are clickable to spawn a new event; events are clickable to edit.
+ * Readable by anyone signed in; **writable by admins only**. Every public
+ * Livewire method that mutates state (or opens a form that will) starts
+ * with an abort_unless, because a Livewire endpoint is reachable directly
+ * whatever the Blade chose to render — and creating an event also posts to
+ * the Discord channel.
  */
 class Calendar extends Page
 {
@@ -71,6 +75,15 @@ class Calendar extends Page
     public function mount(): void
     {
         $this->cursor = now()->startOfMonth()->toDateString();
+    }
+
+    /**
+     * Who may create / edit / delete entries. Read access is deliberately
+     * open — the whole team needs to see what is scheduled.
+     */
+    public static function canManageEvents(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
     }
 
     public function previousMonth(): void
@@ -241,6 +254,8 @@ class Calendar extends Page
 
     public function openCreateModal(string $date): void
     {
+        abort_unless($this->canManageEvents(), 403);
+
         // Guard against scheduling on a past day — surface a small
         // confirm dialog first. Compare on the day boundary so clicking
         // "today" never trips the gate.
@@ -258,6 +273,8 @@ class Calendar extends Page
 
     public function confirmPastDate(): void
     {
+        abort_unless($this->canManageEvents(), 403);
+
         if ($this->pendingPastDate === '') return;
         $date = $this->pendingPastDate;
         $this->pendingPastDate = '';
@@ -283,9 +300,11 @@ class Calendar extends Page
 
     public function openEditModal(int $id): void
     {
+        abort_unless($this->canManageEvents(), 403);
+
         $event = CalendarEvent::find($id);
         if (! $event) {
-            Notification::make()->title('Event not found')->danger()->send();
+            Notification::make()->title(__('admin.calendar.event_not_found'))->danger()->send();
             return;
         }
         $this->editingId = $event->id;
@@ -331,6 +350,8 @@ class Calendar extends Page
 
     public function saveEvent(): void
     {
+        abort_unless($this->canManageEvents(), 403);
+
         $title = trim($this->eventTitle);
         if ($title === '') {
             Notification::make()->title(__('admin.calendar.modal.title_req'))->danger()->send();
@@ -391,6 +412,8 @@ class Calendar extends Page
 
     public function deleteEvent(): void
     {
+        abort_unless($this->canManageEvents(), 403);
+
         if (! $this->editingId) return;
         $event = CalendarEvent::find($this->editingId);
         if (! $event) {
