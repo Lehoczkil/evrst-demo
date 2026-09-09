@@ -28,7 +28,7 @@ class NewMemberApplication extends Notification
 
         return FilamentNotification::make()
             ->title('New member application')
-            ->body($app->name . ($app->department ? ' — ' . $app->department : ''))
+            ->body($app->name . (($summary = $app->summaryAnswer()) ? ' — ' . (is_array($summary['value']) ? implode(', ', $summary['value']) : $summary['value']) : ''))
             ->icon('heroicon-o-user-plus')
             ->iconColor('primary')
             ->actions([

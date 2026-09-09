@@ -196,7 +196,15 @@
                             @endphp
                             <a href="{{ \App\Filament\Resources\MemberApplications\MemberApplicationResource::getUrl('edit', ['record' => $a->id]) }}" class="evrst-tile-row">
                                 <span class="evrst-dot {{ $dot }}"></span>
-                                <span class="evrst-tile-row-title">{{ $a->name }} @if ($a->department)<span class="evrst-tile-row-sub">· {{ $a->department }}</span>@endif</span>
+                                @php
+                                // Whichever choice question the form leads
+                                // with — the department picker today.
+                                $summary = $a->summaryAnswer();
+                                $summaryValue = is_array($summary['value'] ?? null)
+                                    ? implode(', ', $summary['value'])
+                                    : ($summary['value'] ?? null);
+                            @endphp
+                            <span class="evrst-tile-row-title">{{ $a->name }} @if ($summaryValue)<span class="evrst-tile-row-sub">· {{ $summaryValue }}</span>@endif</span>
                                 <span class="evrst-tile-row-meta">{{ \Illuminate\Support\Str::upper($a->status) }}</span>
                             </a>
                         @endforeach

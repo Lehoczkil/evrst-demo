@@ -201,7 +201,7 @@ class Dashboard extends BaseDashboard
             MemberApplication::query()
                 ->orderByDesc('created_at')
                 ->limit(5)
-                ->get(['id', 'name', 'email', 'department', 'status', 'created_at'])
+                ->get(['id', 'name', 'email', 'answers', 'status', 'created_at'])
         );
     }
 

@@ -6,6 +6,8 @@ use App\Auth\Perm;
 use App\Filament\Resources\MemberApplications\MemberApplicationResource;
 use App\Jobs\PostDiscordWebhook;
 use App\Models\MemberApplication;
+use App\Models\TeamMemberGroup;
+use App\Support\ApplicationForm;
 use App\Support\DiscordPayloads;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -34,8 +36,22 @@ class MemberApplicationsTable
                     ->searchable()
                     ->copyable()
                     ->color('gray')->toggleable(),
-                TextColumn::make('department')
-                    ->label(__('admin.applications.department'))
+                // The form is editable, so this shows whichever choice
+                // question comes first on it — the department picker today.
+                TextColumn::make('summary')
+                    ->label(fn () => TeamMemberGroup::pickLocale(ApplicationForm::summaryField()?->label)
+                        ?: __('admin.applications.department'))
+                    ->state(function (MemberApplication $record) {
+                        $summary = $record->summaryAnswer();
+
+                        if (! $summary) {
+                            return '—';
+                        }
+
+                        return is_array($summary['value'])
+                            ? implode(', ', $summary['value'])
+                            : $summary['value'];
+                    })
                     ->badge()
                     ->color('gray')->toggleable(),
                 TextColumn::make('status')

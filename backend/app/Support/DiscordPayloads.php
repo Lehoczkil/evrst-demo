@@ -36,21 +36,42 @@ class DiscordPayloads
     /** @return array{content: string, embed: array<string, mixed>, reference: string} */
     public static function newApplication(MemberApplication $app): array
     {
+        // The questions are editable now, so the headline comes from the
+        // first choice question on the form rather than from a column named
+        // `department` that may no longer exist.
+        $summary = $app->summaryAnswer();
+        $title = $summary
+            ? $app->name . ' — ' . self::flatten($summary['value'])
+            : $app->name;
+
         return [
             'content' => '📬 New member application',
             'embed' => [
-                'title' => $app->name . ($app->department ? ' — ' . $app->department : ''),
-                'description' => Str::limit((string) $app->why, 200) ?: null,
+                'title' => $title,
+                'description' => Str::limit((string) self::flatten($app->answer('why')), 200) ?: null,
                 'url' => MemberApplicationResource::getUrl('edit', ['record' => $app->id]),
                 'color' => self::COLOR_APPLICATION,
                 'fields' => array_values(array_filter([
                     $app->email ? ['name' => 'Email', 'value' => $app->email, 'inline' => true] : null,
-                    $app->hours ? ['name' => 'Hours/wk', 'value' => $app->hours, 'inline' => true] : null,
+                    $app->answer('hours') ? ['name' => 'Hours/wk', 'value' => self::flatten($app->answer('hours')), 'inline' => true] : null,
                 ])),
                 'timestamp' => optional($app->created_at)->toIso8601String(),
             ],
             'reference' => 'application:' . $app->id,
         ];
+    }
+
+    /**
+     * An answer is a scalar for most field types and a list for a checkbox
+     * question, and Discord wants a string either way.
+     */
+    private static function flatten(mixed $value): string
+    {
+        if (is_array($value)) {
+            return implode(', ', array_map(fn ($v) => is_scalar($v) ? (string) $v : '', $value));
+        }
+
+        return is_scalar($value) ? (string) $value : '';
     }
 
     /** @return array{content: string, embed: array<string, mixed>, reference: string} */
@@ -80,7 +101,7 @@ class DiscordPayloads
             'content' => '🚫 Application rejected',
             'embed' => [
                 'title' => $app->name,
-                'description' => $app->department,
+                'description' => self::flatten($app->summaryAnswer()['value'] ?? null) ?: null,
                 'url' => MemberApplicationResource::getUrl('edit', ['record' => $app->id]),
                 'color' => self::COLOR_REJECTED,
                 'fields' => array_values(array_filter([
