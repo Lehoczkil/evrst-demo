@@ -39,6 +39,8 @@ class TeamSeeder extends Seeder
      *   discord_id           — numeric snowflake; null until collected (only
      *                          snowflakes resolve `<@id>` mentions / can be
      *                          targeted by the future DM bot)
+     *   degree               — {en, hu} qualification shown on the public
+     *                          team page; omit when there is none on file
      *   email_private        — personal contact email from the spreadsheet
      *   email                — EVRST org address; defaults to the
      *                          <given>.<surname>@evrst.hu form minted by
@@ -73,6 +75,9 @@ class TeamSeeder extends Seeder
             'discord_username' => 'k_zoli',           'discord_nick' => 'Zoli',             'email_private' => 'kristonzoli2002@gmail.com'],
         ['name' => 'Horváth Márton Antal',   'positions' => ['elektronika', 'szoftver'],              'main' => 'elektronika',
             'discord_username' => 'duckyducky',       'discord_nick' => 'Marci',            'email_private' => 'marton.horvath302@gmail.com'],
+        ['name' => 'Penc Máté',              'positions' => ['elektronika'],                          'main' => 'elektronika',
+            'discord_nick' => 'Máté',             'email_private' => 'pencmate56@gmail.com',
+            'degree' => ['en' => 'Electrical engineer', 'hu' => 'Villamosmérnök']],
         ['name' => 'Obsitos Péter',          'positions' => ['vaz-aerodinamika'],                     'main' => 'vaz-aerodinamika',
             'discord_username' => 'petter0655',       'discord_nick' => 'Obsitos Peti OP',  'email_private' => 'obsitospeti04@gmail.com'],
         ['name' => 'Laschek Ádám',           'positions' => ['marketing-dizajn', 'hajtomu'],          'main' => 'hajtomu',
@@ -197,6 +202,7 @@ class TeamSeeder extends Seeder
                 'discord_nick' => $info['discord_nick'] ?? null,
                 'discord_username' => $info['discord_username'] ?? null,
                 'discord_id' => $info['discord_id'] ?? null,
+                'degree' => $info['degree'] ?? null,
                 'user_id' => $user->id,
                 'position' => $i,
                 'is_public' => true,
