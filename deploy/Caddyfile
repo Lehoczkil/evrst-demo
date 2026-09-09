@@ -7,8 +7,13 @@
 
 	# Everything Laravel + Filament owns. /livewire is REQUIRED for the admin
 	# panel to be interactive; /css|js/filament are its published assets;
-	# /storage is the public-disk symlink; /up is the health route.
-	@backend path /admin /admin/* /api/* /livewire/* /sanctum/* /storage/* /css/filament/* /js/filament/* /up
+	# /css/admin-theme.css is the mission-console override sheet and
+	# /vendor/* the assets vendored into backend/public (SortableJS, for the
+	# kanban) — both are linked with asset() from render hooks, so without
+	# them here the SPA's try_files answers index.html and the panel renders
+	# unstyled and un-draggable; /storage is the public-disk symlink;
+	# /up is the health route.
+	@backend path /admin /admin/* /api/* /livewire/* /sanctum/* /storage/* /css/filament/* /js/filament/* /css/admin-theme.css /vendor/* /up
 	handle @backend {
 		reverse_proxy backend:8080
 	}
