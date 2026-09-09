@@ -6,13 +6,18 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const CSS_SCROLL_DRIVEN: typeof import('./composables/useParallax').CSS_SCROLL_DRIVEN
   const CmsRequests: typeof import('./services/requests/CmsRequests').CmsRequests
   const EffectScope: typeof import('vue').EffectScope
+  const EventRequests: typeof import('./services/requests/EventRequests').EventRequests
   const HomeRequests: typeof import('./services/requests/HomeRequests').HomeRequests
   const K: typeof import('./composables/useQuery/useQuery').K
   const MemberApplicationRequests: typeof import('./services/requests/MemberApplicationRequests').MemberApplicationRequests
   const PageRequests: typeof import('./services/requests/PageRequests').PageRequests
+  const ROUTE_PATHS: typeof import('./composables/useLanguage').ROUTE_PATHS
+  const SURFACE_IGNORE: typeof import('./composables/useSurfaceMode').SURFACE_IGNORE
   const TeamRequests: typeof import('./services/requests/TeamRequests').TeamRequests
+  const ViewRequests: typeof import('./services/requests/ViewRequests').ViewRequests
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const cacheStorage: typeof import('./composables/useQuery/utils').cacheStorage
   const computed: typeof import('vue').computed
@@ -35,6 +40,7 @@ declare global {
   const isReadonly: typeof import('vue').isReadonly
   const isRef: typeof import('vue').isRef
   const isShallow: typeof import('vue').isShallow
+  const localeFromPath: typeof import('./composables/useLanguage').localeFromPath
   const mapActions: typeof import('pinia').mapActions
   const mapGetters: typeof import('pinia').mapGetters
   const mapState: typeof import('pinia').mapState
@@ -58,6 +64,7 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const pathsFor: typeof import('./composables/useLanguage').pathsFor
   const provide: typeof import('vue').provide
   const reactive: typeof import('vue').reactive
   const readonly: typeof import('vue').readonly
@@ -69,8 +76,11 @@ declare global {
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
+  const soonest: typeof import('./services/requests/EventRequests').soonest
+  const startOf: typeof import('./services/requests/EventRequests').startOf
   const storeToRefs: typeof import('pinia').storeToRefs
   const stringify: typeof import('./composables/useQuery/utils').stringify
+  const surfaceModeAt: typeof import('./composables/useSurfaceMode').surfaceModeAt
   const toRaw: typeof import('vue').toRaw
   const toRef: typeof import('vue').toRef
   const toRefs: typeof import('vue').toRefs
@@ -79,22 +89,27 @@ declare global {
   const unref: typeof import('vue').unref
   const useAttrs: typeof import('vue').useAttrs
   const useConfigStore: typeof import('./store/configStore/configStore').useConfigStore
+  const useCountdown: typeof import('./composables/useCountdown').useCountdown
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
   const useForm: typeof import('vue-formify').useForm
   const useI18n: typeof import('vue-i18n').useI18n
   const useId: typeof import('vue').useId
   const useInput: typeof import('vue-formify').useInput
+  const useLanguage: typeof import('./composables/useLanguage').useLanguage
   const useLink: typeof import('vue-router').useLink
   const useLocale: typeof import('./composables/useLocale').useLocale
   const useMetaStore: typeof import('./store/metaStore/metaStore').useMetaStore
   const useModel: typeof import('vue').useModel
+  const useParallax: typeof import('./composables/useParallax').useParallax
   const useQuery: typeof import('./composables/useQuery/useQuery').useQuery
   const useRocketScene: typeof import('./composables/useRocketScene').useRocketScene
   const useRoute: typeof import('vue-router').useRoute
   const useRouter: typeof import('vue-router').useRouter
   const useSlots: typeof import('vue').useSlots
+  const useSurfaceMode: typeof import('./composables/useSurfaceMode').useSurfaceMode
   const useTemplateRef: typeof import('vue').useTemplateRef
+  const useToasts: typeof import('./composables/useToasts').useToasts
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
   const watchPostEffect: typeof import('vue').watchPostEffect
@@ -109,11 +124,17 @@ declare global {
   export type { MetaType } from './store/metaStore/metaStore.interface'
   import('./store/metaStore/metaStore.interface')
   // @ts-ignore
+  export type { Remaining } from './composables/useCountdown'
+  import('./composables/useCountdown')
+  // @ts-ignore
   export type { QueryKey, useQueryType, RequestQueue, RequestState, CacheData, CacheState } from './composables/useQuery/types'
   import('./composables/useQuery/types')
   // @ts-ignore
-  export type { RocketSceneOptions } from './composables/useRocketScene'
-  import('./composables/useRocketScene')
+  export type { SurfaceMode } from './composables/useSurfaceMode'
+  import('./composables/useSurfaceMode')
+  // @ts-ignore
+  export type { ToastTone, Toast } from './composables/useToasts'
+  import('./composables/useToasts')
   // @ts-ignore
   export type { SponsorPayload, MentorPayload, EventPayload, AboutItemPayload, SponsorResource, MentorResource, EventResource, AboutItemResource } from './services/requests/CmsRequests'
   import('./services/requests/CmsRequests')
@@ -123,6 +144,9 @@ declare global {
   // @ts-ignore
   export type { TeamMemberGroupRef, TeamMember, TeamGroup } from './services/requests/TeamRequests'
   import('./services/requests/TeamRequests')
+  // @ts-ignore
+  export type { ViewPayload, ViewResource } from './services/requests/ViewRequests'
+  import('./services/requests/ViewRequests')
 }
 
 // for vue template auto import
@@ -130,13 +154,18 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly CSS_SCROLL_DRIVEN: UnwrapRef<typeof import('./composables/useParallax')['CSS_SCROLL_DRIVEN']>
     readonly CmsRequests: UnwrapRef<typeof import('./services/requests/CmsRequests')['CmsRequests']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly EventRequests: UnwrapRef<typeof import('./services/requests/EventRequests')['EventRequests']>
     readonly HomeRequests: UnwrapRef<typeof import('./services/requests/HomeRequests')['HomeRequests']>
     readonly K: UnwrapRef<typeof import('./composables/useQuery/useQuery')['K']>
     readonly MemberApplicationRequests: UnwrapRef<typeof import('./services/requests/MemberApplicationRequests')['MemberApplicationRequests']>
     readonly PageRequests: UnwrapRef<typeof import('./services/requests/PageRequests')['PageRequests']>
+    readonly ROUTE_PATHS: UnwrapRef<typeof import('./composables/useLanguage')['ROUTE_PATHS']>
+    readonly SURFACE_IGNORE: UnwrapRef<typeof import('./composables/useSurfaceMode')['SURFACE_IGNORE']>
     readonly TeamRequests: UnwrapRef<typeof import('./services/requests/TeamRequests')['TeamRequests']>
+    readonly ViewRequests: UnwrapRef<typeof import('./services/requests/ViewRequests')['ViewRequests']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly cacheStorage: UnwrapRef<typeof import('./composables/useQuery/utils')['cacheStorage']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
@@ -159,6 +188,7 @@ declare module 'vue' {
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
     readonly isShallow: UnwrapRef<typeof import('vue')['isShallow']>
+    readonly localeFromPath: UnwrapRef<typeof import('./composables/useLanguage')['localeFromPath']>
     readonly mapActions: UnwrapRef<typeof import('pinia')['mapActions']>
     readonly mapGetters: UnwrapRef<typeof import('pinia')['mapGetters']>
     readonly mapState: UnwrapRef<typeof import('pinia')['mapState']>
@@ -182,6 +212,7 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly pathsFor: UnwrapRef<typeof import('./composables/useLanguage')['pathsFor']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
@@ -193,8 +224,11 @@ declare module 'vue' {
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
+    readonly soonest: UnwrapRef<typeof import('./services/requests/EventRequests')['soonest']>
+    readonly startOf: UnwrapRef<typeof import('./services/requests/EventRequests')['startOf']>
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
     readonly stringify: UnwrapRef<typeof import('./composables/useQuery/utils')['stringify']>
+    readonly surfaceModeAt: UnwrapRef<typeof import('./composables/useSurfaceMode')['surfaceModeAt']>
     readonly toRaw: UnwrapRef<typeof import('vue')['toRaw']>
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
@@ -203,22 +237,24 @@ declare module 'vue' {
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
     readonly useConfigStore: UnwrapRef<typeof import('./store/configStore/configStore')['useConfigStore']>
+    readonly useCountdown: UnwrapRef<typeof import('./composables/useCountdown')['useCountdown']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
-    readonly useForm: UnwrapRef<typeof import('vue-formify')['useForm']>
     readonly useI18n: UnwrapRef<typeof import('vue-i18n')['useI18n']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
-    readonly useInput: UnwrapRef<typeof import('vue-formify')['useInput']>
+    readonly useLanguage: UnwrapRef<typeof import('./composables/useLanguage')['useLanguage']>
     readonly useLink: UnwrapRef<typeof import('vue-router')['useLink']>
     readonly useLocale: UnwrapRef<typeof import('./composables/useLocale')['useLocale']>
     readonly useMetaStore: UnwrapRef<typeof import('./store/metaStore/metaStore')['useMetaStore']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
+    readonly useParallax: UnwrapRef<typeof import('./composables/useParallax')['useParallax']>
     readonly useQuery: UnwrapRef<typeof import('./composables/useQuery/useQuery')['useQuery']>
-    readonly useRocketScene: UnwrapRef<typeof import('./composables/useRocketScene')['useRocketScene']>
     readonly useRoute: UnwrapRef<typeof import('vue-router')['useRoute']>
     readonly useRouter: UnwrapRef<typeof import('vue-router')['useRouter']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
+    readonly useSurfaceMode: UnwrapRef<typeof import('./composables/useSurfaceMode')['useSurfaceMode']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
+    readonly useToasts: UnwrapRef<typeof import('./composables/useToasts')['useToasts']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>
     readonly watchPostEffect: UnwrapRef<typeof import('vue')['watchPostEffect']>
