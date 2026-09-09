@@ -4,12 +4,15 @@ import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import RadioButton from 'primevue/radiobutton';
 import Checkbox from 'primevue/checkbox';
+import Select from 'primevue/select';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
-import {
-  MemberApplicationRequests,
-  type MemberApplicationPayload,
-} from '@/services/requests/MemberApplicationRequests';
+import { MemberApplicationRequests } from '@/services/requests/MemberApplicationRequests';
+import type {
+  ApplicationAnswers,
+  ApplicationField,
+  ApplicationFormSchema,
+} from '@/types/applicationForm';
 
 /*---------------------------------------------
 /  PROPS & EMITS
@@ -18,49 +21,20 @@ import {
 /  VARIABLES
 ---------------------------------------------*/
 const { t } = useI18n();
+const { locale } = useLocale();
 const toast = useToast();
 
-const EDUCATION_OPTIONS = ['BSc', 'MSc', 'PhD'] as const;
-const LANGUAGE_OPTIONS = ['Hungarian', 'English', 'German'] as const;
-const DEPARTMENT_OPTIONS = [
-  'Marketing & Design',
-  'Electronics & Software Development',
-  'Propulsion',
-  'Structure & Aerodynamics',
-  'Management',
-] as const;
+// The questions live in the admin panel, not in this file. Keyed on the
+// locale so switching language re-asks for the translated labels.
+const { data: schema, isLoading } = useQuery<ApplicationFormSchema>({
+  key: ['application-form', locale],
+  request: () => MemberApplicationRequests.form(locale.value as string),
+  cache: true,
+  staleTime: 60,
+  refetchTime: 600,
+});
 
-interface FormState {
-  email: string;
-  name: string;
-  university: string;
-  education: string;
-  faculty: string;
-  why: string;
-  hours: string;
-  languages: string[];
-  otherLanguage: string;
-  department: string;
-  tasks: string;
-  skills: string;
-}
-
-const initialState: FormState = {
-  email: '',
-  name: '',
-  university: '',
-  education: '',
-  faculty: '',
-  why: '',
-  hours: '',
-  languages: [],
-  otherLanguage: '',
-  department: '',
-  tasks: '',
-  skills: '',
-};
-
-const { Form, values, reset } = useForm<FormState>({ initialValues: initialState });
+const { Form, values, reset } = useForm<ApplicationAnswers>({ initialValues: {} });
 const status = ref<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
 const plusKeys = [
@@ -74,28 +48,33 @@ const plusKeys = [
 /*---------------------------------------------
 /  METHODS
 ---------------------------------------------*/
+/**
+ * Give every question a starting value without discarding anything already
+ * typed — the schema also arrives again on a locale switch, and losing a
+ * half-filled form to a language change would be its own bug report.
+ */
+const syncValues = (next?: ApplicationFormSchema | null) => {
+  if (!next) return;
+
+  for (const section of next.sections) {
+    for (const field of section.fields) {
+      if (values.value[field.key] !== undefined) continue;
+      values.value[field.key] = field.type === 'checkbox' ? [] : '';
+    }
+  }
+};
+
 const onSubmit = async () => {
   status.value = 'submitting';
 
-  const otherLanguage = (values.value.otherLanguage ?? '').trim();
-  const languages = [
-    ...(values.value.languages ?? []),
-    ...(otherLanguage ? [`Other: ${otherLanguage}`] : []),
-  ];
-
-  const payload: MemberApplicationPayload = {
-    email: values.value.email ?? '',
-    name: values.value.name ?? '',
-    university: values.value.university ?? '',
-    education: values.value.education ?? '',
-    faculty: values.value.faculty ?? '',
-    why: values.value.why ?? '',
-    hours: values.value.hours ?? '',
-    languages,
-    department: values.value.department ?? '',
-    tasks: values.value.tasks ?? '',
-    skills: values.value.skills ?? '',
-  };
+  // Send only what was answered: the API validates against the same
+  // questions, and an empty string for an optional question would be
+  // stored as an answer nobody gave.
+  const payload: ApplicationAnswers = {};
+  for (const [key, value] of Object.entries(values.value)) {
+    if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) continue;
+    payload[key] = value;
+  }
 
   try {
     await MemberApplicationRequests.submit(payload);
@@ -113,12 +92,23 @@ const onSubmit = async () => {
 
 const resetForm = () => {
   reset();
+  syncValues(schema.value);
   status.value = 'idle';
 };
+
+/** Two-digit card number, matching the 01 / 02 / 03 the form always had. */
+const sectionNumber = (index: number) => String(index + 1).padStart(2, '0');
+
+const isTextual = (field: ApplicationField) => field.type === 'text' || field.type === 'email';
 /*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
 const submitting = computed(() => status.value === 'submitting');
+const sections = computed(() => schema.value?.sections ?? []);
+/*---------------------------------------------
+/  WATCHERS
+---------------------------------------------*/
+watch(schema, syncValues, { immediate: true });
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
@@ -205,59 +195,17 @@ const submitting = computed(() => status.value === 'submitting');
         </div>
       </div>
 
-      <Form @submit="onSubmit">
-        <div
-          class="p-[clamp(24px,3vw,40px)] mb-32px border border-cardBorder rounded-12px bg-cardBg"
-        >
-          <div
-            class="flex items-baseline gap-16px pb-16px mb-24px border-b border-dashed border-cardBorder"
-          >
-            <span
-              class="join__section-num font-500 fs-32px lh-1"
-            >01</span>
-            <h2
-              class="m-0 font-600 fs-[clamp(20px,3vw,28px)] lh-1 uppercase"
-            >
-              {{ t('join.section.about') }}
-            </h2>
-          </div>
-          <div class="flex flex-col gap-16px">
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.email') }}</label>
-              <InputText v-model="values.email" type="email" required class="w-full" />
-            </div>
-            <div class="grid grid-cols-1 gap-16px sm:grid-cols-2">
-              <div class="join__field flex flex-col gap-6px">
-                <label>{{ t('join.name') }}</label>
-                <InputText v-model="values.name" required class="w-full" />
-              </div>
-              <div class="join__field flex flex-col gap-6px">
-                <label>{{ t('join.university') }}</label>
-                <InputText v-model="values.university" required class="w-full" />
-              </div>
-            </div>
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.education') }}</label>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-8px mt-8px">
-                <label
-                  v-for="opt in EDUCATION_OPTIONS"
-                  :key="opt"
-                  class="join__option-pill flex items-center gap-10px py-10px px-14px border border-cardBorder rounded-8px bg-[rgb(255_255_255_/_2%)] cursor-pointer transition-[border-color,background-color] duration-150"
-                  :data-checked="values.education === opt"
-                >
-                  <RadioButton v-model="values.education" :value="opt" />
-                  <span>{{ opt }}</span>
-                </label>
-              </div>
-            </div>
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.faculty') }}</label>
-              <InputText v-model="values.faculty" required class="w-full" />
-            </div>
-          </div>
-        </div>
+      <div
+        v-if="isLoading && sections.length === 0"
+        class="p-[clamp(24px,3vw,40px)] border border-cardBorder rounded-12px bg-cardBg text-[var(--color-dimmed)]"
+      >
+        {{ t('join.loading') }}
+      </div>
 
+      <Form v-else @submit="onSubmit">
         <div
+          v-for="(section, index) in sections"
+          :key="section.key"
           class="p-[clamp(24px,3vw,40px)] mb-32px border border-cardBorder rounded-12px bg-cardBg"
         >
           <div
@@ -265,85 +213,94 @@ const submitting = computed(() => status.value === 'submitting');
           >
             <span
               class="join__section-num font-500 fs-32px lh-1"
-            >02</span>
+            >{{ sectionNumber(index) }}</span>
             <h2
               class="m-0 font-600 fs-[clamp(20px,3vw,28px)] lh-1 uppercase"
             >
-              {{ t('join.section.availability') }}
+              {{ section.title }}
             </h2>
           </div>
+          <p
+            v-if="section.description"
+            class="mt-0 mb-24px text-[var(--color-dimmed)] fs-14px lh-[1.6]"
+          >
+            {{ section.description }}
+          </p>
           <div class="flex flex-col gap-16px">
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.why') }}</label>
-              <Textarea v-model="values.why" rows="3" auto-resize required class="w-full" />
-            </div>
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.hours') }}</label>
-              <small>{{ t('join.hoursHelp') }}</small>
-              <InputText v-model="values.hours" required class="w-full" />
-            </div>
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.languages') }}</label>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-8px mt-8px">
-                <label
-                  v-for="opt in LANGUAGE_OPTIONS"
-                  :key="opt"
-                  class="join__option-pill flex items-center gap-10px py-10px px-14px border border-cardBorder rounded-8px bg-[rgb(255_255_255_/_2%)] cursor-pointer transition-[border-color,background-color] duration-150"
-                  :data-checked="(values.languages ?? []).includes(opt)"
-                >
-                  <Checkbox v-model="values.languages" :value="opt" />
-                  <span>{{ opt }}</span>
-                </label>
-              </div>
-            </div>
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.languagesOther') }}</label>
+            <div
+              v-for="field in section.fields"
+              :key="field.key"
+              class="join__field flex flex-col gap-6px"
+            >
+              <label :for="`field-${field.key}`">
+                {{ field.label }}<span v-if="field.required" class="ml-2px text-primary">*</span>
+              </label>
+              <small v-if="field.help" class="text-[var(--color-dimmed)]">{{ field.help }}</small>
+
               <InputText
-                v-model="values.otherLanguage"
-                :placeholder="t('join.languagesOtherPlaceholder')"
+                v-if="isTextual(field)"
+                :id="`field-${field.key}`"
+                v-model="(values[field.key] as string)"
+                :type="field.type === 'email' ? 'email' : 'text'"
+                :required="field.required"
+                :maxlength="field.maxLength"
+                :placeholder="field.placeholder ?? ''"
                 class="w-full"
               />
-            </div>
-          </div>
-        </div>
 
-        <div
-          class="p-[clamp(24px,3vw,40px)] mb-32px border border-cardBorder rounded-12px bg-cardBg"
-        >
-          <div
-            class="flex items-baseline gap-16px pb-16px mb-24px border-b border-dashed border-cardBorder"
-          >
-            <span
-              class="join__section-num font-500 fs-32px lh-1"
-            >03</span>
-            <h2
-              class="m-0 font-600 fs-[clamp(20px,3vw,28px)] lh-1 uppercase"
-            >
-              {{ t('join.section.contribution') }}
-            </h2>
-          </div>
-          <div class="flex flex-col gap-16px">
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.department') }}</label>
-              <div class="grid grid-cols-1 gap-8px mt-8px">
+              <Textarea
+                v-else-if="field.type === 'textarea'"
+                :id="`field-${field.key}`"
+                v-model="(values[field.key] as string)"
+                rows="3"
+                auto-resize
+                :required="field.required"
+                :maxlength="field.maxLength"
+                :placeholder="field.placeholder ?? ''"
+                class="w-full"
+              />
+
+              <Select
+                v-else-if="field.type === 'select'"
+                :id="`field-${field.key}`"
+                v-model="(values[field.key] as string)"
+                :options="field.options"
+                option-label="label"
+                option-value="value"
+                :placeholder="field.placeholder ?? ''"
+                class="w-full"
+              />
+
+              <div
+                v-else-if="field.type === 'radio'"
+                class="grid grid-cols-1 gap-8px mt-8px sm:grid-cols-3"
+                :class="{ 'sm:grid-cols-1': field.options.length > 3 }"
+              >
                 <label
-                  v-for="opt in DEPARTMENT_OPTIONS"
-                  :key="opt"
+                  v-for="option in field.options"
+                  :key="option.value"
                   class="join__option-pill flex items-center gap-10px py-10px px-14px border border-cardBorder rounded-8px bg-[rgb(255_255_255_/_2%)] cursor-pointer transition-[border-color,background-color] duration-150"
-                  :data-checked="values.department === opt"
+                  :data-checked="values[field.key] === option.value"
                 >
-                  <RadioButton v-model="values.department" :value="opt" />
-                  <span>{{ opt }}</span>
+                  <RadioButton v-model="values[field.key]" :value="option.value" />
+                  <span>{{ option.label }}</span>
                 </label>
               </div>
-            </div>
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.tasks') }}</label>
-              <Textarea v-model="values.tasks" rows="3" auto-resize required class="w-full" />
-            </div>
-            <div class="join__field flex flex-col gap-6px">
-              <label>{{ t('join.skills') }}</label>
-              <Textarea v-model="values.skills" rows="3" auto-resize required class="w-full" />
+
+              <div
+                v-else-if="field.type === 'checkbox'"
+                class="grid grid-cols-1 gap-8px mt-8px sm:grid-cols-3"
+              >
+                <label
+                  v-for="option in field.options"
+                  :key="option.value"
+                  class="join__option-pill flex items-center gap-10px py-10px px-14px border border-cardBorder rounded-8px bg-[rgb(255_255_255_/_2%)] cursor-pointer transition-[border-color,background-color] duration-150"
+                  :data-checked="((values[field.key] as string[]) ?? []).includes(option.value)"
+                >
+                  <Checkbox v-model="values[field.key]" :value="option.value" />
+                  <span>{{ option.label }}</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>

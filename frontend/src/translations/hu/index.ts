@@ -106,6 +106,7 @@ export default {
     tasks: 'Milyen konkrét feladatok érdekelnének?',
     skills: 'Milyen készségek vagy kompetenciák lehetnek hasznosak a csapatnak?',
     required: 'Kötelező',
+    loading: 'Űrlap betöltése…',
     submit: 'Jelentkezés elküldése',
     submitting: 'Küldés…',
     success: {

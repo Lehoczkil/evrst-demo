@@ -121,9 +121,6 @@ declare global {
   export type { HomePageData } from './services/requests/HomeRequests'
   import('./services/requests/HomeRequests')
   // @ts-ignore
-  export type { MemberApplicationPayload } from './services/requests/MemberApplicationRequests'
-  import('./services/requests/MemberApplicationRequests')
-  // @ts-ignore
   export type { TeamMemberGroupRef, TeamMember, TeamGroup } from './services/requests/TeamRequests'
   import('./services/requests/TeamRequests')
 }

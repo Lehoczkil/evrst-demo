@@ -108,6 +108,7 @@ export default {
     tasks: 'What specific tasks or responsibilities would you be interested in?',
     skills: 'What skills or competencies could be useful to the team?',
     required: 'Required',
+    loading: 'Loading the form…',
     submit: 'Submit application',
     submitting: 'Submitting…',
     success: {
