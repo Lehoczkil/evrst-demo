@@ -12,15 +12,16 @@ Vue 3.5 + TypeScript (strict) + Vite SPA in `frontend/`. Talks to the Laravel ba
 - **Vue 3.5** Composition API + `<script setup lang="ts">`. TypeScript strict.
 - **Vite 7** with `@vitejs/plugin-vue` + `vite-plugin-vue-devtools` + `unplugin-auto-import` + `unplugin-vue-components`. Output dir is `frontend/build/`.
 - **Pinia** for shared client state (`configStore` for HTTP loading + 429 modal flag, `metaStore` for SEO/meta tags).
-- **PrimeVue 4** with custom Aura preset (primary `#f2ac3c`); registered in `main.ts`. ToastService is plugged in for the join-us form's submit feedback. Components used so far: `Drawer`, `SelectButton`, `Avatar`, `InputText`, `Textarea`, `RadioButton`, `Checkbox`, `Select`, `Toast`.
+- **No component library.** PrimeVue and `@primevue/themes` were removed in 0.6.0 — 156 KB gz, and Aura's token cascade had to be fought at every step to reach the design. Their replacements are local: `components/Form/*` for the inputs, `components/Form/ToastHost.vue` + `composables/useToasts.ts` for submit feedback, `Chrome/LocaleToggle.vue` for the locale switch, and global `.btn` / `.pill` / `.input` classes in `styles/_controls.scss`.
 - **vue-router** with `createWebHistory`. Routes lazy-loaded (`component: () => import(...)`). The `/:slug(.*)*` catch-all renders the dynamic CMS page.
 - **vue-i18n v11** in non-legacy mode. Translation maps live under `src/translations/{en,hu}/index.ts`. The active locale is read from `localStorage('evrst:language')` on bootstrap and persisted there on change via `useLocale()`.
-- **vue-formify** for the join-us application form. The `useForm()` composable manages bound state + reset; the form state is a `Record<string, string | string[]>` keyed by field key, because the question set comes from the API.
+- **No form library.** `vue-formify` went with PrimeVue: the join-us page holds its own `answers` ref (a `Record<string, string | string[]>` keyed by field key) because the question set comes from the API, and that is three lines of Vue.
 - **motion-v** for animations (Vue port of motion/Framer-motion).
-- **Three.js** for the rocket GLB. Wrapped in a single composable `useRocketScene(canvasRef, options)` (no react-three-fiber equivalent, plain Three.js API).
-- **UnoCSS** (presetWind3) for utility classes; theme breakpoints `sm` / `md` / `lg` / `xl` / `xxl`. SCSS for component-scoped styles. Variables in `src/styles/_variables.scss`, breakpoint mixins in `_breakpoints.scss`.
+- **No 3D.** Three.js was removed with the hero redesign. The hero is seven CSS/SVG parallax layers driven by `animation-timeline: scroll()` — see `components/Hero/`.
+- **date-fns** for the events section's date formatting (HU/EN month names, ranges, the past/upcoming split).
+- **UnoCSS** (presetWind3) for utility classes; theme colours all point at CSS custom properties so utilities and SCSS cannot drift. SCSS for component-scoped styles. Tokens in `src/styles/_tokens.scss` (NOT `_variables.scss`, which is gone), plus `_base.scss`, `_typography.scss`, `_controls.scss`, `_prose.scss` and the `_breakpoints.scss` mixins.
 - **Sentry** initialised only when `VITE_ENV !== 'develop'` and `VITE_SENTRY_DSN` is set. Filters out common network noise.
-- **@vueuse/core** + **maska** are installed for future use; not consumed by the current pages.
+- **@vueuse/core** is installed; `maska` was removed (zero call sites).
 
 ## Commands
 
@@ -43,9 +44,11 @@ Plugin order: `router` → `pinia` → `i18n` → `PrimeVue` → `ToastService` 
 
 ## Routing (`src/router.ts` + `src/routes.ts`)
 
-- `/` → `HomePage.vue` (Hero + RocketScene + Events + About + Team + Mentors + Sponsors + Outro)
-- `/join-us` → `JoinUsPage.vue` (vue-formify + PrimeVue form, **rendered from the API**: `MemberApplicationRequests.form(lang)` returns the sections and questions, and the page builds the inputs from them — the questions are edited in the admin panel, not in this file)
+- `/` → `HomePage.vue` (Hero + Manifesto + Rocket + Programme + Events + Team + Sponsors + Marquee + JoinCta)
+- `/csatlakozz` **and** `/join-us` → `JoinUsPage.vue` (vue-formify + PrimeVue form, **rendered from the API**: `MemberApplicationRequests.form(lang)` returns the sections and questions, and the page builds the inputs from them — the questions are edited in the admin panel, not in this file)
 - `/:slug(.*)*` → `DynamicPage.vue` (catch-all for CMS pages; renders `payload.content` as `v-html`; falls back to a "Coming soon" placeholder when no match)
+
+**Localized paths**: `src/translations/{hu,en}/routes.ts` map route NAMES to paths, and `routes.ts` registers one record per locale per name (`pathsFor()`). `composables/useLanguage.ts` owns the switch: `switchTo(lang)` sets the locale AND `router.replace`s to the other locale's spelling of the same route. `localeFromPath()` runs FIRST in `main.ts`'s resolution chain — path → stored → `navigator.language` → `hu` — because a shared `/csatlakozz` link was sent by someone who chose the language.
 
 `scrollBehavior` resolves `to.hash` by waiting one tick then scrolling with an 80 px header offset; saved positions take priority on back/forward.
 
@@ -145,7 +148,8 @@ When you add a new endpoint, put it in a new file under `services/requests/` (au
 ## i18n + locale switcher
 
 - Strings live under `src/translations/{en,hu}/index.ts`. Nested objects map naturally to `t('section.about')` lookups.
-- The active locale is set in `main.ts` from `localStorage('evrst:language')` (default `en`), and switched via the header's `<SelectButton>` bound to `useLocale().locale`.
+- The active locale resolves as **path → `localStorage('evrst:language')` → `navigator.language` → `hu`** (default HU, not EN), and is switched via the nav pill's `<LocaleToggle>` calling `useLanguage().switchTo()`.
+- **Never put a literal `@` in a message value** — it is vue-i18n's linked-message sigil and throws at compile time. The team email is a constant in `src/lib/site.ts`.
 - `useLocale().setLocale(next)` updates vue-i18n + writes to localStorage + sets `document.documentElement.lang` + dispatches a `locale-changed` window event.
 - The `LanguageRequestInterceptor` re-reads `localStorage` on every API call, so a locale change automatically affects subsequent fetches. To force already-displayed `useQuery`-driven sections to refetch on locale change, include `locale` in the `key` array (Team does this).
 
@@ -232,7 +236,9 @@ Two things to keep in mind when touching it:
 
 ## Don'ts
 
-- Don't reintroduce React, Mantine, TanStack Query, react-icons, MDX, react-three-fiber, or react-router — the rewrite removed all of them on purpose.
+- Don't reintroduce React, Mantine, TanStack Query, react-icons, MDX, react-three-fiber or react-router — the 0.5.2 rewrite removed those. Don't reintroduce PrimeVue, `@primevue/themes`, Three.js, `vue-formify` or `maska` either — the 0.6.0 redesign removed those, each with a reason recorded in `docs/frontend-redesign.md`.
+- Don't put `overflow-x: hidden` on `body`, and don't give `html`/`body` `height: 100%`: either makes body the scroll container and silently kills every scroll-driven animation on the site. `_base.scss` uses `overflow-x: clip` on `html`.
+- Don't animate `top`, `left`, `width` or `height` where a transform will do, and never `filter: blur()` on a scrolling layer.
 - Don't import a Vue component manually if it lives under `src/components/**` — `unplugin-vue-components` will register it automatically.
 - Don't pass `xs` to the SCSS `media-down(...)` mixin (the breakpoint map has `xs: 0`).
 - Don't add a barrel `index.ts` for components — auto-registration covers it.
