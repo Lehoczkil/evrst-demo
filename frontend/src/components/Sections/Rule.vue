@@ -1,14 +1,16 @@
 <script setup lang="ts">
+/*
+  The hairline that does the structural work on this site in place of
+  borders, shadows and boxes.
+
+  It reads its colour from the surface rather than taking a prop: a rule
+  inside a paper section is `--paper-line`, everywhere else `--line`, and
+  making that a prop would mean every caller repeating what its own
+  section already knows.
+*/
 /*---------------------------------------------
 /  PROPS & EMITS
 ---------------------------------------------*/
-const {
-  bg = 'dark',
-  withGridOverlay = false,
-} = defineProps<{
-  bg?: 'dark' | 'gray';
-  withGridOverlay?: boolean;
-}>();
 /*---------------------------------------------
 /  VARIABLES
 ---------------------------------------------*/
@@ -18,7 +20,6 @@ const {
 /*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
-const bgClass = computed(() => (bg === 'dark' ? 'bg-bgDark' : 'bg-bgGray'));
 /*---------------------------------------------
 /  WATCHERS
 ---------------------------------------------*/
@@ -28,20 +29,16 @@ const bgClass = computed(() => (bg === 'dark' ? 'bg-bgDark' : 'bg-bgGray'));
 </script>
 
 <template>
-  <div
-    class="relative py-40px"
-    :class="[bgClass, withGridOverlay ? 'overflow-visible' : 'overflow-hidden']"
-  >
-    <div
-      v-if="withGridOverlay"
-      aria-hidden="true"
-      class="absolute left-0 right-0 top-1/2 h-[calc(50%+80px)] bg-no-repeat bg-cover bg-center pointer-events-none opacity-40 z-0"
-      :style="{ backgroundImage: 'url(/grid.svg)' }"
-    />
-    <div class="relative z-1 container">
-      <slot />
-    </div>
-  </div>
+  <div class="rule" role="presentation" />
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.rule {
+  height: 1px;
+  background: var(--line);
+
+  .paper & {
+    background: var(--paper-line);
+  }
+}
+</style>
