@@ -1,19 +1,26 @@
 <script setup lang="ts">
-import { useForm } from 'vue-formify';
-import InputText from 'primevue/inputtext';
-import Textarea from 'primevue/textarea';
-import RadioButton from 'primevue/radiobutton';
-import Checkbox from 'primevue/checkbox';
-import Select from 'primevue/select';
-import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
+import { motion } from 'motion-v';
 import { MemberApplicationRequests } from '@/services/requests/MemberApplicationRequests';
+import { sectionRise } from '@/components/Home/anims';
 import type {
   ApplicationAnswers,
   ApplicationField,
   ApplicationFormSchema,
 } from '@/types/applicationForm';
 
+/*
+  The one page on the site that is a TOOL rather than a document, so the
+  craft shifts from typography to input design.
+
+  It never hard-codes a field: every question comes from
+  GET /api/application-form, and each field's `type` picks the control.
+  Adding a question is an admin-panel edit, not a change here.
+
+  Zero PrimeVue — the controls are the local Form/ components. Aura's
+  token cascade would have to be fought at every step to reach this
+  design, and the whole theme engine was the largest dependency left in
+  the bundle after Three.js.
+*/
 /*---------------------------------------------
 /  PROPS & EMITS
 ---------------------------------------------*/
@@ -22,11 +29,14 @@ import type {
 ---------------------------------------------*/
 const { t } = useI18n();
 const { locale } = useLocale();
-const toast = useToast();
+const toasts = useToasts();
 
-// The questions live in the admin panel, not in this file. Keyed on the
-// locale so switching language re-asks for the translated labels.
-const { data: schema, isLoading } = useQuery<ApplicationFormSchema>({
+/*
+  Keyed on the locale so switching language re-asks for the translated
+  labels — see syncValues for why that does not cost the applicant their
+  answers.
+*/
+const { data: schema, status } = useQuery<ApplicationFormSchema>({
   key: ['application-form', locale],
   request: () => MemberApplicationRequests.form(locale.value as string),
   cache: true,
@@ -34,77 +44,109 @@ const { data: schema, isLoading } = useQuery<ApplicationFormSchema>({
   refetchTime: 600,
 });
 
-const { Form, values, reset } = useForm<ApplicationAnswers>({ initialValues: {} });
-const status = ref<'idle' | 'submitting' | 'success' | 'error'>('idle');
+const answers = ref<ApplicationAnswers>({});
+const submitState = ref<'idle' | 'submitting' | 'success'>('idle');
 
-const plusKeys = [
-  'join.plus.english',
-  'join.plus.knowledge',
-  'join.plus.hours',
-  'join.plus.inPerson',
-  'join.plus.tools',
-  'join.plus.tdk',
-] as const;
+/** Per-field messages from the API's 422, keyed by field key. */
+const fieldErrors = ref<Record<string, string>>({});
 /*---------------------------------------------
 /  METHODS
 ---------------------------------------------*/
 /**
- * Give every question a starting value without discarding anything already
- * typed — the schema also arrives again on a locale switch, and losing a
- * half-filled form to a language change would be its own bug report.
+ * Give every question a starting value without discarding anything
+ * already typed.
+ *
+ * This MERGES rather than replaces, and that is the whole point: the
+ * schema arrives again on a locale switch, and losing a half-filled form
+ * to a language change would be its own bug report.
  */
 const syncValues = (next?: ApplicationFormSchema | null) => {
-  if (!next) return;
-
+  if (!next) {
+    return;
+  }
   for (const section of next.sections) {
     for (const field of section.fields) {
-      if (values.value[field.key] !== undefined) continue;
-      values.value[field.key] = field.type === 'checkbox' ? [] : '';
+      if (answers.value[field.key] === undefined) {
+        answers.value[field.key] = field.type === 'checkbox' ? [] : '';
+      }
     }
   }
 };
 
-const onSubmit = async () => {
-  status.value = 'submitting';
+const isAnswered = (field: ApplicationField) => {
+  const value = answers.value[field.key];
 
-  // Send only what was answered: the API validates against the same
-  // questions, and an empty string for an optional question would be
-  // stored as an answer nobody gave.
+  return Array.isArray(value) ? value.length > 0 : !!value;
+};
+
+const submit = async () => {
+  submitState.value = 'submitting';
+  fieldErrors.value = {};
+
+  /*
+    Send only what was answered. The API validates against the same
+    questions, and an empty string for an optional question would be
+    stored as an answer nobody gave.
+  */
   const payload: ApplicationAnswers = {};
-  for (const [key, value] of Object.entries(values.value)) {
-    if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) continue;
+  for (const [key, value] of Object.entries(answers.value)) {
+    if (value === undefined || value === '' || (Array.isArray(value) && !value.length)) {
+      continue;
+    }
     payload[key] = value;
   }
 
   try {
     await MemberApplicationRequests.submit(payload);
-    status.value = 'success';
+    submitState.value = 'success';
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  } catch {
-    status.value = 'error';
-    toast.add({
-      severity: 'error',
-      summary: t('join.error'),
-      life: 4000,
-    });
+  } catch (error) {
+    submitState.value = 'idle';
+
+    /*
+      A 429 is recoverable without retyping — the form stays filled and
+      says to wait. That is the reason this is an in-page state rather
+      than a redirect: the throttle is 10/minute and a redirect would
+      throw the answers away.
+    */
+    const responseStatus = (error as { status?: number })?.status;
+    const body = (error as { data?: { errors?: Record<string, string[]> } })?.data;
+
+    if (responseStatus === 429) {
+      toasts.error(t('form.throttled'));
+
+      return;
+    }
+
+    if (body?.errors) {
+      fieldErrors.value = Object.fromEntries(
+        Object.entries(body.errors).map(([key, messages]) => [key, messages[0] ?? '']),
+      );
+      toasts.error(t('form.errorBody'));
+
+      return;
+    }
+
+    toasts.error(t('form.errorTitle'));
   }
 };
 
-const resetForm = () => {
-  reset();
+const startOver = () => {
+  answers.value = {};
+  fieldErrors.value = {};
   syncValues(schema.value);
-  status.value = 'idle';
+  submitState.value = 'idle';
 };
-
-/** Two-digit card number, matching the 01 / 02 / 03 the form always had. */
-const sectionNumber = (index: number) => String(index + 1).padStart(2, '0');
-
-const isTextual = (field: ApplicationField) => field.type === 'text' || field.type === 'email';
 /*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
-const submitting = computed(() => status.value === 'submitting');
 const sections = computed(() => schema.value?.sections ?? []);
+const submitting = computed(() => submitState.value === 'submitting');
+
+/** A section counts as done once its required questions are answered. */
+const sectionsDone = computed(() => sections.value.filter(
+  (section) => section.fields.filter((field) => field.required).every(isAnswered),
+).length);
 /*---------------------------------------------
 /  WATCHERS
 ---------------------------------------------*/
@@ -115,236 +157,149 @@ watch(schema, syncValues, { immediate: true });
 </script>
 
 <template>
-  <Toast />
   <HtmlTitle :title="t('join.title')" />
 
-  <div
-    class="container pt-[calc(var(--header-height)+32px)] pb-64px"
-  >
-    <div class="mb-32px">
-      <SectionButton to="/">{{ t('button.home') }}</SectionButton>
-    </div>
-
-    <template v-if="status === 'success'">
-      <div
-        class="p-[clamp(32px,4vw,56px)] border border-cardBorder rounded-12px bg-cardBg text-center"
-      >
-        <h2
-          class="m-0 mb-16px fs-[clamp(28px,5vw,40px)] uppercase"
-        >
-          {{ t('join.success.title') }}
-        </h2>
-        <p
-          class="max-w-520px mx-auto mb-24px text-[var(--color-dimmed)] fs-16px lh-[1.6]"
-        >
-          {{ t('join.success.body') }}
-        </p>
-        <SectionButton type="button" @click="resetForm">
-          {{ t('join.success.again') }}
-        </SectionButton>
+  <SectionShell :eyebrow="t('join.eyebrow')" :title="t('join.title')">
+    <!-- The success state REPLACES the form rather than redirecting, so a
+         reader can see what happened without losing the page. -->
+    <motion.div v-if="submitState === 'success'" v-bind="sectionRise()" class="done">
+      <h3>{{ t('form.successTitle') }}</h3>
+      <p class="lede">{{ t('form.successBody') }}</p>
+      <div class="cta-row">
+        <RouterLink to="/" class="btn">{{ t('notFound.home') }}</RouterLink>
+        <button type="button" class="btn btn--ghost" @click="startOver">
+          {{ t('form.again') }}
+        </button>
       </div>
-    </template>
+    </motion.div>
 
     <template v-else>
-      <div
-        class="relative p-[clamp(28px,4vw,56px)] mb-32px border border-cardBorder rounded-12px bg-cardBg overflow-hidden"
-      >
-        <div
-          class="grid grid-cols-1 gap-32px md:(grid-cols-[minmax(0,1.5fr)_minmax(260px,1fr)] items-end)"
-        >
-          <div>
-            <span
-              class="inline-block py-4px px-12px mb-16px rounded-full text-primary bg-[rgb(242_172_60_/_18%)] font-600 fs-12px uppercase ls-[0.08em]"
-            >
-              {{ t('join.tagline') }}
-            </span>
-            <h1
-              class="m-0 mb-16px text-primary fs-[clamp(40px,8vw,84px)] lh-[0.96] font-[var(--font-family-headline)] uppercase"
-            >
-              {{ t('join.title') }}
-            </h1>
-            <p
-              class="max-w-[56ch] text-[var(--color-dimmed)] fs-17px lh-[1.6]"
-            >
-              {{ t('join.intro') }}
-            </p>
-          </div>
-          <div
-            class="p-20px border border-cardBorder rounded-8px bg-[rgb(255_255_255_/_4%)]"
-          >
-            <div
-              class="mb-12px text-primary font-600 fs-12px uppercase ls-[0.08em]"
-            >
-              {{ t('join.plus.heading') }}
-            </div>
-            <ul class="flex flex-col gap-10px p-0 m-0 list-none">
-              <li
-                v-for="key in plusKeys"
-                :key="key"
-                class="flex items-start gap-10px fs-13px lh-[1.45]"
-              >
-                <span
-                  class="inline-flex items-center justify-center shrink-0 w-18px h-18px mt-1px rounded-full text-primary bg-[rgb(242_172_60_/_22%)] fs-11px"
-                >
-                  ✓
-                </span>
-                <span>{{ t(key) }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <FetchError v-if="status === 'FAILED' && !sections.length" />
+      <Skeleton v-else-if="status === 'PENDING' && !sections.length" :rows="4" height="90px" />
 
-      <div
-        v-if="isLoading && sections.length === 0"
-        class="p-[clamp(24px,3vw,40px)] border border-cardBorder rounded-12px bg-cardBg text-[var(--color-dimmed)]"
-      >
-        {{ t('join.loading') }}
-      </div>
+      <form v-else class="join-form" novalidate @submit.prevent="submit">
+        <p class="lede join-form__lede">{{ t('join.lede') }}</p>
 
-      <Form v-else @submit="onSubmit">
-        <div
-          v-for="(section, index) in sections"
-          :key="section.key"
-          class="p-[clamp(24px,3vw,40px)] mb-32px border border-cardBorder rounded-12px bg-cardBg"
-        >
-          <div
-            class="flex items-baseline gap-16px pb-16px mb-24px border-b border-dashed border-cardBorder"
-          >
-            <span
-              class="join__section-num font-500 fs-32px lh-1"
-            >{{ sectionNumber(index) }}</span>
-            <h2
-              class="m-0 font-600 fs-[clamp(20px,3vw,28px)] lh-1 uppercase"
-            >
-              {{ section.title }}
-            </h2>
-          </div>
-          <p
-            v-if="section.description"
-            class="mt-0 mb-24px text-[var(--color-dimmed)] fs-14px lh-[1.6]"
-          >
-            {{ section.description }}
-          </p>
-          <div class="flex flex-col gap-16px">
-            <div
-              v-for="field in section.fields"
-              :key="field.key"
-              class="join__field flex flex-col gap-6px"
-            >
-              <label :for="`field-${field.key}`">
-                {{ field.label }}<span v-if="field.required" class="ml-2px text-primary">*</span>
-              </label>
-              <small v-if="field.help" class="text-[var(--color-dimmed)]">{{ field.help }}</small>
+        <FormProgress :total="sections.length" :done="sectionsDone" />
 
-              <InputText
-                v-if="isTextual(field)"
-                :id="`field-${field.key}`"
-                v-model="(values[field.key] as string)"
-                :type="field.type === 'email' ? 'email' : 'text'"
-                :required="field.required"
-                :maxlength="field.maxLength"
+        <section v-for="section in sections" :key="section.key" class="join-form__section">
+          <h3>{{ section.title }}</h3>
+          <p v-if="section.description" class="join-form__hint">{{ section.description }}</p>
+
+          <FormField
+            v-for="field in section.fields"
+            :key="field.key"
+            :id="`f-${field.key}`"
+            :label="field.label"
+            :help="field.help"
+            :error="fieldErrors[field.key] ?? null"
+            :required="field.required"
+          >
+            <template #default="{ id, describedBy, invalid }">
+              <TextArea
+                v-if="field.type === 'textarea'"
+                :id="id"
+                v-model="answers[field.key] as string"
                 :placeholder="field.placeholder ?? ''"
-                class="w-full"
-              />
-
-              <Textarea
-                v-else-if="field.type === 'textarea'"
-                :id="`field-${field.key}`"
-                v-model="(values[field.key] as string)"
-                rows="3"
-                auto-resize
+                :maxlength="field.maxLength || undefined"
+                :described-by="describedBy"
+                :invalid="invalid"
                 :required="field.required"
-                :maxlength="field.maxLength"
-                :placeholder="field.placeholder ?? ''"
-                class="w-full"
               />
-
-              <Select
+              <SelectInput
                 v-else-if="field.type === 'select'"
-                :id="`field-${field.key}`"
-                v-model="(values[field.key] as string)"
+                :id="id"
+                v-model="answers[field.key] as string"
                 :options="field.options"
-                option-label="label"
-                option-value="value"
-                :placeholder="field.placeholder ?? ''"
-                class="w-full"
+                :placeholder="field.placeholder || t('form.choose')"
+                :described-by="describedBy"
+                :invalid="invalid"
+                :required="field.required"
               />
+              <OptionPills
+                v-else-if="field.type === 'radio' || field.type === 'checkbox'"
+                :id="id"
+                v-model="answers[field.key]"
+                :options="field.options"
+                :multiple="field.type === 'checkbox'"
+                :described-by="describedBy"
+                :invalid="invalid"
+              />
+              <TextInput
+                v-else
+                :id="id"
+                v-model="answers[field.key] as string"
+                :type="field.type === 'email' ? 'email' : 'text'"
+                :placeholder="field.placeholder ?? ''"
+                :maxlength="field.maxLength || undefined"
+                :described-by="describedBy"
+                :invalid="invalid"
+                :required="field.required"
+              />
+            </template>
+          </FormField>
+        </section>
 
-              <div
-                v-else-if="field.type === 'radio'"
-                class="grid grid-cols-1 gap-8px mt-8px sm:grid-cols-3"
-                :class="{ 'sm:grid-cols-1': field.options.length > 3 }"
-              >
-                <label
-                  v-for="option in field.options"
-                  :key="option.value"
-                  class="join__option-pill flex items-center gap-10px py-10px px-14px border border-cardBorder rounded-8px bg-[rgb(255_255_255_/_2%)] cursor-pointer transition-[border-color,background-color] duration-150"
-                  :data-checked="values[field.key] === option.value"
-                >
-                  <RadioButton v-model="values[field.key]" :value="option.value" />
-                  <span>{{ option.label }}</span>
-                </label>
-              </div>
-
-              <div
-                v-else-if="field.type === 'checkbox'"
-                class="grid grid-cols-1 gap-8px mt-8px sm:grid-cols-3"
-              >
-                <label
-                  v-for="option in field.options"
-                  :key="option.value"
-                  class="join__option-pill flex items-center gap-10px py-10px px-14px border border-cardBorder rounded-8px bg-[rgb(255_255_255_/_2%)] cursor-pointer transition-[border-color,background-color] duration-150"
-                  :data-checked="((values[field.key] as string[]) ?? []).includes(option.value)"
-                >
-                  <Checkbox v-model="values[field.key]" :value="option.value" />
-                  <span>{{ option.label }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="flex flex-col gap-16px mt-8px sm:(flex-row items-center justify-between)"
-        >
-          <SectionButton to="/">{{ t('button.home') }}</SectionButton>
-          <SectionButton type="submit" :disabled="submitting">
-            {{ submitting ? t('join.submitting') : t('join.submit') }}
-          </SectionButton>
-        </div>
-      </Form>
+        <button type="submit" class="btn join-form__submit" :disabled="submitting">
+          {{ submitting ? t('form.sending') : t('form.submit') }}
+        </button>
+      </form>
     </template>
-  </div>
+  </SectionShell>
 </template>
 
 <style lang="scss" scoped>
-.join__section-num {
-  color: transparent;
-  background: linear-gradient(to right, transparent, var(--color-primary));
-  background-clip: text;
+.join-form {
+  max-width: 620px;
+  margin-top: clamp(32px, 4vw, 56px);
 }
 
-.join__field {
-  label {
-    font-weight: 500;
-    font-size: 14px;
-  }
+.join-form__lede {
+  margin-bottom: clamp(30px, 4vw, 48px);
+}
 
-  small {
-    color: var(--color-dimmed);
-    font-size: 12px;
+.join-form__section {
+  margin-bottom: clamp(40px, 5vw, 64px);
+
+  h3 {
+    margin-bottom: 8px;
+    font-size: var(--fs-h3);
   }
 }
 
-.join__option-pill {
-  &:hover {
-    border-color: rgb(242 172 60 / 60%);
+.join-form__hint {
+  margin-bottom: 26px;
+  color: var(--text-mid);
+  font-size: 15px;
+}
+
+.join-form__submit {
+  justify-content: center;
+  width: 100%;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+}
+
+.done {
+  max-width: 52ch;
+  margin-top: clamp(32px, 4vw, 56px);
+
+  h3 {
+    font-size: var(--fs-h2);
   }
 
-  &[data-checked='true'] {
-    border-color: var(--color-primary);
-    background: rgb(242 172 60 / 12%);
+  .lede {
+    margin-top: 16px;
   }
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
 }
 </style>
