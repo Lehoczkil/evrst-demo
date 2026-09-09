@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMembers\Pages;
+namespace App\Filament\Resources\TeamMembers\Pages;
 
-use App\Filament\Resources\Cms\TeamMembers\TeamMemberResource;
+use App\Filament\Resources\TeamMembers\TeamMemberResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 

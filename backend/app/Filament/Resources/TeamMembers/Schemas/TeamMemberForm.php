@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMembers\Schemas;
+namespace App\Filament\Resources\TeamMembers\Schemas;
 
 use App\Filament\Schemas\MemberPositionFields;
 use App\Models\TeamMember;
@@ -68,18 +68,18 @@ class TeamMemberForm
                     ->helperText(__('admin.team.discord_help'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('discord_username')
-                    ->label('Discord username')
+                    ->label(__('admin.team.discord_username'))
                     ->maxLength(64)
                     ->placeholder('e.g. balint_klabacsek')
-                    ->helperText('Globally-unique Discord handle (the @name).')
+                    ->helperText(__('admin.team.discord_username_help'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('discord_id')
-                    ->label('Discord snowflake')
+                    ->label(__('admin.team.discord_id'))
                     ->maxLength(32)
                     ->placeholder('123456789012345678')
                     ->rule('regex:/^\d{17,20}$/')
-                    ->validationMessages(['regex' => 'Must be a 17–20 digit Discord snowflake.'])
-                    ->helperText('Numeric user ID (Developer Mode → right-click → Copy User ID). Required for DM bot delivery and `<@id>` mentions.')
+                    ->validationMessages(['regex' => __('admin.team.discord_id_invalid')])
+                    ->helperText(__('admin.team.discord_id_help'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('degree_en')
                     ->label(__('admin.team.degree') . ' (EN)')

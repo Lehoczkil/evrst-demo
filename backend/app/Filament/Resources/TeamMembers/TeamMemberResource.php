@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMembers;
+namespace App\Filament\Resources\TeamMembers;
 
 use App\Auth\Perm;
-use App\Filament\Resources\Cms\TeamMembers\Pages\CreateTeamMember;
-use App\Filament\Resources\Cms\TeamMembers\Pages\EditTeamMember;
-use App\Filament\Resources\Cms\TeamMembers\Pages\ListTeamMembers;
-use App\Filament\Resources\Cms\TeamMembers\Schemas\TeamMemberForm;
-use App\Filament\Resources\Cms\TeamMembers\Tables\TeamMembersTable;
+use App\Filament\Resources\TeamMembers\Pages\CreateTeamMember;
+use App\Filament\Resources\TeamMembers\Pages\EditTeamMember;
+use App\Filament\Resources\TeamMembers\Pages\ListTeamMembers;
+use App\Filament\Resources\TeamMembers\Schemas\TeamMemberForm;
+use App\Filament\Resources\TeamMembers\Tables\TeamMembersTable;
 use App\Models\TeamMember;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -19,6 +19,15 @@ use Illuminate\Database\Eloquent\Model;
 class TeamMemberResource extends Resource
 {
     protected static ?string $model = TeamMember::class;
+
+    /**
+     * These moved out of App\Filament\Resources\Cms\ when the models
+     * stopped being CMS-backed. The slug is pinned to the old path so
+     * the /admin/cms/… URLs people have bookmarked, the route names,
+     * and the help-modal keys that are looked up by route name all
+     * keep working — only the PHP namespace changed.
+     */
+    protected static ?string $slug = 'cms/team-members';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 

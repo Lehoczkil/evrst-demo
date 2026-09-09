@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Cms\TeamMembers\Tables;
+namespace App\Filament\Resources\TeamMembers\Tables;
 
 use App\Models\TeamMemberGroup;
 use Filament\Actions\BulkActionGroup;
@@ -54,14 +54,14 @@ class TeamMembersTable
                     ->placeholder('—')
                     ->toggleable(),
                 TextColumn::make('discord_username')
-                    ->label('Discord @')
+                    ->label(__('admin.team.discord_username_col'))
                     ->searchable()
                     ->prefix('@')
                     ->color('gray')
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('discord_id')
-                    ->label('Snowflake')
+                    ->label(__('admin.team.discord_id_col'))
                     ->searchable()
                     ->copyable()
                     ->color('gray')
