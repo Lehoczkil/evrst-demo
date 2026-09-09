@@ -230,4 +230,17 @@ class AdminPagesTest extends TestCase
             ->post('/admin/logout')
             ->assertRedirect();
     }
+    public function test_the_application_form_editor_renders(): void
+    {
+        $admin = $this->makeAdmin();
+        $field = \App\Models\ApplicationFormField::where('key', 'department')->firstOrFail();
+        $system = \App\Models\ApplicationFormField::where('key', 'name')->firstOrFail();
+
+        $this->actingAs($admin)->get('/admin/application-form')->assertOk();
+        $this->actingAs($admin)->get('/admin/application-form/create')->assertOk();
+        $this->actingAs($admin)->get("/admin/application-form/{$field->id}/edit")->assertOk();
+        // The system variant renders a different (locked) form.
+        $this->actingAs($admin)->get("/admin/application-form/{$system->id}/edit")->assertOk();
+        $this->actingAs($admin)->get('/admin/application-form-sections')->assertOk();
+    }
 }
