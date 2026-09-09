@@ -15,6 +15,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             \App\Http\Middleware\SetLocale::class,
         ]);
+        // Also on `web`, not just the panel's authMiddleware: Livewire
+        // component updates POST to /livewire/update, which is a plain
+        // `web` route and never runs the panel middleware. Without this
+        // the forced-password-change gate stopped at the page boundary,
+        // and a user who had not set a password yet could still drive any
+        // Livewire component the profile page's chrome exposes — the
+        // global search among them. The middleware no-ops for anyone whose
+        // password_changed_at is set, i.e. everybody but a fresh account.
+        $middleware->web(append: [
+            \App\Http\Middleware\RequirePasswordChange::class,
+        ]);
         // Caddy / Fly / any PaaS terminates TLS in front of the
         // container. Trust everything so Laravel reads the correct
         // scheme + client IP from X-Forwarded-* headers — otherwise
