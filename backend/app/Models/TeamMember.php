@@ -70,6 +70,37 @@ class TeamMember extends Model
     }
 
     /**
+     * Replace this member's group assignments and mark one of them primary.
+     *
+     * `started_at` is stamped on *newly* attached rows only. The pivot has
+     * its own id so the same position can be held across several spans, and
+     * a row with no start date can't take part in that timeline — but
+     * re-stamping every row on each save would rewrite history every time
+     * someone edits an unrelated field.
+     *
+     * @param  array<int, int|string>  $groupIds
+     */
+    public function syncGroupAssignments(array $groupIds, ?int $primaryGroupId): void
+    {
+        $groupIds = array_values(array_unique(array_map('intval', array_filter(
+            $groupIds,
+            static fn ($id) => $id !== null && $id !== '',
+        ))));
+
+        $existing = $this->groups()->pluck('team_member_groups.id')->all();
+
+        $pivot = [];
+        foreach ($groupIds as $id) {
+            $pivot[$id] = in_array($id, $existing, true)
+                ? []   // leave the existing row's started_at alone
+                : ['is_primary' => false, 'started_at' => now()];
+        }
+
+        $this->groups()->sync($pivot);
+        $this->setPrimaryGroup($primaryGroupId);
+    }
+
+    /**
      * Set exactly one primary assignment, clearing any others. Pass null
      * to clear without setting a new one.
      */

@@ -2,16 +2,17 @@
 
 namespace App\Filament\Resources\MemberApplications\Pages;
 
+use App\Actions\IssueTempPassword;
 use App\Auth\Perm;
-use App\Filament\Resources\Cms\TeamMembers\TeamMemberResource;
+use App\Filament\Resources\TeamMembers\TeamMemberResource;
 use App\Filament\Resources\MemberApplications\MemberApplicationResource;
 use App\Filament\Schemas\MemberPositionFields;
+use App\Filament\Support\TempPasswordReport;
 use App\Jobs\PostDiscordWebhook;
 use App\Models\MemberApplication;
 use App\Models\TeamMember;
 use App\Models\Role;
 use App\Models\User;
-use App\Notifications\TeamMemberAccountCreated;
 use App\Support\DiscordPayloads;
 use App\Support\OrgEmail;
 use Filament\Actions\Action;
@@ -22,8 +23,8 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class AcceptMemberApplication extends Page implements HasForms
 {
@@ -144,85 +145,87 @@ class AcceptMemberApplication extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-        $temp = Str::password(12);
-        $memberRole = Role::where('key', Perm::ROLE_MEMBER)->first();
+        // The org address is the login. If an account already holds it,
+        // this is not our call to make: updateOrCreate used to overwrite
+        // that account's password, null its password_changed_at and demote
+        // it to Member — one click away from locking out an admin. The
+        // form's unique rule normally catches it; this is the backstop for
+        // a race or a hand-edited address.
+        if (User::where('email', $data['email'])->exists()) {
+            Notification::make()
+                ->title(__('admin.applications.login_taken'))
+                ->body(__('admin.applications.login_taken_body', ['email' => $data['email']]))
+                ->danger()
+                ->persistent()
+                ->send();
 
-        // Login is the org address. password_changed_at stays null so
-        // RequirePasswordChange forces a reset on first sign-in.
-        $user = User::updateOrCreate(
-            ['email' => $data['email']],
-            [
-                'name' => $data['name'],
-                'password' => Hash::make($temp),
-                'role_id' => $memberRole?->id,
-                'password_changed_at' => null,
-            ],
-        );
+            return;
+        }
+
+        $temp = IssueTempPassword::generate();
+        $memberRole = Role::where('key', Perm::ROLE_MEMBER)->first();
 
         $degree = [];
         if (! empty($data['degree_en'])) $degree['en'] = $data['degree_en'];
         if (! empty($data['degree_hu'])) $degree['hu'] = $data['degree_hu'];
 
-        $member = TeamMember::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'email_private' => $data['email_private'],
-            'degree' => $degree === [] ? null : $degree,
-            'user_id' => $user->id,
-            'joined_at' => now()->toDateString(),
-        ]);
+        // One transaction: the TeamMember insert can still fail on the
+        // team_members.email unique index (it covers soft-deleted rows),
+        // and without this that left an orphan user with a null
+        // password_changed_at behind while the application stayed PENDING.
+        [$user, $member] = DB::transaction(function () use ($data, $temp, $memberRole, $degree) {
+            // Login is the org address. password_changed_at stays null so
+            // RequirePasswordChange forces a reset on first sign-in.
+            $user = User::create([
+                'email' => $data['email'],
+                'name' => $data['name'],
+                'password' => Hash::make($temp),
+                'role_id' => $memberRole?->id,
+                'password_changed_at' => null,
+            ]);
 
-        $groupIds = array_values(array_filter((array) ($data['group_ids'] ?? [])));
-        if ($groupIds !== []) {
-            $member->groups()->sync(array_fill_keys($groupIds, ['is_primary' => false]));
-        }
-        if (! empty($data['main_position_id'])) {
-            $member->setPrimaryGroup((int) $data['main_position_id']);
-        }
+            $member = TeamMember::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'email_private' => $data['email_private'],
+                'degree' => $degree === [] ? null : $degree,
+                'user_id' => $user->id,
+                'joined_at' => now()->toDateString(),
+            ]);
 
-        $this->record->withoutActivityLog(fn () => $this->record->update([
-            'status' => MemberApplication::STATUS_ACCEPTED,
-            'reviewed_at' => now(),
-            'reviewed_by' => auth()->id(),
-            'team_member_id' => $member->id,
-        ]));
-        $this->record->logActivity('accepted', [
-            'team_member' => ['id' => $member->id, 'name' => $member->name],
-        ]);
+            $member->syncGroupAssignments(
+                (array) ($data['group_ids'] ?? []),
+                empty($data['main_position_id']) ? null : (int) $data['main_position_id'],
+            );
 
-        $destination = $user->fresh('teamMember')->deliveryEmail() ?? $user->email;
+            $this->record->withoutActivityLog(fn () => $this->record->update([
+                'status' => MemberApplication::STATUS_ACCEPTED,
+                'reviewed_at' => now(),
+                'reviewed_by' => auth()->id(),
+                'team_member_id' => $member->id,
+            ]));
+            $this->record->logActivity('accepted', [
+                'team_member' => ['id' => $member->id, 'name' => $member->name],
+            ]);
 
-        $mailFailure = null;
-        try {
-            \Illuminate\Support\Facades\Notification::sendNow($user, new TeamMemberAccountCreated($temp));
-        } catch (\Throwable $e) {
-            $mailFailure = $e->getMessage();
-        }
+            return [$user, $member];
+        });
+
+        $user->setRelation('teamMember', $member);
+        $delivery = IssueTempPassword::deliver($user, $temp);
 
         $payload = DiscordPayloads::applicationAccepted($this->record, auth()->user());
         PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
 
-        if ($mailFailure) {
-            Notification::make()
-                ->title('Application accepted, mail failed')
-                ->body('Team member created but the temp-password email could not be sent: ' . $mailFailure)
-                ->danger()
-                ->persistent()
-                ->send();
-        } elseif (config('mail.default') === 'log') {
-            Notification::make()
-                ->title('Application accepted (mail logged)')
-                ->body('Temp password written to storage/logs/laravel.log for ' . $destination . '. Switch MAIL_MAILER off `log` to deliver real email.')
-                ->warning()
-                ->persistent()
-                ->send();
-        } else {
-            Notification::make()
-                ->title('Application accepted')
-                ->body('Team member created and a temporary password emailed to ' . $destination . '.')
-                ->success()
-                ->send();
-        }
+        // The application is accepted either way — say what happened to the
+        // credentials separately rather than folding it into one message.
+        Notification::make()
+            ->title(__('admin.applications.accepted_title'))
+            ->body(__('admin.applications.accepted_body', ['name' => $member->name]))
+            ->success()
+            ->send();
+
+        TempPasswordReport::flash($delivery);
 
         $this->redirect(TeamMemberResource::getUrl('edit', ['record' => $member->id]));
     }
@@ -231,11 +234,11 @@ class AcceptMemberApplication extends Page implements HasForms
     {
         return [
             Action::make('save')
-                ->label('Create team member + admin account')
+                ->label(__('admin.applications.accept_submit'))
                 ->action('save')
                 ->color('success'),
             Action::make('cancel')
-                ->label('Cancel')
+                ->label(__('admin.common.cancel'))
                 ->color('gray')
                 ->url(MemberApplicationResource::getUrl('edit', ['record' => $this->record])),
         ];
