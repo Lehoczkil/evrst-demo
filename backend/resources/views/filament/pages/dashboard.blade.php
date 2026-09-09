@@ -1,12 +1,18 @@
 <x-filament-panels::page>
     @php
         $stats     = $this->getStats();
-        $pending   = $this->getPendingApplications();
         $myTasks   = $this->getMyOpenTasks();
         $upcoming  = $this->getUpcomingThisWeek();
         $latest    = $this->getLatestApplications();
         $activity  = $this->getRecentActivity();
         $actions   = $this->getQuickActions();
+
+        // Applicant names and the audit feed are admin-grade data: the
+        // tiles that carry them only render for viewers who could open
+        // the matching resource. The page methods above return empty
+        // collections for everyone else, so nothing is even queried.
+        $canSeeApplications = $this->canSeeApplications();
+        $canSeeActivity     = $this->canSeeActivity();
 
         $state    = $this->getMissionState();
         $target   = \Illuminate\Support\Carbon::parse($state['target']);
@@ -96,38 +102,25 @@
     <div class="evrst-tile-grid">
 
         {{-- 1 · PENDING APPLICATIONS --}}
-        <div class="evrst-tile">
-            <div class="evrst-tile-heading">
-                {{ __('admin.widgets.pending_apps') }}
-                <span class="evrst-tile-count">· {{ $stats['pending'] }}</span>
-            </div>
-            <div class="evrst-tile-big">{{ $stats['pending'] }}
-                @if ($stats['pending'] === 0)
-                    <span class="evrst-tile-delta evrst-success">✓ {{ __('admin.widgets.inbox_clear') }}</span>
-                @else
-                    <span class="evrst-tile-delta evrst-amber">{{ __('admin.widgets.awaiting_review') }}</span>
-                @endif
-            </div>
-            @if ($pending->isNotEmpty())
-                <div class="evrst-tile-rows">
-                    @foreach ($pending->take(3) as $a)
-                        @php
-                            $dot = match ($a->status) {
-                                'PENDING'  => 'evrst-dot-amber',
-                                'ACCEPTED' => 'evrst-dot-success',
-                                'REJECTED' => 'evrst-dot-danger',
-                                default    => 'evrst-dot-muted',
-                            };
-                        @endphp
-                        <a href="{{ \App\Filament\Resources\MemberApplications\MemberApplicationResource::getUrl('edit', ['record' => $a->id]) }}" class="evrst-tile-row">
-                            <span class="evrst-dot {{ $dot }}"></span>
-                            <span class="evrst-tile-row-title">{{ $a->name }}</span>
-                            <span class="evrst-tile-row-meta">{{ \Illuminate\Support\Str::upper($a->created_at?->diffForHumans(null, true) ?? '') }}</span>
-                        </a>
-                    @endforeach
+        @if ($canSeeApplications)
+            <div class="evrst-tile">
+                <div class="evrst-tile-heading">
+                    {{ __('admin.widgets.pending_apps') }}
+                    <span class="evrst-tile-count">· {{ $stats['pending'] }}</span>
                 </div>
-            @endif
-        </div>
+                <div class="evrst-tile-big">{{ $stats['pending'] }}
+                    @if ($stats['pending'] === 0)
+                        <span class="evrst-tile-delta evrst-success">✓ {{ __('admin.widgets.inbox_clear') }}</span>
+                    @else
+                        <span class="evrst-tile-delta evrst-amber">{{ __('admin.widgets.awaiting_review') }}</span>
+                    @endif
+                </div>
+                {{-- The row list that used to sit here ran an unfiltered query,
+                     so accepted and rejected applicants showed up underneath a
+                     count that only totalled the pending ones. Tile 4 lists
+                     recent applications properly, with a status badge. --}}
+            </div>
+        @endif
 
         {{-- 2 · OPEN TASKS (YOU) --}}
         <div class="evrst-tile">
@@ -185,57 +178,61 @@
         </div>
 
         {{-- 4 · LATEST APPLICATIONS --}}
-        <div class="evrst-tile">
-            <div class="evrst-tile-heading">{{ __('admin.widgets.recent_apps') }}<span class="evrst-tile-count">· {{ $latest->count() }}</span></div>
-            @if ($latest->isEmpty())
-                <p class="evrst-tile-empty">{{ __('admin.widgets.recent_apps_empty') }}</p>
-            @else
-                <div class="evrst-tile-rows">
-                    @foreach ($latest as $a)
-                        @php
-                            $dot = match ($a->status) {
-                                'PENDING'  => 'evrst-dot-amber',
-                                'ACCEPTED' => 'evrst-dot-success',
-                                'REJECTED' => 'evrst-dot-danger',
-                                default    => 'evrst-dot-muted',
-                            };
-                        @endphp
-                        <a href="{{ \App\Filament\Resources\MemberApplications\MemberApplicationResource::getUrl('edit', ['record' => $a->id]) }}" class="evrst-tile-row">
-                            <span class="evrst-dot {{ $dot }}"></span>
-                            <span class="evrst-tile-row-title">{{ $a->name }} @if ($a->department)<span class="evrst-tile-row-sub">· {{ $a->department }}</span>@endif</span>
-                            <span class="evrst-tile-row-meta">{{ \Illuminate\Support\Str::upper($a->status) }}</span>
-                        </a>
-                    @endforeach
-                </div>
-            @endif
-        </div>
+        @if ($canSeeApplications)
+            <div class="evrst-tile">
+                <div class="evrst-tile-heading">{{ __('admin.widgets.recent_apps') }}<span class="evrst-tile-count">· {{ $latest->count() }}</span></div>
+                @if ($latest->isEmpty())
+                    <p class="evrst-tile-empty">{{ __('admin.widgets.recent_apps_empty') }}</p>
+                @else
+                    <div class="evrst-tile-rows">
+                        @foreach ($latest as $a)
+                            @php
+                                $dot = match ($a->status) {
+                                    'PENDING'  => 'evrst-dot-amber',
+                                    'ACCEPTED' => 'evrst-dot-success',
+                                    'REJECTED' => 'evrst-dot-danger',
+                                    default    => 'evrst-dot-muted',
+                                };
+                            @endphp
+                            <a href="{{ \App\Filament\Resources\MemberApplications\MemberApplicationResource::getUrl('edit', ['record' => $a->id]) }}" class="evrst-tile-row">
+                                <span class="evrst-dot {{ $dot }}"></span>
+                                <span class="evrst-tile-row-title">{{ $a->name }} @if ($a->department)<span class="evrst-tile-row-sub">· {{ $a->department }}</span>@endif</span>
+                                <span class="evrst-tile-row-meta">{{ \Illuminate\Support\Str::upper($a->status) }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        @endif
 
         {{-- 5 · ACTIVITY --}}
-        <div class="evrst-tile">
-            <div class="evrst-tile-heading">{{ __('admin.resources.activity_log.p') }}</div>
-            @if ($activity->isEmpty())
-                <p class="evrst-tile-empty">{{ __('admin.empty.activity_logs_b') }}</p>
-            @else
-                <div class="evrst-tile-rows">
-                    @foreach ($activity as $log)
-                        @php
-                            $dot = match ($log->event ?? '') {
-                                'created', 'accepted' => 'evrst-dot-success',
-                                'updated'             => 'evrst-dot-info',
-                                'deleted', 'rejected' => 'evrst-dot-danger',
-                                default               => 'evrst-dot-muted',
-                            };
-                            $who = $log->user?->name ?? 'system';
-                        @endphp
-                        <div class="evrst-tile-row">
-                            <span class="evrst-dot {{ $dot }}"></span>
-                            <span class="evrst-tile-row-title"><b>{{ $who }}</b> <span class="evrst-tile-row-sub">{{ $log->event }}</span> <span class="evrst-tile-row-target">{{ $log->subject_label ?: ($log->subject_type ?: '—') }}</span></span>
-                            <span class="evrst-tile-row-meta">{{ \Illuminate\Support\Str::upper($log->created_at?->diffForHumans(null, true) ?? '') }}</span>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
+        @if ($canSeeActivity)
+            <div class="evrst-tile">
+                <div class="evrst-tile-heading">{{ __('admin.resources.activity_log.p') }}</div>
+                @if ($activity->isEmpty())
+                    <p class="evrst-tile-empty">{{ __('admin.empty.activity_logs_b') }}</p>
+                @else
+                    <div class="evrst-tile-rows">
+                        @foreach ($activity as $log)
+                            @php
+                                $dot = match ($log->event ?? '') {
+                                    'created', 'accepted' => 'evrst-dot-success',
+                                    'updated'             => 'evrst-dot-info',
+                                    'deleted', 'rejected' => 'evrst-dot-danger',
+                                    default               => 'evrst-dot-muted',
+                                };
+                                $who = $log->user?->name ?? 'system';
+                            @endphp
+                            <div class="evrst-tile-row">
+                                <span class="evrst-dot {{ $dot }}"></span>
+                                <span class="evrst-tile-row-title"><b>{{ $who }}</b> <span class="evrst-tile-row-sub">{{ $log->event }}</span> <span class="evrst-tile-row-target">{{ $log->subject_label ?: ($log->subject_type ?: '—') }}</span></span>
+                                <span class="evrst-tile-row-meta">{{ \Illuminate\Support\Str::upper($log->created_at?->diffForHumans(null, true) ?? '') }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        @endif
 
         {{-- 6 · QUICK ACTIONS --}}
         <div class="evrst-tile">

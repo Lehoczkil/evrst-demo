@@ -2,6 +2,11 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\ActivityLogs\ActivityLogResource;
+use App\Filament\Resources\Drawings\DrawingResource;
+use App\Filament\Resources\MemberApplications\MemberApplicationResource;
+use App\Filament\Resources\OnshapeModels\OnshapeModelResource;
+use App\Filament\Resources\Tasks\TaskResource;
 use App\Models\ActivityLog;
 use App\Models\CalendarEvent;
 use App\Models\Cms\Event;
@@ -27,6 +32,24 @@ class Dashboard extends BaseDashboard
     protected string $view = 'filament.pages.dashboard';
 
     public function getTitle(): string { return __('admin.widgets.dashboard') ?? 'Dashboard'; }
+
+    /**
+     * The tiles are rendered by the Blade, not by Filament widgets, so
+     * nothing gates them for free. These mirror the resources the tiles
+     * link into: MemberApplicationResource::canViewAny() and the
+     * admin-only ActivityLogResource. A tile a viewer may not open must
+     * not render — it leaked applicant names and the whole audit feed to
+     * every signed-in member, with a link that 403s on click.
+     */
+    public function canSeeApplications(): bool
+    {
+        return MemberApplicationResource::canViewAny();
+    }
+
+    public function canSeeActivity(): bool
+    {
+        return ActivityLogResource::canViewAny();
+    }
 
     /** Filament shows widgets by default; we render everything in the Blade. */
     public function getWidgets(): array { return []; }
@@ -84,23 +107,14 @@ class Dashboard extends BaseDashboard
         return ['pending' => $pending, 'open' => $open, 'events' => $events, 'team' => $team];
     }
 
-    /** @return Collection<int, MemberApplication> */
-    public function getPendingApplications(): Collection
-    {
-        return Cache::remember('widgets:recent-applications', 60, fn () =>
-            MemberApplication::query()
-                ->orderByDesc('created_at')
-                ->limit(5)
-                ->get(['id', 'name', 'email', 'department', 'status', 'created_at'])
-        );
-    }
-
     /** @return Collection<int, Task> */
     public function getMyOpenTasks(): Collection
     {
         $userId = auth()->id();
         if (! $userId) return collect();
-        return Cache::remember("widgets:my-tasks:{$userId}", 60, fn () =>
+        $version = Task::myTasksCacheVersion();
+
+        return Cache::remember("widgets:my-tasks:{$version}:{$userId}", 60, fn () =>
             Task::query()
                 ->where(function ($q) use ($userId) {
                     $q->where('supervisor_id', $userId)
@@ -157,7 +171,7 @@ class Dashboard extends BaseDashboard
                         default                  => 'muted',
                     },
                     'title' => $t->title,
-                    'url'   => \App\Filament\Resources\Tasks\TaskResource::getUrl('edit', ['record' => $t->id]),
+                    'url'   => TaskResource::getUrl('edit', ['record' => $t->id]),
                 ]);
 
             return $events->concat($cals)->concat($tasks)
@@ -168,10 +182,22 @@ class Dashboard extends BaseDashboard
         });
     }
 
-    /** @return Collection<int, MemberApplication> */
+    /**
+     * The five most recent applications, whatever their status — the tile
+     * shows a status badge per row. There used to be a second, identical
+     * query behind the "pending" tile, which listed accepted and rejected
+     * applicants under a count that only totalled the pending ones; that
+     * tile now shows the count from getStats() alone.
+     *
+     * @return Collection<int, MemberApplication>
+     */
     public function getLatestApplications(): Collection
     {
-        return Cache::remember('widgets:latest-applications', 60, fn () =>
+        if (! $this->canSeeApplications()) {
+            return collect();
+        }
+
+        return Cache::remember('widgets:recent-applications', 60, fn () =>
             MemberApplication::query()
                 ->orderByDesc('created_at')
                 ->limit(5)
@@ -182,6 +208,10 @@ class Dashboard extends BaseDashboard
     /** @return Collection<int, ActivityLog> */
     public function getRecentActivity(): Collection
     {
+        if (! $this->canSeeActivity()) {
+            return collect();
+        }
+
         return Cache::remember('widgets:dashboard-activity', 60, fn () =>
             ActivityLog::query()
                 ->with('user:id,name')
@@ -191,30 +221,48 @@ class Dashboard extends BaseDashboard
         );
     }
 
-    /** @return array<int, array{label: string, url: string, icon: string}> */
+    /**
+     * Only the shortcuts this viewer can actually follow — an offered
+     * action that lands on a 403 is worse than no action at all.
+     *
+     * @return array<int, array{label: string, url: string, icon: string}>
+     */
     public function getQuickActions(): array
     {
-        return [
-            [
+        $actions = [];
+
+        if (TaskResource::canCreate()) {
+            $actions[] = [
                 'label' => __('admin.resources.task.s'),
-                'url'   => \App\Filament\Resources\Tasks\TaskResource::getUrl('create'),
+                'url'   => TaskResource::getUrl('create'),
                 'icon'  => 'plus',
-            ],
-            [
+            ];
+        }
+
+        if (Calendar::canManageEvents()) {
+            $actions[] = [
                 'label' => __('admin.resources.calendar.s'),
                 'url'   => '/admin/calendar',
                 'icon'  => 'plus',
-            ],
-            [
+            ];
+        }
+
+        if (DrawingResource::canCreate()) {
+            $actions[] = [
                 'label' => __('admin.resources.drawing.s'),
-                'url'   => \App\Filament\Resources\Drawings\DrawingResource::getUrl('create'),
+                'url'   => DrawingResource::getUrl('create'),
                 'icon'  => 'plus',
-            ],
-            [
+            ];
+        }
+
+        if (OnshapeModelResource::canCreate()) {
+            $actions[] = [
                 'label' => __('admin.resources.onshape_model.s'),
-                'url'   => \App\Filament\Resources\OnshapeModels\OnshapeModelResource::getUrl('create'),
+                'url'   => OnshapeModelResource::getUrl('create'),
                 'icon'  => 'plus',
-            ],
-        ];
+            ];
+        }
+
+        return $actions;
     }
 }
