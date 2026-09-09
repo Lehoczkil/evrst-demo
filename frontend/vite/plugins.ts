@@ -2,6 +2,7 @@ import strip from '@rollup/plugin-strip';
 import vue from '@vitejs/plugin-vue';
 import { visualizer } from 'rollup-plugin-visualizer';
 import UnoCSS from 'unocss/vite';
+import webfontDownload from 'vite-plugin-webfont-dl';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import type { Plugin } from 'vite';
@@ -18,10 +19,6 @@ const plugins: Plugin[] = [
       'vue-router',
       'vue-i18n',
       'pinia',
-      {
-        from: 'vue-formify',
-        imports: ['useForm', 'useInput'],
-      },
     ],
     dirs: [
       './src/store/**/**',
@@ -44,6 +41,14 @@ const plugins: Plugin[] = [
     include: [/\.vue$/, /\.vue\?vue/],
     exclude: [/[\\/]node_modules[\\/]/, /[\\/]\.git[\\/]/],
   }),
+  /*
+    Rewrites the Google Fonts <link> in index.html to self-hosted copies at
+    build time. Without it Space Grotesk and IBM Plex Mono are a
+    third-party request on every page load, and their CSS is a
+    render-blocking round trip the browser cannot start early.
+  */
+  webfontDownload(),
+
   UnoCSS(),
   visualizer({
     emitFile: true,

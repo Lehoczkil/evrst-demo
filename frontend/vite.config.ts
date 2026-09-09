@@ -52,7 +52,12 @@ export default defineConfig({
   build: {
     outDir: 'build',
     assetsDir: 'assets',
-    target: 'es2015',
+    /*
+      es2015 forced a regenerator transform onto every async function in
+      the app for browsers that have not mattered for years — and the
+      chrome's backdrop-filter needs far newer than that anyway.
+    */
+    target: 'es2020',
     sourcemap: true,
     manifest: true,
     chunkSizeWarningLimit: 800,
@@ -60,12 +65,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          three: ['three'],
           'vue-router': ['vue-router'],
           pinia: ['pinia'],
-          primevue: ['primevue/config'],
-          '@primevue/themes': ['@primevue/themes', '@primevue/themes/aura'],
-          'vue-formify': ['vue-formify'],
           'motion-v': ['motion-v'],
         },
       },
