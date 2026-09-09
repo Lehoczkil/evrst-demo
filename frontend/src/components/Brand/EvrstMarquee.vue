@@ -52,4 +52,17 @@ const looped = [...words, ...words, ...words];
   animation: marquee-scroll 24s linear infinite;
   padding-inline: 16px;
 }
+
+/*
+  A marquee is motion with no resting state, so under reduced motion it
+  stops — and stopping a `translateX(-50%)` loop mid-way would show the
+  seam, so it holds at its start instead.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  :deep(.marquee-track) {
+    animation: none;
+    transform: none;
+  }
+}
 </style>
