@@ -112,7 +112,7 @@ Sidebar nav groups (`AdminPanelProvider::navigationGroups`): `Site`, `About`, `T
 
 Resources live under `app/Filament/Resources/`:
 - `Cms/Events`, `Cms/Sponsors`, `Cms/AboutGoals`, `Cms/AboutProjects`, `Cms/Mentors` — CMS content backed by the `resources` JSON-payload store (each binds to a fixed `collectionId`).
-- `Cms/TeamMembers`, `Cms/TeamMemberGroups` — **no longer CMS-backed.** Bound to the dedicated `team_members` / `team_member_groups` tables and `App\Models\TeamMember` / `App\Models\TeamMemberGroup` via the new pivot. The `Cms/` namespace is a leftover so `/admin/cms/team-members` URLs keep working — fair game to lift out of `Cms\` later.
+- `TeamMembers`, `TeamMemberGroups` — **no longer CMS-backed**, and no longer under `Cms/`. Bound to the dedicated `team_members` / `team_member_groups` tables and `App\Models\TeamMember` / `App\Models\TeamMemberGroup` via the new pivot. Each pins an explicit `$slug` (`cms/team-members`, `cms/team-member-groups`) so the existing URLs + route names + help keys survive the namespace move.
 - `MemberApplications` — typed table; review/edit/accept/reject flow.
 - `Tasks` — typed table; list grouped by status + custom Kanban page.
 - `Users`, `Roles` — admin-only management of accounts and roles. Both gated through `canViewAny()` + `canAccess()` + `shouldRegisterNavigation()` returning `isAdmin()`.
@@ -175,7 +175,28 @@ Accept flow (`Filament/Resources/MemberApplications/Pages/AcceptMemberApplicatio
 2. A `TeamMember` row (`TeamMember::create([...])`) with the new column set (`name`, `email`, `email_private`, `discord_username`, `discord_nick`, `discord_id`, etc.) + `user_id` snapshot pointing at the new login. The chosen group is attached via `$member->groups()->sync([$groupId => ['is_primary' => true, 'started_at' => now()]])` and `$member->setPrimaryGroup($groupId)` keeps the `is_primary` flag canonical. **No more virtual-attribute setters or JSON `payload` writes.**
 3. A `TeamMemberAccountCreated` mail notification sent to the new user — temp password, login URL, and an explainer that the org address is a sign-in name rather than a mailbox. **Not** `ShouldQueue`: it's sent inline (and via `sendNow` from the Users-table actions) so the admin gets real delivery feedback instead of "queued" silence, and so it works with no worker running.
 
+**One path for temp passwords.** `App\Actions\IssueTempPassword::rotate($user)` (existing account) / `::deliver($user, $password)` (fresh one) is the only way a temporary password leaves the app. It resolves the destination from `User::deliveryEmail()`, refuses an undeliverable `@evrst.hu`-only address **before** rotating, restores the previous hash when the send throws, and returns a `TempPasswordResult` (`sent` / `skipped_undeliverable` / `failed`, plus `loggedNotSent()` for `MAIL_MAILER=log`). `App\Filament\Support\TempPasswordReport::flash()` and `::flashBatch()` render the panel notification. Callers: the Users row action + bulk action, `MemberLogin::provision()`, `CreateUser::afterCreate()`, `AcceptMemberApplication::save()`.
+
+**Adding a team member provisions the login too.** `App\Support\MemberLogin::provision(TeamMember)` is the single implementation: it derives the org address from the name when `team_members.email` is blank (`OrgEmail::uniqueForName`), creates a Member-role `User` with `password_changed_at = null`, points `user_id` at it, and `sendNow`s `TeamMemberAccountCreated`. It returns a `MemberLoginResult` whose `status` is one of `created_sent` / `created_undeliverable` / `created_mail_failed` / `linked_existing` / `already_linked` / `no_address`, so every caller reports the same thing. `MemberLogin::isDeliverable()` lives here too — `UsersTable` calls it for the bulk skip rule. Callers:
+- `Pages\CreateTeamMember::afterCreate()` — automatic, **admin only** (`team.create` is a Manager permission but Users is admin-only, so a manager creating a roster row gets a "no login created" warning instead). Skipped when the row already has a `user_id` or `left_at` is filled (a row added for the record is history, not an onboarding).
+- `Pages\EditTeamMember`'s **Create login** header action — same path, on demand. No longer requires an org address on the row; it derives one.
+- `php artisan team:provision-login {id|email|name}` — the shell path (`--all`, or no argument to list rows with no login). Use it on the deploy box: `docker compose exec backend php artisan team:provision-login "Some Name"`.
+Reporting is shared by the two Filament pages through the `App\Filament\Concerns\ProvisionsMemberLogin` trait. Deliberately **not** a model observer — `TeamSeeder` writes straight to the table and would mail the whole roster on every reseed. An account that already holds the address is *linked*, never rotated: someone who has already signed in keeps their password.
+
 `UserResource::Pages\CreateUser` does the same (auto-generates the temp password when admin leaves the field blank). `Tables\UsersTable` exposes a `Resend temp password` row action that rotates and re-mails, plus a **`Send temp password` bulk action** (`sendTempPasswords()`) for onboarding the whole roster at once. The bulk action skips anyone whose `deliveryEmail()` resolves to an `@evrst.hu` address while `MAIL_DELIVER_TO_ORG=false` — rotating a password we can't deliver would lock the member out — and reports who was skipped or failed.
+
+## Task permissions
+
+`tasks.edit` opens any task; **`tasks.progress`** (held by Member) opens one you
+are on. `Task::canBeProgressedBy(?User)` — `TASKS_EDIT || (TASKS_PROGRESS &&
+isOnTask())` — is the single per-record gate, used by
+`TaskResource::canEdit($record)`, `Task::canTransitionTo()` and
+`KanbanBoard::reorder()`. `TaskForm::definitionLocked($record)` disables title /
+description / supervisor / assignees / due date / priority / category / parent /
+position for a progress-only viewer; Filament doesn't dehydrate a disabled
+field, so the stored values survive the save. The key was backfilled onto all
+three roles by `2026_09_09_000001_attach_tasks_progress_permission` — `RoleSeeder`
+runs once, so a new `Perm::*` key always needs one of these.
 
 ## Tasks + notifications
 
@@ -245,7 +266,7 @@ Http::fake(); // catches anything that slipped through to the Discord REST API
 
 FK migration `2026_05_07_000003_repoint_team_member_fks.php` repoints `member_applications.team_member_id` and `item_stocks.owner_team_member_id` from `foreignUuid → resources` to `bigint FK → team_members.id`. Anywhere code still typed those columns as `string` / `Uuid` should be updated to `int`.
 
-The Filament admin still lives at `App\Filament\Resources\Cms\TeamMembers\` and `…\TeamMemberGroups\` so `/admin/cms/team-members` URLs keep working — the `Cms\` namespace is leftover and can be moved out as a cleanup.
+The Filament admin lives at `App\Filament\Resources\TeamMembers\` and `…\TeamMemberGroups\`. Both pin `$slug` to the old `cms/...` path, so `/admin/cms/team-members` still resolves and the route names (which the help modal keys off) are unchanged.
 
 ## Recent admin features (cheat sheet)
 

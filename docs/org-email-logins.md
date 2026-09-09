@@ -353,8 +353,8 @@ dig +short TXT resend._domainkey.evrst.hu; dig +short MX send.evrst.hu
 | `backend/database/migrations/2026_07_21_000000_assign_org_login_emails.php` | Backfill. |
 | `backend/database/seeders/TeamSeeder.php` | Roster → org logins; `orgEmail()` + `legacyStubEmail()`. |
 | `…/Filament/Resources/MemberApplications/Pages/AcceptMemberApplication.php` | Accept flow, org-address field. |
-| `…/Filament/Resources/Cms/TeamMembers/Pages/EditTeamMember.php` | `syncLoginEmail()`, Create-login action. |
-| `…/Filament/Resources/Cms/TeamMembers/Schemas/TeamMemberForm.php` | Org email field + Generate-from-name. |
+| `…/Filament/Resources/TeamMembers/Pages/EditTeamMember.php` | `syncLoginEmail()`, Create-login action (now `App\Support\MemberLogin`). |
+| `…/Filament/Resources/TeamMembers/Schemas/TeamMemberForm.php` | Org email field + Generate-from-name. |
 | `…/Filament/Resources/Users/Tables/UsersTable.php` | *Login* + *Mail delivered to* columns, Resend temp password (row) + Send temp password (bulk), `isDeliverable()`. |
 | `…/Filament/Auth/ForceChangeProfile.php` | First-login password form; email locked for non-admins. |
 | `…/Providers/AppServiceProvider.php` | `PasswordReset` → stamps `password_changed_at`. |
