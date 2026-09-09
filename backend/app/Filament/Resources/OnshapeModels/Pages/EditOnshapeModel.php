@@ -40,31 +40,26 @@ class EditOnshapeModel extends EditRecord
                         'glb_error' => null,
                     ])->save();
 
-                    // Run inline so the user sees the result immediately
-                    // instead of relying on a queue worker (the
-                    // database queue requires `php artisan queue:work`).
-                    ExportOnshapeModelToGlb::dispatchSync($record->id);
+                    // On the queue, not dispatchSync: this is an external
+                    // API call plus a binary download that regularly takes
+                    // 30-90s (capped at 3 minutes), which is far longer
+                    // than a web request should be held open. The compose
+                    // stack runs a dedicated `queue` container; with
+                    // QUEUE_CONNECTION=sync it still runs inline, so a box
+                    // without a worker degrades rather than breaks.
+                    ExportOnshapeModelToGlb::dispatch($record->id, auth()->id());
 
-                    $record->refresh();
-
-                    if ($record->hasGlb()) {
-                        Notification::make()
-                            ->title(__('admin.onshape.export_done'))
-                            ->success()
-                            ->send();
-                    } else {
-                        Notification::make()
-                            ->title(__('admin.onshape.export_failed', ['reason' => $record->glb_error ?: '']))
-                            ->danger()
-                            ->send();
-                    }
+                    Notification::make()
+                        ->title(__('admin.onshape.export_queued'))
+                        ->body(__('admin.onshape.export_queued_body'))
+                        ->info()
+                        ->send();
 
                     // Filament's partial form refresh doesn't re-evaluate
                     // the embed Section's visible() / viewData() closures,
-                    // so the Three.js viewer wouldn't see the new GLB
+                    // so the Three.js viewer wouldn't see a finished GLB
                     // until a manual page reload. A self-redirect on the
-                    // current edit URL forces a fresh schema render that
-                    // picks up the cached GLB straight away.
+                    // current edit URL forces a fresh schema render.
                     $this->redirect(static::getResource()::getUrl('edit', ['record' => $record]));
                 }),
             Action::make('open_in_onshape')

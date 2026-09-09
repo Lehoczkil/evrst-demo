@@ -3,7 +3,9 @@
 namespace App\Jobs;
 
 use App\Models\OnshapeModel;
+use App\Models\User;
 use App\Services\Onshape\Client as OnshapeClient;
+use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,6 +20,12 @@ use Illuminate\Support\Str;
  * disk. Polls Onshape's translation endpoint until the job is DONE
  * (or FAILED), streams the result onto storage/app/public/onshape/,
  * and updates the OnshapeModel with the new path / size / timestamp.
+ *
+ * Runs on the queue: the whole thing is an external API call plus a
+ * binary download and can take minutes on a big assembly, which is far
+ * too long to hold a web request open. Whoever pressed the button is
+ * told how it went through the notification bell — pass their id as
+ * $requestedByUserId.
  */
 class ExportOnshapeModelToGlb implements ShouldQueue
 {
@@ -27,8 +35,11 @@ class ExportOnshapeModelToGlb implements ShouldQueue
 
     public int $timeout = 240;
 
-    public function __construct(public int $modelId)
-    {
+    public function __construct(
+        public int $modelId,
+        /** Who asked for this export, so the result can be reported back. */
+        public ?int $requestedByUserId = null,
+    ) {
     }
 
     public function handle(): void
@@ -127,6 +138,12 @@ class ExportOnshapeModelToGlb implements ShouldQueue
                 // best-effort
             }
         }
+
+        $this->notifyRequester(
+            __('admin.onshape.export_done'),
+            $model->title ?: (string) $model->id,
+            'success',
+        );
     }
 
     private function fail(OnshapeModel $model, string $reason): void
@@ -136,5 +153,31 @@ class ExportOnshapeModelToGlb implements ShouldQueue
             'glb_status' => OnshapeModel::GLB_FAILED,
             'glb_error' => mb_substr($reason, 0, 500),
         ])->save();
+
+        $this->notifyRequester(__('admin.onshape.export_failed', ['reason' => '']), $reason, 'danger');
+    }
+
+    /**
+     * Report the outcome to the admin who started the export. This runs in
+     * a worker with no session, so it goes to the notification bell rather
+     * than a flash message.
+     */
+    private function notifyRequester(string $title, string $body, string $status): void
+    {
+        if (! $this->requestedByUserId) {
+            return;
+        }
+
+        $user = User::find($this->requestedByUserId);
+
+        if (! $user) {
+            return;
+        }
+
+        FilamentNotification::make()
+            ->title($title)
+            ->body(mb_substr($body, 0, 300))
+            ->status($status)
+            ->sendToDatabase($user);
     }
 }
