@@ -2,32 +2,32 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Actions\IssueTempPassword;
+use App\Filament\Support\TempPasswordReport;
 use App\Models\Role;
 use App\Models\User;
-use App\Notifications\TeamMemberAccountCreated;
-use App\Support\OrgEmail;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification as NotificationFacade;
-use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
 
 class UsersTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            // Eager-load what the columns read — Filament does no
+            // automatic eager loading, so without this the role column and deliveryEmail(), which the notification_email column calls from three closures
+            // fire one query per row.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['role:id,name', 'teamMember']))
             ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
@@ -94,47 +94,12 @@ class UsersTable
                     ->color('warning')
                     ->requiresConfirmation()
                     ->modalHeading(__('admin.users.resend_modal'))
-                    ->action(function (User $record) {
-                        $temp = Str::password(12);
-                        $record->update([
-                            'password' => Hash::make($temp),
-                            'password_changed_at' => null,
-                        ]);
-
-                        $destination = $record->fresh('teamMember')->deliveryEmail();
-
-                        // sendNow bypasses the queue so the admin gets
-                        // immediate feedback instead of "queued" silence
-                        // when no worker is running on the deploy box.
-                        try {
-                            NotificationFacade::sendNow($record, new TeamMemberAccountCreated($temp));
-                        } catch (\Throwable $e) {
-                            Notification::make()
-                                ->title(__('admin.users.temp_send_failed'))
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->persistent()
-                                ->send();
-                            return;
-                        }
-
-                        $mailer = config('mail.default');
-                        if ($mailer === 'log') {
-                            Notification::make()
-                                ->title(__('admin.users.temp_logged'))
-                                ->body(__('admin.users.temp_logged_body', ['email' => $destination ?? '—']))
-                                ->warning()
-                                ->persistent()
-                                ->send();
-                            return;
-                        }
-
-                        Notification::make()
-                            ->title(__('admin.users.temp_sent'))
-                            ->body(__('admin.users.temp_sent_body', ['email' => $destination ?? $record->email]))
-                            ->success()
-                            ->send();
-                    }),
+                    // Same action as the bulk one below, on one row: it
+                    // refuses an undeliverable address instead of rotating
+                    // into the void, and rolls back if the send throws.
+                    ->action(fn (User $record) => TempPasswordReport::flash(
+                        IssueTempPassword::rotate($record),
+                    )),
                 DeleteAction::make()
                     ->visible(fn (User $r) => $r->id !== auth()->id()),
             ])
@@ -166,9 +131,10 @@ class UsersTable
      * Onboarding in one click: rotate a temp password for every selected
      * account and mail it to wherever that user's mail actually goes.
      *
-     * Sent with sendNow (like the single-record action) so the report below
-     * reflects real delivery instead of "queued" silence, and so this works
-     * on a box with no queue worker running.
+     * The per-record work is {@see IssueTempPassword::rotate()} — including
+     * the skip for members with no deliverable address, because rotating a
+     * password we cannot deliver locks them out. One bad address must not
+     * abort the rest of the batch, so the report is assembled at the end.
      *
      * @param  EloquentCollection<int, User>  $records
      */
@@ -181,90 +147,16 @@ class UsersTable
         $failed = [];
 
         foreach ($records as $record) {
-            $destination = $record->deliveryEmail();
+            $result = IssueTempPassword::rotate($record);
 
-            // Rotate only when there is somewhere to send it. Otherwise we
-            // would invalidate the member's current password and hand the
-            // replacement to a mailbox that doesn't exist — locking them out.
-            if (! self::isDeliverable($destination)) {
-                $skipped[] = $record->name;
-
-                continue;
-            }
-
-            $temp = Str::password(12);
-            $record->update([
-                'password' => Hash::make($temp),
-                'password_changed_at' => null,
-            ]);
-
-            try {
-                NotificationFacade::sendNow($record, new TeamMemberAccountCreated($temp));
-                $sent[] = $record->name;
-            } catch (\Throwable $e) {
-                // One bad address must not abort the rest of the batch.
-                report($e);
-                $failed[] = $record->name;
-            }
+            match ($result->status) {
+                IssueTempPassword::SENT => $sent[] = $record->name,
+                IssueTempPassword::SKIPPED_UNDELIVERABLE => $skipped[] = $record->name,
+                IssueTempPassword::FAILED => $failed[] = $record->name,
+                default => null,
+            };
         }
 
-        self::reportTempPasswordBatch($records->count(), $sent, $skipped, $failed);
-    }
-
-    /**
-     * deliveryEmail() falls back to the login address when no private one is
-     * on file. While MAIL_DELIVER_TO_ORG is off that fallback is an @evrst.hu
-     * address, which is a sign-in name with no mailbox behind it — mail to it
-     * bounces, so treat it as undeliverable.
-     */
-    private static function isDeliverable(?string $destination): bool
-    {
-        if ($destination === null) {
-            return false;
-        }
-
-        return (bool) config('mail.deliver_to_org_addresses')
-            || ! OrgEmail::isOrgAddress($destination);
-    }
-
-    /**
-     * @param  array<int, string>  $sent
-     * @param  array<int, string>  $skipped
-     * @param  array<int, string>  $failed
-     */
-    private static function reportTempPasswordBatch(int $total, array $sent, array $skipped, array $failed): void
-    {
-        $lines = [__('admin.users.bulk_temp_done_body', ['sent' => count($sent), 'total' => $total])];
-
-        if ($skipped !== []) {
-            $lines[] = __('admin.users.bulk_temp_skipped', ['names' => implode(', ', $skipped)]);
-        }
-
-        if ($failed !== []) {
-            $lines[] = __('admin.users.bulk_temp_failed', ['names' => implode(', ', $failed)]);
-        }
-
-        // MAIL_MAILER=log writes the passwords to the log instead of sending
-        // them — say so loudly, same as the single-record action does.
-        $logged = config('mail.default') === 'log';
-        if ($logged && $sent !== []) {
-            $lines[] = __('admin.users.temp_logged_body', ['email' => implode(', ', $sent)]);
-        }
-
-        $body = new HtmlString(implode('<br>', array_map('e', $lines)));
-
-        $notification = Notification::make()->body($body);
-
-        if ($sent === []) {
-            $notification->title(__('admin.users.bulk_temp_none'))->warning()->persistent();
-        } elseif ($logged || $skipped !== [] || $failed !== []) {
-            $notification->title($logged ? __('admin.users.temp_logged') : __('admin.users.bulk_temp_done'))
-                ->warning()
-                ->persistent();
-        } else {
-            $notification->title(__('admin.users.bulk_temp_done'))->success();
-        }
-
-        $notification->send();
+        TempPasswordReport::flashBatch($records->count(), $sent, $skipped, $failed);
     }
 }
