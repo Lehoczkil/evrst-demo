@@ -1,5 +1,195 @@
 export default {
+  manifesto: {
+    eyebrow: 'Amiért ez az egész van',
+    body: 'Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk, miközben a hallgatói mérnöki munka határait feszegetjük.',
+    second: 'Kilenc szakmai csoport, egy próbapad és három rakéta. Egy már repült — a következő épp épül.',
+    founded: 'Alapítva',
+    members: 'Aktív tag',
+    groups: 'Csoport',
+    vehicles: 'Rakéta',
+    mark1: 'CAD → próbapad → kilövés',
+    mark2: 'EuRoC · Spaceport America Cup',
+    mark3: 'Nyílt dokumentáció',
+    goal1: {
+      title: 'Mérnöki kiválóság',
+      description: 'Hallgatók képzése valós űrtechnikai feladatokon.',
+    },
+    goal2: {
+      title: 'Nemzetközi verseny',
+      description: 'Az Óbudai Egyetem képviselete a nagy diákversenyeken.',
+    },
+    goal3: {
+      title: 'Inspiráció',
+      description: 'Munkánk megosztása és a hazai diák-űrközösség erősítése.',
+    },
+  },
+  rocket: {
+    eyebrow: 'Aktív jármű',
+    title: 'A rakéta',
+    status: 'Építés alatt',
+    dimHeight: '2 400 mm',
+    dimDiameter: '⌀ 102',
+    blueprintAlt: 'A rakéta felépítése',
+    subsystemHeading: 'Alrendszer → felelős csoport',
+    /*
+      Open question §14/2: these could equally be a CMS row so the team can
+      edit them without a deploy. Here for now, because the labels have to
+      be translated either way and splitting a label from its value across
+      two systems is worse than either.
+    */
+    specs: [
+      { label: 'Magasság', value: '2 400', unit: 'mm' },
+      { label: 'Átmérő', value: '102', unit: 'mm' },
+      { label: 'Felszálló massza', value: '11,4', unit: 'kg' },
+      { label: 'Tolóerő', value: '1 320', unit: 'N' },
+      { label: 'Cél csúcsmagasság', value: '3 000', unit: 'm' },
+      { label: 'Hajtómű', value: 'K', unit: 'osztály' },
+    ],
+    subsystem: {
+      avionics: 'Avionika',
+      software: 'Fedélzeti szoftver',
+      propulsion: 'Hajtómű',
+      structures: 'Váz és aerodinamika',
+    },
+  },
+  programme: {
+    eyebrow: '{total} rakéta a programban',
+    title: 'Amit építünk',
+    empty: 'A programot még nem töltöttük fel — hamarosan itt lesz.',
+    apogee1: 'Elért csúcsmagasság · 640 m',
+    apogee2: 'Cél csúcsmagasság · 3 000 m',
+    apogee3: 'EuRoC kategória · 9 000 m',
+    state: {
+      flown: 'Repült',
+      building: 'Építés alatt',
+      design: 'Tervezés',
+    },
+    vehicles: [
+      {
+        title: 'Atlas-1',
+        description: 'Kis magasságú tesztplatform az avionika, a mentés és a hajtóművek validálására.',
+      },
+      {
+        title: 'Helios',
+        description: 'Közepes teljesítményű rakéta a fedélzeti számítógép és a kettős mentés tesztelésére.',
+      },
+      {
+        title: 'Voyager',
+        description: 'Versenyképes rakéta nemzetközi diákversenyekre.',
+      },
+    ],
+  },
+  events: {
+    title: 'Események',
+    next: 'Következő',
+    eyebrowNone: 'Nincs meghirdetett esemény',
+    upcoming: 'Közelgő',
+    log: 'Napló',
+    empty: 'Még nincs feltöltött esemény.',
+    noUpcoming: 'Most nincs meghirdetett esemény — a naplóban látod, mi volt.',
+    noPast: 'A napló még üres.',
+  },
+  team: {
+    eyebrow: '{members} tag · {groups} csoport',
+    title: 'A csapat',
+    openPositions: 'Csatlakozz',
+    empty: 'A csapat listája hamarosan.',
+    other: 'Egyéb',
+    mentors: '{count} mentor',
+    group: {
+      'csapat-menedzser': 'Csapat menedzser',
+      'projekt-menedzser': 'Projekt menedzser',
+      'marketing-dizajn': 'Marketing-Dizájn',
+      elektronika: 'Elektronika',
+      szoftver: 'Szoftver',
+      hajtomu: 'Hajtómű',
+      'vaz-aerodinamika': 'Váz-Aerodinamika',
+      jog: 'Jog',
+      webfejleszto: 'Webfejlesztő',
+    },
+  },
+  sponsors: {
+    eyebrow: '{count} támogató',
+    title: 'Támogatók',
+    pitchTitle: 'Egy hallgatói rakétacsapat nem építkezik magától',
+    pitchBody: 'Anyag, gépidő, próbapad, utazás a versenyre. Cserébe a rakétán, a dokumentációban és minden megjelenésünkben ott a logója.',
+    cta: 'Legyen támogató',
+    mailSubject: 'Támogatás',
+    empty: 'Első támogatónk helye — szívesen beszélünk róla.',
+  },
+  join: {
+    eyebrow: 'Jelentkezés nyitva',
+    title: 'Csatlakozz a csapathoz',
+    lede: 'Nem kell mérnöknek lenned. A rakétához legalább annyira kell marketing, jog és webfejlesztés, mint hajtómű.',
+    cta: 'Jelentkezem',
+    question: 'Kérdésem van',
+    disciplines: 'Szakmai csoportjaink',
+  },
+  footer: {
+    site: 'Oldal',
+    team: 'Csapat',
+    contact: 'Kapcsolat',
+    admin: 'Admin belépés',
+  },
+  contact: {
+    address: 'Óbudai Egyetem · Bécsi út 96/b, 1034 Budapest',
+  },
+  state: {
+    fetchFailed: 'Ezt a részt most nem sikerült betölteni.',
+    retry: 'Újra',
+    loading: 'Betöltés…',
+  },
+  notFound: {
+    code: '404',
+    title: 'Ez az oldal nincs meg',
+    body: 'Lehet, hogy elírtuk a linket, vagy már nem létezik. A lap tetejéről minden elérhető.',
+    home: 'Vissza a főoldalra',
+  },
+  form: {
+    required: 'kötelező',
+    submit: 'Jelentkezés elküldése',
+    sending: 'Küldés…',
+    successTitle: 'Megvan, köszönjük!',
+    successBody: 'Átnézzük a jelentkezésed, és e-mailben keresünk.',
+    again: 'Új jelentkezés',
+    errorTitle: 'Nem sikerült elküldeni',
+    errorBody: 'Nézd át a megjelölt kérdéseket, aztán próbáld újra.',
+    throttled: 'Túl sok próbálkozás egyszerre. Várj egy percet, és küldd újra.',
+    choose: 'Válassz…',
+    step: '{current} / {total}',
+  },
+  hero: {
+    eyebrow: 'Óbudai Egyetem · Budapest · Alapítva 2024',
+    title1: 'Escape Velocity',
+    title2: 'Rocketry',
+    lede: 'Kísérleti rakétákat tervezünk, építünk és indítunk — a CAD-tól a próbapadig és a kilövésig.',
+    ctaJoin: 'Csatlakozz',
+    ctaMission: 'Küldetésünk',
+    next: 'Következő',
+    rocketAlt: 'A csapat kísérleti rakétája',
+    unitDay: 'nap',
+    unitHour: 'ó',
+    unitMinute: 'p',
+    unitSecond: 'mp',
+    /*
+      What the About section used to say, said in the hero's own empty
+      band. Three lines, played in sequence as the stage is scrolled
+      through — see Hero/HeroSays.vue. The <em> marks the one word that
+      takes the accent.
+
+      A fourth line is a translation edit plus a fourth window in
+      Hero/anims.ts; the template does not change.
+    */
+    says: [
+      'Egy rakétát nem érdekel a jó szándék. Csak az, ami <em>működik</em>.',
+      'A CAD-tól a próbapadig. Aztán a <em>kilövésig</em>.',
+      'Kilenc csoport, tizenkilenc ember, három rakéta. Egy már <em>repült</em>.',
+    ],
+  },
   nav: {
+    programme: 'Amit építünk',
+    mission: 'Küldetés',
+    rocket: 'Rakéta',
     events: 'Események',
     about: 'Rólunk',
     team: 'Csapat',
@@ -21,22 +211,11 @@ export default {
     home: 'Kezdőlap',
     back: 'Vissza',
   },
-  rocket: {
-    height: 'Magasság',
-    diameter: 'Átmérő',
-    thrust: 'Tolóerő',
-    mass: 'Tömeg',
-  },
   outro: {
     contact: 'Kapcsolat',
     follow: 'Kövess minket',
     navigation: 'Navigáció',
     poweredBy: 'Támogatja',
-  },
-  team: {
-    joinPrompt: 'Csatlakoznál hozzánk? Töltsd ki a jelentkezési űrlapot',
-    joinHere: 'itt',
-    joinUs: 'Csatlakozz',
   },
   placeholder: {
     comingSoon: 'Hamarosan',
@@ -77,49 +256,5 @@ export default {
       title: 'Inspiráció',
       description: 'Munkánk megosztása és a hazai diák-űrközösség erősítése.',
     },
-  },
-  join: {
-    title: 'Csatlakozz',
-    intro:
-      'Mi vagyunk az Escape Velocity Rocketry Student Team. Lelkes, elkötelezett hallgatókat keresünk – elsősorban az Óbudai Egyetemről, de más egyetemek és intézmények hallgatóit is szívesen látjuk együttműködésre.',
-    plus: {
-      heading: 'Előny, ha:',
-      english: 'társalgási szintű angol nyelvtudásod van',
-      knowledge: 'bármilyen szintű tudásod van a rakétatechnikáról vagy kapcsolódó tudományokról',
-      hours: 'heti több mint 3 órát tudsz a csapatra fordítani',
-      inPerson: 'tudsz személyesen találkozni velünk Budapesten',
-      tools: 'rendelkezel tapasztalattal a választott alcsapatodhoz tartozó szoftveres eszközökkel',
-      tdk: 'érdekelne egy kapcsolódó témájú TDK-dolgozat megírása a jövőben',
-    },
-    email: 'E-mail',
-    name: 'Név',
-    university: 'Egyetem',
-    education: 'Jelenlegi vagy legmagasabb iskolai végzettség',
-    faculty: 'Kar',
-    why: 'Miért szeretnél csatlakozni hozzánk?',
-    hours: 'Hány órát tudsz hetente a csapatra fordítani?',
-    hoursHelp: 'Ezen felül lesz egy 20 perces heti megbeszélés.',
-    languages: 'Beszélt nyelvek (társalgási szinten)',
-    languagesOther: 'Egyéb',
-    languagesOtherPlaceholder: 'Add meg a nyelvet',
-    department: 'Melyik részleghez csatlakoznál?',
-    tasks: 'Milyen konkrét feladatok érdekelnének?',
-    skills: 'Milyen készségek vagy kompetenciák lehetnek hasznosak a csapatnak?',
-    required: 'Kötelező',
-    loading: 'Űrlap betöltése…',
-    submit: 'Jelentkezés elküldése',
-    submitting: 'Küldés…',
-    success: {
-      title: 'Jelentkezés elküldve',
-      body: 'Köszönjük a jelentkezésed! Hamarosan megnézzük, és visszajelzünk.',
-      again: 'Új jelentkezés küldése',
-    },
-    error: 'Hiba történt. Próbáld újra, vagy használd az eredeti űrlapot.',
-    section: {
-      about: 'Rólad',
-      availability: 'Elérhetőség',
-      contribution: 'Részleg és hozzájárulás',
-    },
-    tagline: 'Segíts megépíteni a következő generációs hallgatói rakétáinkat.',
   },
 };
