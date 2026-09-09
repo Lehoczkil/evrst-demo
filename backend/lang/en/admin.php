@@ -60,6 +60,12 @@ return [
         'empty_body'          => 'Add the first item to the catalog. Track where copies live from the management page.',
         'empty_stock_heading' => 'No stock recorded yet',
         'empty_stock_body'    => 'Add a stock row to track an item at the office or with a team member.',
+        'log_nav'             => 'Inventory log',
+        'log_title'           => 'Inventory log',
+        'log_sub'             => 'Every change to the item catalog and the stock table — who, what and when. The catalog is open to the whole team, so this is how a change is traced back.',
+        'log_changes'         => 'Change',
+        'log_empty_h'         => 'Nothing logged yet',
+        'log_empty_b'         => 'Item and stock changes made from the panel show up here.',
     ],
 
     'bugs' => [
@@ -104,6 +110,8 @@ return [
     ],
 
     'onshape' => [
+        'export_queued'      => 'Export queued',
+        'export_queued_body' => 'The translation runs in the background — a big assembly can take a minute or two. You will get a notification in the bell when it finishes; reload this page to see the viewer pick up the new file.',
         'new'              => 'New 3D model',
         'gallery_sub'      => 'Browse and edit Onshape CAD models embedded in the panel.',
         'section_meta'     => 'Details',
@@ -161,6 +169,7 @@ return [
     ],
 
     'common' => [
+        'id'           => 'ID',
         'actions'      => 'Actions',
         'create'       => 'Create',
         'save'         => 'Save',
@@ -214,6 +223,10 @@ return [
     ],
 
     'tasks' => [
+        'drag_not_allowed' => 'You cannot move cards on this board',
+        'drag_filtered'    => 'Drag disabled while filters are active',
+        'drag_filtered_body' => 'Clear the filters to reorder cards — a drag over a filtered board would rewrite positions across the hidden ones too.',
+        'drag_moved'       => '{1} Task moved|[2,*] :count tasks moved',
         'section_details' => 'Task details',
         'supervisor'  => 'Supervisor',
         'assignees'   => 'Assignees',
@@ -283,6 +296,11 @@ return [
     ],
 
     'applications' => [
+        'login_taken'   => 'That login address is already in use',
+        'login_taken_body' => 'An account already signs in with :email. Nothing was created — pick a different org address (or link the existing account from the team member page) and try again.',
+        'accept_submit' => 'Create team member + admin account',
+        'accepted_title' => 'Application accepted',
+        'accepted_body' => ':name is now on the roster.',
         'department'  => 'Department',
         'university'  => 'University',
         'faculty'     => 'Faculty',
@@ -348,6 +366,20 @@ return [
     ],
 
     'team' => [
+        'discord_username'      => 'Discord username',
+        'discord_username_help' => 'Globally-unique Discord handle (the @name).',
+        'discord_username_col'  => 'Discord @',
+        'discord_id'            => 'Discord snowflake',
+        'discord_id_col'        => 'Snowflake',
+        'discord_id_help'       => 'Numeric user ID (Developer Mode → right-click → Copy User ID). Required for DM bot delivery and `<@id>` mentions.',
+        'discord_id_invalid'    => 'Must be a 17–20 digit Discord snowflake.',
+        'group_slug'            => 'Slug',
+        'group_slug_help'       => 'Stable code-side identifier; survives renames.',
+        'group_kind'            => 'Kind',
+        'group_parent'          => 'Parent group',
+        'group_parent_col'      => 'Parent',
+        'group_public'          => 'Show on public team page',
+        'group_public_col'      => 'Public',
         'degree'         => 'Degree',
         'position'       => 'Position',
         'main_position'  => 'Main position',
@@ -365,6 +397,19 @@ return [
         'login_email_synced_body' => 'The linked account now signs in with :new instead of :old.',
         'login_email_conflict' => 'Login address not updated',
         'login_email_conflict_body' => 'Another account already uses :email, so the linked login was left unchanged.',
+        'login_create'   => 'Create login',
+        'login_create_modal' => 'Provision a panel account?',
+        'login_create_modal_body' => 'A Member-role login will be created for :email and a temporary password emailed.',
+        'login_created'  => 'Login created',
+        'login_created_body' => 'Signs in with :login — a temporary password was emailed to :email.',
+        'login_undeliverable' => 'Login created, password not sent',
+        'login_undeliverable_body' => ':login is a sign-in name with no mailbox behind it, and no private email is on file — the temporary password was not sent. Add a private email, then use "Resend temp password" in Users.',
+        'login_mail_failed_body' => 'The account for :login exists, but the temp-password email failed: :error',
+        'login_linked'   => 'Existing account linked',
+        'login_linked_body' => 'An account already used :login, so it was linked to this team member. No password was changed.',
+        'login_none'     => 'No login created',
+        'login_no_address_body' => 'No @evrst.hu address could be derived from the name. Fill in the EVRST email field and use "Create login".',
+        'login_not_allowed_body' => 'Only an admin can provision a panel account. Ask one to open this member and use "Create login".',
         'joined_at'      => 'Joined at',
         'left_at'        => 'Left at',
         'left_at_help'   => 'Set when the member leaves the team — keeps history without deleting the row.',
@@ -401,6 +446,8 @@ return [
         'temp_logged'     => 'Temp password written to log, NOT emailed',
         'temp_logged_body' => 'MAIL_MAILER=log on this environment — the message for :email landed in storage/logs/laravel.log instead of being delivered. Switch to resend / postmark / smtp in .env to actually send mail.',
         'temp_send_failed' => 'Sending the temp-password email failed',
+        'temp_skipped'    => 'Nothing sent — no deliverable address',
+        'temp_skipped_body' => 'This account has no address we can deliver to: the @evrst.hu login is a sign-in name with no mailbox behind it, and there is no private email on file. The password was left untouched so the member is not locked out. Add a private email on their team member row, then try again.',
         'login_email'     => 'Login (EVRST email)',
         'login_email_help' => 'The address this person signs in with — use their @evrst.hu org address. Where mail is actually delivered is shown in the Users table.',
         'notification_email' => 'Mail delivered to',
@@ -661,6 +708,7 @@ return [
     ],
 
     'calendar' => [
+        'event_not_found' => 'Event not found',
         'title'         => 'Calendar',
         'today'         => 'Today',
         'previous'      => 'Previous month',
@@ -706,6 +754,10 @@ return [
     ],
 
     'drawing' => [
+        'invalid_payload' => 'Invalid drawing payload',
+        'decode_failed'   => 'Could not decode drawing',
+        'saved'           => 'Drawing saved',
+        'saved_body'      => 'Find it in the Drawings gallery.',
         'studio_title'   => 'Drawing studio',
         'studio_subtitle'=> 'Sketch directly in the browser. Hit “Save” to add it to the gallery.',
         'gallery_title'  => 'Drawings',
@@ -789,4 +841,13 @@ return [
             'grid_step'  => 'Step',
         ],
     ],
+    'cms' => [
+        'payload'      => 'Payload (JSON)',
+        'payload_help' => 'Stored as JSON. Edit as raw JSON for now; per-collection field editors can be added later.',
+        'collection'   => 'Collection',
+        'resources'    => 'Resources',
+        'project_webhook'      => 'Discord webhook URL',
+        'project_webhook_help' => 'Calendar events linked to this project will post to this Discord channel. Leave blank to use the global webhook.',
+    ],
+
 ];

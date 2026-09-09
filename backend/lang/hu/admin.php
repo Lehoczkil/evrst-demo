@@ -60,6 +60,12 @@ return [
         'empty_body'          => 'Add hozzá az első eszközt a katalógushoz. A példányok helyét az eszközkezelés oldalon tudod nyomon követni.',
         'empty_stock_heading' => 'Még nincs rögzített készlet',
         'empty_stock_body'    => 'Adj hozzá egy készletsort, hogy nyomon követhesd az eszközt az irodában vagy egy csapattagnál.',
+        'log_nav'             => 'Eszköznapló',
+        'log_title'           => 'Eszköznapló',
+        'log_sub'             => 'Az eszközkatalógus és a készlettábla minden módosítása — ki, mit, mikor. A katalógust az egész csapat szerkesztheti, így visszakövethető minden változás.',
+        'log_changes'         => 'Módosítás',
+        'log_empty_h'         => 'Még nincs naplóbejegyzés',
+        'log_empty_b'         => 'A panelről végzett eszköz- és készletmódosítások itt jelennek meg.',
     ],
 
     'bugs' => [
@@ -104,6 +110,8 @@ return [
     ],
 
     'onshape' => [
+        'export_queued'      => 'Exportálás sorba állítva',
+        'export_queued_body' => 'A konvertálás a háttérben fut — egy nagy összeállítás egy-két percet is igénybe vehet. Ha kész, értesítést kapsz a csengőnél; a nézegető az oldal újratöltése után látja az új fájlt.',
         'new'              => 'Új 3D modell',
         'gallery_sub'      => 'Böngéssz és szerkessz Onshape CAD modelleket a panelbe ágyazva.',
         'section_meta'     => 'Adatok',
@@ -161,6 +169,7 @@ return [
     ],
 
     'common' => [
+        'id'           => 'Azonosító',
         'actions'      => 'Műveletek',
         'create'       => 'Létrehozás',
         'save'         => 'Mentés',
@@ -214,6 +223,10 @@ return [
     ],
 
     'tasks' => [
+        'drag_not_allowed' => 'Ezen a táblán nem mozgathatsz kártyát',
+        'drag_filtered'    => 'A húzás szűrő alatt ki van kapcsolva',
+        'drag_filtered_body' => 'Töröld a szűrőket az átrendezéshez — szűrt táblán a húzás a rejtett kártyák sorrendjét is felülírná.',
+        'drag_moved'       => '{1} Feladat áthelyezve|[2,*] :count feladat áthelyezve',
         'section_details' => 'Feladat részletei',
         'supervisor'  => 'Felelős',
         'assignees'   => 'Megbízottak',
@@ -283,6 +296,11 @@ return [
     ],
 
     'applications' => [
+        'login_taken'   => 'Ez a belépési cím már foglalt',
+        'login_taken_body' => 'A :email címmel már létezik fiók. Semmi nem jött létre — válassz másik org címet (vagy kösd össze a meglévő fiókot a csapattag adatlapján), és próbáld újra.',
+        'accept_submit' => 'Csapattag + admin fiók létrehozása',
+        'accepted_title' => 'Jelentkezés elfogadva',
+        'accepted_body' => ':name felkerült a névsorra.',
         'department'  => 'Részleg',
         'university'  => 'Egyetem',
         'faculty'     => 'Kar',
@@ -348,6 +366,20 @@ return [
     ],
 
     'team' => [
+        'discord_username'      => 'Discord felhasználónév',
+        'discord_username_help' => 'A globálisan egyedi Discord azonosító (a @név).',
+        'discord_username_col'  => 'Discord @',
+        'discord_id'            => 'Discord snowflake',
+        'discord_id_col'        => 'Snowflake',
+        'discord_id_help'       => 'Numerikus felhasználói azonosító (Fejlesztői mód → jobb klikk → Felhasználói azonosító másolása). A bot általi DM-hez és a `<@id>` említésekhez kell.',
+        'discord_id_invalid'    => '17–20 számjegyű Discord snowflake-nek kell lennie.',
+        'group_slug'            => 'Azonosító (slug)',
+        'group_slug_help'       => 'Állandó, kód oldali azonosító; átnevezés után is megmarad.',
+        'group_kind'            => 'Típus',
+        'group_parent'          => 'Szülő csoport',
+        'group_parent_col'      => 'Szülő',
+        'group_public'          => 'Megjelenítés a publikus csapatoldalon',
+        'group_public_col'      => 'Publikus',
         'degree'         => 'Végzettség',
         'position'       => 'Pozíció',
         'main_position'  => 'Fő pozíció',
@@ -365,6 +397,19 @@ return [
         'login_email_synced_body' => 'A kapcsolt fiók mostantól :new címmel lép be a korábbi :old helyett.',
         'login_email_conflict' => 'A belépési cím nem változott',
         'login_email_conflict_body' => 'A :email címet már egy másik fiók használja, ezért a kapcsolt belépési cím maradt a régi.',
+        'login_create'   => 'Belépés létrehozása',
+        'login_create_modal' => 'Létrehozzuk a panel-hozzáférést?',
+        'login_create_modal_body' => 'Member jogosultságú belépés jön létre a :email címhez, az ideiglenes jelszót pedig kiküldjük.',
+        'login_created'  => 'Belépés létrehozva',
+        'login_created_body' => 'A belépési cím :login — az ideiglenes jelszót elküldtük ide: :email.',
+        'login_undeliverable' => 'Belépés létrehozva, jelszó nem ment ki',
+        'login_undeliverable_body' => 'A :login csak belépési név, nincs mögötte postafiók, és privát e-mail sincs megadva — az ideiglenes jelszó nem ment ki. Adj meg privát e-mailt, majd a Felhasználók oldalon használd az „Ideiglenes jelszó újraküldése” gombot.',
+        'login_mail_failed_body' => 'A :login fiók létrejött, de az ideiglenes jelszót tartalmazó e-mail nem ment ki: :error',
+        'login_linked'   => 'Meglévő fiók összekapcsolva',
+        'login_linked_body' => 'A :login címet már használta egy fiók, ezért azt kapcsoltuk a csapattaghoz. Jelszó nem változott.',
+        'login_none'     => 'Belépés nem jött létre',
+        'login_no_address_body' => 'A névből nem lehetett @evrst.hu címet képezni. Töltsd ki az EVRST e-mail mezőt, majd használd a „Belépés létrehozása” gombot.',
+        'login_not_allowed_body' => 'Panel-hozzáférést csak admin hozhat létre. Kérd meg, hogy nyissa meg a tagot és használja a „Belépés létrehozása” gombot.',
         'joined_at'      => 'Csatlakozás dátuma',
         'left_at'        => 'Kilépés dátuma',
         'left_at_help'   => 'Akkor töltsd ki, ha a tag elhagyta a csapatot — a sor törlése nélkül megőrzi az előzményt.',
@@ -401,6 +446,8 @@ return [
         'temp_logged'     => 'Ideiglenes jelszó naplózva, NEM lett kiküldve',
         'temp_logged_body' => 'MAIL_MAILER=log van beállítva — a(z) :email címnek szóló üzenet a storage/logs/laravel.log fájlba került, nem lett kiküldve. Állítsd át resend / postmark / smtp értékre az .env-ben a valódi küldéshez.',
         'temp_send_failed' => 'Az ideiglenes jelszó kiküldése meghiúsult',
+        'temp_skipped'    => 'Nem ment ki semmi — nincs kézbesíthető cím',
+        'temp_skipped_body' => 'Ehhez a fiókhoz nincs kézbesíthető cím: az @evrst.hu csak belépési név, nincs mögötte postafiók, privát e-mail pedig nincs megadva. A jelszót nem cseréltük, hogy a tag ne zárja ki magát. Vedd fel a privát címét a csapattag adatlapján, aztán próbáld újra.',
         'login_email'     => 'Belépés (EVRST e-mail)',
         'login_email_help' => 'Ezzel a címmel lép be — használd az @evrst.hu címét. Hogy a levél hova megy valójában, a Felhasználók táblában látszik.',
         'notification_email' => 'Levél ide megy',
@@ -661,6 +708,7 @@ return [
     ],
 
     'calendar' => [
+        'event_not_found' => 'Az esemény nem található',
         'title'         => 'Naptár',
         'today'         => 'Ma',
         'previous'      => 'Előző hónap',
@@ -706,6 +754,10 @@ return [
     ],
 
     'drawing' => [
+        'invalid_payload' => 'Érvénytelen rajz adat',
+        'decode_failed'   => 'A rajzot nem sikerült dekódolni',
+        'saved'           => 'Rajz elmentve',
+        'saved_body'      => 'Megtalálod a Rajzok galériában.',
         'studio_title'   => 'Rajzműhely',
         'studio_subtitle'=> 'Rajzolj közvetlenül a böngészőben. A „Mentés” a galériába helyezi.',
         'gallery_title'  => 'Rajzok',
@@ -789,4 +841,13 @@ return [
             'grid_step'  => 'Lépés',
         ],
     ],
+    'cms' => [
+        'payload'      => 'Tartalom (JSON)',
+        'payload_help' => 'JSON-ként tárolva. Egyelőre nyers JSON-ként szerkeszthető; gyűjteményenkénti mezőszerkesztő később jöhet.',
+        'collection'   => 'Gyűjtemény',
+        'resources'    => 'Elemek',
+        'project_webhook'      => 'Discord webhook URL',
+        'project_webhook_help' => 'Az ehhez a projekthez kötött naptáresemények erre a Discord csatornára posztolnak. Hagyd üresen a globális webhookhoz.',
+    ],
+
 ];

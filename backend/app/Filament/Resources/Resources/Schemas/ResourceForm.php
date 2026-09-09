@@ -27,7 +27,7 @@ class ResourceForm
                     ->default(0)
                     ->helperText(__('admin.help.fields.sponsor_position')),
                 Textarea::make('payload')
-                    ->label('Payload (JSON)')
+                    ->label(__('admin.cms.payload'))
                     ->rows(14)
                     ->columnSpanFull()
                     ->dehydrateStateUsing(fn ($state) => is_string($state) ? json_decode($state, true) : $state)
@@ -41,7 +41,7 @@ class ResourceForm
                             }
                         };
                     }])
-                    ->helperText('Stored as JSON. Edit as raw JSON for now; per-collection field editors can be added later.'),
+                    ->helperText(__('admin.cms.payload_help')),
             ]);
     }
 }

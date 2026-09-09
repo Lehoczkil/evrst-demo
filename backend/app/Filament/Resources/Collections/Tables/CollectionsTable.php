@@ -21,14 +21,14 @@ class CollectionsTable
                     ->badge()
                     ->searchable()->toggleable(),
                 TextColumn::make('resources_count')
-                    ->label('Resources')
+                    ->label(__('admin.cms.resources'))
                     ->counts('resources')
                     ->numeric()->toggleable(),
                 TextColumn::make('description')
                     ->limit(60)
                     ->toggleable(),
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('admin.common.id'))
                     ->copyable()
                     ->copyMessage('UUID copied')
                     ->limit(8)

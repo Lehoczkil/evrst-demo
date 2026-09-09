@@ -9,16 +9,21 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ResourcesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            // Eager-load what the columns read — Filament does no
+            // automatic eager loading, so without this the collection column
+            // fire one query per row.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['collection']))
             ->defaultSort('position')
             ->columns([
                 TextColumn::make('label')
-                    ->label('Title')
+                    ->label(__('admin.common.title'))
                     ->state(fn ($record) => $record->resourceLabel())
                     ->searchable(query: function ($query, string $search) {
                         $query->whereRaw("json_extract(payload, '$.name') like ?", ["%{$search}%"])
@@ -26,26 +31,26 @@ class ResourcesTable
                     })
                     ->limit(50)->toggleable(),
                 TextColumn::make('collection.name')
-                    ->label('Collection')
+                    ->label(__('admin.cms.collection'))
                     ->badge()
                     ->sortable()->toggleable(),
                 TextColumn::make('position')
                     ->numeric()
                     ->sortable()->toggleable(),
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('admin.common.id'))
                     ->copyable()
                     ->copyMessage('UUID copied')
                     ->limit(8)
                     ->toggleable(),
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label(__('admin.common.updated_at'))
                     ->since()
                     ->sortable()->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('collection_id')
-                    ->label('Collection')
+                    ->label(__('admin.cms.collection'))
                     ->options(fn () => Collection::orderBy('name')->pluck('name', 'id'))
                     ->searchable(),
             ])

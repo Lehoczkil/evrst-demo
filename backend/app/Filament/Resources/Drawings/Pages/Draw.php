@@ -126,14 +126,14 @@ class Draw extends Page
         $title = trim($this->drawingTitle) !== '' ? trim($this->drawingTitle) : 'Untitled drawing';
 
         if (! preg_match('/^data:image\/(png|jpeg);base64,(.+)$/', $dataUrl, $m)) {
-            Notification::make()->title('Invalid drawing payload')->danger()->send();
+            Notification::make()->title(__('admin.drawing.invalid_payload'))->danger()->send();
             return;
         }
 
         $mime = 'image/' . $m[1];
         $binary = base64_decode($m[2], true);
         if ($binary === false) {
-            Notification::make()->title('Could not decode drawing')->danger()->send();
+            Notification::make()->title(__('admin.drawing.decode_failed'))->danger()->send();
             return;
         }
 
@@ -182,8 +182,8 @@ class Draw extends Page
         ]);
 
         Notification::make()
-            ->title('Drawing saved')
-            ->body('Find it in the Drawings gallery.')
+            ->title(__('admin.drawing.saved'))
+            ->body(__('admin.drawing.saved_body'))
             ->success()
             ->send();
 
