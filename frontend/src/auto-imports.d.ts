@@ -92,10 +92,8 @@ declare global {
   const useCountdown: typeof import('./composables/useCountdown').useCountdown
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
-  const useForm: typeof import('vue-formify').useForm
   const useI18n: typeof import('vue-i18n').useI18n
   const useId: typeof import('vue').useId
-  const useInput: typeof import('vue-formify').useInput
   const useLanguage: typeof import('./composables/useLanguage').useLanguage
   const useLink: typeof import('vue-router').useLink
   const useLocale: typeof import('./composables/useLocale').useLocale
