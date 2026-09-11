@@ -268,16 +268,34 @@ const isEmpty = computed(() => !vehicles.value.length && status.value !== 'PENDI
     display: none;
   }
 
+  /*
+    No row gap. The rail is each item's own left border, so a gap between
+    items is a gap in the rail — the line broke off under every entry and
+    picked up again at the next node, which read as three unrelated
+    cards. The spacing moves into the items' own padding, where it does
+    not interrupt the border.
+  */
   .timeline__items {
     grid-template-columns: 1fr;
+    gap: 0;
   }
 
   // The rail becomes a left border and the nodes hang off it.
   .tl-item {
     padding-top: 0;
-    padding-bottom: 36px;
+    padding-bottom: clamp(34px, 7vw, 56px);
     padding-left: 26px;
     border-left: 1px solid var(--line);
+  }
+
+  /*
+    The last one fades out instead of stopping dead. A border cannot do
+    that, so it hands over to a 1px gradient in the same place — the rail
+    ends because the programme does, not because the list ran out.
+  */
+  .tl-item:last-child {
+    border-left-color: transparent;
+    background: linear-gradient(180deg, var(--line) 0%, rgb(34 37 43 / 0%) 78%) left top / 1px 100% no-repeat;
   }
 
   .tl-item__year {
