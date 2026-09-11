@@ -410,6 +410,16 @@ onUnmounted(() => {
 // Transform only, so it never fights the entrance's opacity + clip-path.
 .nav {
   transition: transform 0.45s var(--ease-inout);
+
+  /*
+    The <nav> is `inset-x-0`: a full-width band whose only job is to
+    centre the pill. It is also `--z-nav` (100), above the back-to-top
+    rocket at `--z-float` (90), and the two sit at the same height — so
+    every click on the rocket was landing on this empty band instead and
+    the button did nothing at all. Nothing outside the pill is meant to
+    be clickable, so nothing outside it takes pointer events.
+  */
+  pointer-events: none;
 }
 
 .nav.is-hidden {
@@ -424,6 +434,8 @@ onUnmounted(() => {
 // collide with a section's own `.paper`.
 .nav-pill {
   position: relative; // anchors the highlight and the dot
+  // The band around it is pointer-events: none — see .nav above.
+  pointer-events: auto;
   border: 1px solid transparent;
   background: rgb(248 247 244 / 78%);
   backdrop-filter: blur(8px);
