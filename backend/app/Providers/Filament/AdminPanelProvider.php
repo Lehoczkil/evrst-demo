@@ -45,6 +45,23 @@ class AdminPanelProvider extends PanelProvider
             // clears the RequirePasswordChange gate.
             ->passwordReset()
             ->profile(ForceChangeProfile::class)
+            /*
+              A save is the end of the job: go back to the table.
+
+              Filament's defaults do the opposite — creating lands you on
+              the new record's edit page, and saving an edit stays put — so
+              finishing a record takes two actions, the save and then a
+              separate trip out of the form. On a panel whose day-to-day
+              work is "open a row, change one field, move on", that second
+              click is most of the interaction cost.
+
+              Set on the panel rather than per page: it is one rule for
+              every resource, present and future, and a page that genuinely
+              needs to stay (where the save is a step rather than the end)
+              still wins by declaring its own getRedirectUrl().
+            */
+            ->resourceCreatePageRedirect('index')
+            ->resourceEditPageRedirect('index')
             ->colors([
                 'primary' => Color::Amber,
             ])
