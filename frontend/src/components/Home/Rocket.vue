@@ -104,8 +104,16 @@ const subsystems = computed(() => SUBSYSTEMS.map((row) => {
       <span class="pill pill--building">{{ t('rocket.status') }}</span>
     </template>
 
-    <Starfield class="rocket-section__stars" :opacity="0.55" />
-    <div class="rocket-section__glow" aria-hidden="true" />
+    <!--
+      In the bleed slot, not the default one: both of these are full-bleed
+      and the default slot is inside the container, which cropped the
+      field to the reading measure and pulled the glow's centre off the
+      viewport's.
+    -->
+    <template #bleed>
+      <Starfield class="rocket-section__stars" :opacity="0.55" />
+      <div class="rocket-section__glow" aria-hidden="true" />
+    </template>
 
     <div class="sheet">
       <dl class="sheet__col sheet__col--left">
@@ -154,16 +162,16 @@ const subsystems = computed(() => SUBSYSTEMS.map((row) => {
 
 <style lang="scss" scoped>
 .rocket-section {
+  // The two bleed layers are oversized on purpose; this is what keeps
+  // them from giving the page a sideways scrollbar.
   overflow: hidden;
-
-  :deep(.container) {
-    position: relative;
-  }
 }
 
 .rocket-section__stars {
-  // Oversized so the drift never pulls the field's edge into frame.
-  inset: -14% 0 !important;
+  // Oversized so the drift never pulls the field's edge into frame. The
+  // horizontal overscan matters as much as the vertical now that the
+  // layer spans the viewport rather than the container.
+  inset: -14% -2% !important;
   will-change: transform;
 }
 

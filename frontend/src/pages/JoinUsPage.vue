@@ -157,101 +157,159 @@ watch(schema, syncValues, { immediate: true });
 </script>
 
 <template>
-  <HtmlTitle :title="t('join.title')" />
+  <div class="join-page">
+    <HtmlTitle :title="t('join.title')" />
 
-  <SectionShell :eyebrow="t('join.eyebrow')" :title="t('join.title')">
-    <!-- The success state REPLACES the form rather than redirecting, so a
-         reader can see what happened without losing the page. -->
-    <motion.div v-if="submitState === 'success'" v-bind="sectionRise()" class="done">
-      <h3>{{ t('form.successTitle') }}</h3>
-      <p class="lede">{{ t('form.successBody') }}</p>
-      <div class="cta-row">
-        <RouterLink to="/" class="btn">{{ t('notFound.home') }}</RouterLink>
-        <button type="button" class="btn btn--ghost" @click="startOver">
-          {{ t('form.again') }}
-        </button>
-      </div>
-    </motion.div>
+    <SectionShell
+      class="join-section"
+      :eyebrow="t('join.eyebrow')"
+      :title="t('join.title')"
+    >
+      <!--
+        The same sky the hero and the rocket sheet are set against. This
+        page asks someone to join a rocketry team; sending them to a bare
+        form on flat ink is the one screen where the site stops looking
+        like itself. Full-bleed, so it goes in the bleed slot — the
+        default slot is inside the reading measure.
+      -->
+      <template #bleed>
+        <Starfield class="join-section__stars" :opacity="0.5" />
+        <div class="join-section__glow" aria-hidden="true" />
+      </template>
 
-    <template v-else>
-      <FetchError v-if="status === 'FAILED' && !sections.length" />
-      <Skeleton v-else-if="status === 'PENDING' && !sections.length" :rows="4" height="90px" />
+      <!-- The success state REPLACES the form rather than redirecting, so a
+           reader can see what happened without losing the page. -->
+      <motion.div v-if="submitState === 'success'" v-bind="sectionRise()" class="done">
+        <h3>{{ t('form.successTitle') }}</h3>
+        <p class="lede">{{ t('form.successBody') }}</p>
+        <div class="cta-row">
+          <RouterLink to="/" class="btn">{{ t('notFound.home') }}</RouterLink>
+          <button type="button" class="btn btn--ghost" @click="startOver">
+            {{ t('form.again') }}
+          </button>
+        </div>
+      </motion.div>
 
-      <form v-else class="join-form" novalidate @submit.prevent="submit">
-        <p class="lede join-form__lede">{{ t('join.lede') }}</p>
+      <template v-else>
+        <FetchError v-if="status === 'FAILED' && !sections.length" />
+        <Skeleton v-else-if="status === 'PENDING' && !sections.length" :rows="4" height="90px" />
 
-        <FormProgress :total="sections.length" :done="sectionsDone" />
+        <form v-else class="join-form" novalidate @submit.prevent="submit">
+          <p class="lede join-form__lede">{{ t('join.lede') }}</p>
 
-        <section v-for="section in sections" :key="section.key" class="join-form__section">
-          <h3>{{ section.title }}</h3>
-          <p v-if="section.description" class="join-form__hint">{{ section.description }}</p>
+          <FormProgress :total="sections.length" :done="sectionsDone" />
 
-          <FormField
-            v-for="field in section.fields"
-            :key="field.key"
-            :id="`f-${field.key}`"
-            :label="field.label"
-            :help="field.help"
-            :error="fieldErrors[field.key] ?? null"
-            :required="field.required"
-          >
-            <template #default="{ id, describedBy, invalid }">
-              <TextArea
-                v-if="field.type === 'textarea'"
-                :id="id"
-                v-model="answers[field.key] as string"
-                :placeholder="field.placeholder ?? ''"
-                :maxlength="field.maxLength || undefined"
-                :described-by="describedBy"
-                :invalid="invalid"
-                :required="field.required"
-              />
-              <SelectInput
-                v-else-if="field.type === 'select'"
-                :id="id"
-                v-model="answers[field.key] as string"
-                :options="field.options"
-                :placeholder="field.placeholder || t('form.choose')"
-                :described-by="describedBy"
-                :invalid="invalid"
-                :required="field.required"
-              />
-              <OptionPills
-                v-else-if="field.type === 'radio' || field.type === 'checkbox'"
-                :id="id"
-                v-model="answers[field.key]"
-                :options="field.options"
-                :multiple="field.type === 'checkbox'"
-                :described-by="describedBy"
-                :invalid="invalid"
-              />
-              <TextInput
-                v-else
-                :id="id"
-                v-model="answers[field.key] as string"
-                :type="field.type === 'email' ? 'email' : 'text'"
-                :placeholder="field.placeholder ?? ''"
-                :maxlength="field.maxLength || undefined"
-                :described-by="describedBy"
-                :invalid="invalid"
-                :required="field.required"
-              />
-            </template>
-          </FormField>
-        </section>
+          <section v-for="section in sections" :key="section.key" class="join-form__section">
+            <h3>{{ section.title }}</h3>
+            <p v-if="section.description" class="join-form__hint">{{ section.description }}</p>
 
-        <button type="submit" class="btn join-form__submit" :disabled="submitting">
-          {{ submitting ? t('form.sending') : t('form.submit') }}
-        </button>
-      </form>
-    </template>
-  </SectionShell>
+            <FormField
+              v-for="field in section.fields"
+              :key="field.key"
+              :id="`f-${field.key}`"
+              :label="field.label"
+              :help="field.help"
+              :error="fieldErrors[field.key] ?? null"
+              :required="field.required"
+            >
+              <template #default="{ id, describedBy, invalid }">
+                <TextArea
+                  v-if="field.type === 'textarea'"
+                  :id="id"
+                  v-model="answers[field.key] as string"
+                  :placeholder="field.placeholder ?? ''"
+                  :maxlength="field.maxLength || undefined"
+                  :described-by="describedBy"
+                  :invalid="invalid"
+                  :required="field.required"
+                />
+                <SelectInput
+                  v-else-if="field.type === 'select'"
+                  :id="id"
+                  v-model="answers[field.key] as string"
+                  :options="field.options"
+                  :placeholder="field.placeholder || t('form.choose')"
+                  :described-by="describedBy"
+                  :invalid="invalid"
+                  :required="field.required"
+                />
+                <OptionPills
+                  v-else-if="field.type === 'radio' || field.type === 'checkbox'"
+                  :id="id"
+                  v-model="answers[field.key]"
+                  :options="field.options"
+                  :multiple="field.type === 'checkbox'"
+                  :described-by="describedBy"
+                  :invalid="invalid"
+                />
+                <TextInput
+                  v-else
+                  :id="id"
+                  v-model="answers[field.key] as string"
+                  :type="field.type === 'email' ? 'email' : 'text'"
+                  :placeholder="field.placeholder ?? ''"
+                  :maxlength="field.maxLength || undefined"
+                  :described-by="describedBy"
+                  :invalid="invalid"
+                  :required="field.required"
+                />
+              </template>
+            </FormField>
+          </section>
+
+          <button type="submit" class="btn join-form__submit" :disabled="submitting">
+            {{ submitting ? t('form.sending') : t('form.submit') }}
+          </button>
+        </form>
+      </template>
+    </SectionShell>
+  </div>
 </template>
 
 <style lang="scss" scoped>
+/*
+  The section head and the form share one centred column.
+
+  The head is a flex row that spreads to the container's full width, so
+  centring the form alone would have left the heading hard against the
+  left margin and the form in the middle — two different axes on one
+  screen. Both are constrained to the same measure instead, and the head
+  centres its own contents rather than pushing them apart.
+*/
+.join-section {
+  overflow: hidden;
+
+  :deep(.section__head),
+  :deep(.section__rule),
+  :deep(.join-form),
+  :deep(.done) {
+    max-width: 680px;
+    margin-inline: auto;
+  }
+
+  :deep(.section__head) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.join-section__stars {
+  // Oversized so nothing can pull the field's edge into frame.
+  inset: -6% -2% !important;
+}
+
+.join-section__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 46% at 50% 0%, rgb(241 171 60 / 8%), transparent 64%);
+  pointer-events: none;
+}
+
 .join-form {
-  max-width: 620px;
+  max-width: 680px;
   margin-top: clamp(32px, 4vw, 56px);
+  margin-inline: auto;
 }
 
 .join-form__lede {
@@ -286,6 +344,8 @@ watch(schema, syncValues, { immediate: true });
 .done {
   max-width: 52ch;
   margin-top: clamp(32px, 4vw, 56px);
+  margin-inline: auto;
+  text-align: center;
 
   h3 {
     font-size: var(--fs-h2);
@@ -300,6 +360,7 @@ watch(schema, syncValues, { immediate: true });
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  justify-content: center;
   margin-top: 30px;
 }
 </style>

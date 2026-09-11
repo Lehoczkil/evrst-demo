@@ -63,6 +63,20 @@ const {
     class="section"
     :class="[`section--${surface}`, { paper: surface === 'paper' }]"
   >
+    <!--
+      Background art goes HERE, outside the container.
+
+      Anything full-bleed put in the default slot is laid out inside
+      `.container` — max-width 1440px with a page gutter — so on a wide
+      screen it stops short of both edges and paints a visible rectangle
+      of itself. The rocket section's starfield and its gold glow both did
+      exactly that: the field ended mid-page, and the radial was centred
+      on the container rather than on the viewport, so it read as an
+      off-centre gradient. Full-bleed decoration needs the section box,
+      not the reading measure.
+    -->
+    <slot name="bleed" />
+
     <div :class="wide ? 'w-full' : 'container'">
       <div v-if="eyebrow || title || $slots.right" class="section__head">
         <div>
@@ -84,18 +98,43 @@ const {
   padding-block: var(--section-y);
 }
 
+// Everything in the reading measure sits above the bleed slot's art,
+// which is absolutely positioned against the section box.
+.section > .container,
+.section > .w-full {
+  position: relative;
+  z-index: 1;
+}
+
 .section--ink-1 {
   background: var(--ink-1);
 }
 
 .section--paper {
   color: var(--on-paper);
-  background: var(--paper);
 
-  // On paper, gold is 1.87:1 — a fill colour, never text. The eyebrow
-  // takes the darker gold, which clears 4.5:1 at this size.
+  /*
+    A FLAT colour, deliberately — see --paper-surface in _tokens.scss for
+    why it is no longer the logo's off-white.
+
+    Not a gradient ramping out of the ink either side, though that was
+    tried: `surfaceModeAt` decides the wordmark's colour by reading the
+    first opaque `background-color` under it, so a gradient band is
+    invisible to it and the mark would flip to ink while still sitting
+    over black. Softening this edge properly means teaching the sampler
+    to evaluate a gradient at a given y, which is a bigger change than
+    the edge is worth.
+  */
+  background: var(--paper-surface);
+
+  /*
+    On paper, --gold-500 is a FILL colour and never text. The eyebrow
+    takes --gold-700, which clears 4.5:1 against --paper-surface;
+    --gold-600 is only 2.1:1 there and was never the 4.5:1 an older
+    comment here claimed.
+  */
   :deep(.eyebrow) {
-    color: var(--gold-600);
+    color: var(--gold-700);
   }
 
   :deep(.mono-label) {
