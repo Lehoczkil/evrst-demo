@@ -44,6 +44,18 @@ onMounted(() => {
     <Meta />
     <SiteHeader />
     <main>
+      <!--
+        EVERY routed page must have a SINGLE ELEMENT root.
+
+        `mode="out-in"` waits for the outgoing page's leave transition to
+        finish before mounting the incoming one, and a fragment or comment
+        root has nothing to run that transition on — so the wait never
+        ends and the next page never mounts. That was the join-us → home
+        bug: JoinUsPage's root was `<HtmlTitle>` + `<SectionShell>`, Vue
+        warned "renders non-element root node that cannot be animated",
+        and clicking the wordmark left `<main>` empty. A `v-if` chain with
+        no `v-else` is the same trap — it renders a comment node.
+      -->
       <RouterView v-slot="{ Component }">
         <transition name="router-fade" mode="out-in">
           <component :is="Component" />

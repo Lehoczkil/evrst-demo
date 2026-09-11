@@ -60,20 +60,22 @@ const notFound = computed(() => status.value === 'SUCCESS' && !page.value);
 </script>
 
 <template>
-  <FetchError v-if="status === 'FAILED'" class="container" @retry="refetch()" />
-  <NotFoundPage v-else-if="notFound" />
+  <div class="dynamic-page">
+    <FetchError v-if="status === 'FAILED'" class="container" @retry="refetch()" />
+    <NotFoundPage v-else-if="notFound" />
 
-  <SectionShell v-else-if="page" :title="page.payload.title">
-    <HtmlTitle :title="page.payload.title" />
-    <!-- eslint-disable-next-line vue/no-v-html -- CMS content authored in
-         the admin panel by the team; the prose scale in _prose.scss is
-         what makes it look like part of this site. -->
-    <div v-if="page.payload.content" class="prose" v-html="page.payload.content" />
-  </SectionShell>
+    <SectionShell v-else-if="page" :title="page.payload.title">
+      <HtmlTitle :title="page.payload.title" />
+      <!-- eslint-disable-next-line vue/no-v-html -- CMS content authored in
+           the admin panel by the team; the prose scale in _prose.scss is
+           what makes it look like part of this site. -->
+      <div v-if="page.payload.content" class="prose" v-html="page.payload.content" />
+    </SectionShell>
 
-  <SectionShell v-else-if="!settled">
-    <Skeleton :rows="4" height="24px" gap="14px" />
-  </SectionShell>
+    <SectionShell v-else-if="!settled">
+      <Skeleton :rows="4" height="24px" gap="14px" />
+    </SectionShell>
+  </div>
 </template>
 
 <style lang="scss" scoped></style>
