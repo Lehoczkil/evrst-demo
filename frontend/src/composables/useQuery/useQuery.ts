@@ -32,7 +32,21 @@ export const useQuery = <T, K = void>(query: useQueryType<T, K>) => {
 
     pendingRequests.value.add(cacheKey);
 
-    if (!cacheStorage.getCache(cacheKey)) {
+    /*
+      Read the cache BEFORE the placeholder below is written.
+
+      The placeholder is an entry with `data: undefined`, and both cache
+      branches used to be reached after it existed — so `hasCache()` was
+      true and `meta.time` was `Date.now()` on the very first run of every
+      query. Every `cache: true` query therefore decided its own empty
+      placeholder was a warm hit and returned without ever fetching, which
+      left the whole page on its skeletons. A hit is an entry that
+      actually carries data.
+    */
+    const warm = cacheStorage.getCache(cacheKey);
+    const isHit = warm?.data !== undefined;
+
+    if (!warm) {
       const initial: CacheData = {
         data: undefined,
         meta: { time: Date.now(), cacheState: 'PENDING', loading: true },
@@ -43,7 +57,7 @@ export const useQuery = <T, K = void>(query: useQueryType<T, K>) => {
     }
 
     if (queryData.cache && queryData.refetchTime !== Infinity) {
-      const cache = cacheStorage.getCache(cacheKey);
+      const cache = isHit ? warm : undefined;
       if (cache) {
         const elapsed = secondsBetweenDates(cache.meta.time, Date.now());
         if (elapsed < (queryData.staleTime as number)) {
@@ -57,7 +71,10 @@ export const useQuery = <T, K = void>(query: useQueryType<T, K>) => {
           cacheStorage.removeResponseData(cacheKey);
         }
       }
-    } else if (queryData.cache && cacheStorage.hasCache(cacheKey)) {
+    } else if (queryData.cache && isHit) {
+      // `refetchTime: Infinity` — fetched once, then held for the session.
+      cacheStorage.setCacheState(cacheKey, 'FRESH');
+      cacheStorage.requestStatus.set(cacheKey, 'SUCCESS');
       revalidate = false;
     }
 
