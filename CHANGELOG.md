@@ -14,6 +14,36 @@ Before each deploy, bump the version in **`backend/config/app.php`**
 `version` field — already gated by `.github/workflows/deploy.yaml`),
 then add a one-line entry under the matching section below.
 
+## 1.0.0 — first production release
+
+Everything below this section was written while the site was still being
+built and never shipped on its own — `0.4.0`, `0.5.1` and `0.5.2` are all
+marked *(unreleased)* because there was no production to release them to.
+This is that deploy: the whole accumulated tree goes out at once, which is
+why it is a major rather than the next minor. Those sections stay as the
+record of what landed when.
+
+### Frontend — the 0.6.0 redesign
+
+- **PrimeVue + `@primevue/themes` removed** (156 KB gz; the join-us page went 171 KB → 9 KB), along with Three.js, `vue-formify`, `maska` and `@unocss/transformer-directives`. What is left: `motion-v`, `pinia`, `vue-router`, `vue-i18n`, `@vueuse/core`, `date-fns`, `@sentry/vue`, UnoCSS + SCSS and the custom `useQuery`. Every decision behind it: `docs/frontend-redesign.md`.
+- **New hero** — a sticky 3-viewport stage of eight CSS/SVG parallax layers driven by `animation-timeline: scroll()`, replacing the Three.js rocket scene. Directional overscan per layer, two star planes zooming at different rates to read as speed, comets on the far plane, and a build that waits for `document.fonts.ready`.
+- **New design system** — `ink` / `gold` / `paper` / `txt` tokens, a single-clamp type scale, masked per-character text builds (`components/Motion/SplitText.vue`), a surface-following header and nav pill, localized route paths, a real 404, and a CMS prose scale.
+- **Home sections rebuilt** — programme timeline, rocket spec sheet, roster, sponsors, events, and a seamless gold wordmark marquee.
+- **Fixes that were silent failures** — `useQuery` treating its own empty placeholder as a warm cache hit (the whole site sat on its skeletons), routed pages without a single element root hanging `<transition mode="out-in">`, the full-width nav band swallowing every back-to-top click, and stale UnoCSS colour utilities emitting no CSS at all.
+- **Ambient loops pause off screen** (`composables/useOffscreenIdle.ts`) — a running animation keeps its element on a compositor layer.
+
+### Admin — accounts, roster and the join-us form
+
+- **The join-us form is data, not code.** Questions live in `application_form_fields` / `application_form_sections` and are edited under Membership → Application form; `App\Support\ApplicationForm` is the single reader feeding the API schema, the validation rules and the answer split.
+- **Roster ↔ account lifecycle** — `App\Support\MemberLogin` owns all three directions: `provision()` (roster → account), `revoke()` (member deleted → account deleted, refusing your own account and any admin's) and `detach()` (account deleted → member survives, unpublished and provisionable again). The last two are model events, so no deletion path can leave an orphaned login behind.
+- **"Create login" on the team members table** as well as the edit page — the route back after deleting an account.
+- **Every save returns to the table**, set once on the panel via `resourceCreatePageRedirect` / `resourceEditPageRedirect`.
+- **Temp passwords have exactly one exit** — `App\Actions\IssueTempPassword`, which refuses an undeliverable address before rotating and rolls the hash back if the send throws.
+
+### Deploy
+
+- **Single-domain Docker Compose stack** (`compose.yaml`) — Caddy serves the built SPA and reverse-proxies `/admin`, `/api`, `/livewire`, `/storage`, `/up` and the panel's own assets to Laravel. Four services: `backend` (owns the schema), `queue`, `scheduler`, `web` (auto-TLS). SQLite + uploads on a Docker volume. The backend image runs the PHP test suite during build, so a red suite fails the deploy. Runbooks: `deploy/README.md`, `deploy/HETZNER.md`, `deploy/DNS.md`.
+
 ## 0.5.2 (unreleased)
 
 ### Image transform pipeline
