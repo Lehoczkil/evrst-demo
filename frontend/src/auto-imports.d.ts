@@ -101,6 +101,7 @@ declare global {
   const useLocale: typeof import('./composables/useLocale').useLocale
   const useMetaStore: typeof import('./store/metaStore/metaStore').useMetaStore
   const useModel: typeof import('vue').useModel
+  const useOffscreenIdle: typeof import('./composables/useOffscreenIdle').useOffscreenIdle
   const useParallax: typeof import('./composables/useParallax').useParallax
   const useQuery: typeof import('./composables/useQuery/useQuery').useQuery
   const useRocketScene: typeof import('./composables/useRocketScene').useRocketScene
@@ -247,6 +248,7 @@ declare module 'vue' {
     readonly useLocale: UnwrapRef<typeof import('./composables/useLocale')['useLocale']>
     readonly useMetaStore: UnwrapRef<typeof import('./store/metaStore/metaStore')['useMetaStore']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
+    readonly useOffscreenIdle: UnwrapRef<typeof import('./composables/useOffscreenIdle')['useOffscreenIdle']>
     readonly useParallax: UnwrapRef<typeof import('./composables/useParallax')['useParallax']>
     readonly useQuery: UnwrapRef<typeof import('./composables/useQuery/useQuery')['useQuery']>
     readonly useRoute: UnwrapRef<typeof import('vue-router')['useRoute']>

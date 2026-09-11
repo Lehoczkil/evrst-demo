@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BackToTop: typeof import('./components/Chrome/BackToTop.vue')['default']
+    Comets: typeof import('./components/Hero/Comets.vue')['default']
     Countdown: typeof import('./components/Hero/Countdown.vue')['default']
     EmptyNote: typeof import('./components/States/EmptyNote.vue')['default']
     Events: typeof import('./components/Home/Events.vue')['default']
@@ -47,6 +48,7 @@ declare module 'vue' {
     SiteHeader: typeof import('./components/Chrome/SiteHeader.vue')['default']
     SiteNav: typeof import('./components/Chrome/SiteNav.vue')['default']
     Skeleton: typeof import('./components/States/Skeleton.vue')['default']
+    SplitText: typeof import('./components/Motion/SplitText.vue')['default']
     Sponsors: typeof import('./components/Home/Sponsors.vue')['default']
     Starfield: typeof import('./components/Hero/Starfield.vue')['default']
     Team: typeof import('./components/Home/Team.vue')['default']
