@@ -329,6 +329,19 @@ The Filament admin lives at `App\Filament\Resources\TeamMembers\` and `…\TeamM
 - Filament's `EditProfile` is enabled — so don't add a separate password-change page.
 - `databaseNotifications()` is conditional on `auth()->user()?->can(Perm::NOTIFICATIONS_SEE)`. Don't call it unconditionally or Manager + Member sessions will see an empty bell.
 
+### Roster ↔ account lifecycle
+
+`App\Support\MemberLogin` owns the link in both directions:
+
+| | |
+| --- | --- |
+| `provision()` | roster row → account. Create page, "Create login" (edit page **and** table row action), `team:provision-login`. |
+| `revoke()` | member deleted → account deleted. Wired to `TeamMember::deleted`. Refuses your own account and any admin's. |
+| `detach()` | account deleted → member survives, `is_public = false`, `user_id = null`, provisionable again. Wired to **`User::deleting`** — `deleted` is too late, the `nullOnDelete` FK has already broken the link. |
+
+Reporting for all of them is `App\Filament\Support\MemberLoginReport::flash()`.
+`Tests/Feature/MemberAccountLifecycleTest.php` is the contract.
+
 ## Don'ts
 
 - Don't add a `data` wrapper to API responses — the frontend reads arrays/objects directly.
@@ -346,3 +359,5 @@ The Filament admin lives at `App\Filament\Resources\TeamMembers\` and `…\TeamM
 - **Don't put the Three.js `<script type="module">` inside an `@if` branch.** Livewire DOM diffs do not re-execute module scripts, so `window.evrstMountOnshapeViewer` would never get defined when the `@if` flips. The viewer Blade renders the importmap + module unconditionally for that reason.
 - **Don't call `__('admin.help.pages.<dotted-key>.title')`** — the lang file uses literal dotted strings as array keys (e.g. `'resources.cms.events.index' => […]`) and Laravel's `__()` would split on the dots. Use `trans('admin.help.pages')` and array-lookup.
 - **Don't write a new file-handling model from scratch.** Add `use HasFileUrl;` and (if the columns aren't named `disk` / `path`) override `fileDiskAttribute()` / `filePathAttribute()`. Filament tables hook the cleanup via `DeleteAction::make()->before(fn ($r) => $r->deleteFile())`.
+- **Don't add a per-page `getRedirectUrl()` to make a save return to the list.** The panel sets `resourceCreatePageRedirect('index')` + `resourceEditPageRedirect('index')` once; overriding the method is how a page opts *out*.
+- **Don't hook `User::deleted` to touch the team member.** `team_members.user_id` is `nullOnDelete`, so the relation is already empty by then — use `deleting`.

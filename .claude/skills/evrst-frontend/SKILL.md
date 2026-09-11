@@ -17,7 +17,7 @@ Vue 3.5 + TypeScript (strict) + Vite SPA in `frontend/`. Talks to the Laravel ba
 - **vue-i18n v11** in non-legacy mode. Translation maps live under `src/translations/{en,hu}/index.ts`. The active locale is read from `localStorage('evrst:language')` on bootstrap and persisted there on change via `useLocale()`.
 - **No form library.** `vue-formify` went with PrimeVue: the join-us page holds its own `answers` ref (a `Record<string, string | string[]>` keyed by field key) because the question set comes from the API, and that is three lines of Vue.
 - **motion-v** for animations (Vue port of motion/Framer-motion).
-- **No 3D.** Three.js was removed with the hero redesign. The hero is seven CSS/SVG parallax layers driven by `animation-timeline: scroll()` — see `components/Hero/`.
+- **No 3D.** Three.js was removed with the hero redesign. The hero is eight CSS/SVG parallax layers driven by `animation-timeline: scroll()` — see `components/Hero/`. Text builds go through `components/Motion/SplitText.vue`, a masked per-character (or per-word) reveal ported from feat.agency's `v-reveal-text`; `driver="none"` splits and masks but animates nothing, for pieces the caller drives from a scroll timeline.
 - **date-fns** for the events section's date formatting (HU/EN month names, ranges, the past/upcoming split).
 - **UnoCSS** (presetWind3) for utility classes; theme colours all point at CSS custom properties so utilities and SCSS cannot drift. SCSS for component-scoped styles. Tokens in `src/styles/_tokens.scss` (NOT `_variables.scss`, which is gone), plus `_base.scss`, `_typography.scss`, `_controls.scss`, `_prose.scss` and the `_breakpoints.scss` mixins.
 - **Sentry** initialised only when `VITE_ENV !== 'develop'` and `VITE_SENTRY_DSN` is set. Filters out common network noise.
@@ -234,6 +234,18 @@ Two things to keep in mind when touching it:
   error messages) is still i18n in `src/translations/**`. Only the questions
   come from the API.
 
+### Section backgrounds
+
+`SectionShell` has a `bleed` slot that renders inside `<section>` but OUTSIDE
+`.container`. Full-bleed art (a starfield, a radial glow) belongs there —
+the default slot is inside the 1440px reading measure, so a background put
+there stops short of both page edges and any `at 50%` gradient is centred on
+the container instead of the viewport.
+
+Two paper tokens, and they are not interchangeable: `--paper` is the ink
+(the wordmark's light half, labels on dark buttons), `--paper-surface` is the
+ground the inverted section paints.
+
 ## Don'ts
 
 - Don't reintroduce React, Mantine, TanStack Query, react-icons, MDX, react-three-fiber or react-router — the 0.5.2 rewrite removed those. Don't reintroduce PrimeVue, `@primevue/themes`, Three.js, `vue-formify` or `maska` either — the 0.6.0 redesign removed those, each with a reason recorded in `docs/frontend-redesign.md`.
@@ -243,3 +255,9 @@ Two things to keep in mind when touching it:
 - Don't pass `xs` to the SCSS `media-down(...)` mixin (the breakpoint map has `xs: 0`).
 - Don't add a barrel `index.ts` for components — auto-registration covers it.
 - Don't delete the `objects?` optionality on the `Resource<T>` type; some endpoints return resources without `?include=objects`.
+- Don't give a routed page a fragment root or a `v-if` chain with no `v-else`. `App.vue`'s `<transition mode="out-in">` needs a single element root to run a leave transition on; without one the next page never mounts.
+- Don't treat `useQuery`'s `hasCache(key)` as "the data is here". It is true for the empty placeholder the same call just wrote — check `getCache(key)?.data !== undefined`.
+- Don't use `ch` for a measure on `--font-display` type. Panchang's zero is 1.19em wide.
+- Don't reach for a UnoCSS colour utility without checking `uno.config.ts` — the theme is `ink` / `gold` / `paper` / `txt`, and an unknown utility emits nothing instead of erroring.
+- Don't leave an infinite CSS animation running in a block that scrolls off screen; wrap it with `useOffscreenIdle` and `animation-play-state: paused`. A running animation keeps its element composited.
+- Don't use `--gold-600` as text on a paper surface (2.1:1). `--gold-700` is the text-weight gold there.
