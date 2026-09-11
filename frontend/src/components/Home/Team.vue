@@ -162,7 +162,9 @@ const isLoading = computed(() => status.value === 'PENDING' && !members.value?.l
   // The count is what makes this a legend rather than a row of
   // decorative labels.
   em {
-    color: var(--gold-600);
+    // --gold-700, like the eyebrow: this is a number to be read on the
+    // paper surface, not a fill.
+    color: var(--gold-700);
     font-style: normal;
     font-variant-numeric: tabular-nums;
   }
@@ -192,14 +194,23 @@ const isLoading = computed(() => status.value === 'PENDING' && !members.value?.l
     object-fit: cover;
   }
 
+  /*
+    A person's role, and it must not look like a group legend.
+
+    It was mono, uppercase and letter-spaced — the same voice as the `h3`
+    above it — so "ELECTRICAL ENGINEER" under Penc Máté read as the start
+    of a new group rather than as his title, and the two names below it
+    looked like they belonged to it. Mono-uppercase is the DATA voice on
+    this site (eyebrows, counts, specs); a job title is content, so it is
+    set in the body face like the name it belongs to, just smaller and
+    quieter.
+  */
   small {
     display: block;
-    margin-top: 3px;
+    margin-top: 1px;
     color: var(--on-paper-mid);
-    font-size: 10px;
-    font-family: var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 12.5px;
+    letter-spacing: -0.005em;
   }
 }
 </style>

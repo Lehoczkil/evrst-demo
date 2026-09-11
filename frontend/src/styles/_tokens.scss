@@ -35,18 +35,43 @@
     --gold-400: #f7c368;
     --gold-500: #f1ab3c;
     --gold-600: #c6871f;
+    /* Gold dark enough to be TEXT on --paper-surface: 4.6:1, where
+       --gold-600 is 2.1:1 there. Used by the eyebrow inside a paper
+       section and nowhere else — on ink, gold-500 already clears 10:1. */
+    --gold-700: #7d520c;
     --gold-dim: rgb(241 171 60 / 16%);
 
-    /* ── Paper — the one inverted surface, the logo's own off-white ── */
+    /* ── Paper ────────────────────────────────────────────────────────
+       TWO values, and the distinction matters.
+
+       --paper is the logo's own off-white. It is an INK: the wordmark's
+       light half, the label on a dark button. It must stay this bright
+       or the mark stops being the mark.
+
+       --paper-surface is the ground the one inverted section paints, and
+       it is deliberately darker and warmer than the ink. At #f8f7f4 the
+       jump from --ink-0 (#050506) was the harshest edge on the page —
+       a 19:1 step across a single hairline, which is what made the team
+       section read as a different site rather than as the other side of
+       this one. Knocking it back to a warm bone keeps the inversion
+       (still 12.8:1 for body copy on it) and takes the glare out.
+
+       There is a FLOOR on how dark it can go: useSurfaceMode treats a
+       surface as 'light' above a relative luminance of 0.6, and below
+       that the wordmark and the pill would keep their dark-surface
+       colours over a light band. #d9d4ca sits at 0.66 — dark enough to
+       have taken two steps down from the original, with enough margin
+       left that a future nudge does not silently break the chrome. */
     --paper: #f8f7f4;
-    --paper-2: #efeee9;
-    --paper-line: #dedcd6;
+    --paper-surface: #d9d4ca;
+    --paper-2: #cec9bd;
+    --paper-line: #bdb8ab;
 
     /* ── Type ─────────────────────────────────────────────────────── */
     --text-hi: #f4f4f5;
     --text-mid: #a2a6ad;
     --text-low: #6b7078;
-    --on-paper: #05060a;
+    --on-paper: #0e1014;
     --on-paper-mid: #55595f;
 
     /* ── Status. Separate from the accent: gold means "action or live",
