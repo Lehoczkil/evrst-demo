@@ -145,15 +145,22 @@ const uid = useId();
   }
 }
 
+/*
+  The plume stretches as well as brightening. A trail that only gets
+  lighter reads as a lamp being turned up; one that also gets longer is
+  the only cue in the SVG itself that the thing is accelerating — and
+  `transform-origin: top center` above means it grows downwards, away
+  from the nozzle, which is the direction it would.
+*/
 @keyframes rocket-trail {
   from {
     opacity: 0.18;
-    transform: scaleY(0.5);
+    transform: scaleY(0.5) scaleX(1);
   }
 
   to {
-    opacity: 0.95;
-    transform: scaleY(1);
+    opacity: 1;
+    transform: scaleY(2.4) scaleX(0.72);
   }
 }
 

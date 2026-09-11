@@ -2,11 +2,11 @@
 import { motion } from 'motion-v';
 import { EventRequests, soonest, startOf } from '@/services/requests/EventRequests';
 import { CSS_SCROLL_DRIVEN, useParallax } from '@/composables/useParallax';
-import { COPY_OUT, heroBuild } from './anims';
+import { BUILD, CHAR_STEP, COPY_OUT, WORD_STEP, heroBuild } from './anims';
 import { PIN_VH, STAGE_VH } from './layers';
 
 /*
-  The hero: a 100dvh pane pinned inside a 215dvh stage.
+  The hero: a 100dvh pane pinned inside a 300dvh stage.
 
   Why pinned rather than simply tall — three problems it solves at once,
   all of them found by building it the other way first:
@@ -23,8 +23,13 @@ import { PIN_VH, STAGE_VH } from './layers';
        travelling layer to slide into, which is where the stuck band came
        from. A pinned pane has none — it is the viewport.
 
-  `--pin` is the pin's length in px and it feeds both paths: the CSS
-  keyframes' travel and animation-range, and the fallback's arithmetic.
+  `--pin` is the pin's length and it feeds both paths: the CSS keyframes'
+  travel and animation-range, and the fallback's arithmetic.
+
+  The copy sits on the pane's VERTICAL CENTRE, in the same place the
+  statement sequence arrives — so the headline does not vacate a spot at
+  the top and leave the statements to appear somewhere else. One optical
+  centre, handed from one thing to the next.
 */
 /*---------------------------------------------
 /  PROPS & EMITS
@@ -39,6 +44,32 @@ const stageRef = ref<HTMLElement | null>(null);
 const paneRef = ref<HTMLElement | null>(null);
 
 const { progress, pin, measure } = useParallax(stageRef, paneRef);
+
+/*
+  The comets, the beacon and the engine flame have no resting state, and
+  the hero is off screen for most of a nine-viewport page. See
+  useOffscreenIdle for why pausing them matters more than the ticks.
+*/
+const { idle } = useOffscreenIdle(stageRef);
+
+/*
+  The build waits for Panchang.
+
+  `font-display: swap` paints the headline in Space Grotesk first and
+  swaps when the real face lands. The two have different metrics, so the
+  swap changes the copy block's height AND where its lines wrap — and the
+  block is vertically centred, so every line in it moves. That is the
+  jump on a cold load.
+
+  Holding the build until `document.fonts.ready` means the space is
+  reserved (the block is laid out the whole time, just at opacity 0 and
+  behind its masks) and the reader sees the arrival once, in the right
+  font. The timeout is the safety net: a font that never resolves must
+  not leave the hero permanently blank.
+*/
+const FONT_TIMEOUT = 1500;
+const ready = ref(false);
+let readyTimer: ReturnType<typeof setTimeout> | null = null;
 
 /*
   The countdown's target. Keyed on locale because the payload is localised
@@ -80,7 +111,7 @@ const stageStyle = computed(() => ({
   '--pin': `${PIN_VH}dvh`,
 }));
 
-/** The copy's fade, on the fallback path only. */
+/** The copy's hand-over, on the fallback path only. */
 const copyStyle = computed(() => (CSS_SCROLL_DRIVEN
   ? undefined
   : { opacity: String(Math.max(0, 1 - progress.value / COPY_OUT)) }));
@@ -94,6 +125,30 @@ onMounted(() => {
   // The stage's height is in dvh, so it settles a frame after mount on
   // mobile browsers that resolve dvh against a collapsing toolbar.
   nextTick(measure);
+
+  readyTimer = setTimeout(() => {
+    ready.value = true;
+  }, FONT_TIMEOUT);
+
+  const go = () => {
+    ready.value = true;
+    if (readyTimer) {
+      clearTimeout(readyTimer);
+      readyTimer = null;
+    }
+  };
+
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(go, go);
+  } else {
+    go();
+  }
+});
+
+onBeforeUnmount(() => {
+  if (readyTimer) {
+    clearTimeout(readyTimer);
+  }
 });
 </script>
 
@@ -112,23 +167,49 @@ onMounted(() => {
     <section
       ref="paneRef"
       class="hero surface-ignore sticky top-0 h-100dvh overflow-hidden"
+      :class="{ 'is-idle': idle }"
       :aria-label="t('hero.eyebrow')"
     >
       <HeroParallax :progress="progress" :pin="pin">
         <div class="hero-copy wrap" :style="copyStyle">
-          <motion.p v-bind="heroBuild(0)" class="eyebrow">
-            {{ t('hero.eyebrow') }}
-          </motion.p>
+          <SplitText
+            as="p"
+            class="eyebrow"
+            :text="t('hero.eyebrow')"
+            :play="ready"
+            :delay="BUILD.eyebrow"
+            :stagger="0.018"
+            :duration="0.6"
+          />
 
-          <motion.h1 v-bind="heroBuild(0.06)" class="hero-title">
-            {{ t('hero.title1') }}<span class="hero-title__accent">{{ t('hero.title2') }}</span>
-          </motion.h1>
+          <h1 class="hero-title">
+            <SplitText
+              :text="t('hero.title1')"
+              :play="ready"
+              :delay="BUILD.title1"
+              :stagger="CHAR_STEP"
+            />
+            <SplitText
+              class="hero-title__accent"
+              :text="t('hero.title2')"
+              :play="ready"
+              :delay="BUILD.title2"
+              :stagger="CHAR_STEP"
+            />
+          </h1>
 
-          <motion.p v-bind="heroBuild(0.12)" class="hero-lede">
-            {{ t('hero.lede') }}
-          </motion.p>
+          <SplitText
+            as="p"
+            class="hero-lede"
+            per="word"
+            :text="t('hero.lede')"
+            :play="ready"
+            :delay="BUILD.lede"
+            :stagger="WORD_STEP"
+            :duration="0.7"
+          />
 
-          <motion.div v-bind="heroBuild(0.18)" class="cta-row">
+          <motion.div v-bind="heroBuild(BUILD.cta, ready)" class="cta-row">
             <RouterLink to="/join-us" class="btn">
               {{ t('hero.ctaJoin') }}
             </RouterLink>
@@ -137,7 +218,15 @@ onMounted(() => {
             </a>
           </motion.div>
 
-          <motion.div v-bind="heroBuild(0.24)" class="mt-32px">
+          <!--
+            The clock's height is reserved whether or not there is an
+            event to count to. <Countdown> renders nothing when the next
+            event is in the past or the query has not landed yet, and on
+            a vertically centred block "nothing" is not free: the clock
+            arriving with the events response would grow the block and
+            shove the headline up by half its height.
+          -->
+          <motion.div v-bind="heroBuild(BUILD.countdown, ready)" class="countdown-slot">
             <Countdown :target="nextAt" :label="nextLabel" />
           </motion.div>
         </div>
@@ -161,31 +250,34 @@ onMounted(() => {
 }
 
 .hero-copy {
-  padding-top: clamp(96px, 13vh, 150px);
   text-align: center;
-  will-change: opacity;
+  will-change: opacity, transform;
 }
 
 /*
-  The copy hands over at 15% of the pin rather than fading across half of
-  it, because the statement sequence needs the room.
+  The copy hands over in the first fifth of the pin, and it LEAVES rather
+  than switching off: a small lift and a slight recede, on the same
+  timeline as the fade. The statements arrive into the space it vacates,
+  on the same optical centre.
 */
 @supports (animation-timeline: scroll()) {
   .hero-copy {
     animation: hero-copy-out linear both;
     animation-timeline: scroll(root block);
     animation-range-start: 0;
-    animation-range-end: calc(var(--pin) * 0.15);
+    animation-range-end: calc(var(--pin) * 0.2);
   }
 }
 
 @keyframes hero-copy-out {
   from {
     opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   to {
     opacity: 0;
+    transform: translate3d(0, -78px, 0) scale(0.93);
   }
 }
 
@@ -194,14 +286,25 @@ onMounted(() => {
   font-size: var(--fs-display);
 }
 
-// The second line takes the accent as a gradient rather than a flat gold:
-// at display size a flat fill reads as a slab, and the ramp gives the
-// letterforms an edge to catch.
+/*
+  The second line takes the accent as a gradient rather than a flat gold:
+  at display size a flat fill reads as a slab, and the ramp gives the
+  letterforms an edge to catch.
+
+  The clip is on the PIECE, not on the line: `background-clip: text` on
+  the line would paint a gradient the masked pieces then slide out of, so
+  every character would fade through the ramp as it arrived. On the piece
+  each glyph carries its own copy of the same vertical ramp, and since
+  they are all one line tall the result is identical to a single fill.
+*/
 .hero-title__accent {
   display: block;
-  background: linear-gradient(180deg, var(--gold-400) 0%, var(--gold-600) 92%);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+
+  :deep(.split__piece) {
+    background: linear-gradient(180deg, var(--gold-400) 0%, var(--gold-600) 92%);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
 
 .hero-lede {
@@ -219,10 +322,34 @@ onMounted(() => {
   margin-top: 30px;
 }
 
+// The clock is ~40px of numerals over an ~17px label. Reserved so the
+// block's height does not depend on whether an event exists.
+.countdown-slot {
+  min-height: clamp(48px, 5vw, 64px);
+  margin-top: 32px;
+}
+
+/*
+  Off screen: stop the loops that never end.
+
+  Named individually rather than as a blanket `:deep(*)`, because the
+  scroll-driven animations in here must NOT be paused — they are the
+  parallax, and freezing one holds it at whatever position it had when it
+  left the frame.
+*/
+.hero.is-idle {
+  :deep(.comet),
+  :deep(.tower__lamp),
+  :deep(#exhaust) {
+    animation-play-state: paused;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-copy {
     animation: none;
     opacity: 1 !important;
+    transform: none !important;
   }
 }
 </style>

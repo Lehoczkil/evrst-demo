@@ -89,7 +89,14 @@
     --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
 
     /* ── Type scale. One clamp per step, no per-breakpoint overrides. */
-    --fs-display: clamp(2.6rem, 8.4vw, 7.4rem);
+    /* The hero headline, and nothing else. It used to be 8.4vw/7.4rem,
+       which put "Escape Velocity" 8px inside the container at the widest
+       viewport and already wrapped below ~1420px. A per-character split
+       costs ~2% of line width — every glyph is its own inline-block, so
+       the pairs stop kerning and each advance rounds up — and that was
+       enough to tip it. The headroom here is what makes the split safe
+       at every width rather than at most of them. */
+    --fs-display: clamp(2.5rem, 7.7vw, 6.9rem);
     --fs-h1: clamp(2.25rem, 5.5vw, 4.5rem);
     --fs-h2: clamp(1.85rem, 4vw, 3.1rem);
     --fs-h3: clamp(1.12rem, 1.7vw, 1.42rem);
