@@ -32,6 +32,19 @@ html {
     so the document keeps scrolling and the root timeline works.
   */
   overflow-x: clip;
+
+  /*
+    No rubber-band past either end of the document.
+
+    The hero is a pinned pane whose sky is painted on the SECTION, not on
+    the page ground, so bouncing above the top of the document exposes
+    `body`'s flat --ink-0 — a black bar sliding down over the artwork,
+    which reads as the page coming apart. `none` rather than `contain`:
+    `contain` only stops the scroll chaining to the parent, it still
+    bounces. The cost is pull-to-refresh on Android, which a marketing
+    page does not need.
+  */
+  overscroll-behavior-y: none;
 }
 
 /*
@@ -69,8 +82,22 @@ body,
   margin: 0;
 }
 
+/*
+  Hold the viewport open while the route's chunk is still in flight.
+
+  Every page is a lazy `() => import(...)`, so on a cold load <main> is
+  empty for as long as that request takes. Without a reservation the
+  footer renders against the top of the screen and is then shoved a full
+  hero out of the way when the chunk lands — the jump you see once, on
+  the first visit, and never again because the chunk is cached.
+
+  One viewport, not the hero's whole 300dvh stage: what has to not move is
+  the first screen. Everything the hero adds below the fold is invisible
+  when it arrives.
+*/
 main {
   flex: 1 1 auto;
+  min-height: 100dvh;
 }
 
 a {
