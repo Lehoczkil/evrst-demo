@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Auth\Perm;
+use App\Support\MemberLogin;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -42,6 +43,28 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
             'password_changed_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Deleting an account does NOT delete the person.
+     *
+     * Their roster row stays — it is history, a name, a photo, a group —
+     * but it comes off the public site and its `user_id` is cleared, which
+     * is what makes "Create login" available on the row again. The reverse
+     * direction lives on TeamMember; both are in MemberLogin so the two
+     * halves of the link are described in one place.
+     *
+     * `deleting`, not `deleted`: team_members.user_id is `nullOnDelete`,
+     * so by the time `deleted` fires the database has already broken the
+     * link and `$user->teamMember` — a `where user_id = ?` — finds
+     * nothing. The row would keep its `is_public` flag and quietly stay on
+     * the public site with no account behind it.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user): void {
+            MemberLogin::detach($user);
+        });
     }
 
     public function role(): BelongsTo

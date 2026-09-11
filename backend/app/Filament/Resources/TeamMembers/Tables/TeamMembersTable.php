@@ -2,7 +2,12 @@
 
 namespace App\Filament\Resources\TeamMembers\Tables;
 
+use App\Filament\Support\MemberLoginReport;
+use App\Models\TeamMember;
 use App\Models\TeamMemberGroup;
+use App\Support\MemberLogin;
+use App\Support\OrgEmail;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -127,11 +132,44 @@ class TeamMembersTable
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+
+                /*
+                  Same act as the edit page's header button, on the row.
+
+                  This is the way back from deleting an account: the user
+                  is gone, the roster row survives with user_id cleared,
+                  and the admin should not have to open the member to give
+                  them a login again.
+                */
+                Action::make('create_login')
+                    ->label(__('admin.team.login_create'))
+                    ->icon('heroicon-o-key')
+                    ->color('warning')
+                    ->visible(fn (TeamMember $record) => $record->user_id === null && MemberLogin::canProvision())
+                    ->requiresConfirmation()
+                    ->modalHeading(__('admin.team.login_create_modal'))
+                    ->modalDescription(fn (TeamMember $record) => __('admin.team.login_create_modal_body', [
+                        'email' => filled($record->email)
+                            ? $record->email
+                            : (OrgEmail::forName((string) $record->name) ?? '—'),
+                    ]))
+                    ->action(fn (TeamMember $record) => MemberLoginReport::flash(
+                        MemberLogin::provision($record),
+                        $record,
+                    )),
+
+                // Say what else goes: deleting a member deletes their
+                // panel account, which is not what "delete" usually
+                // implies and is not undoable from this screen.
+                DeleteAction::make()
+                    ->modalDescription(fn (TeamMember $record) => $record->user_id
+                        ? __('admin.team.delete_with_login_body', ['login' => $record->user?->email ?? '—'])
+                        : __('filament-actions::delete.single.modal.description')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->modalDescription(__('admin.team.delete_bulk_with_login_body')),
                 ]),
             ])
             ->emptyStateHeading(__('admin.empty.team_members_h'))

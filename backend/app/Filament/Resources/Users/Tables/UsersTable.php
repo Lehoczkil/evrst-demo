@@ -100,8 +100,13 @@ class UsersTable
                     ->action(fn (User $record) => TempPasswordReport::flash(
                         IssueTempPassword::rotate($record),
                     )),
+                // The person stays on the roster; only the account goes.
+                // Say so, or "delete user" reads as "delete member".
                 DeleteAction::make()
-                    ->visible(fn (User $r) => $r->id !== auth()->id()),
+                    ->visible(fn (User $r) => $r->id !== auth()->id())
+                    ->modalDescription(fn (User $record) => $record->teamMember
+                        ? __('admin.users.delete_keeps_member_body', ['name' => $record->teamMember->name])
+                        : __('filament-actions::delete.single.modal.description')),
             ])
             ->toolbarActions([
                 // Deliberately NOT inside the BulkActionGroup dropdown.

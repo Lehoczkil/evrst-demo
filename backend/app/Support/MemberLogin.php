@@ -11,17 +11,25 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Provisions the panel login that belongs to a roster row.
+ * The link between a roster row and the panel account that belongs to it,
+ * in both directions.
  *
  * Every team member signs in with their org address, so adding someone to
- * team_members and giving them a User are two halves of the same act. This
- * is the single implementation of that half: the Team members create page
- * runs it automatically, the "Create login" button on the edit page runs it
- * on demand, and `team:provision-login` runs it from the shell for rows
- * that predate either.
+ * team_members and giving them a User are two halves of the same act:
  *
- * Deliberately *not* a model observer — TeamSeeder writes straight to the
- * table and would mail the whole roster a fresh password on every reseed.
+ *   provision()  roster row  →  account. The Team members create page runs
+ *                it automatically, "Create login" on the edit page and in
+ *                the table run it on demand, `team:provision-login` runs
+ *                it from the shell for rows that predate either.
+ *   revoke()     roster row deleted → account deleted. Wired to
+ *                TeamMember::deleted.
+ *   detach()     account deleted → roster row survives, unpublished, and
+ *                provisionable again. Wired to User::deleted.
+ *
+ * provision() is deliberately *not* a model observer — TeamSeeder writes
+ * straight to the table and would mail the whole roster a fresh password
+ * on every reseed. The other two are, because they send nothing and there
+ * are four separate ways to delete a row.
  */
 final class MemberLogin
 {
@@ -42,6 +50,18 @@ final class MemberLogin
 
     /** No org address on the row and none derivable from the name. */
     public const NO_ADDRESS = 'no_address';
+
+    /**
+     * May the current actor mint a panel account?
+     *
+     * Provisioning creates a `users` row, and Users is admin-only —
+     * `team.create` is a Manager permission, so the automatic path on the
+     * team-member create page must not become a way around that.
+     */
+    public static function canProvision(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
 
     public static function provision(TeamMember $member): MemberLoginResult
     {
@@ -108,6 +128,79 @@ final class MemberLogin
             $delivery->destination,
             $delivery->error,
         );
+    }
+
+    /**
+     * The roster row is going away, so the account goes with it.
+     *
+     * Membership is what the login is *for*: an account with no roster row
+     * is someone who can still sign in to the panel and appears nowhere,
+     * which is the state this exists to prevent. Called from
+     * TeamMember::booted() rather than from the Filament actions, so it
+     * covers the row action, the bulk action, the edit page's header
+     * button, tinker and any future caller equally.
+     *
+     * Two accounts are never taken:
+     *
+     *  · Your own. Deleting the account you are signed in as ends the
+     *    request in a redirect to the login screen, halfway through a bulk
+     *    action, with no way to tell what else was processed.
+     *  · An admin's. The roster is a list of people, not an authorisation
+     *    list, and an admin account is very often the one that would have
+     *    to grant itself back in. Removing someone's roster row must not
+     *    be able to lock the panel.
+     *
+     * Returns the address of the account it deleted, or null when it left
+     * one standing — the caller decides whether that is worth reporting.
+     */
+    public static function revoke(TeamMember $member): ?string
+    {
+        $user = $member->user;
+
+        if (! $user || $user->getKey() === auth()->id() || $user->isAdmin()) {
+            return null;
+        }
+
+        $email = (string) $user->email;
+
+        // Null the link first. team_members.user_id is `nullOnDelete`, so
+        // the database would do it anyway — but the in-memory model would
+        // still be holding the stale id, and this row is about to be read
+        // back by whatever is showing the delete notification.
+        $member->forceFill(['user_id' => null])->saveQuietly();
+
+        $user->delete();
+
+        return $email;
+    }
+
+    /**
+     * The account is going away but the person is not.
+     *
+     * Their roster row survives — history, a name, a photo, a group — but
+     * it comes off the public site, because a member with no way to sign
+     * in is someone who has been off-boarded rather than someone who is
+     * merely unlisted. Making it explicit (rather than filtering the API
+     * on `user_id`) keeps the toggle visible and reversible in the panel,
+     * and leaves room for a member who legitimately has no login.
+     *
+     * `user_id` is nulled here as well as by the FK, which is what makes
+     * "Create login" reappear on the row.
+     */
+    public static function detach(User $user): ?TeamMember
+    {
+        $member = $user->teamMember;
+
+        if (! $member) {
+            return null;
+        }
+
+        $member->forceFill([
+            'user_id' => null,
+            'is_public' => false,
+        ])->saveQuietly();
+
+        return $member;
     }
 
     /** Point the roster row at the account, writing back a derived address. */

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\LogsActivity;
+use App\Support\MemberLogin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -40,6 +41,27 @@ class TeamMember extends Model
         'is_public' => 'boolean',
         'position' => 'integer',
     ];
+
+    /**
+     * Deleting someone from the roster deletes their panel account.
+     *
+     * A model event rather than something bolted onto the Filament delete
+     * actions, because there are four ways a row can go — the table's row
+     * action, its bulk action, the edit page's header button, and the
+     * shell — and a login left behind by any of them is an account that
+     * can still sign in while appearing nowhere. MemberLogin::revoke()
+     * decides what is safe to take; see its docblock for the two accounts
+     * it refuses.
+     *
+     * Safe under TeamSeeder: it wipes with `TeamMember::query()->forceDelete()`,
+     * a mass delete on the query builder, which fires no model events.
+     */
+    protected static function booted(): void
+    {
+        static::deleted(function (TeamMember $member): void {
+            MemberLogin::revoke($member);
+        });
+    }
 
     public function labelForLog(): string
     {
