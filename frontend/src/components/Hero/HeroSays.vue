@@ -32,6 +32,8 @@ import { SAY_IN, SAY_OUT, SAY_SHIFT, SAY_WINDOWS } from './anims';
 /*---------------------------------------------
 /  PROPS & EMITS
 ---------------------------------------------*/
+const { lines } = useHomeCopy();
+
 const { progress = 0 } = defineProps<{
   /** 0-1 through the pin. Only read on the JS fallback path. */
   progress?: number;
@@ -121,13 +123,9 @@ const rangeFor = (index: number) => {
   word that takes the accent, and <SplitText> keeps that run intact
   through the split.
 */
-const says = computed(() => {
-  const raw = tm('hero.says') as unknown[];
-
-  return (Array.isArray(raw) ? raw : [])
-    .slice(0, SAY_WINDOWS.length)
-    .map((line) => rt(line as Parameters<typeof rt>[0]));
-});
+// Editable in the panel (Site → Home texts); falls back to the bundled
+// lines when the row has none.
+const says = computed(() => lines('hero.says'));
 /*---------------------------------------------
 /  WATCHERS
 ---------------------------------------------*/

@@ -75,6 +75,10 @@ let readyTimer: ReturnType<typeof setTimeout> | null = null;
   The countdown's target. Keyed on locale because the payload is localised
   server-side, and the label comes out of the same row as the date.
 */
+// Hero copy is editable in the panel (Site → Home texts); `text()`
+// falls back to the bundled translation per string.
+const { text } = useHomeCopy();
+
 const { data: events } = useQuery({
   key: ['events', locale],
   request: () => EventRequests.all(locale.value as string),
@@ -168,14 +172,14 @@ onBeforeUnmount(() => {
       ref="paneRef"
       class="hero surface-ignore sticky top-0 h-100dvh overflow-hidden"
       :class="{ 'is-idle': idle }"
-      :aria-label="t('hero.eyebrow')"
+      :aria-label="text('hero.eyebrow')"
     >
       <HeroParallax :progress="progress" :pin="pin">
         <div class="hero-copy wrap" :style="copyStyle">
           <SplitText
             as="p"
             class="eyebrow"
-            :text="t('hero.eyebrow')"
+            :text="text('hero.eyebrow')"
             :play="ready"
             :delay="BUILD.eyebrow"
             :stagger="0.018"
@@ -184,14 +188,14 @@ onBeforeUnmount(() => {
 
           <h1 class="hero-title">
             <SplitText
-              :text="t('hero.title1')"
+              :text="text('hero.title1')"
               :play="ready"
               :delay="BUILD.title1"
               :stagger="CHAR_STEP"
             />
             <SplitText
               class="hero-title__accent"
-              :text="t('hero.title2')"
+              :text="text('hero.title2')"
               :play="ready"
               :delay="BUILD.title2"
               :stagger="CHAR_STEP"
@@ -202,7 +206,7 @@ onBeforeUnmount(() => {
             as="p"
             class="hero-lede"
             per="word"
-            :text="t('hero.lede')"
+            :text="text('hero.lede')"
             :play="ready"
             :delay="BUILD.lede"
             :stagger="WORD_STEP"
@@ -211,10 +215,10 @@ onBeforeUnmount(() => {
 
           <motion.div v-bind="heroBuild(BUILD.cta, ready)" class="cta-row">
             <RouterLink to="/join-us" class="btn">
-              {{ t('hero.ctaJoin') }}
+              {{ text('hero.ctaJoin') }}
             </RouterLink>
             <a href="#mission" class="btn btn--ghost">
-              {{ t('hero.ctaMission') }}
+              {{ text('hero.ctaMission') }}
             </a>
           </motion.div>
 

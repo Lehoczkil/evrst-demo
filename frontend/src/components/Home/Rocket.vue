@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { motion } from 'motion-v';
-import { TeamRequests, type TeamMember } from '@/services/requests/TeamRequests';
+import { TeamRequests, type TeamGroup, type TeamMember } from '@/services/requests/TeamRequests';
 import { cardStagger, sectionRise } from './anims';
 
 /*
@@ -29,12 +29,33 @@ import { cardStagger, sectionRise } from './anims';
 ---------------------------------------------*/
 const { t, tm, locale } = useI18n();
 
+const { text, specs: specsFrom } = useHomeCopy();
+
 const { data: members } = useQuery<TeamMember[]>({
   key: ['team-members', locale],
   request: () => TeamRequests.members(locale.value as string),
   cache: true,
   staleTime: 300,
 });
+
+const { data: groups } = useQuery<TeamGroup[]>({
+  key: ['team-groups', locale],
+  request: () => TeamRequests.groups(locale.value as string),
+  cache: true,
+  staleTime: 300,
+});
+
+/**
+ * A group's own localised name, from the roster.
+ *
+ * This label used to read `t('team.group.<slug>')` while the comment
+ * above it claimed the roster was the source — so renaming a position in
+ * the panel changed it everywhere except here. The bundled name stays as
+ * the fallback for a group the API has not sent: one that is not public,
+ * or a response that has not landed yet.
+ */
+const groupName = (slug: string): string =>
+  groups.value?.find((group) => group.slug === slug)?.name || t(`team.group.${slug}`);
 
 /*
   Which group owns which subsystem. The slugs are the real
@@ -64,11 +85,7 @@ const headcount = (slug: string) => (members.value ?? []).filter(
   because the labels have to be translated either way and splitting the
   label from its value across two systems is worse than either.
 */
-const specs = computed(() => {
-  const raw = tm('rocket.specs') as unknown[];
-
-  return (Array.isArray(raw) ? raw : []) as { label: string; value: string; unit?: string }[];
-});
+const specs = computed(() => specsFrom('rocket.specs'));
 
 const leftSpecs = computed(() => specs.value.slice(0, 3));
 const rightSpecs = computed(() => specs.value.slice(3, 6));
@@ -79,9 +96,11 @@ const subsystems = computed(() => SUBSYSTEMS.map((row) => {
   return {
     key: row.key,
     name: t(`rocket.subsystem.${row.key}`),
-    // The group's own localised name comes from the roster; the count is
-    // omitted when the roster has not loaded rather than showing 0.
-    owner: t(`team.group.${row.slug}`),
+    // The group's own localised name, from the roster — renaming a
+    // position in the panel has to reach this label too. The bundled
+    // name is the fallback for a group the API has not sent (not
+    // public, or not loaded yet).
+    owner: groupName(row.slug),
     count: count || null,
   };
 }));
@@ -96,12 +115,12 @@ const subsystems = computed(() => SUBSYSTEMS.map((row) => {
 <template>
   <SectionShell
     id="rocket"
-    :eyebrow="t('rocket.eyebrow')"
-    :title="t('rocket.title')"
+    :eyebrow="text('rocket.eyebrow')"
+    :title="text('rocket.title')"
     class="rocket-section"
   >
     <template #right>
-      <span class="pill pill--building">{{ t('rocket.status') }}</span>
+      <span class="pill pill--building">{{ text('rocket.status') }}</span>
     </template>
 
     <!--
@@ -129,7 +148,7 @@ const subsystems = computed(() => SUBSYSTEMS.map((row) => {
       </dl>
 
       <motion.div v-bind="sectionRise()">
-        <RocketBlueprint :height="t('rocket.dimHeight')" :diameter="t('rocket.dimDiameter')" />
+        <RocketBlueprint :height="text('rocket.dimHeight')" :diameter="text('rocket.dimDiameter')" />
       </motion.div>
 
       <dl class="sheet__col sheet__col--right">

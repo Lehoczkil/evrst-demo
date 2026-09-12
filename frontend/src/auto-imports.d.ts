@@ -92,6 +92,7 @@ declare global {
   const useCountdown: typeof import('./composables/useCountdown').useCountdown
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
+  const useHomeCopy: typeof import('./composables/useHomeCopy').useHomeCopy
   const useI18n: typeof import('vue-i18n').useI18n
   const useId: typeof import('vue').useId
   const useLanguage: typeof import('./composables/useLanguage').useLanguage
@@ -144,7 +145,7 @@ declare global {
   export type { TeamMemberGroupRef, TeamMember, TeamGroup } from './services/requests/TeamRequests'
   import('./services/requests/TeamRequests')
   // @ts-ignore
-  export type { ViewPayload, ViewResource } from './services/requests/ViewRequests'
+  export type { ViewPayload, ViewResource, LocaleMap, HomeCopyPayload, HomeCopyResource } from './services/requests/ViewRequests'
   import('./services/requests/ViewRequests')
 }
 
@@ -239,6 +240,7 @@ declare module 'vue' {
     readonly useCountdown: UnwrapRef<typeof import('./composables/useCountdown')['useCountdown']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
+    readonly useHomeCopy: UnwrapRef<typeof import('./composables/useHomeCopy')['useHomeCopy']>
     readonly useI18n: UnwrapRef<typeof import('vue-i18n')['useI18n']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useLanguage: UnwrapRef<typeof import('./composables/useLanguage')['useLanguage']>
