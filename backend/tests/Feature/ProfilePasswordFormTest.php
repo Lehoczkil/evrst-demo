@@ -60,7 +60,11 @@ class ProfilePasswordFormTest extends TestCase
                 'currentPassword' => 'temp-pass-1234',
             ])
             ->call('save')
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            // Off the profile once the gate is cleared — this page is where
+            // the member was being held, so staying reads as "nothing
+            // happened" on the one screen they were trying to get past.
+            ->assertRedirect(Filament::getUrl());
 
         $user->refresh();
 
@@ -76,7 +80,10 @@ class ProfilePasswordFormTest extends TestCase
             ->test(ForceChangeProfile::class)
             ->fillForm(['name' => 'New Name'])
             ->call('save')
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            // No password change, so nothing to leave for: editing a name
+            // or an avatar stays put.
+            ->assertNoRedirect();
 
         $this->assertSame('New Name', $user->refresh()->name);
     }

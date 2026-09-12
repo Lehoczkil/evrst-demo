@@ -3,6 +3,7 @@
 namespace App\Filament\Auth;
 
 use Filament\Auth\Pages\EditProfile;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -78,6 +79,9 @@ class ForceChangeProfile extends EditProfile
         return auth()->user()?->isAdmin() ?? false;
     }
 
+    /** Whether the save currently running actually rotated the password. */
+    protected bool $rotatedPassword = false;
+
     /**
      * Stamp password_changed_at every time the user actually rotates their
      * password. Combined with the RequirePasswordChange middleware this is
@@ -85,9 +89,31 @@ class ForceChangeProfile extends EditProfile
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (! empty($data['password'])) {
+        $this->rotatedPassword = ! empty($data['password']);
+
+        if ($this->rotatedPassword) {
             $data['password_changed_at'] = now();
         }
+
         return parent::mutateFormDataBeforeSave($data);
+    }
+
+    /**
+     * Leave the profile once the password is actually set.
+     *
+     * This page is where a freshly-provisioned account is held by
+     * RequirePasswordChange, and the gate it was stuck behind is exactly
+     * what the save just cleared — so staying put reads as "nothing
+     * happened" on the one screen the user was trying to get past. Editing
+     * only a name or an avatar still stays, because there is nowhere the
+     * user was being sent.
+     *
+     * Safe to redirect: Filament re-puts `password_hash_*` in the session
+     * before this runs, so the new hash does not log the user straight out
+     * on the next request.
+     */
+    protected function getRedirectUrl(): ?string
+    {
+        return $this->rotatedPassword ? Filament::getUrl() : null;
     }
 }
