@@ -76,6 +76,19 @@ RUN composer dump-autoload --no-scripts \
        APP_ENV=testing \
        php artisan test --stop-on-failure
 
+# Strip developer comments out of the Blade views.
+#
+# Blade's own `{{-- --}}` never reaches the browser, but HTML comments and
+# the comments inside the panel's inline <script> blocks are served
+# verbatim — a guided tour of how the help modal, the sidebar search
+# injector and the desktop-view toggle work, on every page load.
+#
+# Done here rather than in the repo so the comments stay in git and only
+# the image loses them. Runs AFTER the test suite above, so the tests see
+# the real source. Only whole-line comments are removed; see the command's
+# docblock for why that restriction is the safe one.
+RUN php artisan views:strip-comments
+
 # Strip dev dependencies and re-optimise the autoloader for production.
 # `bootstrap/cache/*.php` is wiped at the end because the test stage above
 # booted Laravel with dev packages installed, which caused

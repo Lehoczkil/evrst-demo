@@ -8,6 +8,7 @@ import Components from 'unplugin-vue-components/vite';
 import type { Plugin } from 'vite';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import { sitemap } from './sitemap';
+import { stripHtmlComments } from './stripHtmlComments';
 
 const plugins: Plugin[] = [
   vue(),
@@ -52,6 +53,9 @@ const plugins: Plugin[] = [
 
   /* sitemap.xml, generated from the route table — see ./sitemap.ts. */
   sitemap(),
+
+  /* index.html's comments are for whoever edits it, not for visitors. */
+  stripHtmlComments(),
 
   UnoCSS(),
   visualizer({
