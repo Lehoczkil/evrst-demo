@@ -147,7 +147,10 @@ class TaskForm
                     ->columnSpan(['default' => 12, 'md' => 8]),
                 TextInput::make('position')
                     ->label(__('admin.tasks.position'))
-                    ->numeric()
+                    ->integer()
+                    ->minValue(0)
+                    ->step(1)
+                    ->helperText(__('admin.common.sort_help'))
                     ->default(0)
                     ->disabled(fn ($record) => self::definitionLocked($record))
                     ->columnSpan(['default' => 12, 'md' => 4]),

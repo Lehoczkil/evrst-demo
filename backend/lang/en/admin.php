@@ -192,6 +192,7 @@ return [
         'status'       => 'Status',
         'date'         => 'Date',
         'sort'         => 'Sort',
+        'sort_help'    => 'Lower numbers come first. Leave it at 0 unless you need a specific order — entries sharing a number fall back to alphabetical.',
         'created_at'   => 'Created',
         'updated_at'   => 'Updated',
         'submitted_at' => 'Submitted',

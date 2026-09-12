@@ -30,7 +30,10 @@ class SponsorForm
                     ->columnSpan(['default' => 6, 'md' => 3]),
                 TextInput::make('position')
                     ->label(__('admin.sponsors.sort_order'))
-                    ->numeric()
+                    ->integer()
+                    ->minValue(0)
+                    ->step(1)
+                    ->helperText(__('admin.common.sort_help'))
                     ->default(0)
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.sponsor_position'))
                     ->columnSpan(['default' => 6, 'md' => 3]),

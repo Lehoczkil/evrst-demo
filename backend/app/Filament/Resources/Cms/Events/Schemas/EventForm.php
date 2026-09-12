@@ -64,7 +64,10 @@ class EventForm
                             ->columnSpan(['default' => 12, 'md' => 4]),
                         TextInput::make('position')
                             ->label(__('admin.common.sort'))
-                            ->numeric()
+                            ->integer()
+                            ->minValue(0)
+                            ->step(1)
+                            ->helperText(__('admin.common.sort_help'))
                             ->default(0)
                             ->columnSpan(['default' => 12, 'md' => 4]),
                     ])

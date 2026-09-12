@@ -106,7 +106,10 @@ class TeamMemberForm
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('position')
                     ->label(__('admin.sponsors.sort_order'))
-                    ->numeric()
+                    ->integer()
+                    ->minValue(0)
+                    ->step(1)
+                    ->helperText(__('admin.common.sort_help'))
                     ->default(0)
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('photo_path')

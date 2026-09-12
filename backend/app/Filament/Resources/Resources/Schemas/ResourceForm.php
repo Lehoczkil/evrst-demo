@@ -23,7 +23,10 @@ class ResourceForm
                 TextInput::make('position')
                     ->label(__('admin.common.sort'))
                     ->required()
-                    ->numeric()
+                    ->integer()
+                    ->minValue(0)
+                    ->step(1)
+                    ->helperText(__('admin.common.sort_help'))
                     ->default(0)
                     ->helperText(__('admin.help.fields.sponsor_position')),
                 Textarea::make('payload')

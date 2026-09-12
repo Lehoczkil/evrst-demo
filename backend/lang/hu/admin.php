@@ -192,6 +192,7 @@ return [
         'status'       => 'Állapot',
         'date'         => 'Dátum',
         'sort'         => 'Sorrend',
+        'sort_help'    => 'A kisebb szám kerül előrébb. Hagyd 0-n, ha nem számít a sorrend — az azonos számú elemek név szerint rendeződnek.',
         'created_at'   => 'Létrehozva',
         'updated_at'   => 'Frissítve',
         'submitted_at' => 'Beküldve',
