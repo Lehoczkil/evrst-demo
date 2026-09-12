@@ -648,7 +648,7 @@ return [
             ],
             'resources.member-applications.index' => [
                 'title' => 'Applications',
-                'body' => '<p>Inbox of new-member applications submitted from the public site. The pending count appears as a badge in the sidebar.</p><p>Use <em>Accept</em> to convert an application into a real team member + admin account; <em>Reject</em> archives it. Both actions write a dedicated entry to the activity log.</p>',
+                'body' => '<p>Inbox of new-member applications submitted from the public site. The pending count appears as a badge in the sidebar.</p><p><em>Accept</em> turns the application into a team member plus a panel login, with a role you choose on the next screen. <em>Reject</em> archives it — the row and its answers stay, nothing is deleted. Both write their own entry to the activity log, so the decision has a name and a timestamp against it.</p>',
             ],
             'resources.member-applications.edit' => [
                 'title' => 'Application detail',
@@ -656,7 +656,7 @@ return [
             ],
             'resources.member-applications.accept' => [
                 'title' => 'Accept application',
-                'body' => '<p>Creates a Team member and a panel login in one go, with the <em>Role</em> you pick — Member by default. The applicant gets a temporary password emailed (or logged to <code>storage/logs/laravel.log</code> if MAIL_MAILER=log) and is forced to change it on first sign-in.</p>',
+                'body' => '<p>Turns an application into two things at once: a row on the roster and a panel login. The organisation address is derived from the name and becomes the login; the address the applicant wrote is kept separately as their private e-mail, which is where the temporary password is sent.</p><p><em>Role</em> starts empty and is required — there is no default to accept without reading. Member is right for almost everyone. Nothing is created until you pick one.</p><p>The temporary password is mailed (or written to <code>storage/logs/laravel.log</code> while MAIL_MAILER=log), and the account cannot reach the rest of the panel until it is changed on first sign-in.</p>',
             ],
             'resources.application-form.index' => [
                 'title' => 'Application form',
@@ -676,7 +676,7 @@ return [
             ],
             'resources.cms.team-members.index' => [
                 'title' => 'Team members',
-                'body' => '<p>The public org chart. Each member has a name, optional bilingual degree, photo, one or more positions, and a designated <em>main position</em> (used as their slot in the chart).</p>',
+                'body' => '<p>The roster behind the public team page. Each member has a name, an optional bilingual degree, a photo, one or more positions and a designated <em>main position</em> — the one that decides which group they are listed under.</p><p>The <em>Status</em> badge says Active or Alumni. <strong>Mark as alumni</strong> is on every row, on the edit page, and as a bulk action for a whole graduating cohort: it takes them off the public page and out of the active count, and it is reversible. It does not touch their account or role — someone who has left may still need to sign in to hand work over.</p>',
             ],
             'resources.cms.team-members.create' => [
                 'title' => 'Add a team member',
@@ -684,7 +684,7 @@ return [
             ],
             'resources.cms.team-members.edit' => [
                 'title' => 'Edit team member',
-                'body' => '<p><em>Public</em> controls whether the member appears on the public site; <em>Sort</em> orders them inside their position group.</p><p>If the row has no account behind it a <strong>Create login</strong> button appears — that is also the way back after a user was deleted. Deleting a member deletes their panel account with them (never your own, never an admin&rsquo;s).</p><p>Discord: the <em>ID</em> is the numeric snowflake, 17–20 digits, and is the only one of the three fields that produces a real @-mention. Nick and username fall back to plain text.</p>',
+                'body' => '<p><em>Public</em> controls whether the member appears on the public site; <em>Sort</em> orders them inside their position group.</p><p>If the row has no account behind it a <strong>Create login</strong> button appears — that is also the way back after a user was deleted. Deleting a member deletes their panel account with them (never your own, never an admin&rsquo;s).</p><p><strong>Mark as alumni</strong> in the header takes them off the public page without deleting anything — their account, role and history stay exactly as they are. <em>Left at</em> is the same switch as a date, if you need a past one.</p><p>Discord: the <em>ID</em> is the numeric snowflake, 17–20 digits, and is the only one of the three fields that produces a real @-mention. Nick and username fall back to plain text.</p>',
             ],
             'resources.cms.team-member-groups.index' => [
                 'title' => 'Positions',
@@ -692,11 +692,11 @@ return [
             ],
             'resources.cms.team-member-groups.create' => [
                 'title' => 'Add a position',
-                'body' => '<p>Bilingual name plus a URL-safe <em>slug</em> — the slug fills itself in from the EN name and is what the public site addresses the group by.</p><p><em>Kind</em> separates leadership from departments and squads; <em>Parent</em> nests a sub-team under a bigger one.</p>',
+                'body' => '<p>Bilingual name plus a URL-safe <em>slug</em> — the slug fills itself in from the EN name and is what the public site addresses the group by.</p><p><em>Parent</em> nests a sub-team under a bigger one. <em>Sort</em> orders the groups on the public page, lowest first; leave it at 0 if the order does not matter.</p>',
             ],
             'resources.cms.team-member-groups.edit' => [
                 'title' => 'Edit position',
-                'body' => '<p>Renaming a position updates it everywhere it is shown. Turning <em>Public</em> off hides the group from the public site without unassigning anyone.</p>',
+                'body' => '<p>Renaming a position updates it everywhere it is shown — members point at the group, nothing is copied onto them.</p><p>Turning <em>Public</em> off hides the group from the public team page without unassigning anyone; the members themselves still appear, listed under another of their public groups, or under <em>Other</em> if that was their only one.</p>',
             ],
             'resources.cms.mentors.index' => [
                 'title' => 'Mentors',
@@ -848,7 +848,7 @@ return [
             ],
             'auth.profile' => [
                 'title' => 'Your profile',
-                'body' => '<p>Avatar, display name and password. Your email is your login, so only an admin can change it.</p><p>Setting a new password also clears the forced-change gate: an account provisioned with a temporary password lands here and can&rsquo;t reach the rest of the panel until it rotates that password. Leave the password boxes empty to change only your name or avatar.</p>',
+                'body' => '<p>Avatar, display name and password. Your email is your login, so only an admin can change it.</p><p>Setting a new password clears the forced-change gate and takes you to the dashboard: an account provisioned with a temporary password is held on this page until it rotates that password, so finishing here is what lets you into the rest of the panel.</p><p>Leave the three password boxes empty to change only your name or avatar — you stay on this page then, because there is nowhere you were being sent.</p>',
             ],
         ],
         'fields' => [

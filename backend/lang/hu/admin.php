@@ -648,7 +648,7 @@ return [
             ],
             'resources.member-applications.index' => [
                 'title' => 'Jelentkezések',
-                'body' => '<p>A nyilvános oldalról beérkező új tag jelentkezések postaládája. A függőben lévők számát a sidebar jelvény mutatja.</p><p>Az <em>Elfogadás</em> jelentkezésből valódi csapattagot + admin fiókot készít; az <em>Elutasítás</em> archiválja. Mindkét művelet külön bejegyzést ír a tevékenységnaplóba.</p>',
+                'body' => '<p>A nyilvános oldalról beérkező új tag jelentkezések postaládája. A függőben lévők számát a sidebar jelvény mutatja.</p><p>Az <em>Elfogadás</em> csapattagot és paneles belépést csinál a jelentkezésből, a következő képernyőn választott szerepkörrel. Az <em>Elutasítás</em> archiválja — a sor és a válaszai megmaradnak, semmi nem törlődik. Mindkettő saját bejegyzést ír a tevékenységnaplóba, így a döntés mellett ott a név és az időpont.</p>',
             ],
             'resources.member-applications.edit' => [
                 'title' => 'Jelentkezés részletei',
@@ -656,7 +656,7 @@ return [
             ],
             'resources.member-applications.accept' => [
                 'title' => 'Jelentkezés elfogadása',
-                'body' => '<p>Egy lépésben létrehoz egy csapattagot és egy paneles belépést, a kiválasztott <em>szerepkörrel</em> — alapértelmezés a Member. A jelentkező ideiglenes jelszót kap e-mailben (vagy <code>storage/logs/laravel.log</code>-ba kerül, ha MAIL_MAILER=log), és az első belépéskor új jelszót kell beállítania.</p>',
+                'body' => '<p>A jelentkezésből egyszerre kettő lesz: egy sor a névsorban és egy paneles belépés. A szervezeti címet a névből képezzük, és ez lesz a belépési cím; amit a jelentkező megadott, az külön, privát e-mailként marad meg — az ideiglenes jelszó is oda megy.</p><p>A <em>szerepkör</em> üresen indul és kötelező — nincs alapértelmezés, amit olvasatlanul el lehetne fogadni. Szinte mindenkinél a Member a helyes. Amíg nem választasz, semmi nem jön létre.</p><p>Az ideiglenes jelszót e-mailben küldjük (vagy a <code>storage/logs/laravel.log</code>-ba írjuk, amíg MAIL_MAILER=log), és a fiók addig nem jut tovább a panelen, amíg az első belépéskor le nem cseréli.</p>',
             ],
             'resources.application-form.index' => [
                 'title' => 'Jelentkezési űrlap',
@@ -676,7 +676,7 @@ return [
             ],
             'resources.cms.team-members.index' => [
                 'title' => 'Csapattagok',
-                'body' => '<p>A nyilvános szervezeti ábra. Minden tagnál van név, opcionálisan kétnyelvű végzettség, fénykép, egy vagy több pozíció és egy kijelölt <em>fő pozíció</em> (ez az ábrabeli helye).</p>',
+                'body' => '<p>A publikus csapatoldal mögötti névsor. Minden tagnál van név, opcionálisan kétnyelvű végzettség, fénykép, egy vagy több pozíció, és egy kijelölt <em>fő pozíció</em> — ez dönti el, melyik csoport alatt szerepel.</p><p>A <em>Státusz</em> badge Aktív vagy Alumni. Az <strong>Alumnivá tétel</strong> ott van minden soron, a szerkesztőoldalon, és tömeges műveletként egy egész végzős évfolyamra: leveszi a publikus oldalról és kiveszi az aktív létszámból, és visszavonható. A fiókjához és a szerepköréhez nem nyúl — aki kilépett, még kell hogy be tudjon lépni átadni a munkát.</p>',
             ],
             'resources.cms.team-members.create' => [
                 'title' => 'Új csapattag',
@@ -684,7 +684,7 @@ return [
             ],
             'resources.cms.team-members.edit' => [
                 'title' => 'Csapattag szerkesztése',
-                'body' => '<p>A <em>Publikus</em> kapcsoló dönti el, hogy a tag megjelenik-e a publikus oldalon; a <em>Sorrend</em> a pozíciócsoporton belül rendezi.</p><p>Ha a sorhoz nem tartozik fiók, megjelenik a <strong>Belépés létrehozása</strong> gomb – ez az út vissza egy törölt felhasználó után is. Egy tag törlése a panelfiókját is törli (a sajátodat és az adminokét soha).</p><p>Discord: az <em>ID</em> a 17–20 jegyű numerikus snowflake, és a három mező közül egyedül ez ad valódi @-említést. A becenév és a felhasználónév sima szövegre esik vissza.</p>',
+                'body' => '<p>A <em>Publikus</em> kapcsoló dönti el, hogy a tag megjelenik-e a publikus oldalon; a <em>Sorrend</em> a pozíciócsoporton belül rendezi.</p><p>Ha a sorhoz nem tartozik fiók, megjelenik a <strong>Belépés létrehozása</strong> gomb – ez az út vissza egy törölt felhasználó után is. Egy tag törlése a panelfiókját is törli (a sajátodat és az adminokét soha).</p><p>A fejlécben az <strong>Alumnivá tétel</strong> leveszi a publikus oldalról anélkül, hogy bármit törölne — a fiókja, a szerepköre és az előzményei érintetlenek maradnak. A <em>Kilépés</em> dátummező ugyanez a kapcsoló, ha korábbi dátum kell.</p><p>Discord: az <em>ID</em> a 17–20 jegyű numerikus snowflake, és a három mező közül egyedül ez ad valódi @-említést. A becenév és a felhasználónév sima szövegre esik vissza.</p>',
             ],
             'resources.cms.team-member-groups.index' => [
                 'title' => 'Pozíciók',
@@ -692,11 +692,11 @@ return [
             ],
             'resources.cms.team-member-groups.create' => [
                 'title' => 'Új pozíció',
-                'body' => '<p>Kétnyelvű név és egy URL-barát <em>slug</em> – a slug magától kitöltődik az angol névből, és a publikus oldal ezen hivatkozik a csoportra.</p><p>A <em>Típus</em> választja szét a vezetőséget az osztályoktól és csapatoktól; a <em>Szülő</em> egy nagyobb egység alá rendezi az alcsapatot.</p>',
+                'body' => '<p>Kétnyelvű név és egy URL-barát <em>slug</em> – a slug magától kitöltődik az angol névből, és a publikus oldal ezen hivatkozik a csoportra.</p><p>A <em>Szülő</em> egy nagyobb egység alá rendezi az alcsapatot. A <em>Sorrend</em> a csoportok sorrendjét adja a publikus oldalon, a kisebb szám előrébb; hagyd 0-n, ha nem számít.</p>',
             ],
             'resources.cms.team-member-groups.edit' => [
                 'title' => 'Pozíció szerkesztése',
-                'body' => '<p>Az átnevezés mindenhol átüt, ahol a pozíció megjelenik. A <em>Publikus</em> kikapcsolása elrejti a csoportot a publikus oldalról anélkül, hogy bárkit levenne róla.</p>',
+                'body' => '<p>Az átnevezés mindenhol átüt, ahol a pozíció megjelenik — a tagok a csoportra hivatkoznak, nem másolatot tárolnak.</p><p>A <em>Publikus</em> kikapcsolása elrejti a csoportot a publikus csapatoldalról anélkül, hogy bárkit levenne róla; maguk a tagok továbbra is megjelennek — egy másik publikus csoportjuk alatt, vagy az <em>Egyéb</em> blokkban, ha ez volt az egyetlen.</p>',
             ],
             'resources.cms.mentors.index' => [
                 'title' => 'Mentorok',
@@ -848,7 +848,7 @@ return [
             ],
             'auth.profile' => [
                 'title' => 'Saját profil',
-                'body' => '<p>Profilkép, megjelenített név és jelszó. Az e-mail a belépésed, ezért csak admin tudja megváltoztatni.</p><p>Új jelszó beállítása egyben feloldja a kötelező jelszócsere kaput is: egy ideiglenes jelszóval létrehozott fiók ide érkezik, és amíg nem cserél jelszót, nem jut tovább a panelen. Ha csak a nevedet vagy a képedet módosítod, hagyd üresen a jelszómezőket.</p>',
+                'body' => '<p>Profilkép, megjelenített név és jelszó. Az e-mail a belépésed, ezért csak admin tudja megváltoztatni.</p><p>Az új jelszó beállítása feloldja a kötelező jelszócsere kaput, és átvisz a vezérlőpultra: az ideiglenes jelszóval létrehozott fiókot ez az oldal tartja fogva, amíg le nem cseréli — vagyis az itteni mentés az, ami beenged a panel többi részébe.</p><p>Ha csak a nevedet vagy a profilképedet módosítanád, hagyd üresen mind a három jelszómezőt — olyankor maradsz ezen az oldalon, mert nincs hová továbbmenni.</p>',
             ],
         ],
         'fields' => [
