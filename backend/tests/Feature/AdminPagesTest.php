@@ -66,6 +66,9 @@ class AdminPagesTest extends TestCase
             'kanban'             => ['/admin/tasks/kanban'],
             'profile'            => ['/admin/profile'],
             'drawing-studio'     => ['/admin/drawings/draw'],
+            'item-management'    => ['/admin/item-management'],
+            'item-log'           => ['/admin/item-log'],
+            'form-sections'      => ['/admin/application-form-sections'],
         ];
     }
 
@@ -102,9 +105,13 @@ class AdminPagesTest extends TestCase
     {
         return [
             'activity-logs'        => ['/admin/activity-logs'],
+            'application-form'     => ['/admin/application-form'],
             'bug-reports'          => ['/admin/bug-reports'],
             'collections'          => ['/admin/collections'],
+            'contacts'             => ['/admin/contacts'],
+            'contact-groups'       => ['/admin/contact-groups'],
             'drawings'             => ['/admin/drawings'],
+            'items'                => ['/admin/items'],
             'member-applications'  => ['/admin/member-applications'],
             'onshape-models'       => ['/admin/onshape-models'],
             'resources'            => ['/admin/resources'],
