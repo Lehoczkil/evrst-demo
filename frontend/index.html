@@ -7,6 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--
+      NO preconnect / dns-prefetch here, deliberately.
+
+      Nothing on this page is cross-origin in production: the fonts below
+      are rewritten to self-hosted copies at build time, the API is
+      same-origin (`VITE_API_URL=/api`, Caddy proxies it), and images go
+      through /api/img. A preconnect to fonts.googleapis.com would open a
+      DNS + TLS handshake that is never used — and reintroduce exactly the
+      third-party request from an EU-facing site that self-hosting removed.
+      Add one only if a genuinely cross-origin resource lands on the
+      critical path.
+
       Panchang carries the hero headline, so it is on the LCP path and gets
       a preload. crossorigin is required even for a same-origin font
       preload, or the browser fetches it twice.
@@ -19,17 +30,78 @@
       render-blocking serial request chain and a third-party font request
       from an EU-facing site. vite-plugin-webfont-dl rewrites these at
       build time to self-hosted copies, so nothing reaches Google in
-      production.
+      production — and their @font-face block is inlined into this file,
+      which is why the woff2 files need no preload of their own.
     -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
 
+    <!--
+      Head copy below is the boot default and the crawler's fallback. The
+      SPA rewrites these same tags per route (components/Meta/Meta.vue) —
+      it never appends a second set, because the first <title> and the
+      first og:title in a document are the ones that count.
+    -->
     <title>Escape Velocity Rocketry Student Team</title>
-    <meta name="description" content="Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk." />
-    <meta property="og:title" content="Escape Velocity Rocketry Student Team" />
-    <meta property="og:description" content="Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata." />
-    <meta property="og:image" content="/share.jpg" />
+    <meta name="description" content="Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk — a CAD-tól a próbapadig és a kilövésig." />
+    <link rel="canonical" href="https://evrst.hu/" />
+    <link rel="alternate" hreflang="hu" href="https://evrst.hu/" />
+    <link rel="alternate" hreflang="en" href="https://evrst.hu/" />
+    <link rel="alternate" hreflang="x-default" href="https://evrst.hu/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+
+    <meta property="og:site_name" content="Escape Velocity Rocketry Student Team" />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://evrst.hu/" />
+    <meta property="og:title" content="Escape Velocity Rocketry Student Team" />
+    <meta property="og:description" content="Az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk — a CAD-tól a próbapadig és a kilövésig." />
+    <!-- Absolute, and a real file: a relative og:image is not resolved by
+         most scrapers, and /share.jpg used to 200 with the SPA's index.html
+         because of the try_files fallback — so every share had no preview. -->
+    <meta property="og:image" content="https://evrst.hu/share.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Escape Velocity Rocketry Student Team" />
+    <meta property="og:locale" content="hu_HU" />
+    <meta property="og:locale:alternate" content="en_GB" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Escape Velocity Rocketry Student Team" />
+    <meta name="twitter:description" content="Az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk." />
+    <meta name="twitter:image" content="https://evrst.hu/share.jpg" />
+
     <meta name="theme-color" content="#050506" />
+
+    <!--
+      Structured data. Static, so it is read without executing the bundle —
+      the reason it lives here rather than being rendered by the app.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SportsOrganization",
+        "name": "Escape Velocity Rocketry Student Team",
+        "alternateName": "EVRST",
+        "url": "https://evrst.hu/",
+        "logo": "https://evrst.hu/evrst_logo.svg",
+        "image": "https://evrst.hu/share.jpg",
+        "email": "evrstrocket@gmail.com",
+        "foundingDate": "2024",
+        "description": "Az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk.",
+        "parentOrganization": {
+          "@type": "CollegeOrUniversity",
+          "name": "Óbudai Egyetem",
+          "url": "https://uni-obuda.hu"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Bécsi út 96/b",
+          "addressLocality": "Budapest",
+          "postalCode": "1034",
+          "addressCountry": "HU"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="vue"></div>
