@@ -58,11 +58,15 @@ const plugins: Plugin[] = [
   stripHtmlComments(),
 
   UnoCSS(),
-  visualizer({
-    emitFile: true,
-    filename: '_stats.html',
-    brotliSize: true,
-  }),
+  /*
+    Bundle analysis. `emitFile: true` writes it INTO the build output, which
+    Caddy then serves — /_stats.html was live on production, 700 KB naming
+    every module in the app. Opt-in now: run `VITE_STATS=true bun run build`
+    and open frontend/build/_stats.html.
+  */
+  ...(process.env.VITE_STATS === 'true'
+    ? [visualizer({ emitFile: true, filename: '_stats.html', brotliSize: true }) as Plugin]
+    : []),
 ];
 
 if (process.env.NODE_ENV === 'production') {

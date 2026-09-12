@@ -58,7 +58,19 @@ export default defineConfig({
       chrome's backdrop-filter needs far newer than that anyway.
     */
     target: 'es2020',
-    sourcemap: true,
+    /*
+      OFF by default, because a source map ships the entire original source
+      in `sourcesContent` — every comment, every note — and is fetchable by
+      anyone. It quietly undid the whole point of stripping comments from
+      the build: /assets/index-*.js.map was live on production, 476 KB of
+      readable source, while index.html had been carefully cleaned.
+
+      Nothing consumed them. There is no Sentry source-map upload step, so
+      the maps were pure exposure. Set VITE_SOURCEMAP=true for a local
+      `bun run build` when you actually need to read one; the dev server
+      has maps regardless.
+    */
+    sourcemap: process.env.VITE_SOURCEMAP === 'true',
     manifest: true,
     chunkSizeWarningLimit: 800,
     reportCompressedSize: false,

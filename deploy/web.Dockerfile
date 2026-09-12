@@ -24,6 +24,12 @@ ARG VITE_API_URL=/api
 RUN printf 'VITE_API_URL=%s\n' "$VITE_API_URL" > .env.production.local
 RUN bun run build      # vue-tsc + vite build → /app/build (outDir from vite.config.ts)
 
+# Belt and braces. vite.config.ts already builds without source maps, but a
+# map that reaches this stage is the whole commented source served as a
+# public file — so nothing that looks like one leaves the build stage,
+# whatever the config happens to say on the day.
+RUN find /app/build -name '*.map' -delete
+
 # ── 2. Serve with Caddy ───────────────────────────────────────────────────
 FROM caddy:2
 COPY --from=spa /app/build /srv/spa
