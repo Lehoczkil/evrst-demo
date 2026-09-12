@@ -40,27 +40,33 @@ class AcceptApplicationOrgLoginTest extends TestCase
         ], $overrides));
     }
 
-    public function test_the_accept_page_defaults_the_new_account_to_member(): void
+    public function test_the_role_starts_empty(): void
     {
         $application = $this->application();
 
         Livewire::actingAs($this->makeAdmin())
             ->test(AcceptMemberApplication::class, ['record' => $application->id])
-            ->assertSet('data.role_id', Role::where('key', Perm::ROLE_MEMBER)->value('id'));
+            ->assertSet('data.role_id', null);
     }
 
-    public function test_accepting_without_touching_the_role_creates_a_member(): void
+    /**
+     * The role has to be chosen, not defaulted. A prefilled Member is a
+     * default nobody reads, and the mistake worth preventing is granting
+     * more access than intended without noticing.
+     */
+    public function test_an_application_cannot_be_accepted_without_a_role(): void
     {
         $application = $this->application();
 
         Livewire::actingAs($this->makeAdmin())
             ->test(AcceptMemberApplication::class, ['record' => $application->id])
             ->call('save')
-            ->assertHasNoFormErrors();
+            ->assertHasFormErrors(['role_id']);
 
-        $user = User::where('email', 'laszlo.lehoczki@evrst.hu')->firstOrFail();
-
-        $this->assertSame(Perm::ROLE_MEMBER, $user->role->key);
+        $this->assertNull(User::where('email', 'laszlo.lehoczki@evrst.hu')->first());
+        $this->assertNull(TeamMember::where('email', 'laszlo.lehoczki@evrst.hu')->first());
+        $this->assertSame(MemberApplication::STATUS_PENDING, $application->fresh()->status);
+        Notification::assertNothingSent();
     }
 
     /**
@@ -127,6 +133,7 @@ class AcceptApplicationOrgLoginTest extends TestCase
 
         Livewire::actingAs($this->makeAdmin())
             ->test(AcceptMemberApplication::class, ['record' => $application->id])
+            ->set('data.role_id', Role::where('key', Perm::ROLE_MEMBER)->value('id'))
             ->call('save');
 
         $user = User::where('email', 'laszlo.lehoczki@evrst.hu')->firstOrFail();
@@ -154,6 +161,7 @@ class AcceptApplicationOrgLoginTest extends TestCase
         Livewire::actingAs($this->makeAdmin())
             ->test(AcceptMemberApplication::class, ['record' => $application->id])
             ->set('data.email', 'laci@evrst.hu')
+            ->set('data.role_id', Role::where('key', Perm::ROLE_MEMBER)->value('id'))
             ->call('save');
 
         $this->assertTrue(User::where('email', 'laci@evrst.hu')->exists());

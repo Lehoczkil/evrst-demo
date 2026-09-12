@@ -82,7 +82,8 @@ class AcceptMemberApplication extends Page implements HasForms
             // inbox — it becomes email_private, not the login.
             'email_private' => $this->record->email,
             'email' => OrgEmail::uniqueForName($this->record->name ?? ''),
-            'role_id' => Role::where('key', Perm::ROLE_MEMBER)->value('id'),
+            // Deliberately blank — see the Select below.
+            'role_id' => null,
             'degree_en' => null,
             'degree_hu' => null,
             'group_ids' => [],
@@ -136,10 +137,16 @@ class AcceptMemberApplication extends Page implements HasForms
                   saying so — and the submit button read "admin account",
                   which made it look like the opposite was happening.
 
+                  Starts EMPTY and is required, on purpose: a prefilled
+                  Member is a default nobody reads, and the one mistake
+                  worth preventing here is granting more access than
+                  intended without noticing. Leaving it blank forces a
+                  deliberate choice before an account can exist at all.
+
                   All three roles are offered because only an Admin reaches
-                  this page at all: `applications.*` is filtered out of
+                  this page: `applications.*` is filtered out of
                   managerPermissions(), and an Admin can already mint any
-                  account from Users. Member stays the default.
+                  account from Users.
                 */
                 Select::make('role_id')
                     ->label(__('admin.common.role'))
@@ -149,7 +156,7 @@ class AcceptMemberApplication extends Page implements HasForms
                         300,
                         fn () => Role::orderBy('name')->pluck('name', 'id')->all(),
                     ))
-                    ->default(fn () => Role::where('key', Perm::ROLE_MEMBER)->value('id'))
+                    ->placeholder(__('admin.applications.role_placeholder'))
                     ->native(false)
                     ->helperText(__('admin.applications.role_help'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
@@ -190,10 +197,10 @@ class AcceptMemberApplication extends Page implements HasForms
 
         $temp = IssueTempPassword::generate();
 
-        // Falls back to Member rather than to null: a user with no role has
-        // no permissions at all and would sign in to an empty panel.
-        $memberRole = Role::find($data['role_id'] ?? null)
-            ?? Role::where('key', Perm::ROLE_MEMBER)->first();
+        // No fallback: the field is required, so getState() has already
+        // refused an empty one. Falling back to Member here would quietly
+        // undo the point of making the admin choose.
+        $memberRole = Role::findOrFail($data['role_id']);
 
         $degree = [];
         if (! empty($data['degree_en'])) $degree['en'] = $data['degree_en'];
