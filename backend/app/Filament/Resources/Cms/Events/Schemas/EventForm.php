@@ -45,8 +45,13 @@ class EventForm
                             ->displayFormat('d M Y H:i')
                             ->required()
                             ->live(onBlur: true)
-                            ->minDate(now())
-                            ->after(now()->subMinute())
+                            // "Past and upcoming team events" — a past event is
+                            // legitimate content, so the future-only rule holds
+                            // on creation and is lifted on edit. Without this an
+                            // event could never be corrected once it had happened:
+                            // the form refused to save its own stored date.
+                            ->minDate(fn (string $operation) => $operation === 'create' ? now() : null)
+                            ->after(fn (string $operation) => $operation === 'create' ? now()->subMinute() : null)
                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.event_date_range'))
                             ->columnSpan(['default' => 12, 'md' => 4]),
                         DateTimePicker::make('end_at')
@@ -54,7 +59,7 @@ class EventForm
                             ->seconds(false)
                             ->displayFormat('d M Y H:i')
                             ->after('start_at')
-                            ->after(now())
+                            ->after(fn (string $operation) => $operation === 'create' ? now() : null)
                             ->minDate(fn (Get $get) => $get('start_at') ?: now())
                             ->columnSpan(['default' => 12, 'md' => 4]),
                         TextInput::make('position')

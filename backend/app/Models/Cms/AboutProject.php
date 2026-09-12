@@ -81,7 +81,13 @@ class AboutProject extends CollectionResource
                 return $raw ? \Carbon\Carbon::parse($raw) : null;
             },
             set: function ($value) {
-                $string = $value ? (is_string($value) ? $value : $value->format('Y-m-d H:i:s')) : null;
+                // Normalise before storing: the pickers dehydrate to
+                // 'Y-m-d H:i' (seconds are off), and SQLite keeps a datetime
+                // column as the literal string it was handed. A value without
+                // seconds sorts as a *prefix* of one with them, so a row
+                // landing exactly on a range boundary — a project starting at
+                // 00:00 on the 1st — fell outside the calendar's whereBetween.
+                $string = filled($value) ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s') : null;
                 return array_merge(
                     $this->writePayload('start_at', $string),
                     ['start_at' => $string],
@@ -98,7 +104,8 @@ class AboutProject extends CollectionResource
                 return $raw ? \Carbon\Carbon::parse($raw) : null;
             },
             set: function ($value) {
-                $string = $value ? (is_string($value) ? $value : $value->format('Y-m-d H:i:s')) : null;
+                // Canonical 'Y-m-d H:i:s' — see the note on start_at.
+                $string = filled($value) ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s') : null;
                 return array_merge(
                     $this->writePayload('end_at', $string),
                     ['end_at' => $string],
