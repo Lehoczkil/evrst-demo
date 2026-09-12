@@ -39,16 +39,6 @@ class TeamMemberGroupForm
                     ->helperText(__('admin.team.group_slug_help'))
                     ->unique(table: 'team_member_groups', column: 'slug', ignoreRecord: true)
                     ->columnSpan(['default' => 12, 'md' => 6]),
-                Select::make('kind')
-                    ->label(__('admin.team.group_kind'))
-                    ->options([
-                        'leadership' => 'Leadership',
-                        'department' => 'Department',
-                        'squad' => 'Squad',
-                    ])
-                    ->default('department')
-                    ->required()
-                    ->columnSpan(['default' => 12, 'md' => 3]),
                 Select::make('parent_id')
                     ->label(__('admin.team.group_parent'))
                     ->options(fn ($record) => TeamMemberGroup::query()

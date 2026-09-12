@@ -77,7 +77,7 @@ const blocks = computed(() => {
   const loose = byslug.get('ungrouped');
   if (loose?.length) {
     ordered.push({
-      group: { id: -1, slug: 'ungrouped', name: t('team.other'), kind: null, position: 999 },
+      group: { id: -1, slug: 'ungrouped', name: t('team.other'), position: 999 },
       people: loose,
     });
   }

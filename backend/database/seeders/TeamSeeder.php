@@ -136,7 +136,6 @@ class TeamSeeder extends Seeder
             $groups[$slug] = TeamMemberGroup::create([
                 'slug' => $slug,
                 'name' => $names,
-                'kind' => 'department',
                 'position' => $sort++,
             ]);
         }

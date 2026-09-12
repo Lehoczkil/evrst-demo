@@ -19,7 +19,6 @@ class TeamMemberGroup extends Model
         'slug',
         'name',
         'description',
-        'kind',
         'position',
         'is_public',
     ];

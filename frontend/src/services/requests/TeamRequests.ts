@@ -21,7 +21,6 @@ export interface TeamGroup {
   id: number;
   slug: string;
   name: string;
-  kind: string | null;
   position: number;
 }
 

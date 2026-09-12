@@ -56,7 +56,6 @@ class TeamController extends Controller
                 'id' => $g->id,
                 'slug' => $g->slug,
                 'name' => TeamMemberGroup::pickLocale($g->name, $lang),
-                'kind' => $g->kind,
                 'position' => $g->position,
             ])
             ->all();

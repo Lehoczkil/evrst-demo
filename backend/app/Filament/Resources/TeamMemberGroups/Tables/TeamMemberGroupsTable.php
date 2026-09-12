@@ -35,10 +35,6 @@ class TeamMemberGroupsTable
                     ->color('gray')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('kind')
-                    ->badge()
-                    ->color('info')
-                    ->toggleable(),
                 TextColumn::make('parent.name')
                     ->label(__('admin.team.group_parent_col'))
                     ->state(fn ($record) => $record->parent ? (TeamMemberGroup::pickLocale($record->parent->name) ?? $record->parent->slug) : '—')
