@@ -584,6 +584,14 @@ return [
                 'title' => 'Sponsors',
                 'body' => '<p>The logo strip on the public site. The form accepts HEIC photos straight from a phone and bumps the upload limit to 8 MB.</p><p>Manager role can\'t see this — sponsor relationships are admin-only.</p>',
             ],
+            'resources.cms.sponsors.create' => [
+                'title' => 'Add a sponsor',
+                'body' => '<p>Only the name is required. <em>Website</em> turns the logo into a link on the public strip; the EN / HU descriptions are optional.</p><p>The logo accepts PNG, JPG, SVG, WebP, GIF and HEIC straight off a phone, up to 8 MB. <em>Sort</em> orders the strip — lower number first.</p>',
+            ],
+            'resources.cms.sponsors.edit' => [
+                'title' => 'Edit sponsor',
+                'body' => '<p>Same fields as the create form. Uploading a new logo replaces the old one on the public site as soon as you save.</p>',
+            ],
             'resources.drawings.index' => [
                 'title' => 'Drawings',
                 'body' => '<p>Every drawing made in the studio. Each row has <em>View</em> (modal preview), <em>Continue editing</em> (clones into a new canvas with that PNG as the starting layer), and <em>Download</em>.</p><p>Search by title or by author. Anyone signed in to the panel can create drawings; only the author or an admin can delete one.</p>',
@@ -636,25 +644,105 @@ return [
                 'title' => 'Accept application',
                 'body' => '<p>Creates a Team member + admin account in one go. The applicant gets a temporary password emailed (or logged to <code>storage/logs/laravel.log</code> if MAIL_MAILER=log) and is forced to change it on first sign-in.</p>',
             ],
+            'resources.application-form.index' => [
+                'title' => 'Application form',
+                'body' => '<p>The questions on the public join-us page. They are data, not code: add, reorder, relabel or deactivate a question here and the public form follows on its next load.</p><p><em>Name</em> and <em>Email</em> are system fields — relabel and reorder them freely, but they can&rsquo;t be deleted or re-keyed, because accepting an application provisions a login out of them.</p>',
+            ],
+            'resources.application-form.create' => [
+                'title' => 'New question',
+                'body' => '<p>Pick the section it belongs to and the field type; the select-style types get an <em>Options</em> repeater below, where the stored value and the two labels are separate.</p><p><em>Key</em> is what every collected answer is filed under and is set once, at creation — it defaults to a camelCase version of the EN label. Labels, help text and placeholders are all bilingual.</p>',
+            ],
+            'resources.application-form.edit' => [
+                'title' => 'Edit question',
+                'body' => '<p>Everything is editable except the <em>Key</em>, which is locked: changing it would orphan every answer already collected under the old one.</p><p>Turning a question off with <em>Active</em> removes it from the public form without touching the answers already stored.</p>',
+            ],
+            'resources.application-form-sections.index' => [
+                'title' => 'Form sections',
+                'body' => '<p>The numbered cards the join-us form is split into. Drag rows to reorder them; the count column shows how many questions sit in each.</p><p>A section can only be deleted once it has no questions left — removing one with questions in it would take their answers along.</p>',
+            ],
             'resources.cms.team-members.index' => [
                 'title' => 'Team members',
                 'body' => '<p>The public org chart. Each member has a name, optional bilingual degree, photo, one or more positions, and a designated <em>main position</em> (used as their slot in the chart).</p>',
+            ],
+            'resources.cms.team-members.create' => [
+                'title' => 'Add a team member',
+                'body' => '<p>Saving this row also provisions the member&rsquo;s panel login: a Member-role account on the organisation address, plus a temporary password sent to their <em>private email</em>. Leave <em>Organisation email</em> blank and it is derived from the name — or press the ✨ button to fill it in.</p><p>The organisation address is a login only, with no mailbox behind it, so put a real reachable address in <em>Private email</em> or the temporary password has nowhere to go. Fill <em>Left at</em> only for someone who has already left — those rows get no login.</p>',
+            ],
+            'resources.cms.team-members.edit' => [
+                'title' => 'Edit team member',
+                'body' => '<p><em>Public</em> controls whether the member appears on the public site; <em>Sort</em> orders them inside their position group.</p><p>If the row has no account behind it a <strong>Create login</strong> button appears — that is also the way back after a user was deleted. Deleting a member deletes their panel account with them (never your own, never an admin&rsquo;s).</p><p>Discord: the <em>ID</em> is the numeric snowflake, 17–20 digits, and is the only one of the three fields that produces a real @-mention. Nick and username fall back to plain text.</p>',
             ],
             'resources.cms.team-member-groups.index' => [
                 'title' => 'Positions',
                 'body' => '<p>The position labels (Propulsion, Avionics, …) that team members can be assigned to. Editing a label here updates it everywhere — they\'re snapshot into each team member\'s payload on save.</p>',
             ],
+            'resources.cms.team-member-groups.create' => [
+                'title' => 'Add a position',
+                'body' => '<p>Bilingual name plus a URL-safe <em>slug</em> — the slug fills itself in from the EN name and is what the public site addresses the group by.</p><p><em>Kind</em> separates leadership from departments and squads; <em>Parent</em> nests a sub-team under a bigger one.</p>',
+            ],
+            'resources.cms.team-member-groups.edit' => [
+                'title' => 'Edit position',
+                'body' => '<p>Renaming a position updates it everywhere it is shown. Turning <em>Public</em> off hides the group from the public site without unassigning anyone.</p>',
+            ],
             'resources.cms.mentors.index' => [
                 'title' => 'Mentors',
                 'body' => '<p>External mentors / advisors shown on the public team page. Same shape as team members minus the position fields.</p>',
+            ],
+            'resources.cms.mentors.create' => [
+                'title' => 'Add a mentor',
+                'body' => '<p>Name is the only required field; email and photo are optional. <em>Sort</em> orders the mentor list on the public team page.</p>',
+            ],
+            'resources.cms.mentors.edit' => [
+                'title' => 'Edit mentor',
+                'body' => '<p>Same fields as the create form. Mentors are public-site content only — no panel account is created for them.</p>',
+            ],
+            'resources.contacts.index' => [
+                'title' => 'Outer contacts',
+                'body' => '<p>An internal address book for people outside the team — suppliers, university staff, competition organisers. None of it reaches the public site.</p><p><em>Group</em> buckets a contact and doubles as the table filter; email and phone are one click to copy. Deleting needs the contacts-delete permission, but anyone with access can add and edit.</p>',
+            ],
+            'resources.contacts.create' => [
+                'title' => 'Add a contact',
+                'body' => '<p>Only the name is required. The <em>Group</em> picker can create a new group inline, so you don&rsquo;t have to bounce to Contact groups first.</p><p><em>Notes</em> is the place for everything that isn&rsquo;t a name, an address or a number — who they are, what they supplied, when you last spoke.</p>',
+            ],
+            'resources.contacts.edit' => [
+                'title' => 'Edit contact',
+                'body' => '<p>Same fields as the create form. Moving a contact between groups here also moves it in the group filter on the list.</p>',
+            ],
+            'resources.contact-groups.index' => [
+                'title' => 'Contact groups',
+                'body' => '<p>The buckets outer contacts are filed into — suppliers, university, organisers, whatever fits. Names are unique.</p><p>Order here is the order the group filter offers on the contacts table.</p>',
+            ],
+            'resources.contact-groups.create' => [
+                'title' => 'Add a contact group',
+                'body' => '<p>A unique name, an optional description of what belongs in it, and a sort position.</p>',
+            ],
+            'resources.contact-groups.edit' => [
+                'title' => 'Edit contact group',
+                'body' => '<p>Renaming a group updates it on every contact filed under it — the contacts point at the group, nothing is copied.</p>',
             ],
             'resources.cms.about-projects.index' => [
                 'title' => 'Projects',
                 'body' => '<p>Past + ongoing rocket projects shown on the About page. Set <em>Starts</em> + <em>Ends</em> to make the project appear on the calendar timeline.</p>',
             ],
+            'resources.cms.about-projects.create' => [
+                'title' => 'Add a project',
+                'body' => '<p>Title is required. <em>Starts</em> / <em>Ends</em> also place the project on the admin calendar as a read-only band — leave them blank for a project with no fixed dates.</p><p>The optional <em>Discord webhook</em> routes calendar events tied to this project to their own channel instead of the global one.</p>',
+            ],
+            'resources.cms.about-projects.edit' => [
+                'title' => 'Edit project',
+                'body' => '<p>Same fields as the create form. Both description languages are stored per project — fill in at least the one the public site is read in.</p>',
+            ],
             'resources.cms.about-goals.index' => [
                 'title' => 'Goals',
                 'body' => '<p>The bullet-point objectives shown above the project list on the About page. Bilingual title + description, sortable.</p>',
+            ],
+            'resources.cms.about-goals.create' => [
+                'title' => 'Add a goal',
+                'body' => '<p>Bilingual title plus an optional bilingual description. <em>Sort</em> orders the list on the public About page — lower number first.</p>',
+            ],
+            'resources.cms.about-goals.edit' => [
+                'title' => 'Edit goal',
+                'body' => '<p>Same fields as the create form. Leaving one language empty means the public site falls back to the other one.</p>',
             ],
             'pages.about-content' => [
                 'title' => 'About content',
@@ -687,6 +775,66 @@ return [
             'pages.database-inspector' => [
                 'title' => 'Database inspector',
                 'body' => '<p>Admin-only. Pick a table on the left to see its full structure on the right: columns with type / nullability / default, indexes (primary, unique, regular), and foreign keys with cascade behaviour.</p><p>Read-only — no row data, no SQL, no editing. Driver is shown next to the table name so you know whether you\'re looking at the dev SQLite or the deployed Postgres.</p>',
+            ],
+            'resources.items.index' => [
+                'title' => 'Items',
+                'body' => '<p>The equipment <em>catalog</em> — one row per kind of thing, name only. Where each thing physically is lives in <strong>Item management</strong>; the <em>Locations</em> and <em>Total quantity</em> columns are rolled up from there.</p><p>Open to everyone signed in, on purpose. The trade for that is <strong>Inventory log</strong>, which records who changed what.</p>',
+            ],
+            'resources.items.create' => [
+                'title' => 'Add an item',
+                'body' => '<p>Just a name — this is the catalog entry, not a physical thing. Record quantities and locations for it afterwards in <strong>Item management</strong>.</p>',
+            ],
+            'resources.items.edit' => [
+                'title' => 'Edit item',
+                'body' => '<p>Renaming the catalog entry renames it on every stock row that points at it. Deleting it takes those stock rows with it.</p>',
+            ],
+            'pages.item-management' => [
+                'title' => 'Item management',
+                'body' => '<p>The actual where-is-what: one row per item × venue (× owner). <em>Add stock</em> can create a brand-new catalog entry inline, so you rarely need the Items page first.</p><p>Picking a private venue reveals the <em>Owner</em> field — that is how personally-owned gear is tracked. Choosing a public venue clears it again.</p>',
+            ],
+            'pages.item-log' => [
+                'title' => 'Inventory log',
+                'body' => '<p>Read-only. Every create / update / delete on the catalog and the stock table, with who did it and when.</p><p>The inventory is deliberately open to everyone signed in; this page is the trade for that. The full audit feed across every resource is admin-only, under Membership → Activity log.</p>',
+            ],
+            'resources.bug-reports.index' => [
+                'title' => 'Bug reports',
+                'body' => '<p>The in-panel issue tracker. Anyone signed in can file one — the bug icon next to the user menu opens the form from anywhere in the panel.</p><p>Members see only their own reports. Managers and admins see all of them and get the triage fields: status, assignee and internal notes. The sidebar badge counts the open ones.</p>',
+            ],
+            'resources.bug-reports.create' => [
+                'title' => 'Report a bug',
+                'body' => '<p>Title and description are required — aim for enough detail that someone else can reproduce it. A <em>Page URL</em> and a screenshot make triage much faster.</p><p>Your browser and language are captured automatically, so there&rsquo;s no need to describe them. Status and assignee are filled in by whoever triages the report.</p>',
+            ],
+            'resources.bug-reports.edit' => [
+                'title' => 'Bug report',
+                'body' => '<p>The reporter can keep editing the description and the evidence. The <strong>Triage</strong> section — status, assignee, internal notes — is visible only to managers and admins.</p>',
+            ],
+            'resources.collections.index' => [
+                'title' => 'Collections',
+                'body' => '<p>Admin-only raw inspector for the CMS storage, kept out of the sidebar. A collection is a bucket of resource rows; day to day, use the typed screens — Events, Sponsors, Projects, Goals, Mentors.</p>',
+            ],
+            'resources.resources.index' => [
+                'title' => 'Raw resources',
+                'body' => '<p>Admin-only raw inspector, kept out of the sidebar. One row per CMS record with its JSON payload exposed — handy when debugging, risky for routine edits. Use the typed screens instead.</p>',
+            ],
+            'resources.collections.create' => [
+                'title' => 'New collection',
+                'body' => '<p>Admin-only. Creating a collection here only makes an empty bucket — the typed screens are each pinned to one fixed collection UUID in code, so a new bucket has no screen to drive it.</p>',
+            ],
+            'resources.collections.edit' => [
+                'title' => 'Edit collection',
+                'body' => '<p>Admin-only. The name and description are labels for this inspector; the slug and ID are what the code matches on, so changing the ID detaches every row in it from its typed screen.</p>',
+            ],
+            'resources.resources.create' => [
+                'title' => 'New raw resource',
+                'body' => '<p>Admin-only. Writes a CMS row with a hand-authored JSON payload. There is no validation of the payload shape here — use the typed screen for the collection you&rsquo;re targeting unless you are deliberately repairing data.</p>',
+            ],
+            'resources.resources.edit' => [
+                'title' => 'Edit raw resource',
+                'body' => '<p>Admin-only. The JSON payload as stored. Translated fields are <code>{"en": …, "hu": …}</code> maps — break that shape and the public site falls back to whatever it can find, or to nothing.</p>',
+            ],
+            'auth.profile' => [
+                'title' => 'Your profile',
+                'body' => '<p>Avatar, display name and password. Your email is your login, so only an admin can change it.</p><p>Setting a new password also clears the forced-change gate: an account provisioned with a temporary password lands here and can&rsquo;t reach the rest of the panel until it rotates that password. Leave the password boxes empty to change only your name or avatar.</p>',
             ],
         ],
         'fields' => [

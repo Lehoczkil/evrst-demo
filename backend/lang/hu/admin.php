@@ -584,6 +584,14 @@ return [
                 'title' => 'Támogatók',
                 'body' => '<p>A logósor a nyilvános oldalon. A form elfogad telefonról HEIC fotókat is, és 8 MB-ig fogadja a feltöltést.</p><p>A Vezető szerepkör nem látja ezt — a támogatói kapcsolatok csak adminhoz tartoznak.</p>',
             ],
+            'resources.cms.sponsors.create' => [
+                'title' => 'Új szponzor',
+                'body' => '<p>Csak a név kötelező. A <em>Weboldal</em> megadásával a logó linkké válik a publikus sávban; az EN / HU leírás opcionális.</p><p>A logó PNG, JPG, SVG, WebP, GIF és HEIC formátumot fogad – telefonról közvetlenül is –, legfeljebb 8 MB-ig. A <em>Sorrend</em> rendezi a sávot: kisebb szám előrébb.</p>',
+            ],
+            'resources.cms.sponsors.edit' => [
+                'title' => 'Szponzor szerkesztése',
+                'body' => '<p>Ugyanazok a mezők, mint a létrehozásnál. Új logó feltöltése mentés után azonnal lecseréli a régit a publikus oldalon.</p>',
+            ],
             'resources.drawings.index' => [
                 'title' => 'Rajzok',
                 'body' => '<p>Minden a műhelyben készült rajz. Soronként <em>Megnézem</em> (modális előnézet), <em>Szerkesztés folytatása</em> (átklónozza új vászonra a PNG-vel kiindulólappal) és <em>Letöltés</em> műveletek.</p><p>Cím vagy szerző szerint kereshető. Bárki, aki belépett, készíthet rajzot; csak a szerző vagy admin törölheti.</p>',
@@ -636,25 +644,105 @@ return [
                 'title' => 'Jelentkezés elfogadása',
                 'body' => '<p>Egy lépésben létrehoz egy csapattag + admin fiókot. A jelentkező ideiglenes jelszót kap e-mailben (vagy <code>storage/logs/laravel.log</code>-ba kerül, ha MAIL_MAILER=log), és az első belépéskor új jelszót kell beállítania.</p>',
             ],
+            'resources.application-form.index' => [
+                'title' => 'Jelentkezési űrlap',
+                'body' => '<p>A publikus csatlakozási oldal kérdései. Ezek adatok, nem kód: itt adsz hozzá, rendezel át, nevezel át vagy kapcsolsz ki egy kérdést, és a publikus űrlap a következő betöltéskor követi.</p><p>A <em>Név</em> és az <em>E-mail</em> rendszermező – át lehet nevezni és sorrendezni őket, de törölni vagy átkulcsolni nem, mert a jelentkezés elfogadása ezekből hozza létre a belépést.</p>',
+            ],
+            'resources.application-form.create' => [
+                'title' => 'Új kérdés',
+                'body' => '<p>Válaszd ki, melyik szekcióba tartozik, és a mező típusát; a választós típusokhoz lent megjelenik az <em>Opciók</em> lista, ahol a tárolt érték és a két címke külön mező.</p><p>A <em>Kulcs</em> alatt tárolódik minden összegyűjtött válasz, és csak létrehozáskor állítható be – alapból az angol címke camelCase változata. A címke, a súgó és a helyőrző mind kétnyelvű.</p>',
+            ],
+            'resources.application-form.edit' => [
+                'title' => 'Kérdés szerkesztése',
+                'body' => '<p>A <em>Kulcs</em> kivételével minden szerkeszthető: a kulcs zárolva van, mert a módosítása árván hagyná az összes eddig begyűjtött választ.</p><p>Az <em>Aktív</em> kikapcsolása leveszi a kérdést a publikus űrlapról anélkül, hogy a már tárolt válaszokhoz hozzányúlna.</p>',
+            ],
+            'resources.application-form-sections.index' => [
+                'title' => 'Űrlapszekciók',
+                'body' => '<p>Azok a számozott kártyák, amikre a csatlakozási űrlap tagolódik. A sorok húzással rendezhetők; a darabszám oszlop mutatja, hány kérdés van mindegyikben.</p><p>Egy szekció csak akkor törölhető, ha már nincs benne kérdés – különben a válaszaikat is vinné magával.</p>',
+            ],
             'resources.cms.team-members.index' => [
                 'title' => 'Csapattagok',
                 'body' => '<p>A nyilvános szervezeti ábra. Minden tagnál van név, opcionálisan kétnyelvű végzettség, fénykép, egy vagy több pozíció és egy kijelölt <em>fő pozíció</em> (ez az ábrabeli helye).</p>',
+            ],
+            'resources.cms.team-members.create' => [
+                'title' => 'Új csapattag',
+                'body' => '<p>A sor mentése egyben létrehozza a tag belépését is: egy Member jogosultságú fiókot a szervezeti címen, plusz egy ideiglenes jelszót a <em>privát e-mail</em> címére. Ha a <em>Szervezeti e-mail</em> üresen marad, a névből képződik – vagy nyomd meg a ✨ gombot.</p><p>A szervezeti cím csak belépés, nincs mögötte postafiók, ezért a <em>Privát e-mail</em> mezőbe valódi, elérhető cím kell, különben az ideiglenes jelszónak nincs hová mennie. A <em>Kilépés</em> dátumot csak annál töltsd ki, aki már távozott – azokhoz nem készül belépés.</p>',
+            ],
+            'resources.cms.team-members.edit' => [
+                'title' => 'Csapattag szerkesztése',
+                'body' => '<p>A <em>Publikus</em> kapcsoló dönti el, hogy a tag megjelenik-e a publikus oldalon; a <em>Sorrend</em> a pozíciócsoporton belül rendezi.</p><p>Ha a sorhoz nem tartozik fiók, megjelenik a <strong>Belépés létrehozása</strong> gomb – ez az út vissza egy törölt felhasználó után is. Egy tag törlése a panelfiókját is törli (a sajátodat és az adminokét soha).</p><p>Discord: az <em>ID</em> a 17–20 jegyű numerikus snowflake, és a három mező közül egyedül ez ad valódi @-említést. A becenév és a felhasználónév sima szövegre esik vissza.</p>',
             ],
             'resources.cms.team-member-groups.index' => [
                 'title' => 'Pozíciók',
                 'body' => '<p>A pozíció címkék (Hajtómű, Avionika, …), amikhez a csapattagok rendelhetők. Itt szerkesztve mindenhol frissül — mentéskor a csapattag payloadjába is bemásolódnak.</p>',
             ],
+            'resources.cms.team-member-groups.create' => [
+                'title' => 'Új pozíció',
+                'body' => '<p>Kétnyelvű név és egy URL-barát <em>slug</em> – a slug magától kitöltődik az angol névből, és a publikus oldal ezen hivatkozik a csoportra.</p><p>A <em>Típus</em> választja szét a vezetőséget az osztályoktól és csapatoktól; a <em>Szülő</em> egy nagyobb egység alá rendezi az alcsapatot.</p>',
+            ],
+            'resources.cms.team-member-groups.edit' => [
+                'title' => 'Pozíció szerkesztése',
+                'body' => '<p>Az átnevezés mindenhol átüt, ahol a pozíció megjelenik. A <em>Publikus</em> kikapcsolása elrejti a csoportot a publikus oldalról anélkül, hogy bárkit levenne róla.</p>',
+            ],
             'resources.cms.mentors.index' => [
                 'title' => 'Mentorok',
                 'body' => '<p>Külső mentorok / tanácsadók a nyilvános csapatoldalon. Ugyanaz a forma, mint a csapattagoknál, csak pozíciómezők nélkül.</p>',
+            ],
+            'resources.cms.mentors.create' => [
+                'title' => 'Új mentor',
+                'body' => '<p>Csak a név kötelező; az e-mail és a fotó opcionális. A <em>Sorrend</em> rendezi a mentorlistát a publikus csapatoldalon.</p>',
+            ],
+            'resources.cms.mentors.edit' => [
+                'title' => 'Mentor szerkesztése',
+                'body' => '<p>Ugyanazok a mezők, mint a létrehozásnál. A mentorok csak publikus tartalmak – hozzájuk nem készül panelfiók.</p>',
+            ],
+            'resources.contacts.index' => [
+                'title' => 'Külső kapcsolatok',
+                'body' => '<p>Belső címjegyzék a csapaton kívüli emberekhez – beszállítók, egyetemi munkatársak, versenyszervezők. Semmi nem kerül belőle a publikus oldalra.</p><p>A <em>Csoport</em> kategorizálja a kapcsolatot, és egyben a tábla szűrője; az e-mail és a telefon egy kattintással másolható. A törléshez külön jogosultság kell, de hozzáadni és szerkeszteni bárki tud, akinek van hozzáférése.</p>',
+            ],
+            'resources.contacts.create' => [
+                'title' => 'Új kapcsolat',
+                'body' => '<p>Csak a név kötelező. A <em>Csoport</em> választóban helyben is létrehozhatsz új csoportot, nem kell előbb a Kapcsolatcsoportokhoz menni.</p><p>A <em>Megjegyzések</em> mezőbe megy minden, ami nem név, cím vagy szám: ki ő, mit szállított, mikor beszéltetek utoljára.</p>',
+            ],
+            'resources.contacts.edit' => [
+                'title' => 'Kapcsolat szerkesztése',
+                'body' => '<p>Ugyanazok a mezők, mint a létrehozásnál. A csoport átállítása itt a kapcsolatlista csoportszűrőjében is átrendezi.</p>',
+            ],
+            'resources.contact-groups.index' => [
+                'title' => 'Kapcsolatcsoportok',
+                'body' => '<p>Azok a kategóriák, amikbe a külső kapcsolatok kerülnek – beszállítók, egyetem, szervezők, ami épp kell. A nevek egyediek.</p><p>Az itteni sorrend adja a kapcsolatok táblájának csoportszűrőjében a sorrendet.</p>',
+            ],
+            'resources.contact-groups.create' => [
+                'title' => 'Új kapcsolatcsoport',
+                'body' => '<p>Egyedi név, opcionális leírás arról, mi tartozik bele, és egy sorrendszám.</p>',
+            ],
+            'resources.contact-groups.edit' => [
+                'title' => 'Kapcsolatcsoport szerkesztése',
+                'body' => '<p>Az átnevezés minden alá sorolt kapcsolatnál átüt – a kapcsolatok a csoportra hivatkoznak, nem másolatot tárolnak.</p>',
             ],
             'resources.cms.about-projects.index' => [
                 'title' => 'Projektek',
                 'body' => '<p>A Rólunk oldalon megjelenő múlt + jelenlegi rakétaprojektek. Állíts <em>Kezdés</em> + <em>Befejezés</em> időt, hogy a projekt megjelenjen a naptár idővonalán.</p>',
             ],
+            'resources.cms.about-projects.create' => [
+                'title' => 'Új projekt',
+                'body' => '<p>A cím kötelező. A <em>Kezdés</em> / <em>Befejezés</em> egyben a projektet felteszi az admin naptárra egy csak olvasható sávként – hagyd üresen, ha nincs fix dátum.</p><p>Az opcionális <em>Discord webhook</em> az ehhez a projekthez kötött naptáreseményeket a saját csatornájára küldi a globális helyett.</p>',
+            ],
+            'resources.cms.about-projects.edit' => [
+                'title' => 'Projekt szerkesztése',
+                'body' => '<p>Ugyanazok a mezők, mint a létrehozásnál. Mindkét nyelvű leírás külön tárolódik – legalább azt töltsd ki, amelyiken a publikus oldalt olvassák.</p>',
+            ],
             'resources.cms.about-goals.index' => [
                 'title' => 'Célok',
                 'body' => '<p>A Rólunk oldal projekt-listája fölött megjelenő célok. Kétnyelvű cím + leírás, sorrendezhető.</p>',
+            ],
+            'resources.cms.about-goals.create' => [
+                'title' => 'Új cél',
+                'body' => '<p>Kétnyelvű cím, opcionális kétnyelvű leírással. A <em>Sorrend</em> rendezi a listát a publikus Rólunk oldalon: kisebb szám előrébb.</p>',
+            ],
+            'resources.cms.about-goals.edit' => [
+                'title' => 'Cél szerkesztése',
+                'body' => '<p>Ugyanazok a mezők, mint a létrehozásnál. Ha az egyik nyelvet üresen hagyod, a publikus oldal a másikra esik vissza.</p>',
             ],
             'pages.about-content' => [
                 'title' => 'Rólunk tartalom',
@@ -687,6 +775,66 @@ return [
             'pages.database-inspector' => [
                 'title' => 'Adatbázis-ellenőrző',
                 'body' => '<p>Csak admin által. Válassz egy táblát a bal oldalon, és látod a teljes szerkezetet jobbra: oszlopok típussal / nullable státusszal / alapértékkel, indexek (elsődleges, egyedi, normál) és idegen kulcsok cascade viselkedéssel.</p><p>Csak olvasható — nincs adat, nincs SQL, nincs szerkesztés. A driver neve a tábla mellett mutatja, hogy SQLite-on vagy Postgres-en vagy.</p>',
+            ],
+            'resources.items.index' => [
+                'title' => 'Eszközök',
+                'body' => '<p>Az eszköz<em>katalógus</em> – egy sor fajtánként, csak névvel. Hogy fizikailag hol van mi, azt az <strong>Eszközkezelés</strong> tartja nyilván; a <em>Helyek</em> és <em>Összes mennyiség</em> oszlop onnan összesít.</p><p>Szándékosan mindenki szerkesztheti, aki be van lépve. Ennek az ára a <strong>Készletnapló</strong>, ami rögzíti, ki mit változtatott.</p>',
+            ],
+            'resources.items.create' => [
+                'title' => 'Új eszköz',
+                'body' => '<p>Csak egy név – ez a katalógusbejegyzés, nem egy fizikai darab. A mennyiséget és a helyet utána az <strong>Eszközkezelés</strong> oldalon rögzítsd hozzá.</p>',
+            ],
+            'resources.items.edit' => [
+                'title' => 'Eszköz szerkesztése',
+                'body' => '<p>A katalógusbejegyzés átnevezése minden rá hivatkozó készletsoron átüt. A törlése ezeket a készletsorokat is viszi.</p>',
+            ],
+            'pages.item-management' => [
+                'title' => 'Eszközkezelés',
+                'body' => '<p>A tényleges hol-van-mi: soronként egy eszköz × helyszín (× tulajdonos). A <em>Készlet hozzáadása</em> helyben új katalógusbejegyzést is létre tud hozni, így ritkán kell előbb az Eszközök oldalra menni.</p><p>Privát helyszín választásakor megjelenik a <em>Tulajdonos</em> mező – így követhető a magántulajdonú felszerelés. Publikus helyszínnél magától kiürül.</p>',
+            ],
+            'pages.item-log' => [
+                'title' => 'Készletnapló',
+                'body' => '<p>Csak olvasható. Minden létrehozás / módosítás / törlés a katalóguson és a készlettáblán, azzal együtt, hogy ki és mikor.</p><p>A készlet szándékosan mindenki számára nyitott, aki be van lépve; ez az oldal ennek az ára. A teljes, minden erőforrásra kiterjedő napló admin-only, a Tagság → Tevékenységnapló alatt.</p>',
+            ],
+            'resources.bug-reports.index' => [
+                'title' => 'Hibajelentések',
+                'body' => '<p>A panelen belüli hibakövető. Bárki, aki be van lépve, tud jelentést küldeni – a felhasználói menü melletti bogár ikon bárhonnan megnyitja az űrlapot.</p><p>A tagok csak a saját jelentéseiket látják. A menedzserek és adminok mindet, és megkapják a triage mezőket is: státusz, felelős, belső jegyzet. Az oldalsáv jelvénye a nyitottakat számolja.</p>',
+            ],
+            'resources.bug-reports.create' => [
+                'title' => 'Hiba jelentése',
+                'body' => '<p>A cím és a leírás kötelező – annyi részlet kell, hogy más is elő tudja idézni. Egy <em>Oldal URL</em> és egy képernyőkép sokat gyorsít a feldolgozáson.</p><p>A böngésződ és a nyelvi beállításod automatikusan rögzül, ezeket nem kell leírni. A státuszt és a felelőst az tölti ki, aki átnézi a jelentést.</p>',
+            ],
+            'resources.bug-reports.edit' => [
+                'title' => 'Hibajelentés',
+                'body' => '<p>A bejelentő tovább szerkesztheti a leírást és a mellékleteket. A <strong>Triage</strong> szekció – státusz, felelős, belső jegyzet – csak menedzsereknek és adminoknak látszik.</p>',
+            ],
+            'resources.collections.index' => [
+                'title' => 'Gyűjtemények',
+                'body' => '<p>Admin-only nyers nézet a CMS tárolására, szándékosan nincs az oldalsávban. Egy gyűjtemény erőforrás-sorok gyűjtője; a napi munkához a dedikált képernyőket használd – Események, Szponzorok, Projektek, Célok, Mentorok.</p>',
+            ],
+            'resources.resources.index' => [
+                'title' => 'Nyers erőforrások',
+                'body' => '<p>Admin-only nyers nézet, szándékosan nincs az oldalsávban. Soronként egy CMS rekord a kitett JSON payloaddal – hibakereséshez hasznos, rutinszerkesztéshez kockázatos. Használd helyette a dedikált képernyőket.</p>',
+            ],
+            'resources.collections.create' => [
+                'title' => 'Új gyűjtemény',
+                'body' => '<p>Admin-only. Itt létrehozni egy gyűjteményt csak egy üres tárolót csinál – a dedikált képernyők mind egy-egy fix gyűjtemény-UUID-hez vannak kötve a kódban, így az új tárolóhoz nem tartozik felület.</p>',
+            ],
+            'resources.collections.edit' => [
+                'title' => 'Gyűjtemény szerkesztése',
+                'body' => '<p>Admin-only. A név és a leírás csak ehhez a nézethez tartozó címke; a kód a slugra és az ID-ra illeszt, tehát az ID módosítása minden benne lévő sort leválaszt a saját képernyőjéről.</p>',
+            ],
+            'resources.resources.create' => [
+                'title' => 'Új nyers erőforrás',
+                'body' => '<p>Admin-only. Kézzel írt JSON payloaddal hoz létre CMS sort. A payload szerkezetét itt semmi nem ellenőrzi – hacsak nem szándékosan adatot javítasz, használd az adott gyűjtemény dedikált képernyőjét.</p>',
+            ],
+            'resources.resources.edit' => [
+                'title' => 'Nyers erőforrás szerkesztése',
+                'body' => '<p>Admin-only. A JSON payload úgy, ahogy tárolva van. A fordított mezők <code>{"en": …, "hu": …}</code> szerkezetűek – ha ez elromlik, a publikus oldal arra esik vissza, amit talál, vagy semmire.</p>',
+            ],
+            'auth.profile' => [
+                'title' => 'Saját profil',
+                'body' => '<p>Profilkép, megjelenített név és jelszó. Az e-mail a belépésed, ezért csak admin tudja megváltoztatni.</p><p>Új jelszó beállítása egyben feloldja a kötelező jelszócsere kaput is: egy ideiglenes jelszóval létrehozott fiók ide érkezik, és amíg nem cserél jelszót, nem jut tovább a panelen. Ha csak a nevedet vagy a képedet módosítod, hagyd üresen a jelszómezőket.</p>',
             ],
         ],
         'fields' => [

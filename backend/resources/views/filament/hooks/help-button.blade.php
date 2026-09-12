@@ -1,6 +1,11 @@
 {{-- Per-page help. Renders a small "?" button that gets moved into
-     the .fi-header-heading element by x-init, and dispatches into the
-     shared modal mounted at body end (see help-modal.blade.php). --}}
+     the page's heading element by x-init, and dispatches into the
+     shared modal mounted at body end (see help-modal.blade.php).
+
+     Two heading classes because the panel has two page shells: standard
+     pages use .fi-header-heading, and "simple" pages — the profile page
+     among them — use .fi-simple-header-heading and render from a
+     different render hook, one that isn't a sibling of the heading. --}}
 
 @php
     $routeName = \Illuminate\Support\Facades\Route::currentRouteName() ?? '';
@@ -14,7 +19,8 @@
 <span
     x-data
     x-init="
-        const h1 = $el.parentElement?.querySelector('.fi-header-heading');
+        const h1 = $el.parentElement?.querySelector('.fi-header-heading')
+            ?? document.querySelector('.fi-header-heading, .fi-simple-header-heading');
         if (h1 && !h1.contains($el)) h1.appendChild($el);
     "
     style="display:inline-flex; align-items:center; vertical-align: middle; margin-left: .55rem;"

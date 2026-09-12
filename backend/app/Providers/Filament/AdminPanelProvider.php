@@ -131,6 +131,17 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::PAGE_HEADER_HEADING_AFTER,
                 fn () => view('filament.hooks.help-button'),
             )
+            // The profile page is a "simple" page (Filament's default for
+            // ->profile()), which renders its own header and never fires
+            // PAGE_HEADER_HEADING_AFTER — so it was the one page in the
+            // panel with no "?" on it. The two hooks are mutually
+            // exclusive per page, and the button renders nothing at all
+            // for a route with no help entry, so login / password reset
+            // (also simple pages) stay untouched.
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_PAGE_START,
+                fn () => view('filament.hooks.help-button'),
+            )
             // Mobile-only sidebar search — CSS keeps it hidden on lg+
             // so it doesn't duplicate the topbar's global search.
             ->renderHook(
