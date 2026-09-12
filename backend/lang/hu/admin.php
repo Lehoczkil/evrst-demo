@@ -349,7 +349,8 @@ return [
         'answer_orphaned'  => 'a kérdést azóta törölték',
         'login_taken'   => 'Ez a belépési cím már foglalt',
         'login_taken_body' => 'A :email címmel már létezik fiók. Semmi nem jött létre — válassz másik org címet (vagy kösd össze a meglévő fiókot a csapattag adatlapján), és próbáld újra.',
-        'accept_submit' => 'Csapattag + admin fiók létrehozása',
+        'accept_submit' => 'Csapattag + belépés létrehozása',
+        'role_help' => 'Mit tehet ez a fiók a panelen. Alapértelmezés a Member, és szinte mindenkinél ez a helyes: a saját feladatai, a névsor, a leltár. A Manager tartalmat és csapatot is szerkeszt; az Admin mindent. Később a Felhasználóknál átállítható.',
         'accepted_title' => 'Jelentkezés elfogadva',
         'accepted_body' => ':name felkerült a névsorra.',
         'department'  => 'Részleg',
@@ -642,7 +643,7 @@ return [
             ],
             'resources.member-applications.accept' => [
                 'title' => 'Jelentkezés elfogadása',
-                'body' => '<p>Egy lépésben létrehoz egy csapattag + admin fiókot. A jelentkező ideiglenes jelszót kap e-mailben (vagy <code>storage/logs/laravel.log</code>-ba kerül, ha MAIL_MAILER=log), és az első belépéskor új jelszót kell beállítania.</p>',
+                'body' => '<p>Egy lépésben létrehoz egy csapattagot és egy paneles belépést, a kiválasztott <em>szerepkörrel</em> — alapértelmezés a Member. A jelentkező ideiglenes jelszót kap e-mailben (vagy <code>storage/logs/laravel.log</code>-ba kerül, ha MAIL_MAILER=log), és az első belépéskor új jelszót kell beállítania.</p>',
             ],
             'resources.application-form.index' => [
                 'title' => 'Jelentkezési űrlap',

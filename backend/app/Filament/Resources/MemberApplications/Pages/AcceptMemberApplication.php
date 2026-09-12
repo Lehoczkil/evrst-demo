@@ -17,12 +17,14 @@ use App\Support\DiscordPayloads;
 use App\Support\OrgEmail;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -80,6 +82,7 @@ class AcceptMemberApplication extends Page implements HasForms
             // inbox — it becomes email_private, not the login.
             'email_private' => $this->record->email,
             'email' => OrgEmail::uniqueForName($this->record->name ?? ''),
+            'role_id' => Role::where('key', Perm::ROLE_MEMBER)->value('id'),
             'degree_en' => null,
             'degree_hu' => null,
             'group_ids' => [],
@@ -127,6 +130,29 @@ class AcceptMemberApplication extends Page implements HasForms
                     ->maxLength(180)
                     ->helperText(__('admin.applications.email_help'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
+                /*
+                  The role the new account gets. Every accepted application
+                  used to be hardcoded to Member with nothing on screen
+                  saying so — and the submit button read "admin account",
+                  which made it look like the opposite was happening.
+
+                  All three roles are offered because only an Admin reaches
+                  this page at all: `applications.*` is filtered out of
+                  managerPermissions(), and an Admin can already mint any
+                  account from Users. Member stays the default.
+                */
+                Select::make('role_id')
+                    ->label(__('admin.common.role'))
+                    ->required()
+                    ->options(fn () => Cache::remember(
+                        'options:roles',
+                        300,
+                        fn () => Role::orderBy('name')->pluck('name', 'id')->all(),
+                    ))
+                    ->default(fn () => Role::where('key', Perm::ROLE_MEMBER)->value('id'))
+                    ->native(false)
+                    ->helperText(__('admin.applications.role_help'))
+                    ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('degree_en')
                     ->label(__('admin.team.degree') . ' (EN)')
                     ->maxLength(120)
@@ -163,7 +189,11 @@ class AcceptMemberApplication extends Page implements HasForms
         }
 
         $temp = IssueTempPassword::generate();
-        $memberRole = Role::where('key', Perm::ROLE_MEMBER)->first();
+
+        // Falls back to Member rather than to null: a user with no role has
+        // no permissions at all and would sign in to an empty panel.
+        $memberRole = Role::find($data['role_id'] ?? null)
+            ?? Role::where('key', Perm::ROLE_MEMBER)->first();
 
         $degree = [];
         if (! empty($data['degree_en'])) $degree['en'] = $data['degree_en'];

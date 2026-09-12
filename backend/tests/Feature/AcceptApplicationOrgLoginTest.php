@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\MemberApplications\Pages\AcceptMemberApplication;
+use App\Auth\Perm;
 use App\Models\MemberApplication;
+use App\Models\Role;
 use App\Models\TeamMember;
 use App\Models\User;
 use App\Notifications\TeamMemberAccountCreated;
@@ -36,6 +38,77 @@ class AcceptApplicationOrgLoginTest extends TestCase
             'email' => 'lehoczkilaszlo2002@gmail.com',
             'status' => MemberApplication::STATUS_PENDING,
         ], $overrides));
+    }
+
+    public function test_the_accept_page_defaults_the_new_account_to_member(): void
+    {
+        $application = $this->application();
+
+        Livewire::actingAs($this->makeAdmin())
+            ->test(AcceptMemberApplication::class, ['record' => $application->id])
+            ->assertSet('data.role_id', Role::where('key', Perm::ROLE_MEMBER)->value('id'));
+    }
+
+    public function test_accepting_without_touching_the_role_creates_a_member(): void
+    {
+        $application = $this->application();
+
+        Livewire::actingAs($this->makeAdmin())
+            ->test(AcceptMemberApplication::class, ['record' => $application->id])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $user = User::where('email', 'laszlo.lehoczki@evrst.hu')->firstOrFail();
+
+        $this->assertSame(Perm::ROLE_MEMBER, $user->role->key);
+    }
+
+    /**
+     * The whole point of the picker: the flow used to hardcode Member with
+     * nothing on screen saying so, while the submit button read "admin
+     * account" — so the one thing it could not do was what it claimed.
+     */
+    public function test_the_chosen_role_is_what_the_new_account_gets(): void
+    {
+        foreach ([Perm::ROLE_MANAGER, Perm::ROLE_ADMIN] as $index => $roleKey) {
+            $application = $this->application([
+                'id' => (string) Str::ulid(),
+                'name' => "Teszt Ember{$index}",
+                'email' => "teszt{$index}@example.test",
+            ]);
+
+            Livewire::actingAs($this->makeAdmin())
+                ->test(AcceptMemberApplication::class, ['record' => $application->id])
+                ->set('data.role_id', Role::where('key', $roleKey)->value('id'))
+                ->call('save')
+                ->assertHasNoFormErrors();
+
+            $user = User::where('name', "Teszt Ember{$index}")->firstOrFail();
+
+            $this->assertSame($roleKey, $user->role->key, "expected the {$roleKey} role");
+            // Still a forced password change, whatever the role.
+            $this->assertNull($user->password_changed_at);
+        }
+    }
+
+    /**
+     * A role id that isn't a real role is rejected before anything is
+     * written — Filament's Select carries an `in:` rule over its options.
+     * save() still falls back to Member if one ever gets past it, because
+     * an account with no role signs in to a panel with nothing in it.
+     */
+    public function test_an_unknown_role_creates_nothing(): void
+    {
+        $application = $this->application();
+
+        Livewire::actingAs($this->makeAdmin())
+            ->test(AcceptMemberApplication::class, ['record' => $application->id])
+            ->set('data.role_id', 99999)
+            ->call('save')
+            ->assertHasFormErrors(['role_id']);
+
+        $this->assertNull(User::where('email', 'laszlo.lehoczki@evrst.hu')->first());
+        $this->assertSame(MemberApplication::STATUS_PENDING, $application->fresh()->status);
     }
 
     public function test_the_accept_page_prefills_a_generated_org_address(): void

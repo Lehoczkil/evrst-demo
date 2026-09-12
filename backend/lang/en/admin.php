@@ -349,7 +349,8 @@ return [
         'answer_orphaned'  => 'question since removed',
         'login_taken'   => 'That login address is already in use',
         'login_taken_body' => 'An account already signs in with :email. Nothing was created — pick a different org address (or link the existing account from the team member page) and try again.',
-        'accept_submit' => 'Create team member + admin account',
+        'accept_submit' => 'Create team member + login',
+        'role_help' => 'What this account may do in the panel. Member is the default and the right answer for almost everyone: their own tasks, the roster, the inventory. Manager adds content and team editing; Admin is unrestricted. It can be changed later under Users.',
         'accepted_title' => 'Application accepted',
         'accepted_body' => ':name is now on the roster.',
         'department'  => 'Department',
@@ -642,7 +643,7 @@ return [
             ],
             'resources.member-applications.accept' => [
                 'title' => 'Accept application',
-                'body' => '<p>Creates a Team member + admin account in one go. The applicant gets a temporary password emailed (or logged to <code>storage/logs/laravel.log</code> if MAIL_MAILER=log) and is forced to change it on first sign-in.</p>',
+                'body' => '<p>Creates a Team member and a panel login in one go, with the <em>Role</em> you pick — Member by default. The applicant gets a temporary password emailed (or logged to <code>storage/logs/laravel.log</code> if MAIL_MAILER=log) and is forced to change it on first sign-in.</p>',
             ],
             'resources.application-form.index' => [
                 'title' => 'Application form',
