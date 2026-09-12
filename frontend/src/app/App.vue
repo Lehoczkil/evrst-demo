@@ -20,12 +20,15 @@ const metaStore = useMetaStore();
 /*---------------------------------------------
 /  HOOKS
 ---------------------------------------------*/
+/*
+  Only the chrome colour. Title and description used to be set here too,
+  which meant the home page had no head copy of its own — it inherited
+  whatever the last page set. Every routed page renders its own HtmlTitle
+  now, including HomePage; until its lazy chunk lands, index.html's static
+  title stands, which is the right answer for that moment anyway.
+*/
 onMounted(() => {
-  metaStore.setMeta({
-    title: 'Escape Velocity Rocketry Student Team',
-    description: 'Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata.',
-    theme: '#050506',
-  });
+  metaStore.setMeta({ theme: '#050506' });
 });
 </script>
 

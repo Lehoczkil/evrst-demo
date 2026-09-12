@@ -1,4 +1,23 @@
 export default {
+  seo: {
+    /*
+      Search + social copy. Separate from the on-page headings on purpose:
+      a <title> is read in a results list with no page around it, so it has
+      to name the thing and the place, and a description is a 150-160
+      character sales pitch rather than a summary of the first paragraph.
+    */
+    description:
+      'Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk — a CAD-tól a próbapadig és a kilövésig.',
+    home: {
+      title: 'Hallgatói rakétacsapat az Óbudai Egyetemen',
+      description:
+        'Kísérleti rakétákat tervezünk, építünk és indítunk az Óbudai Egyetemen. Kilenc szakmai csoport, három rakéta, egy már repült. Ismerd meg a csapatot és a programot.',
+    },
+    joinUs: {
+      description:
+        'Csatlakozz az Óbudai Egyetem hallgatói rakétacsapatához. Nem kell mérnöknek lenned: marketing, jog és webfejlesztés is kell a rakétához. Jelentkezés egy űrlapon.',
+    },
+  },
   manifesto: {
     eyebrow: 'Amiért ez az egész van',
     body: 'Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk, miközben a hallgatói mérnöki munka határait feszegetjük.',

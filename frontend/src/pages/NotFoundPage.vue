@@ -32,7 +32,7 @@ const { t } = useI18n();
 
 <template>
   <div class="notfound surface-ignore">
-    <HtmlTitle :title="t('notFound.title')" />
+    <HtmlTitle :title="t('notFound.title')" robots="noindex, follow" />
     <div class="container">
       <motion.p v-bind="heroBuild()" class="notfound__code">{{ t('notFound.code') }}</motion.p>
       <motion.h1 v-bind="heroBuild(0.06)" class="notfound__title">

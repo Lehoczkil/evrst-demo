@@ -1,4 +1,23 @@
 export default {
+  seo: {
+    /*
+      Search + social copy. Separate from the on-page headings on purpose:
+      a <title> is read in a results list with no page around it, so it has
+      to name the thing and the place, and a description is a 150-160
+      character sales pitch rather than a summary of the first paragraph.
+    */
+    description:
+      'Escape Velocity Rocketry Student Team is the student rocketry team of Óbuda University, Budapest. We design, build and launch experimental rockets — from CAD to the test stand to the pad.',
+    home: {
+      title: 'Student rocketry team at Óbuda University',
+      description:
+        'We design, build and launch experimental rockets at Óbuda University, Budapest. Nine working groups, three vehicles, one already flown. Meet the team and the programme.',
+    },
+    joinUs: {
+      description:
+        'Join the student rocketry team at Óbuda University. You do not have to be an engineer: a rocket needs marketing, law and web development too. Apply with one form.',
+    },
+  },
   manifesto: {
     eyebrow: 'Why any of this exists',
     body: 'Escape Velocity Rocketry Student Team is the student rocketry team of Óbuda University. We design, build and launch experimental rockets, pushing the limits of student engineering.',

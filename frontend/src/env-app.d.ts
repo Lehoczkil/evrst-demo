@@ -4,6 +4,8 @@ declare const __APP_VERSION__: string;
 
 interface ImportMetaEnv {
   readonly VITE_API_URL: string;
+  /** Canonical origin for canonical/hreflang/og:url. Defaults to https://evrst.hu. */
+  readonly VITE_SITE_URL?: string;
   readonly VITE_DEV_BACKEND_URL?: string;
   readonly VITE_ABOUT_PROJECTS_COLLECTION_ID?: string;
   readonly VITE_ABOUT_GOALS_COLLECTION_ID?: string;

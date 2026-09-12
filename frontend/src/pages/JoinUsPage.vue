@@ -158,7 +158,7 @@ watch(schema, syncValues, { immediate: true });
 
 <template>
   <div class="join-page">
-    <HtmlTitle :title="t('join.title')" />
+    <HtmlTitle :title="t('join.title')" :description="t('seo.joinUs.description')" />
 
     <SectionShell
       class="join-section"

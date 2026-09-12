@@ -18,6 +18,7 @@
 /*---------------------------------------------
 /  VARIABLES
 ---------------------------------------------*/
+const { t } = useI18n();
 /*---------------------------------------------
 /  METHODS
 ---------------------------------------------*/
@@ -34,6 +35,7 @@
 
 <template>
   <div>
+    <HtmlTitle :title="t('seo.home.title')" :description="t('seo.home.description')" />
     <Hero />
     <Manifesto />
     <Rocket />
