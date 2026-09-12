@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { PageRequests } from '@/services/requests/PageRequests';
 import type { PageResource } from '@/types/api';
+/*
+  Imported explicitly: unplugin-vue-components only scans
+  `src/components/**`, so a component from `src/pages` is NOT auto
+  registered. Vue logged "Failed to resolve component: NotFoundPage" and
+  rendered nothing in its place, which meant every unmatched URL — every
+  typo, every dead link, every stale crawl — was a completely blank page.
+*/
+import NotFoundPage from '@/pages/NotFoundPage.vue';
 
 /*
   The catch-all CMS route.
