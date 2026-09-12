@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\TeamMembers\Pages;
 
+use App\Auth\Perm;
 use App\Filament\Concerns\ProvisionsMemberLogin;
 use App\Filament\Resources\TeamMembers\TeamMemberResource;
 use App\Models\TeamMember;
 use App\Models\User;
+use App\Support\AlumniStatus;
 use App\Support\OrgEmail;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -123,6 +125,38 @@ class EditTeamMember extends EditRecord
                 ]))
                 ->action(function () use ($record) {
                     $this->provisionMemberLogin($record);
+                    $this->fillForm();
+                }),
+
+            // Same switch as the row action on the table — see
+            // App\Support\AlumniStatus. Refills the form afterwards so the
+            // "Left at" field reflects what the button just did.
+            Action::make('toggle_alumni')
+                ->label(fn () => AlumniStatus::isAlumni($record)
+                    ? __('admin.team.alumni_restore')
+                    : __('admin.team.alumni_mark'))
+                ->icon(fn () => AlumniStatus::isAlumni($record)
+                    ? 'heroicon-o-arrow-uturn-left'
+                    : 'heroicon-o-academic-cap')
+                ->color('gray')
+                ->visible(fn () => auth()->user()?->can(Perm::TEAM_EDIT) ?? false)
+                ->requiresConfirmation()
+                ->modalHeading(fn () => AlumniStatus::isAlumni($record)
+                    ? __('admin.team.alumni_restore_modal', ['name' => $record->name])
+                    : __('admin.team.alumni_mark_modal', ['name' => $record->name]))
+                ->modalDescription(fn () => AlumniStatus::isAlumni($record)
+                    ? __('admin.team.alumni_restore_body')
+                    : __('admin.team.alumni_mark_body'))
+                ->action(function () use ($record) {
+                    AlumniStatus::toggle($record);
+
+                    Notification::make()
+                        ->title(AlumniStatus::isAlumni($record)
+                            ? __('admin.team.alumni_marked', ['name' => $record->name])
+                            : __('admin.team.alumni_restored', ['name' => $record->name]))
+                        ->success()
+                        ->send();
+
                     $this->fillForm();
                 }),
             DeleteAction::make(),
