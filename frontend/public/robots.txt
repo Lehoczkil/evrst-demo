@@ -1,0 +1,18 @@
+# https://evrst.hu
+
+User-agent: *
+Allow: /
+
+# The Filament admin panel, the JSON API and the raw storage disk are not
+# content — indexing them yields login screens and JSON fragments.
+Disallow: /admin
+Disallow: /api/
+Disallow: /livewire/
+Disallow: /storage/
+
+# ...except the image transform endpoint, which serves the pictures the
+# public pages actually reference. Blocking it would keep them out of
+# image search and make the pages look broken to a crawler.
+Allow: /api/img
+
+Sitemap: https://evrst.hu/sitemap.xml

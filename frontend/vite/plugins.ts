@@ -7,6 +7,7 @@ import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import type { Plugin } from 'vite';
 import vueDevTools from 'vite-plugin-vue-devtools';
+import { sitemap } from './sitemap';
 
 const plugins: Plugin[] = [
   vue(),
@@ -48,6 +49,9 @@ const plugins: Plugin[] = [
     render-blocking round trip the browser cannot start early.
   */
   webfontDownload(),
+
+  /* sitemap.xml, generated from the route table — see ./sitemap.ts. */
+  sitemap(),
 
   UnoCSS(),
   visualizer({
