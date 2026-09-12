@@ -99,7 +99,7 @@ class PublicApiTest extends TestCase
         // Everything but name and email is stored under the form field's
         // key, so a question added in the panel needs no column.
         $application = MemberApplication::where('email', 'smoke@example.com')->firstOrFail();
-        $this->assertSame('Propulsion', $application->answer('department'));
+        $this->assertSame(['Propulsion'], $application->answer('department'));
         $this->assertSame(['English'], $application->answer('languages'));
 
         // Discord webhook is dispatched even when the URL is empty —
@@ -183,9 +183,15 @@ class PublicApiTest extends TestCase
         $fields = $sections->pluck('fields')->flatten(1);
         $this->assertSame('Név', $fields->firstWhere('key', 'name')['label']);
 
+        // Ported from the team's Google Form: multi-select, nine options.
         $department = $fields->firstWhere('key', 'department');
-        $this->assertSame('radio', $department['type']);
-        $this->assertCount(5, $department['options']);
+        $this->assertSame('checkbox', $department['type']);
+        $this->assertCount(9, $department['options']);
+
+        // The conditional follow-up on the Google Form has no branching
+        // here, so it is served but never required.
+        $detail = $fields->firstWhere('key', 'extracurricularDetail');
+        $this->assertFalse($detail['required']);
     }
 
     public function test_a_question_the_form_marks_required_is_enforced_by_the_api(): void
@@ -237,15 +243,19 @@ class PublicApiTest extends TestCase
         return array_merge([
             'email' => 'applicant@example.com',
             'name' => 'Applicant Person',
+            'source' => 'A friend on the team.',
             'university' => 'Óbudai Egyetem',
             'education' => 'BSc',
-            'faculty' => 'Bánki',
+            'programme' => 'Mechatronics BSc.',
             'why' => 'I want to launch rockets.',
             'hours' => '5',
             'languages' => ['English'],
-            'department' => 'Propulsion',
+            'department' => ['Propulsion'],
             'tasks' => 'Anything on the propulsion side.',
             'skills' => 'CAD, machining.',
+            'working' => 'No',
+            'research' => 'Maybe',
+            'extracurricular' => 'No',
         ], $overrides);
     }
 }

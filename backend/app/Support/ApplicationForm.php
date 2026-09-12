@@ -24,6 +24,13 @@ final class ApplicationForm
     public const COLUMN_KEYS = ['name', 'email'];
 
     /**
+     * The question a submission is summarised by in the applications table,
+     * when the form still asks it. Not a hard requirement — see
+     * {@see self::summaryField()} for the fallback.
+     */
+    public const SUMMARY_KEY = 'department';
+
+    /**
      * Fields to render and validate, in form order.
      *
      * A system field is included even if someone managed to deactivate it —
@@ -80,17 +87,28 @@ final class ApplicationForm
     }
 
     /**
-     * The field a list view should summarise a submission by: the first
-     * choice question on the form. Today that is the department picker.
+     * The field a list view should summarise a submission by.
+     *
+     * The department picker when the form still has one, because that is
+     * the answer a reviewer triages on; otherwise the first choice question,
+     * so a form rebuilt from scratch still gets a useful column instead of
+     * an empty one.
+     *
+     * It used to be "first choice question" alone, which held only while
+     * the department picker happened to be the first. It stopped being
+     * first when the form was ported from the team's Google Form, and the
+     * column quietly became a list of BSc / MSc.
      */
     public static function summaryField(): ?ApplicationFormField
     {
-        return ApplicationFormField::query()
+        $choices = ApplicationFormField::query()
             ->where('is_system', false)
             ->where('is_active', true)
             ->whereIn('type', ApplicationFormField::CHOICE_TYPES)
-            ->orderBy('position')
-            ->first();
+            ->orderBy('position');
+
+        return (clone $choices)->where('key', self::SUMMARY_KEY)->first()
+            ?? $choices->first();
     }
 
     /**

@@ -151,14 +151,16 @@ class ApplicationFormBuilderTest extends TestCase
 
     public function test_reordering_changes_the_order_the_form_is_served_in(): void
     {
-        ApplicationFormField::where('key', 'faculty')->update(['position' => 2]);
-        ApplicationFormField::where('key', 'university')->update(['position' => 4]);
+        // Seeded order in `about` is email, name, source, university,
+        // education, programme — swap the two ends of it.
+        ApplicationFormField::where('key', 'programme')->update(['position' => 2]);
+        ApplicationFormField::where('key', 'source')->update(['position' => 5]);
 
         $about = collect($this->getJson('/api/application-form')->json('sections'))
             ->firstWhere('key', 'about');
 
         $this->assertSame(
-            ['email', 'name', 'faculty', 'education', 'university'],
+            ['email', 'name', 'programme', 'university', 'education', 'source'],
             collect($about['fields'])->pluck('key')->all(),
         );
     }
@@ -179,12 +181,19 @@ class ApplicationFormBuilderTest extends TestCase
         return array_merge([
             'email' => Str::random(8) . '@example.test',
             'name' => 'Applicant Person',
+            'source' => 'A friend on the team.',
             'university' => 'Óbudai Egyetem',
-            'faculty' => 'Bánki',
+            'education' => 'BSc',
+            'programme' => 'Mechatronics BSc.',
             'why' => 'I want to launch rockets.',
             'hours' => '5',
+            'languages' => ['English'],
+            'department' => ['Propulsion'],
             'tasks' => 'Propulsion work.',
             'skills' => 'CAD, machining.',
+            'working' => 'No',
+            'research' => 'Maybe',
+            'extracurricular' => 'No',
         ], $overrides);
     }
 }
