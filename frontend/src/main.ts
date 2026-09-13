@@ -53,6 +53,20 @@ if (typeof document !== 'undefined') {
   document.documentElement.lang = initialLocale;
 }
 
+/*
+  Persist the resolved locale immediately.
+
+  LanguageRequestInterceptor reads this same key to set X-Lang, falling
+  back to 'en' when it is empty — and nothing wrote it until the visitor
+  clicked the language switcher. So a first-time Hungarian visitor (no
+  stored choice, browser in hu) got a Hungarian interface asking the API
+  for English: English hero copy, English About body, English CMS text
+  under Hungarian chrome, until they happened to toggle the language.
+*/
+if (typeof window !== 'undefined') {
+  window.localStorage.setItem(STORAGE_KEY, initialLocale);
+}
+
 const i18n = createI18n({
   locale: initialLocale,
   legacy: false,

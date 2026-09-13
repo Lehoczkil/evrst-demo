@@ -20,8 +20,15 @@ export const useHomeCopy = () => {
   const { locale } = useLocale();
   const { t, tm, rt } = useI18n();
 
+  /*
+    `locale` is part of the key on purpose. The API localises server-side —
+    it flattens each `{en, hu}` map down to one string using the X-Lang
+    header — so the response is language-specific and a switch has to
+    refetch. Without the locale in the key the hero kept the language it
+    was first loaded in. Every other CMS query here does the same.
+  */
   const { data } = useQuery({
-    key: ['view', 'home'],
+    key: ['view-home-copy', locale],
     request: () => ViewRequests.home(),
     cache: true,
   });
