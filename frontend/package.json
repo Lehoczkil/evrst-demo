@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "@sentry/vue": "^10.17",
-    "@vueuse/core": "^14.2.1",
     "date-fns": "^4.1",
     "motion-v": "^2.0",
     "pinia": "^3.0",

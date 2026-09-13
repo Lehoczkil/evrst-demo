@@ -18,14 +18,12 @@ class TeamMemberGroup extends Model
         'parent_id',
         'slug',
         'name',
-        'description',
         'position',
         'is_public',
     ];
 
     protected $casts = [
         'name' => 'array',
-        'description' => 'array',
         'is_public' => 'boolean',
         'position' => 'integer',
     ];
