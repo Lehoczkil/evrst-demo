@@ -67,6 +67,10 @@ class DatabaseInspector extends Page
 
     public function selectTable(string $name): void
     {
+        // mount() is not on the path of a /livewire/update call, and this
+        // page hands back the whole schema.
+        abort_unless(static::canAccess(), 403);
+
         if (in_array($name, $this->tableNames(), true)) {
             $this->selectedTable = $name;
         }

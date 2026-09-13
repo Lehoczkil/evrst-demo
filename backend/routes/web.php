@@ -13,11 +13,49 @@ use Illuminate\Support\Facades\Storage;
 Route::get('/', fn () => redirect('/admin'));
 
 /**
+ * Reduce a caller-supplied return target to a path on this host.
+ *
+ * Both inputs the locale switch consults — the `redirect` field and the
+ * Referer header — are set by whoever made the request, so handing either
+ * to redirect() unchecked turns a signed-in admin's language toggle into
+ * an open redirect: a phishing page can bounce them off our own domain.
+ * Anything that is not plainly ours collapses to /admin.
+ */
+$safeReturnPath = function (?string $candidate, Request $request): string {
+    $candidate = trim((string) $candidate);
+
+    // A newline or NUL in a Location header is a response-splitting tool.
+    if ($candidate === '' || preg_match('/[\x00-\x1F\x7F]/', $candidate) === 1) {
+        return '/admin';
+    }
+
+    // A referer is an absolute URL of our own page — keep its path, but
+    // only once the host has been checked.
+    if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $candidate) === 1) {
+        $parts = parse_url($candidate);
+        if (($parts['host'] ?? null) !== $request->getHost()) {
+            return '/admin';
+        }
+
+        return ($parts['path'] ?? '/') . (isset($parts['query']) ? '?' . $parts['query'] : '');
+    }
+
+    // Relative: one leading slash and nothing else. "//evil.test" is a
+    // protocol-relative URL and "/\evil.test" is treated as one by every
+    // browser, so both are off-site despite starting with a slash.
+    if (! str_starts_with($candidate, '/') || str_starts_with($candidate, '//') || str_starts_with($candidate, '/\\')) {
+        return '/admin';
+    }
+
+    return $candidate;
+};
+
+/**
  * Persist a UI locale choice. Stored on the user (when authenticated) and
  * mirrored into the session so the login form remembers the preference.
  * Always redirects back to the referrer to keep the flow seamless.
  */
-Route::post('/admin/locale', function (Request $request) {
+Route::post('/admin/locale', function (Request $request) use ($safeReturnPath) {
     $locale = strtolower((string) $request->input('locale', ''));
     if (! in_array($locale, SetLocale::SUPPORTED, true)) {
         return back();
@@ -29,7 +67,10 @@ Route::post('/admin/locale', function (Request $request) {
         $user->forceFill(['locale' => $locale])->save();
     }
 
-    return redirect($request->input('redirect', $request->headers->get('referer') ?: '/admin'));
+    return redirect($safeReturnPath(
+        $request->input('redirect') ?: $request->headers->get('referer'),
+        $request,
+    ));
 })->middleware(['web'])->name('admin.locale.set');
 
 /**

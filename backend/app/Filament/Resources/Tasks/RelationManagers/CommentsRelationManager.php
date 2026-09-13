@@ -17,6 +17,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Notification;
 
@@ -27,6 +28,46 @@ class CommentsRelationManager extends RelationManager
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
     {
         return __('admin.tasks.comments');
+    }
+
+    /*
+     * The per-action `->visible()` calls below are what a reader sees, but
+     * a relation manager also resolves every built-in action through these
+     * methods — and with no policy registered for TaskComment the default
+     * answer is *allow*. Mirroring the visibility rules here means the gate
+     * does not depend on Filament continuing to fold isHidden() into
+     * isDisabled(), which is the only reason ->visible() blocks a crafted
+     * /livewire/update call today.
+     */
+
+    protected function getCreateAuthorizationResponse(): Response
+    {
+        return $this->canCommentOnOwner()
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.comment_not_allowed'));
+    }
+
+    protected function getEditAuthorizationResponse(Model $record): Response
+    {
+        /** @var TaskComment $record */
+        return $this->canEditComment($record)
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.comment_not_allowed'));
+    }
+
+    protected function getDeleteAuthorizationResponse(Model $record): Response
+    {
+        /** @var TaskComment $record */
+        return $this->canEditComment($record)
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.comment_not_allowed'));
+    }
+
+    protected function getDeleteAnyAuthorizationResponse(): Response
+    {
+        return (auth()->user()?->isAdmin() ?? false)
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.comment_not_allowed'));
     }
 
     public function form(Schema $schema): Schema

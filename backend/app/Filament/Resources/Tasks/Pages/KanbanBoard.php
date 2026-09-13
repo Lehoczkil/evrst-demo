@@ -184,6 +184,7 @@ class KanbanBoard extends Page
         $allowedStatuses = Task::statuses();
         $movedAcrossColumns = [];
         $rejected = [];
+        $notMine = [];
 
         // One query for the whole board instead of Task::find() per card,
         // with assignees eager-loaded: the cache-invalidation hook on
@@ -198,7 +199,7 @@ class KanbanBoard extends Page
 
         $tasks = Task::with('assignees')->findMany($ids)->keyBy('id');
 
-        DB::transaction(function () use ($payload, $allowedStatuses, $tasks, &$movedAcrossColumns, &$rejected) {
+        DB::transaction(function () use ($payload, $allowedStatuses, $tasks, &$movedAcrossColumns, &$rejected, &$notMine) {
             foreach ($payload as $status => $cardIds) {
                 if (! in_array($status, $allowedStatuses, true)) continue;
                 if (! is_array($cardIds)) continue;
@@ -209,6 +210,20 @@ class KanbanBoard extends Page
                     if ($taskId <= 0) continue;
                     $task = $tasks->get($taskId);
                     if (! $task) continue;
+
+                    // canEditTasks() above only asks "may you drag at all",
+                    // and tasks.progress answers yes for every Member. The
+                    // per-record gate is canBeProgressedBy(), and position
+                    // used to be written before anything consulted it — so
+                    // one drag reshuffled the whole board, including cards
+                    // the actor has no claim to. The counter still advances
+                    // so the cards they *may* move keep the order they were
+                    // dropped in.
+                    if (! $task->canBeProgressedBy(auth()->user())) {
+                        $notMine[] = $task;
+                        $position++;
+                        continue;
+                    }
 
                     $statusChanged = $task->status !== $status;
                     if ($statusChanged && ! $task->canTransitionTo(auth()->user(), $status)) {
@@ -256,6 +271,14 @@ class KanbanBoard extends Page
                     PostDiscordWebhook::dispatch($ping['content'], $ping['embed'], $ping['reference'])->afterResponse();
                 }
             }
+        }
+
+        if (! empty($notMine)) {
+            FilamentNotification::make()
+                ->title(__('admin.tasks.reorder_denied'))
+                ->body(__('admin.tasks.reorder_denied_body', ['count' => count($notMine)]))
+                ->warning()
+                ->send();
         }
 
         if (! empty($rejected)) {

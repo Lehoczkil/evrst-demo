@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OnshapeModels\Tables;
 
+use App\Auth\Perm;
 use App\Jobs\ExportOnshapeModelToGlb;
 use App\Models\OnshapeModel;
 use App\Services\Onshape\Client as OnshapeClient;
@@ -76,6 +77,13 @@ class OnshapeModelsTable
                     ->label(__('admin.onshape.export_glb'))
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
+                    // The export rewrites the record and spends the team's
+                    // Onshape quota, so it needs the same permission as any
+                    // other edit. Members can *view* this resource (see
+                    // OnshapeModelResource::canViewAny) and held no gate at
+                    // all here. `authorize()`, not `visible()`: this is an
+                    // authorization decision, not a layout one.
+                    ->authorize(fn () => auth()->user()?->can(Perm::MODELS_EDIT) ?? false)
                     ->action(function (OnshapeModel $r) {
                         if (! OnshapeClient::fromConfig()->isConfigured()) {
                             Notification::make()
@@ -86,19 +94,18 @@ class OnshapeModelsTable
                             return;
                         }
                         $r->forceFill(['glb_status' => OnshapeModel::GLB_QUEUED, 'glb_error' => null])->save();
-                        // Inline run so the table refreshes with the
-                        // ready/failed state in one click instead of
-                        // depending on a separate queue worker.
-                        ExportOnshapeModelToGlb::dispatchSync($r->id);
-                        $r->refresh();
-                        if ($r->hasGlb()) {
-                            Notification::make()->title(__('admin.onshape.export_done'))->success()->send();
-                        } else {
-                            Notification::make()
-                                ->title(__('admin.onshape.export_failed', ['reason' => $r->glb_error ?: '']))
-                                ->danger()
-                                ->send();
-                        }
+                        // On the queue, matching the edit page. This used to
+                        // be dispatchSync so the table could show the result
+                        // in one click, but it holds a web request open for
+                        // up to the job's full 3-minute Onshape poll — one
+                        // request per row, and the button was reachable by
+                        // anyone who could see the table.
+                        ExportOnshapeModelToGlb::dispatch($r->id, auth()->id());
+                        Notification::make()
+                            ->title(__('admin.onshape.export_queued'))
+                            ->body(__('admin.onshape.export_queued_body'))
+                            ->info()
+                            ->send();
                     }),
                 Action::make('open_in_onshape')
                     ->label(__('admin.onshape.view_in_onshape'))

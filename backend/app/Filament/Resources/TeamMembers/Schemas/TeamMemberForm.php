@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TeamMembers\Schemas;
 
 use App\Filament\Schemas\MemberPositionFields;
+use App\Filament\Support\Uploads;
 use App\Models\TeamMember;
 use App\Models\User;
 use App\Support\OrgEmail;
@@ -16,6 +17,24 @@ use Filament\Schemas\Schema;
 
 class TeamMemberForm
 {
+    /**
+     * Whether the current user may move the three fields that decide who
+     * an account *is* and where its mail lands.
+     *
+     * `team.edit` is a Manager permission, but `email` is the login,
+     * `email_private` is what User::deliveryEmail() routes password
+     * resets to, and `user_id` is the link between a roster row and a
+     * panel account. A manager able to edit any of them could point an
+     * admin's reset mail at their own inbox and take the account over, so
+     * all three are admin-only — disabled *and* not dehydrated, because a
+     * disabled field is a rendering hint and the payload is attacker
+     * controlled (same pattern as App\Filament\Auth\ForceChangeProfile).
+     */
+    private static function canEditIdentity(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -30,6 +49,9 @@ class TeamMemberForm
                     ->options(fn () => User::orderBy('name')->pluck('name', 'id')->all())
                     ->searchable()
                     ->preload()
+                    ->disabled(fn () => ! self::canEditIdentity())
+                    ->dehydrated(fn () => self::canEditIdentity())
+                    ->helperText(fn () => self::canEditIdentity() ? null : __('admin.team.identity_locked'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email')
                     ->label(__('admin.team.org_email'))
@@ -53,12 +75,18 @@ class TeamMemberForm
                                 ));
                             }),
                     )
+                    ->disabled(fn () => ! self::canEditIdentity())
+                    ->dehydrated(fn () => self::canEditIdentity())
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('email_private')
                     ->label(__('admin.team.private_email'))
                     ->email()
                     ->maxLength(180)
-                    ->helperText(__('admin.team.private_email_help'))
+                    ->disabled(fn () => ! self::canEditIdentity())
+                    ->dehydrated(fn () => self::canEditIdentity())
+                    ->helperText(fn () => self::canEditIdentity()
+                        ? __('admin.team.private_email_help')
+                        : __('admin.team.identity_locked'))
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('discord_nick')
                     ->label(__('admin.team.discord'))
@@ -114,7 +142,8 @@ class TeamMemberForm
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('photo_path')
                     ->label(__('admin.team.photo'))
-                    ->image()
+                    ->acceptedFileTypes(Uploads::PHONE_IMAGE_TYPES)
+                    ->getUploadedFileNameForStorageUsing(Uploads::storedName(...))
                     ->directory('team-members')
                     ->visibility('public')
                     ->disk('public')

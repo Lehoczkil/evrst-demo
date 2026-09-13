@@ -19,6 +19,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -34,6 +36,41 @@ class ChildrenRelationManager extends RelationManager
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
     {
         return __('admin.tasks.subtasks');
+    }
+
+    /*
+     * Authorization.
+     *
+     * A relation manager resolves its built-in actions through these
+     * methods, and with no policy registered for Task the default answer
+     * is *allow*. This manager renders on the task edit page, which a
+     * Member reaches with `tasks.progress` for any task they are on — so
+     * until these overrides landed, that Member could create and delete
+     * subtasks, two things `tasks.create` / `tasks.delete` are supposed
+     * to gate. Overriding the `get*AuthorizationResponse()` pair rather
+     * than adding `->visible()` per action covers rendering, mounting and
+     * calling in one place, and catches any action added here later.
+     */
+
+    protected function getCreateAuthorizationResponse(): Response
+    {
+        return TaskResource::canCreate()
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.subtask_not_allowed'));
+    }
+
+    protected function getDeleteAuthorizationResponse(Model $record): Response
+    {
+        return TaskResource::canDelete($record)
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.subtask_not_allowed'));
+    }
+
+    protected function getDeleteAnyAuthorizationResponse(): Response
+    {
+        return TaskResource::canDeleteAny()
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.subtask_not_allowed'));
     }
 
     public function form(Schema $schema): Schema

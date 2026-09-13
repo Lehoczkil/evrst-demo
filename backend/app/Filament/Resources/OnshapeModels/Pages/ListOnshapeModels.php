@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OnshapeModels\Pages;
 
+use App\Auth\Perm;
 use App\Filament\Resources\OnshapeModels\OnshapeModelResource;
 use App\Services\Onshape\Client as OnshapeClient;
 use Filament\Actions\Action;
@@ -30,6 +31,11 @@ class ListOnshapeModels extends ListRecords
                 ->label(__('admin.onshape.test_connection'))
                 ->icon('heroicon-o-signal')
                 ->color('gray')
+                // Spends a request against the team's Onshape credentials,
+                // so it belongs to whoever actually works with models —
+                // not to every Member who can see the gallery.
+                ->authorize(fn () => (auth()->user()?->can(Perm::MODELS_CREATE) ?? false)
+                    || (auth()->user()?->can(Perm::MODELS_EDIT) ?? false))
                 ->action(function () {
                     $result = OnshapeClient::fromConfig()->ping();
                     if ($result['ok'] ?? false) {

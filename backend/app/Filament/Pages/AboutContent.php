@@ -95,6 +95,11 @@ class AboutContent extends Page
 
     public function save(): void
     {
+        // mount() guards the page, but mount() runs once, on the GET. A
+        // /livewire/update POST reaches this method directly, so the gate
+        // has to be on the write as well as on the door.
+        abort_unless(static::canAccess(), 403);
+
         $payload = $this->form->getState();
 
         $record = $this->view();

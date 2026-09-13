@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OnshapeModels\Pages;
 
+use App\Auth\Perm;
 use App\Filament\Resources\OnshapeModels\OnshapeModelResource;
 use App\Jobs\ExportOnshapeModelToGlb;
 use App\Models\OnshapeModel;
@@ -22,6 +23,10 @@ class EditOnshapeModel extends EditRecord
                 ->label(__('admin.onshape.export_glb'))
                 ->icon('heroicon-o-arrow-path')
                 ->color('warning')
+                // The page is already gated on MODELS_EDIT, but that gate
+                // runs in mount() — a /livewire/update call on an
+                // already-mounted component never re-enters it.
+                ->authorize(fn () => auth()->user()?->can(Perm::MODELS_EDIT) ?? false)
                 ->action(function () {
                     /** @var OnshapeModel $record */
                     $record = $this->record;

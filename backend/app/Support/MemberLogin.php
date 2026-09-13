@@ -65,6 +65,16 @@ final class MemberLogin
 
     public static function provision(TeamMember $member): MemberLoginResult
     {
+        // Every Filament entry point hides its button behind canProvision(),
+        // but that is a property of the button, not of the act. Minting a
+        // panel account is the act, so it re-checks here — once, for all four
+        // callers. Guarded on hasUser() rather than checked unconditionally
+        // because `team:provision-login` runs on the deploy box with nobody
+        // signed in, and the shell is already past every gate we have.
+        if (auth()->hasUser()) {
+            abort_unless(self::canProvision(), 403);
+        }
+
         if ($member->user_id !== null) {
             return new MemberLoginResult(self::ALREADY_LINKED, $member->user);
         }

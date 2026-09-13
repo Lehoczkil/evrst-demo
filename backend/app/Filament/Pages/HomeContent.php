@@ -235,6 +235,10 @@ class HomeContent extends Page
 
     public function save(): void
     {
+        // Same reasoning as AboutContent::save() — mount() only runs on
+        // the initial GET, and this is reachable over /livewire/update.
+        abort_unless(static::canAccess(), 403);
+
         $data = $this->form->getState();
 
         $map = fn (string $key) => [

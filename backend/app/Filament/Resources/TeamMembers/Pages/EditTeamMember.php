@@ -69,6 +69,13 @@ class EditTeamMember extends EditRecord
      *
      * Bails out if another account already holds the address rather than
      * blowing up on the unique index, and tells the admin why.
+     *
+     * Admin-only at the source, not just in the form: rewriting someone
+     * else's login address is an account takeover, and `team.edit` — which
+     * is all TeamMemberResource::canEdit() asks for — is a Manager
+     * permission. The form no longer dehydrates `email`, so a non-admin
+     * can never get here with a changed address; the abort is the
+     * backstop that keeps that true if the form changes.
      */
     private function syncLoginEmail(TeamMember $record): void
     {
@@ -76,6 +83,13 @@ class EditTeamMember extends EditRecord
 
         if (! $user || ! filled($record->email) || $user->email === $record->email) {
             return;
+        }
+
+        // Only when *this* save moved the address. Healing drift the other
+        // way round (the roster row was already ahead of the account) is
+        // harmless and must not 403 a manager who touched another field.
+        if ($record->wasChanged('email')) {
+            abort_unless(auth()->user()?->isAdmin() ?? false, 403);
         }
 
         if (User::where('email', $record->email)->whereKeyNot($user->getKey())->exists()) {

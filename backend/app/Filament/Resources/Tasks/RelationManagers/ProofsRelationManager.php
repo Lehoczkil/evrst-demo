@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tasks\RelationManagers;
 
+use App\Filament\Support\Uploads;
 use App\Models\Task;
 use App\Models\TaskProof;
 use Filament\Actions\Action;
@@ -21,6 +22,8 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Database\Eloquent\Model;
 
 class ProofsRelationManager extends RelationManager
 {
@@ -29,6 +32,43 @@ class ProofsRelationManager extends RelationManager
     public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
     {
         return __('admin.tasks.proofs');
+    }
+
+    /*
+     * Same reasoning as CommentsRelationManager: the ->visible() calls in
+     * table() are the visible half, these are the authorization half that
+     * Filament consults on mount and on call. Without them the fallback
+     * for a model with no policy is *allow*.
+     */
+
+    protected function getCreateAuthorizationResponse(): Response
+    {
+        return $this->canPostProof()
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.proof_not_allowed'));
+    }
+
+    protected function getEditAuthorizationResponse(Model $record): Response
+    {
+        /** @var TaskProof $record */
+        return $this->canEditProof($record)
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.proof_not_allowed'));
+    }
+
+    protected function getDeleteAuthorizationResponse(Model $record): Response
+    {
+        /** @var TaskProof $record */
+        return $this->canEditProof($record)
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.proof_not_allowed'));
+    }
+
+    protected function getDeleteAnyAuthorizationResponse(): Response
+    {
+        return (auth()->user()?->isAdmin() ?? false)
+            ? Response::allow()
+            : Response::deny(__('admin.tasks.proof_not_allowed'));
     }
 
     public function form(Schema $schema): Schema
@@ -76,11 +116,16 @@ class ProofsRelationManager extends RelationManager
                     ->maxSize(20480)
                     ->required(fn (Get $get) => in_array($get('kind'), [TaskProof::KIND_IMAGE, TaskProof::KIND_FILE], true))
                     ->visible(fn (Get $get) => in_array($get('kind'), [TaskProof::KIND_IMAGE, TaskProof::KIND_FILE], true))
-                    ->image()
-                    // Image kind validates as image/*; file kind accepts the broader 3D/PDF set.
+                    // Image kind takes the raster list; file kind accepts the
+                    // broader 3D/PDF set. SVG is on neither — it is a scriptable
+                    // document, and proofs are opened straight from our origin.
                     ->acceptedFileTypes(fn (Get $get) => $get('kind') === TaskProof::KIND_IMAGE
-                        ? ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
+                        ? Uploads::PHONE_IMAGE_TYPES
                         : ['model/gltf-binary', 'model/gltf+json', 'application/octet-stream', 'application/pdf', 'application/zip', 'application/step', 'application/sla'])
+                    // The file kind's allow-list includes application/octet-stream,
+                    // which is whatever the sniffer could not name — so the stored
+                    // extension especially cannot be the one the browser sent.
+                    ->getUploadedFileNameForStorageUsing(Uploads::storedName(...))
                     ->preserveFilenames(false)
                     ->columnSpan(12),
             ])
