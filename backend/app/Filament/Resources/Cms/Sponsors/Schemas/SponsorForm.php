@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Cms\Sponsors\Schemas;
 
+use App\Filament\Support\Uploads;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -49,19 +50,13 @@ class SponsorForm
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 FileUpload::make('logo')
                     ->label(__('admin.sponsors.logo'))
-                    ->image()
                     // iPhone Safari uploads as image/heic and Android sometimes as
                     // image/* with no extension; Filament's ->image() helper rejects
                     // both, so spell out the full mobile-friendly accept list.
-                    ->acceptedFileTypes([
-                        'image/jpeg',
-                        'image/png',
-                        'image/svg+xml',
-                        'image/webp',
-                        'image/gif',
-                        'image/heic',
-                        'image/heif',
-                    ])
+                    // SVG used to be on it — an SVG is a scriptable document, and
+                    // a sponsor logo is served from our own origin.
+                    ->acceptedFileTypes(Uploads::PHONE_IMAGE_TYPES)
+                    ->getUploadedFileNameForStorageUsing(Uploads::storedName(...))
                     ->maxSize(8192)
                     ->openable()
                     ->downloadable()

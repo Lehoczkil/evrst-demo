@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Cms\Events\Schemas;
 
+use App\Filament\Support\Uploads;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -85,7 +86,8 @@ class EventForm
                             ->columnSpan(['default' => 12, 'md' => 6]),
                         FileUpload::make('image')
                             ->label(__('admin.events.image'))
-                            ->image()
+                            ->acceptedFileTypes(Uploads::PHONE_IMAGE_TYPES)
+                            ->getUploadedFileNameForStorageUsing(Uploads::storedName(...))
                             ->directory('events')
                             ->visibility('public')
                             ->disk('public')

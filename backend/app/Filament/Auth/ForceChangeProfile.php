@@ -2,6 +2,7 @@
 
 namespace App\Filament\Auth;
 
+use App\Filament\Support\Uploads;
 use Filament\Auth\Pages\EditProfile;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
@@ -26,7 +27,10 @@ class ForceChangeProfile extends EditProfile
                         FileUpload::make('avatar')
                             ->label(__('admin.profile.avatar'))
                             ->avatar()
-                            ->image()
+                            // Raster only, and the stored extension comes
+                            // from the bytes — see App\Filament\Support\Uploads.
+                            ->acceptedFileTypes(Uploads::IMAGE_TYPES)
+                            ->getUploadedFileNameForStorageUsing(Uploads::storedName(...))
                             ->imageCropAspectRatio('1:1')
                             ->disk('public')
                             ->directory('avatars')

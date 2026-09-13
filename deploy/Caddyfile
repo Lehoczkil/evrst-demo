@@ -5,6 +5,33 @@
 {$SITE_ADDRESS:localhost} {
 	encode zstd gzip
 
+	header {
+		# Never let a browser second-guess a declared Content-Type. The
+		# panel and the SPA are one origin, so a sniffed upload would run
+		# with the session cookie in scope.
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Nothing here is meant to be framed, and the panel is a
+		# session-authenticated UI — the classic clickjacking target.
+		X-Frame-Options "SAMEORIGIN"
+		# Don't advertise the server.
+		-Server
+	}
+
+	# HSTS, but not on the localhost default: pinning localhost to HTTPS
+	# in a developer's browser breaks every *other* project they run on it.
+	@public_host not host localhost
+	header @public_host Strict-Transport-Security "max-age=31536000"
+
+	# Uploads are user-supplied bytes served from our own origin. New ones
+	# can no longer land under an executable extension — App\Filament\
+	# Support\Uploads derives it from the file's content — but anything
+	# stored before that is still on the app-data volume, and an SVG is a
+	# scriptable document that the server correctly labels image/svg+xml,
+	# so nosniff alone would not stop it. Force those to download.
+	@legacy_active_uploads path /storage/*.svg /storage/*.svgz /storage/*.xml /storage/*.html /storage/*.htm /storage/*.xhtml
+	header @legacy_active_uploads Content-Disposition "attachment"
+
 	# Everything Laravel + Filament owns. Anything the panel requests that is
 	# missing here falls through to the SPA handler below, whose try_files
 	# answers index.html — a 200 of the wrong content type, so the browser

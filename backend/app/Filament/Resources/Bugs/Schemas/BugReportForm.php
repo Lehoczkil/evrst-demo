@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Bugs\Schemas;
 
 use App\Auth\Perm;
+use App\Filament\Support\Uploads;
 use App\Models\BugReport;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -59,7 +60,11 @@ class BugReportForm
                             ->label(__('admin.bugs.screenshot'))
                             ->directory('bug-reports')
                             ->disk('public')
-                            ->image()
+                            // Anyone signed in can file a report, so this is
+                            // the widest-open upload in the panel: raster only,
+                            // stored under a content-derived extension.
+                            ->acceptedFileTypes(Uploads::PHONE_IMAGE_TYPES)
+                            ->getUploadedFileNameForStorageUsing(Uploads::storedName(...))
                             ->imageEditor()
                             ->maxSize(5120)
                             ->columnSpanFull(),
