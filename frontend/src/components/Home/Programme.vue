@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { motion } from 'motion-v';
-import { CmsRequests, type AboutItemResource } from '@/services/requests/CmsRequests';
+import { CmsRequests, type AboutItemPayload, type AboutItemResource } from '@/services/requests/CmsRequests';
 import { cardStagger, railFill } from './anims';
 
 /*
@@ -32,14 +32,14 @@ const { data: rows, status, fetch: refetch } = useQuery<AboutItemResource[]>({
 });
 
 /*
-  What the CMS does not carry: the state, the year span and the apogee
-  figure. These are per-vehicle facts the AboutProject payload has no
-  columns for — `start_at` / `end_at` exist but a flown/building/design
-  flag does not, and neither does an altitude.
+  The state and the year span now live on the project itself, editable in
+  the panel (About → Projects). This stays as a fallback for a row that
+  has neither — a project added before the fields existed, or one someone
+  has not filled in yet — so the rail and the badges still render.
 
-  Matched to the CMS rows BY INDEX, which is the honest limitation here:
-  reordering the collection in the panel would mismatch them. Promoting
-  these to real columns is the fix, and it is a backend change.
+  It is matched BY INDEX, which is exactly why it stopped being the source
+  of truth: reordering the collection handed a rocket someone else's
+  stage. The record wins wherever it has an answer.
 */
 const META = [
   { state: 'flown', years: '2024 — 2025' },
@@ -55,7 +55,7 @@ const META = [
 const fallback = computed(() => {
   const raw = tm('programme.vehicles') as unknown[];
 
-  return (Array.isArray(raw) ? raw : []) as { title: string; description: string }[];
+  return (Array.isArray(raw) ? raw : []) as AboutItemPayload[];
 });
 
 const vehicles = computed(() => {
@@ -65,9 +65,16 @@ const vehicles = computed(() => {
 
   return source.map((vehicle, i) => ({
     ...vehicle,
-    state: META[i]?.state ?? 'design',
-    years: META[i]?.years ?? '',
-    apogee: t(`programme.apogee${i + 1}`, ''),
+    state: vehicle.state || META[i]?.state || 'design',
+    years: vehicle.years || META[i]?.years || '',
+    /*
+      No index fallback for the altitude. The bundled strings were keyed
+      by position and did not describe the projects actually in the
+      database — the first card claimed 640 m while the first project's
+      own text says 2000 m. A card with no figure shows no line, which is
+      honest; the figure is a field in the panel now.
+    */
+    apogee: vehicle.apogee || '',
   }));
 });
 

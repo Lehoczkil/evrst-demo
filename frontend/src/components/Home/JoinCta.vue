@@ -20,6 +20,9 @@ import { cardStagger, sectionRise } from './anims';
 /  VARIABLES
 ---------------------------------------------*/
 const { t, locale } = useI18n();
+// Editable in the panel (Site → Home texts); falls back to the
+// bundled translation per string.
+const { text } = useHomeCopy();
 
 const { data: groups } = useQuery<TeamGroup[]>({
   key: ['team-groups', locale],
@@ -46,14 +49,14 @@ const disciplines = computed(() => (groups.value ?? []).filter(
 </script>
 
 <template>
-  <SectionShell id="join" :eyebrow="t('join.eyebrow')" :title="t('join.title')">
+  <SectionShell id="join" :eyebrow="text('join.eyebrow')" :title="text('join.title')">
     <div class="join">
       <motion.div v-bind="sectionRise()">
-        <p class="lede">{{ t('join.lede') }}</p>
+        <p class="lede">{{ text('join.lede') }}</p>
         <div class="cta-row">
-          <RouterLink to="/join-us" class="btn">{{ t('join.cta') }}</RouterLink>
+          <RouterLink to="/join-us" class="btn">{{ text('join.cta') }}</RouterLink>
           <a class="btn btn--ghost" :href="`mailto:${CONTACT_EMAIL}`">
-            {{ t('join.question') }}
+            {{ text('join.question') }}
           </a>
         </div>
       </motion.div>

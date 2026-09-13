@@ -33,6 +33,15 @@ export interface EventPayload {
 export interface AboutItemPayload {
   title: string;
   description: string;
+  /*
+    Projects only, and all optional — goals share this shape and carry
+    none of them. Editable in the panel under About → Projects; they used
+    to be bundled in the SPA and matched to a row by its position in the
+    collection.
+  */
+  state?: 'flown' | 'building' | 'design';
+  years?: string;
+  apogee?: string;
 }
 
 export type SponsorResource = Resource<SponsorPayload>;

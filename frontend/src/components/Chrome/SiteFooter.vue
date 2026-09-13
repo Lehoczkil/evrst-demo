@@ -18,6 +18,9 @@ import { CONTACT_EMAIL, UNIVERSITY_URL } from '@/lib/site';
 /  VARIABLES
 ---------------------------------------------*/
 const { t } = useI18n();
+// Editable in the panel (Site → Home texts); falls back to the
+// bundled translation per string.
+const { text } = useHomeCopy();
 
 const SITE_LINKS = [
   { key: 'mission', to: '/#mission' },
@@ -53,7 +56,7 @@ const year = computed(() => new Date().getFullYear());
         <p class="footer__mark">EVRST</p>
         <p class="footer__addr">
           Escape Velocity Rocketry Student Team<br>
-          {{ t('contact.address') }}
+          {{ text('contact.address') }}
         </p>
       </div>
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Cms\AboutProjects\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -36,6 +37,39 @@ class AboutProjectForm
                     ->seconds(false)
                     ->displayFormat('d M Y H:i')
                     ->after('start_at')
+                    ->columnSpan(['default' => 12, 'md' => 6]),
+                /*
+                  Per-vehicle facts the SPA used to keep in its message
+                  files and match to a project by its POSITION in the
+                  collection — so reordering the list here silently gave a
+                  rocket someone else's altitude. They belong on the row.
+                */
+                Select::make('state')
+                    ->label(__('admin.cms.project_state'))
+                    ->options([
+                        'flown' => __('admin.cms.project_states.flown'),
+                        'building' => __('admin.cms.project_states.building'),
+                        'design' => __('admin.cms.project_states.design'),
+                    ])
+                    ->native(false)
+                    ->helperText(__('admin.cms.project_state_help'))
+                    ->columnSpan(['default' => 12, 'md' => 4]),
+                TextInput::make('years')
+                    ->label(__('admin.cms.project_years'))
+                    ->maxLength(40)
+                    ->placeholder('2024 — 2025')
+                    ->helperText(__('admin.cms.project_years_help'))
+                    ->columnSpan(['default' => 12, 'md' => 4]),
+                TextInput::make('apogee_en')
+                    ->label(__('admin.cms.project_apogee') . ' (EN)')
+                    ->maxLength(80)
+                    ->placeholder('Apogee reached · 640 m')
+                    ->helperText(__('admin.cms.project_apogee_help'))
+                    ->columnSpan(['default' => 12, 'md' => 6]),
+                TextInput::make('apogee_hu')
+                    ->label(__('admin.cms.project_apogee') . ' (HU)')
+                    ->maxLength(80)
+                    ->placeholder('Elért csúcsmagasság · 640 m')
                     ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('discord_webhook_url')
                     ->label(__('admin.cms.project_webhook'))

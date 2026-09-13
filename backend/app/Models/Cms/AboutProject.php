@@ -47,6 +47,63 @@ class AboutProject extends CollectionResource
         );
     }
 
+    /**
+     * Where the vehicle is in its life: flown / building / design.
+     *
+     * The SPA used to derive this from the row's INDEX in the collection,
+     * along with the year span and the apogee — its own comment called
+     * that "the honest limitation here", because reordering the projects
+     * in the panel silently reassigned them. They are per-vehicle facts,
+     * so they live on the vehicle.
+     */
+    protected function state(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->readPayload('state'),
+            set: fn ($value) => $this->writePayload('state', $value),
+        );
+    }
+
+    /** Free text, e.g. "2024 — 2025" or "2027 —". Not a date range: an open
+     *  end and an em dash are part of how it reads on the page. */
+    protected function years(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->readPayload('years'),
+            set: fn ($value) => $this->writePayload('years', $value),
+        );
+    }
+
+    /**
+     * The altitude line, label and figure together — "Elért csúcsmagasság
+     * · 640 m". One field rather than two because the label changes with
+     * the state (reached / target / category) and the team writes the pair
+     * that fits.
+     */
+    protected function apogee(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->readPayload('apogee'),
+            set: fn ($value) => $this->writePayload('apogee', $value),
+        );
+    }
+
+    protected function apogeeEn(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->readPayloadLocale('apogee', 'en'),
+            set: fn ($value) => $this->writePayloadLocale('apogee', 'en', $value),
+        );
+    }
+
+    protected function apogeeHu(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->readPayloadLocale('apogee', 'hu'),
+            set: fn ($value) => $this->writePayloadLocale('apogee', 'hu', $value),
+        );
+    }
+
     protected function discordWebhookUrl(): Attribute
     {
         return Attribute::make(

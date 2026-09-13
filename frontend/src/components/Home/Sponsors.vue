@@ -25,6 +25,9 @@ import { cardStagger } from './anims';
 /  VARIABLES
 ---------------------------------------------*/
 const { t, locale } = useI18n();
+// Editable in the panel (Site → Home texts); falls back to the
+// bundled translation per string.
+const { text } = useHomeCopy();
 
 /** Where a grid of tiles stops being the right object. */
 const RIBBON_FROM = 8;
@@ -73,11 +76,11 @@ const eyebrow = computed(() => t('sponsors.eyebrow', { count: rows.value.length 
     <div v-else class="sponsor-grid" :class="{ 'sponsor-grid--ribbon': asRibbon }">
       <div class="pitch">
         <div>
-          <h3>{{ t('sponsors.pitchTitle') }}</h3>
-          <p>{{ t('sponsors.pitchBody') }}</p>
+          <h3>{{ text('sponsors.pitchTitle') }}</h3>
+          <p>{{ text('sponsors.pitchBody') }}</p>
         </div>
         <a class="btn" :href="`mailto:${CONTACT_EMAIL}?subject=${t('sponsors.mailSubject')}`">
-          {{ t('sponsors.cta') }}
+          {{ text('sponsors.cta') }}
         </a>
       </div>
 

@@ -30,6 +30,9 @@ import { cardStagger, sectionRise } from './anims';
 /  VARIABLES
 ---------------------------------------------*/
 const { t, locale } = useI18n();
+// Editable in the panel (Site → Home texts); falls back to the
+// bundled translation per string.
+const { text } = useHomeCopy();
 
 const { data: goalRows } = useQuery<AboutItemResource[]>({
   key: ['about-goals', locale],
@@ -73,6 +76,9 @@ const { data: projects } = useQuery<AboutItemResource[]>({
   render.
 */
 const MARKS = ['manifesto.mark1', 'manifesto.mark2', 'manifesto.mark3'];
+
+/** The mark for a goal, from the panel when set, bundled copy otherwise. */
+const markAt = (i: number) => text(MARKS[i] ?? '');
 /*---------------------------------------------
 /  METHODS
 ---------------------------------------------*/
@@ -104,7 +110,7 @@ const goals = computed(() => {
 */
 const figures = computed(() => {
   const rows: { label: string; value: string; gold?: boolean }[] = [
-    { label: t('manifesto.founded'), value: '2024' },
+    { label: t('manifesto.founded'), value: text('manifesto.founded') },
   ];
 
   if (members.value?.length) {
@@ -136,7 +142,7 @@ const figures = computed(() => {
 
       <motion.div v-bind="sectionRise(0.05)" class="manifesto__body">
         <p class="lede">{{ body }}</p>
-        <p class="lede">{{ t('manifesto.second') }}</p>
+        <p class="lede">{{ text('manifesto.second') }}</p>
       </motion.div>
 
       <!-- One hairline strip, not four number tiles: these are context
@@ -157,7 +163,7 @@ const figures = computed(() => {
           v-bind="cardStagger(i)"
           class="goal"
         >
-          <p class="goal__mark">{{ t(MARKS[i] ?? MARKS[0]) }}</p>
+          <p class="goal__mark">{{ markAt(i) || markAt(0) }}</p>
           <h3 class="goal__title">{{ goal.title }}</h3>
           <p class="goal__text">{{ goal.description }}</p>
         </motion.div>
