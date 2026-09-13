@@ -127,19 +127,35 @@ onBeforeUnmount(() => {
 }
 
 /*
-  On a phone there is no room for a row of floating controls. The pill
-  grows to fit its labels plus the language switch, its right edge runs
-  under the rocket, and the pill wins — it is `--z-nav` (100) against the
-  rocket's `--z-float` (90).
+  Below `md` the rocket sits ABOVE the pill instead of beside it.
 
-  Lifting the rocket above the pill rather than reordering the z stack: at
-  the same height the two would still collide, and the band around the
-  pill is `pointer-events: none` precisely because these two controls have
-  fought over the same clicks before.
+  The pill is centred and the rocket is pinned right, so they converge as
+  the viewport narrows. Measured on the live site: the pill is 383px in
+  English and 439px in Hungarian (which carries one menu item more), the
+  rocket is 41px, and its inset is `clamp(14px, 2.6vw, 34px)`. They touch
+  when
+
+      viewport < pillWidth + 2 x inset + 2 x rocketWidth
+
+  which for the Hungarian pill is 549px at the small inset and 589px at
+  the large one. The first attempt at this used 576px — inside that range,
+  so the bug survived between 576 and 589px.
+
+  `md` (768px) is not a tighter guess, it is headroom: ~180px of it, which
+  is four more menu items' worth. The pill's width is content-dependent —
+  it changes with the language and with how many sections the page has —
+  so the threshold has to sit far enough away that adding a nav item does
+  not quietly bring the overlap back.
+
+  Above the pill rather than reordering the z stack: level with it they
+  would still collide, and the band around the pill is
+  `pointer-events: none` precisely because these two have fought over the
+  same clicks before.
 */
-@media (width < 576px) {
+@media (width < 768px) {
   .to-top {
-    bottom: calc(2vh + 4px + 52px + 12px);
+    // Pill: 2vh inset + 42px tall (measured), then a 12px gap.
+    bottom: calc(2vh + 42px + 12px);
   }
 }
 
