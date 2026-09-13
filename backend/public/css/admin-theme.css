@@ -1230,11 +1230,19 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 
     /* Form-grid columns collapse to single column on phones — Filament
        already does some of this through its own breakpoints, but our
-       12-col forms occasionally render side-by-side fields that
-       collide. */
+       12-col forms occasionally render side-by-side fields that collide.
+
+       `1 / -1`, not `span 12`. A field declared columnSpanFull() is
+       emitted by Filament as `grid-column: 1 / -1`; overriding that with
+       `span 12` on a grid that has collapsed to ONE column makes the
+       browser open eleven implicit columns and the field renders at a
+       twelfth of the row. That is why the bug-report title and
+       description were ~90px wide on a phone while the fields that
+       declare `['default' => 12, …]` filled the row. `1 / -1` is the
+       whole row whatever the grid underneath happens to be. */
     .fi-fo-component-ctn,
     .fi-sc-component-ctn {
-        grid-column: span 12 / span 12 !important;
+        grid-column: 1 / -1 !important;
     }
     .fi-section,
     .fi-fo-section { padding: 1rem !important; }
