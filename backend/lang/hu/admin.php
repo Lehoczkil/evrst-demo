@@ -310,6 +310,7 @@ return [
         'section_behaviour' => 'Viselkedés',
         'section'           => 'Szekció',
         'section_title'     => 'Szekció címe',
+        'section_description'    => 'Szekció leírása',
         'section_key_invalid' => 'Csak kisbetű, szám és kötőjel.',
         'type'              => 'Típus',
         'types'             => [

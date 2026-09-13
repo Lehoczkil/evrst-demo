@@ -310,6 +310,7 @@ return [
         'section_behaviour' => 'Behaviour',
         'section'           => 'Section',
         'section_title'     => 'Section title',
+        'section_description'    => 'Section description',
         'section_key_invalid' => 'Lowercase letters, digits and hyphens only.',
         'type'              => 'Type',
         'types'             => [

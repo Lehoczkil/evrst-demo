@@ -10,6 +10,7 @@ use BackedEnum;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -68,6 +69,24 @@ class ApplicationFormSectionResource extends Resource
                     ->required()
                     ->maxLength(120)
                     ->columnSpan(['default' => 12, 'md' => 6]),
+                /*
+                  The SPA renders this under the section heading
+                  (JoinUsPage.vue) and ApplicationForm::schema() has always
+                  shipped it — there was simply no way to type one, so it
+                  was null on every section and the paragraph never
+                  appeared. Optional: a section that needs no explanation
+                  should not grow an empty line.
+                */
+                Textarea::make('description_en')
+                    ->label(__('admin.application_form.section_description') . ' (EN)')
+                    ->rows(2)
+                    ->maxLength(500)
+                    ->columnSpan(['default' => 12, 'md' => 6]),
+                Textarea::make('description_hu')
+                    ->label(__('admin.application_form.section_description') . ' (HU)')
+                    ->rows(2)
+                    ->maxLength(500)
+                    ->columnSpan(['default' => 12, 'md' => 6]),
                 TextInput::make('key')
                     ->label(__('admin.application_form.key'))
                     ->required()
@@ -121,6 +140,8 @@ class ApplicationFormSectionResource extends Resource
                     ->fillForm(fn (ApplicationFormSection $record) => [
                         'title_en' => $record->title['en'] ?? null,
                         'title_hu' => $record->title['hu'] ?? null,
+                        'description_en' => $record->description['en'] ?? null,
+                        'description_hu' => $record->description['hu'] ?? null,
                     ] + $record->attributesToArray())
                     ->mutateDataUsing(fn (array $data) => self::packTitle($data)),
                 DeleteAction::make(),
@@ -129,17 +150,28 @@ class ApplicationFormSectionResource extends Resource
             ->emptyStateDescription(__('admin.application_form.sections_empty_b'));
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Fold the per-locale inputs back into their `{en, hu}` columns.
+     *
+     * @return array<string, mixed>
+     */
     public static function packTitle(array $data): array
     {
-        $packed = [];
-        foreach (['en', 'hu'] as $lang) {
-            if (filled($data['title_' . $lang] ?? null)) {
-                $packed[$lang] = $data['title_' . $lang];
+        foreach (['title', 'description'] as $field) {
+            $packed = [];
+
+            foreach (['en', 'hu'] as $lang) {
+                if (filled($data["{$field}_{$lang}"] ?? null)) {
+                    $packed[$lang] = $data["{$field}_{$lang}"];
+                }
+
+                unset($data["{$field}_{$lang}"]);
             }
-            unset($data['title_' . $lang]);
+
+            // An all-blank description is null, not an empty map — the SPA
+            // tests the value for truthiness before rendering the line.
+            $data[$field] = $packed ?: ($field === 'title' ? [] : null);
         }
-        $data['title'] = $packed;
 
         return $data;
     }
