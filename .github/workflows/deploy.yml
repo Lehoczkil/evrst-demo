@@ -187,15 +187,21 @@ jobs:
       group: deploy-production
       cancel-in-progress: false
     steps:
-      - name: SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-
+      # Before the agent, so a key that fails to load reports itself rather
+      # than surfacing later as "Host key verification failed" from an
+      # unrelated step.
       - name: Trust the host
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      # `error in libcrypto` here means the secret is not a byte-for-byte
+      # copy of the key file — usually a trailing newline lost to a paste.
+      # `gh secret set DEPLOY_SSH_KEY < ~/.ssh/hetzner` sets it correctly.
+      - name: SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
       # Over stdin, so the token never appears in the server's process list
       # or shell history. Short-lived and scoped to this run — nothing
@@ -254,7 +260,7 @@ jobs:
           exit 1
 
       - name: Prune old images
-        if: always()
+        if: success()
         env:
           HOST: ${{ secrets.DEPLOY_HOST }}
         # The volume holds the database; the image cache does not, and a
