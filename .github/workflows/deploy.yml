@@ -17,8 +17,12 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/evrst-demo/backend
-  WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/evrst-demo/web
+  # Lowercase and literal: GHCR rejects an uppercase path, and
+  # `github.repository_owner` is "Lehoczkil". These two strings have to
+  # match compose.yaml on the server, so spelling them out keeps the pair
+  # visible rather than hidden behind a case transform.
+  BACKEND_IMAGE: ghcr.io/lehoczkil/evrst-demo/backend
+  WEB_IMAGE: ghcr.io/lehoczkil/evrst-demo/web
 
 jobs:
   # ── Checks ───────────────────────────────────────────────────────────────
@@ -46,9 +50,20 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
+      # `--no-scripts`, then create the runtime directories, then discover —
+      # exactly the order the Dockerfile uses. composer's
+      # post-autoload-dump hook runs `package:discover`, which boots Blade
+      # and throws "Please provide a valid cache path" because
+      # storage/framework/views is not tracked by git and does not exist in
+      # a fresh checkout.
       - name: Install
         working-directory: backend
-        run: composer install --no-interaction --no-progress --prefer-dist
+        run: |
+          composer install --no-interaction --no-progress --prefer-dist --no-scripts
+          mkdir -p storage/framework/cache/data storage/framework/sessions \
+                   storage/framework/views storage/framework/testing \
+                   storage/logs bootstrap/cache
+          php artisan package:discover --ansi
 
       # phpunit.xml pins sqlite/:memory:, MAIL_MAILER=array and empty Discord
       # credentials, so the suite needs no services and cannot reach out.
