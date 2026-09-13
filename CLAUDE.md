@@ -46,9 +46,9 @@ Frontend `.env` already points `VITE_API_URL` at `http://localhost:8000/api`.
 
 **Current target: Hetzner, via `compose.yaml`.** One VM, one domain. Caddy (`deploy/Caddyfile`) serves the built SPA at `/` and reverse-proxies `/admin`, `/api`, `/livewire`, `/storage`, `/css|js/filament`, `/up` to the Laravel container. Four services: `backend` (owns the schema — `RUN_RELEASE_TASKS` defaults to 1 so it alone runs migrate+seed on boot), `queue` (`queue:work`), `scheduler` (ticks `schedule:run` every 60s), `web` (Caddy + TLS). SQLite + `storage/` live on the `app-data` volume. Env comes from `backend/.env.production` (gitignored; copy `backend/.env.production.example`) plus `SITE_ADDRESS` in the repo-root `.env`. Guides: `deploy/README.md`, `deploy/HETZNER.md`, `deploy/DNS.md`.
 
-Two stale deploy paths are still in the tree — don't assume either works:
-- `.github/workflows/deploy.yaml` pushes the SPA to Dokku on a `v*` tag. Its version check reads `./package.json`, which **does not exist** at the repo root, so the job fails before deploying. Either repoint it at `frontend/package.json` or delete it.
-- `deploy/fly/fly.toml` is a parked Fly.io config. It predates the compose stack and, unlike `compose.yaml`, does **not** set `RUN_RELEASE_TASKS=0` on its `worker` process group — both process groups would run `migrate` against the same SQLite file. Fix that before ever using it.
+Both stale deploy paths are **gone** (2026-09-13). For the record, and because the note that stood here was wrong in a way that mattered:
+- `.github/workflows/deploy.yaml` pushed the SPA to Dokku on a `v*` tag. This guide claimed its version check read `./package.json` and therefore always failed — it actually read `./frontend/package.json`, so **any `v*` tag really would have deployed**, to an unmonitored second host, using `DOKKU_SSH_PRIVATE_KEY`. Deleted. Rotate `DOKKU_SSH_PRIVATE_KEY` and `DOKKU_REMOTE_URL` in the repo secrets if they are still set.
+- `deploy/fly/` was a parked Fly.io config predating the compose stack, and it did not set `RUN_RELEASE_TASKS=0` on its `worker` group — both process groups would have run `migrate` against one SQLite file. Deleted.
 
 ## Things to know about this user
 
