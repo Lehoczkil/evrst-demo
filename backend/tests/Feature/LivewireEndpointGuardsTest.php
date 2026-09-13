@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use App\Filament\Pages\AboutContent;
 use App\Filament\Pages\DatabaseInspector;
 use App\Filament\Pages\HomeContent;
@@ -210,7 +212,7 @@ class LivewireEndpointGuardsTest extends TestCase
         ];
     }
 
-    /** @dataProvider offsiteTargets */
+    #[DataProvider('offsiteTargets')]
     public function test_the_locale_switch_refuses_an_offsite_return_target(string $target): void
     {
         $this->actingAs($this->makeAdmin())
@@ -218,7 +220,7 @@ class LivewireEndpointGuardsTest extends TestCase
             ->assertRedirect('/admin');
     }
 
-    /** @dataProvider offsiteTargets */
+    #[DataProvider('offsiteTargets')]
     public function test_an_offsite_referer_is_ignored_too(string $target): void
     {
         $this->actingAs($this->makeAdmin())

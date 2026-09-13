@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use App\Models\BugReport;
 use App\Models\CalendarEvent;
 use App\Models\Cms\Event;
@@ -49,9 +51,7 @@ class AdminPagesTest extends TestCase
             ->assertOk();
     }
 
-    /**
-     * @dataProvider customPagesProvider
-     */
+        #[DataProvider('customPagesProvider')]
     public function test_custom_admin_pages_render(string $path): void
     {
         $this->actingAs($this->makeAdmin())->get($path)->assertOk();
@@ -72,17 +72,13 @@ class AdminPagesTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider listPagesProvider
-     */
+        #[DataProvider('listPagesProvider')]
     public function test_resource_index_pages_render(string $path): void
     {
         $this->actingAs($this->makeAdmin())->get($path)->assertOk();
     }
 
-    /**
-     * @dataProvider listPagesProvider
-     */
+        #[DataProvider('listPagesProvider')]
     public function test_resource_create_pages_render(string $path): void
     {
         // Resources without a `create` page (read-only listings,

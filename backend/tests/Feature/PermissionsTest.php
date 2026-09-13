@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use App\Auth\Perm;
 use Database\Seeders\CollectionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -52,9 +54,7 @@ class PermissionsTest extends TestCase
         $this->assertFalse($member->can(Perm::APPLICATIONS_ACCEPT));
     }
 
-    /**
-     * @dataProvider adminOnlyRoutesProvider
-     */
+        #[DataProvider('adminOnlyRoutesProvider')]
     public function test_admin_only_routes_are_blocked_for_member(string $path): void
     {
         $member = $this->makeMember();
@@ -85,9 +85,7 @@ class PermissionsTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider managerHiddenRoutesProvider
-     */
+        #[DataProvider('managerHiddenRoutesProvider')]
     public function test_routes_hidden_from_manager_block_them(string $path): void
     {
         $manager = $this->makeManager();
@@ -127,8 +125,8 @@ class PermissionsTest extends TestCase
      * wide open by accident before, and only the calendar was supposed to
      * change.
      *
-     * @dataProvider memberReadableRoutesProvider
      */
+    #[DataProvider('memberReadableRoutesProvider')]
     public function test_member_readable_routes_stay_open(string $path): void
     {
         $member = $this->makeMember();

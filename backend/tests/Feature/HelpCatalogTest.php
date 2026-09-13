@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use Database\Seeders\CollectionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -103,8 +105,8 @@ class HelpCatalogTest extends TestCase
      * the page. Standard pages get it from PAGE_HEADER_HEADING_AFTER; the
      * profile page is a "simple" page and needs SIMPLE_PAGE_START instead.
      *
-     * @dataProvider helpButtonPagesProvider
      */
+    #[DataProvider('helpButtonPagesProvider')]
     public function test_the_help_button_reaches_the_page(string $path, string $key): void
     {
         $this->seed([RoleSeeder::class, CollectionSeeder::class]);

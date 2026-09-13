@@ -2,6 +2,8 @@
 
 namespace Tests\Unit;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 use App\Support\OrgEmail;
 use Tests\TestCase;
 
@@ -24,7 +26,7 @@ class OrgEmailTest extends TestCase
         ];
     }
 
-    /** @dataProvider nameProvider */
+    #[DataProvider('nameProvider')]
     public function test_it_builds_the_org_address(string $name, ?string $expected): void
     {
         $this->assertSame($expected, OrgEmail::forName($name));
