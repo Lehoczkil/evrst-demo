@@ -95,21 +95,6 @@ onBeforeUnmount(() => {
   // Level with the pill's own inset, so the two read as one row of
   // floating controls rather than two unrelated things.
   bottom: calc(2vh + 4px);
-
-  /*
-    Except on a phone, where there is no room for a row. The pill grows to
-    fit its labels plus the language switch and its right edge runs under
-    the rocket — and the pill is `--z-nav` (100) against the rocket's
-    `--z-float` (90), so the pill wins and the rocket is half-hidden.
-
-    Lifting it above the pill is the fix rather than reordering the z
-    stack: at the same height the two would still collide, and the band
-    around the pill is `pointer-events: none` precisely because these two
-    controls used to fight over the same clicks.
-  */
-  @media only screen and (max-width: 575px) {
-    bottom: calc(2vh + 4px + 52px + 12px);
-  }
   color: var(--ink-0);
   background: var(--gold-500);
   transition:
@@ -138,6 +123,23 @@ onBeforeUnmount(() => {
     display: block;
     width: 22px;
     height: 22px;
+  }
+}
+
+/*
+  On a phone there is no room for a row of floating controls. The pill
+  grows to fit its labels plus the language switch, its right edge runs
+  under the rocket, and the pill wins — it is `--z-nav` (100) against the
+  rocket's `--z-float` (90).
+
+  Lifting the rocket above the pill rather than reordering the z stack: at
+  the same height the two would still collide, and the band around the
+  pill is `pointer-events: none` precisely because these two controls have
+  fought over the same clicks before.
+*/
+@media (width < 576px) {
+  .to-top {
+    bottom: calc(2vh + 4px + 52px + 12px);
   }
 }
 

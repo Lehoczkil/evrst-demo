@@ -64,6 +64,13 @@ COPY . .
 # DB_CONNECTION=sqlite + DB_DATABASE=:memory: so no external services
 # are needed. A red suite fails the Docker build, which fails the
 # deploy — bad code never replaces a known-good production.
+#
+# CI passes RUN_TESTS=0 because its own job already ran the suite, on a
+# runner, in parallel with the frontend checks — running it twice would
+# add minutes to every deploy for no extra signal. A hand-built image
+# (`docker compose up --build`, no pipeline involved) keeps the guard,
+# because there it is the only one.
+ARG RUN_TESTS=1
 RUN composer dump-autoload --no-scripts \
     && mkdir -p \
         storage/framework/cache/data \
@@ -72,9 +79,13 @@ RUN composer dump-autoload --no-scripts \
         storage/framework/testing \
         storage/logs \
         bootstrap/cache \
-    && APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')" \
-       APP_ENV=testing \
-       php artisan test --stop-on-failure
+    && if [ "$RUN_TESTS" = "1" ]; then \
+           APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')" \
+           APP_ENV=testing \
+           php artisan test --stop-on-failure; \
+       else \
+           echo "RUN_TESTS=0 — suite already run by CI, skipping"; \
+       fi
 
 # Strip developer comments out of the Blade views.
 #

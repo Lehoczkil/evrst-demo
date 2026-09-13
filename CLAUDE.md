@@ -46,6 +46,16 @@ Frontend `.env` already points `VITE_API_URL` at `http://localhost:8000/api`.
 
 **Current target: Hetzner, via `compose.yaml`.** One VM, one domain. Caddy (`deploy/Caddyfile`) serves the built SPA at `/` and reverse-proxies `/admin`, `/api`, `/livewire`, `/storage`, `/css|js/filament`, `/up` to the Laravel container. Four services: `backend` (owns the schema — `RUN_RELEASE_TASKS` defaults to 1 so it alone runs migrate+seed on boot), `queue` (`queue:work`), `scheduler` (ticks `schedule:run` every 60s), `web` (Caddy + TLS). SQLite + `storage/` live on the `app-data` volume. Env comes from `backend/.env.production` (gitignored; copy `backend/.env.production.example`) plus `SITE_ADDRESS` in the repo-root `.env`. Guides: `deploy/README.md`, `deploy/HETZNER.md`, `deploy/DNS.md`.
 
+**Pushing to `main` deploys.** `.github/workflows/deploy.yml`: three check jobs in parallel (backend `php artisan test`, frontend `bun run lint` + `bun run build`, and `caddy validate` on `deploy/Caddyfile` — the one file no test covers and the one that takes the whole site down when it is wrong), then images are built and pushed to GHCR tagged with the commit SHA, then the server pulls. A pull request runs the checks and stops.
+
+The build no longer happens on the production VM. `compose.yaml` keeps `build:` next to `image:` so `docker compose up --build` still works by hand, but a deploy resolves `IMAGE_TAG` from the repo-root `.env` (the job rewrites it to the SHA) and pulls. **Rolling back is one line**: put the previous SHA in `.env` and `docker compose up -d`.
+
+`backend/Dockerfile` takes `RUN_TESTS` (default 1). CI passes 0 because its own job already ran the suite; a hand-built image keeps the guard, because there it is the only one.
+
+Required repo secrets: `DEPLOY_SSH_KEY` (private key for the Hetzner box), `DEPLOY_KNOWN_HOSTS` (`ssh-keyscan <ip>`), `DEPLOY_HOST` (e.g. `root@167.235.233.207`). GHCR uses the run's own `GITHUB_TOKEN` — nothing long-lived is stored on the server, and the job logs out at the end.
+
+The deploy fails if `/up` does not return 200 within ~2.5 minutes, and dumps `docker compose ps` + logs when it does. "The command ran" is not "the site works".
+
 Both stale deploy paths are **gone** (2026-09-13). For the record, and because the note that stood here was wrong in a way that mattered:
 - `.github/workflows/deploy.yaml` pushed the SPA to Dokku on a `v*` tag. This guide claimed its version check read `./package.json` and therefore always failed — it actually read `./frontend/package.json`, so **any `v*` tag really would have deployed**, to an unmonitored second host, using `DOKKU_SSH_PRIVATE_KEY`. Deleted. Rotate `DOKKU_SSH_PRIVATE_KEY` and `DOKKU_REMOTE_URL` in the repo secrets if they are still set.
 - `deploy/fly/` was a parked Fly.io config predating the compose stack, and it did not set `RUN_RELEASE_TASKS=0` on its `worker` group — both process groups would have run `migrate` against one SQLite file. Deleted.

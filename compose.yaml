@@ -7,13 +7,23 @@
 #            docker compose up -d --build
 name: evrst
 
+# Images are named for the GitHub Container Registry so CI can push them and
+# this box can pull them. `build:` is kept alongside `image:` on purpose:
+# `docker compose up --build` still builds locally, which is the only way to
+# run the stack without a registry login — while a deploy resolves IMAGE_TAG
+# and pulls a pre-built image instead of compiling the SPA and the PHP image
+# on a 4 GB production VM.
+#
+# IMAGE_TAG lives in the repo-root .env, which the deploy job rewrites to the
+# commit SHA. Rolling back is that one line plus `docker compose up -d`.
+
 services:
   # Laravel 12 + Filament admin (php:8.4-apache). Serves /admin + /api and owns
   # the schema: RUN_RELEASE_TASKS defaults to 1, so this is the one container
   # that runs migrate + seed on boot.
   backend:
     build: ./backend
-    image: evrst-backend:latest
+    image: ${BACKEND_IMAGE:-ghcr.io/lehoczkil/evrst-demo/backend}:${IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file: ./backend/.env.production
     environment:
@@ -29,7 +39,7 @@ services:
 
   # Queue worker (member-application mails, temp passwords, Discord webhooks).
   queue:
-    image: evrst-backend:latest        # reuses the image built by `backend`
+    image: ${BACKEND_IMAGE:-ghcr.io/lehoczkil/evrst-demo/backend}:${IMAGE_TAG:-latest}   # same image as `backend`
     restart: unless-stopped
     env_file: ./backend/.env.production
     environment:
@@ -43,7 +53,7 @@ services:
 
   # Cron replacement: ticks the Laravel scheduler (nightly prune jobs) every 60s.
   scheduler:
-    image: evrst-backend:latest
+    image: ${BACKEND_IMAGE:-ghcr.io/lehoczkil/evrst-demo/backend}:${IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file: ./backend/.env.production
     environment:
@@ -61,7 +71,7 @@ services:
     build:
       context: .
       dockerfile: deploy/web.Dockerfile
-    image: evrst-web:latest
+    image: ${WEB_IMAGE:-ghcr.io/lehoczkil/evrst-demo/web}:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
