@@ -90,11 +90,11 @@ class UploadHardeningTest extends TestCase
             ->test(CreateBugReport::class)
             ->set('data.title', 'Broken button')
             ->set('data.description', 'It does nothing.')
-            ->set('data.screenshot_path', [
+            ->set('data.screenshots', [
                 UploadedFile::fake()->createWithContent('payload.svg', self::SVG),
             ])
             ->call('create')
-            ->assertHasFormErrors(['screenshot_path']);
+            ->assertHasFormErrors(['screenshots']);
 
         $this->assertDatabaseMissing('bug_reports', ['title' => 'Broken button']);
     }
@@ -115,14 +115,69 @@ class UploadHardeningTest extends TestCase
             ->test(CreateBugReport::class)
             ->set('data.title', 'Broken button')
             ->set('data.description', 'It does nothing.')
-            ->set('data.screenshot_path', [UploadedFile::fake()->image('shot.png')])
+            ->set('data.screenshots', [UploadedFile::fake()->image('shot.png')])
             ->call('create')
             ->assertHasNoFormErrors();
 
-        $stored = BugReport::where('title', 'Broken button')->value('screenshot_path');
+        $stored = BugReport::where('title', 'Broken button')->firstOrFail()->screenshots;
 
-        $this->assertNotNull($stored);
-        $this->assertStringEndsWith('.png', $stored);
-        Storage::disk('public')->assertExists($stored);
+        $this->assertIsArray($stored);
+        $this->assertCount(1, $stored);
+        $this->assertStringEndsWith('.png', $stored[0]);
+        Storage::disk('public')->assertExists($stored[0]);
+    }
+
+    /**
+     * The point of the change: a bug is usually a sequence, and the
+     * reporter no longer has to pick which frame of it to keep.
+     */
+    public function test_a_report_can_carry_several_screenshots_in_order(): void
+    {
+        Livewire::actingAs($this->makeMember())
+            ->test(CreateBugReport::class)
+            ->set('data.title', 'Three steps')
+            ->set('data.description', 'Before, during, after.')
+            ->set('data.screenshots', [
+                UploadedFile::fake()->image('one.png'),
+                UploadedFile::fake()->image('two.png'),
+                UploadedFile::fake()->image('three.png'),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $report = BugReport::where('title', 'Three steps')->firstOrFail();
+
+        $this->assertCount(3, $report->screenshots);
+        $this->assertCount(3, $report->screenshotUrls());
+
+        foreach ($report->screenshots as $path) {
+            Storage::disk('public')->assertExists($path);
+        }
+    }
+
+    /** Deleting a report has to take every image with it, not just the first. */
+    public function test_deleting_a_report_removes_all_of_its_images(): void
+    {
+        Livewire::actingAs($this->makeMember())
+            ->test(CreateBugReport::class)
+            ->set('data.title', 'Goes away')
+            ->set('data.description', 'With its evidence.')
+            ->set('data.screenshots', [
+                UploadedFile::fake()->image('a.png'),
+                UploadedFile::fake()->image('b.png'),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $report = BugReport::where('title', 'Goes away')->firstOrFail();
+        $paths = $report->screenshots;
+
+        $this->assertCount(2, $paths);
+
+        $report->delete();
+
+        foreach ($paths as $path) {
+            Storage::disk('public')->assertMissing($path);
+        }
     }
 }

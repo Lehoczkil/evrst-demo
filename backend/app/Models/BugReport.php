@@ -7,6 +7,7 @@ use App\Concerns\LogsActivity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Bug report submitted from inside the admin panel.
@@ -61,25 +62,18 @@ class BugReport extends Model
     }
 
     /**
-     * HasFileUrl override — this model stores the screenshot path on
-     * `screenshot_path` and has no per-row disk column (we always use
-     * the public disk). The trait calls `fileDiskAttribute()` /
-     * `filePathAttribute()` to resolve the URL, so override both.
+     * A report holds a LIST of screenshots, so the single-path half of
+     * HasFileUrl does not apply — `fileUrl()` and the trait's own
+     * `deleteFile()` both read one column. `deleteFile()` is overridden
+     * below to sweep the whole list; the trait's `deleting` hook still
+     * calls it, so a deleted report still takes its images with it.
      */
-    public function filePathAttribute(): string
-    {
-        return 'screenshot_path';
-    }
-
     public function fileDiskAttribute(): string
     {
         return 'disk';
     }
 
-    /**
-     * Always serve screenshots from the public disk; we don't track a
-     * per-row disk column.
-     */
+    /** Always the public disk; there is no per-row disk column. */
     public function getDiskAttribute(): string
     {
         return 'public';
@@ -90,12 +84,13 @@ class BugReport extends Model
         'title', 'description',
         'status', 'severity',
         'page_url', 'environment',
-        'screenshot_path', 'admin_notes',
+        'screenshots', 'admin_notes',
         'resolved_at',
     ];
 
     protected $casts = [
         'environment' => 'array',
+        'screenshots' => 'array',
         'resolved_at' => 'datetime',
     ];
 
@@ -137,8 +132,50 @@ class BugReport extends Model
         });
     }
 
-    public function screenshotUrl(): Attribute
+    /**
+     * Public URLs for every attached screenshot, in the order the
+     * reporter arranged them.
+     *
+     * @return list<string>
+     */
+    public function screenshotUrls(): array
     {
-        return Attribute::get(fn () => $this->fileUrl());
+        $disk = Storage::disk($this->disk);
+
+        return collect($this->screenshots ?? [])
+            ->filter(fn ($path) => is_string($path) && $path !== '')
+            ->map(function (string $path) use ($disk) {
+                try {
+                    return $disk->url($path);
+                } catch (\Throwable) {
+                    return null;
+                }
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Every image, not just the first. The trait's `deleting` hook calls
+     * this, so deleting a report — by row action, bulk action or shell —
+     * still clears the volume.
+     */
+    public function deleteFile(): void
+    {
+        $paths = collect($this->screenshots ?? [])
+            ->filter(fn ($path) => is_string($path) && $path !== '')
+            ->values()
+            ->all();
+
+        if ($paths === []) {
+            return;
+        }
+
+        try {
+            Storage::disk($this->disk)->delete($paths);
+        } catch (\Throwable) {
+            // Best effort; the row still goes.
+        }
     }
 }

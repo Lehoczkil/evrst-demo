@@ -102,6 +102,8 @@ return [
         'page_url'                => 'Oldal URL',
         'page_url_placeholder'    => '/admin/tasks/3/edit',
         'screenshot'              => 'Képernyőkép',
+        'screenshots'            => 'Képernyőképek',
+        'screenshots_help'       => 'Legfeljebb 8 kép. Húzással átrendezhetők — ebben a sorrendben nézi végig, aki feldolgozza. Kattints egyre a teljes méretű megnyitáshoz, vagy használd a letöltés gombot.',
         'reporter'                => 'Bejelentő',
         'assignee'                => 'Felelős',
         'admin_notes'             => 'Kezelői jegyzet',

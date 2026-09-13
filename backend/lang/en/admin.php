@@ -102,6 +102,8 @@ return [
         'page_url'                => 'Page URL',
         'page_url_placeholder'    => '/admin/tasks/3/edit',
         'screenshot'              => 'Screenshot',
+        'screenshots'            => 'Screenshots',
+        'screenshots_help'       => 'Up to 8 images. Drag to reorder — the order is the order a triager reads them in. Click one to open it full size, or use the download button.',
         'reporter'                => 'Reporter',
         'assignee'                => 'Assignee',
         'admin_notes'             => 'Triage notes',

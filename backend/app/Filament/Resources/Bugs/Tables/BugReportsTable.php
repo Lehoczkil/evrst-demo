@@ -8,6 +8,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -67,6 +68,19 @@ class BugReportsTable
                     ->searchable()
                     ->color('gray')
                     ->placeholder('—')
+                    ->toggleable(),
+                /*
+                  A stack of thumbnails rather than a count: whether a
+                  report has usable evidence is the thing a triager scans
+                  the list for, and a number does not answer it.
+                */
+                ImageColumn::make('screenshots')
+                    ->label(__('admin.bugs.screenshots'))
+                    ->disk('public')
+                    ->circular(false)
+                    ->stacked()
+                    ->limit(3)
+                    ->limitedRemainingText()
                     ->toggleable(),
                 TextColumn::make('page_url')
                     ->label(__('admin.bugs.page_url'))

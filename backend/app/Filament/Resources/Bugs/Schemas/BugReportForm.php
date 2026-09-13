@@ -56,8 +56,9 @@ class BugReportForm
 
                 Section::make(__('admin.bugs.section_evidence'))
                     ->components([
-                        FileUpload::make('screenshot_path')
-                            ->label(__('admin.bugs.screenshot'))
+                        FileUpload::make('screenshots')
+                            ->label(__('admin.bugs.screenshots'))
+                            ->helperText(__('admin.bugs.screenshots_help'))
                             ->directory('bug-reports')
                             ->disk('public')
                             // Anyone signed in can file a report, so this is
@@ -65,7 +66,22 @@ class BugReportForm
                             // stored under a content-derived extension.
                             ->acceptedFileTypes(Uploads::PHONE_IMAGE_TYPES)
                             ->getUploadedFileNameForStorageUsing(Uploads::storedName(...))
+                            /*
+                              A bug is usually a sequence — the screen before,
+                              the error, the console. One slot made the reporter
+                              choose which of those to keep.
+                            */
+                            ->multiple()
+                            ->reorderable()
+                            ->appendFiles()
+                            ->maxFiles(8)
+                            // Full size in a new tab, and a download button per
+                            // image — a triager needs to read the small print
+                            // in a screenshot, not squint at a 120px thumbnail.
+                            ->openable()
+                            ->downloadable()
                             ->imageEditor()
+                            ->panelLayout('grid')
                             ->maxSize(5120)
                             ->columnSpanFull(),
                     ]),
