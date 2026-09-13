@@ -11,7 +11,12 @@ export interface SponsorPayload {
 
 export interface MentorPayload {
   name: string;
-  email: string;
+  /**
+   * The domain half only. The API redacts `email` out of the CMS payload
+   * (that endpoint is unauthenticated) and hands back the domain, which
+   * is the only part this site ever rendered.
+   */
+  email_domain?: string;
   photo?: string;
 }
 

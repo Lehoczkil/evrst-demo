@@ -42,9 +42,6 @@ const photoFor = (mentor: MentorResource) => {
 
   return imgUrl(path, { width: 72, format: 'webp', fit: 'cover' });
 };
-
-/** The domain only: a mentor's mailbox is not ours to publish. */
-const domainOf = (email: string | undefined) => email?.split('@')[1] ?? '';
 /*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
@@ -69,7 +66,7 @@ const domainOf = (email: string | undefined) => email?.split('@')[1] ?? '';
         />
         <div>
           <b>{{ mentor.payload.name }}</b>
-          <span v-if="mentor.payload.email">{{ domainOf(mentor.payload.email) }}</span>
+          <span v-if="mentor.payload.email_domain">{{ mentor.payload.email_domain }}</span>
         </div>
       </div>
     </div>

@@ -14,8 +14,11 @@ use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,6 +36,25 @@ class AppServiceProvider extends ServiceProvider
         $this->wireSelectOptionsCacheInvalidation();
         $this->configureDatePickerDefaults();
         $this->wirePasswordResetStamp();
+        $this->configureRateLimiters();
+    }
+
+    /**
+     * Nothing under /api was throttled except the join-us POST, and the
+     * whole API is unauthenticated and public.
+     *
+     * Two limiters, because the two workloads are nothing alike. `api`
+     * covers the JSON reads — a cold page load makes a handful. `images`
+     * covers /api/img, where one page can legitimately ask for dozens of
+     * files, but where every miss also *writes* one to the same volume the
+     * database lives on; the ceiling matters more there than anywhere
+     * else. Keyed on the client IP: there is no authenticated caller.
+     */
+    private function configureRateLimiters(): void
+    {
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+
+        RateLimiter::for('images', fn (Request $request) => Limit::perMinute(300)->by($request->ip()));
     }
 
     /**

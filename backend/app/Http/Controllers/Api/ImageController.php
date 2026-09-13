@@ -34,6 +34,27 @@ class ImageController extends Controller
 
     private const ALLOWED_FITS = ['cover', 'contain', 'inside'];
 
+    /**
+     * The dimension ladder every request is snapped up to.
+     *
+     * Each distinct (path, w, h, f, q, fit) tuple writes a new file to the
+     * app-data volume — the same volume the SQLite database and every
+     * upload live on — and the endpoint is public. Accepting any integer
+     * from 16 to 3000 meant ~9 million reachable variants per source
+     * image, i.e. a stranger could fill the disk with `curl` in a loop and
+     * take the site down with it.
+     *
+     * Snapping bounds that to 23 widths × 23 heights. It costs nothing
+     * visually: an image is only ever served larger than asked, never
+     * smaller, and the browser scales it down. The values the SPA asks
+     * for today (72 and 200, and 216 = 72 at 3x) are on the ladder
+     * exactly, so nothing is re-rendered at a different size than before.
+     */
+    private const SIZE_STEPS = [
+        16, 24, 32, 48, 64, 72, 96, 128, 160, 200, 216, 240,
+        320, 400, 480, 600, 640, 800, 960, 1200, 1600, 2000, 3000,
+    ];
+
     public function transform(Request $request): BinaryFileResponse|Response|JsonResponse|StreamedResponse
     {
         $data = $request->validate([
@@ -59,11 +80,16 @@ class ImageController extends Controller
         $source = $disk->path($path);
 
         $format = $data['f'] ?? 'webp';
-        $quality = (int) ($data['q'] ?? 82);
+        // Quality rounds to the nearest 10 for the same reason the
+        // dimensions snap — see SIZE_STEPS. 82 (the SPA's default) and
+        // 70 land on 80 and 70; the difference is not visible.
+        $quality = $this->snapQuality((int) ($data['q'] ?? 82));
         $dpr = (int) ($data['dpr'] ?? 1);
         $fit = $data['fit'] ?? 'cover';
-        $width = isset($data['w']) ? (int) $data['w'] * $dpr : null;
-        $height = isset($data['h']) ? (int) $data['h'] * $dpr : null;
+        // dpr multiplies before snapping, so a 2x/3x variant lands on the
+        // ladder too rather than opening a second axis of its own.
+        $width = isset($data['w']) ? $this->snapSize((int) $data['w'] * $dpr) : null;
+        $height = isset($data['h']) ? $this->snapSize((int) $data['h'] * $dpr) : null;
 
         if ($this->isPassthrough($source) || $format === 'original') {
             return $this->streamOriginal($source);
@@ -136,6 +162,23 @@ class ImageController extends Controller
         file_put_contents($cachePath, json_encode($payload));
 
         return response()->json($payload);
+    }
+
+    /** Round a requested dimension up to the next rung of SIZE_STEPS. */
+    private function snapSize(int $value): int
+    {
+        foreach (self::SIZE_STEPS as $step) {
+            if ($value <= $step) {
+                return $step;
+            }
+        }
+
+        return self::SIZE_STEPS[count(self::SIZE_STEPS) - 1];
+    }
+
+    private function snapQuality(int $value): int
+    {
+        return max(10, min(100, (int) round($value / 10) * 10));
     }
 
     private function safePath(string $path): ?string
