@@ -61,7 +61,6 @@ class AdminPagesTest extends TestCase
     {
         return [
             'calendar'           => ['/admin/calendar'],
-            'about-content'      => ['/admin/about-content'],
             'database-inspector' => ['/admin/database-inspector'],
             'kanban'             => ['/admin/tasks/kanban'],
             'profile'            => ['/admin/profile'],

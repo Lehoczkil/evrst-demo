@@ -20,7 +20,6 @@ return [
         'event'              => ['s' => 'Event',           'p' => 'Events'],
         'sponsor'            => ['s' => 'Sponsor',         'p' => 'Sponsors'],
         'drawing'            => ['s' => 'Drawing',         'p' => 'Drawings'],
-        'about_content'      => ['s' => 'Content',         'p' => 'Content'],
         'project'            => ['s' => 'Project',         'p' => 'Projects'],
         'goal'               => ['s' => 'Goal',            'p' => 'Goals'],
         'team_member'        => ['s' => 'Team member',     'p' => 'Team members'],
@@ -497,14 +496,6 @@ return [
         'alumni_filter_active'  => 'Active only',
     ],
 
-    'about' => [
-        'heading'  => 'Heading',
-        'body'     => 'Body',
-        'who'      => 'Who we are',
-        'who_help' => 'This text is shown above the project / goal cards on the home page.',
-        'saved'    => 'About content saved',
-    ],
-
     'sponsors' => [
         'logo'         => 'Logo',
         'logo_help'    => 'PNG, JPG, SVG, WebP, GIF, or HEIC — up to 8 MB.',
@@ -599,7 +590,8 @@ return [
         'rocket_title'     => 'Heading',
         'rocket_status'    => 'Status pill',
         'manifesto'        => 'Mission statement',
-        'manifesto_help'   => 'The paragraph under the lead, the founding year, and the three short marks beside the figures. The member, group and vehicle counts are counted from the data, not typed.',
+        'manifesto_help'   => 'The two paragraphs that open the mission section, the founding year, and the three short marks beside the figures. The member, group and vehicle counts are counted from the data, not typed.',
+        'manifesto_first'  => 'First paragraph',
         'manifesto_second' => 'Second paragraph',
         'manifesto_founded'=> 'Founded',
         'founded_help'     => 'The year shown in the figures strip. A year, not a date.',
@@ -825,10 +817,6 @@ return [
             'pages.home-content' => [
                 'title' => 'Home page texts',
                 'body' => '<p>The hero and the rocket sheet — the two blocks whose copy used to live inside the SPA, so that changing a word meant a deploy. Everything else on the home page is edited elsewhere: events, sponsors, projects, goals and the roster all have their own screens.</p><p><strong>Every field is optional.</strong> An empty one falls back to the text the site ships with, per string, so you can rewrite the headline alone and leave the rest untouched. Clearing a field does not blank the site — it restores the built-in copy.</p><p>The scroll statements are the lines that play one after another as the hero is scrolled. Wrap one word in <code>&lt;em&gt;</code> to give it the accent.</p>',
-            ],
-            'pages.about-content' => [
-                'title' => 'About content',
-                'body' => '<p>The lead heading and body text shown above the projects + goals on the public About page. Both EN and HU copy are required so the language switch keeps working.</p>',
             ],
             'resources.users.index' => [
                 'title' => 'Users',

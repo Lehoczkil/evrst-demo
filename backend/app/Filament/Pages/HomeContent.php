@@ -19,15 +19,19 @@ use Filament\Support\Icons\Heroicon;
  * The home page's own copy.
  *
  * Everything on the home page that comes from a record — events,
- * sponsors, projects, goals, the roster, the About body — was already
- * editable. Everything else lived in the SPA's message files, so changing
+ * sponsors, projects, goals, the roster — was already editable. Everything else lived in the SPA's message files, so changing
  * one word meant a deploy: the headline a visitor reads first, the scroll
  * statements, the rocket's spec table, the sponsor pitch, the join block,
  * even the address in the footer.
  *
- * Stored as one `views` resource, the shape AboutContent uses, because the
- * SPA already knows how to fetch a view by name and a row per string would
- * make the admin hunt.
+ * Stored as one `views` resource, because the SPA already knows how to
+ * fetch a view by name and a row per string would make the admin hunt.
+ *
+ * The mission's two paragraphs both live here, in `manifesto`. The first
+ * used to be the body of a separate "About" view with its own admin page,
+ * which put two halves of one paragraph block on two different screens —
+ * and that page's title fields were rendered nowhere, because the site has
+ * no About page for them to head.
  *
  * The name is 'home-copy', not 'home'. The SPA looks a view up by
  * `payload.name` alone (VITE_VIEWS_COLLECTION_ID is unset, so the
@@ -67,7 +71,7 @@ class HomeContent extends Page
     private const TEXTS = [
         'hero' => ['eyebrow', 'title1', 'title2', 'lede', 'ctaJoin', 'ctaMission'],
         'rocket' => ['eyebrow', 'title', 'status'],
-        'manifesto' => ['second', 'mark1', 'mark2', 'mark3'],
+        'manifesto' => ['first', 'second', 'mark1', 'mark2', 'mark3'],
         'sponsors' => ['pitchTitle', 'pitchBody', 'cta'],
         'join' => ['eyebrow', 'title', 'lede', 'cta', 'question'],
         'contact' => ['address'],
@@ -185,6 +189,7 @@ class HomeContent extends Page
                     ->description(__('admin.home_content.manifesto_help'))
                     ->columns(12)
                     ->components([
+                        ...self::pair('manifesto.first', 600, textarea: true),
                         ...self::pair('manifesto.second', 300, textarea: true),
                         TextInput::make('manifesto_founded')
                             ->label(__('admin.home_content.manifesto_founded'))
@@ -287,7 +292,7 @@ class HomeContent extends Page
 
     public function save(): void
     {
-        // Same reasoning as AboutContent::save() — mount() only runs on
+        // mount() guards the page, but it only runs on
         // the initial GET, and this is reachable over /livewire/update.
         abort_unless(static::canAccess(), 403);
 

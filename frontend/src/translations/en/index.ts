@@ -20,7 +20,7 @@ export default {
   },
   manifesto: {
     eyebrow: 'Why any of this exists',
-    body: 'Escape Velocity Rocketry Student Team is the student rocketry team of Óbuda University. We design, build and launch experimental rockets, pushing the limits of student engineering.',
+    first: 'Escape Velocity Rocketry Student Team is the student rocketry team of Óbuda University. We design, build and launch experimental rockets, pushing the limits of student engineering.',
     second: 'Nine discipline groups, one test stand and three vehicles. One has flown — the next is being built.',
     founded: 'Founded',
     members: 'Members',

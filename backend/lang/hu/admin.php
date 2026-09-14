@@ -20,7 +20,6 @@ return [
         'event'              => ['s' => 'Esemény',         'p' => 'Események'],
         'sponsor'            => ['s' => 'Támogató',        'p' => 'Támogatók'],
         'drawing'            => ['s' => 'Rajz',            'p' => 'Rajzok'],
-        'about_content'      => ['s' => 'Tartalom',        'p' => 'Tartalom'],
         'project'            => ['s' => 'Projekt',         'p' => 'Projektek'],
         'goal'               => ['s' => 'Cél',             'p' => 'Célok'],
         'team_member'        => ['s' => 'Csapattag',       'p' => 'Csapattagok'],
@@ -497,14 +496,6 @@ return [
         'alumni_filter_active'  => 'Csak aktív',
     ],
 
-    'about' => [
-        'heading'  => 'Cím',
-        'body'     => 'Szöveg',
-        'who'      => 'Kik vagyunk',
-        'who_help' => 'Ez a szöveg jelenik meg a projekt- és célkártyák felett a főoldalon.',
-        'saved'    => 'Tartalom mentve',
-    ],
-
     'sponsors' => [
         'logo'         => 'Logó',
         'logo_help'    => 'PNG, JPG, SVG, WebP, GIF vagy HEIC — max. 8 MB.',
@@ -599,7 +590,8 @@ return [
         'rocket_title'     => 'Cím',
         'rocket_status'    => 'Státusz-címke',
         'manifesto'        => 'Küldetés szövege',
-        'manifesto_help'   => 'A bevezető alatti bekezdés, az alapítás éve, és a számok mellett álló három rövid sor. A tag-, csoport- és rakétaszámot az adatokból számoljuk, nem gépeled.',
+        'manifesto_help'   => 'A küldetés szekciót nyitó két bekezdés, az alapítás éve, és a számok mellett álló három rövid sor. A tag-, csoport- és rakétaszámot az adatokból számoljuk, nem gépeled.',
+        'manifesto_first'  => 'Első bekezdés',
         'manifesto_second' => 'Második bekezdés',
         'manifesto_founded'=> 'Alapítva',
         'founded_help'     => 'A számsávban megjelenő évszám. Év, nem dátum.',
@@ -825,10 +817,6 @@ return [
             'pages.home-content' => [
                 'title' => 'Főoldal szövegei',
                 'body' => '<p>A hero és a rakéta-adatlap — az a két blokk, aminek a szövege eddig a SPA-ban élt, így egyetlen szó átírása is deployt igényelt. A főoldal többi része máshol szerkeszthető: az eseményeknek, szponzoroknak, projekteknek, céloknak és a névsornak saját képernyője van.</p><p><strong>Minden mező opcionális.</strong> Az üresen hagyott soronként visszaesik a beépített szövegre, tehát átírhatod csak a főcímet, a többihez hozzá sem nyúlva. Egy mező kiürítése nem tünteti el a szöveget az oldalról — visszaállítja a beépítettet.</p><p>A görgetős mondatok azok a sorok, amik egymás után játszódnak le a heron végiggörgetve. Tegyél <code>&lt;em&gt;</code> jelölést arra az egy szóra, amin a hangsúly van.</p>',
-            ],
-            'pages.about-content' => [
-                'title' => 'Rólunk tartalom',
-                'body' => '<p>A nyilvános Rólunk oldal projektek + célok feletti címsora és törzsszövege. EN és HU is kötelező, hogy a nyelvváltó tovább működjön.</p>',
             ],
             'resources.users.index' => [
                 'title' => 'Felhasználók',

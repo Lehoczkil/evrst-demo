@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 
-use App\Filament\Pages\AboutContent;
 use App\Filament\Pages\DatabaseInspector;
 use App\Filament\Pages\HomeContent;
 use App\Filament\Resources\OnshapeModels\Pages\ListOnshapeModels as OnshapeList;
@@ -182,11 +181,6 @@ class LivewireEndpointGuardsTest extends TestCase
         $this->actingAs($this->makeMember());
 
         $component->call($method, ...$args)->assertForbidden();
-    }
-
-    public function test_a_member_cannot_save_the_about_content_page(): void
-    {
-        $this->callAsMember(AboutContent::class, 'save');
     }
 
     public function test_a_member_cannot_save_the_home_content_page(): void

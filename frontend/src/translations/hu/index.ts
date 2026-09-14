@@ -20,7 +20,7 @@ export default {
   },
   manifesto: {
     eyebrow: 'Amiért ez az egész van',
-    body: 'Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk, miközben a hallgatói mérnöki munka határait feszegetjük.',
+    first: 'Az Escape Velocity Rocketry Student Team az Óbudai Egyetem hallgatói rakétacsapata. Kísérleti rakétákat tervezünk, építünk és indítunk, miközben a hallgatói mérnöki munka határait feszegetjük.',
     second: 'Kilenc szakmai csoport, egy próbapad és három rakéta. Egy már repült — a következő épp épül.',
     founded: 'Alapítva',
     members: 'Aktív tag',

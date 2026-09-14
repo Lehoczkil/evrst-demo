@@ -2,7 +2,6 @@
 import { motion } from 'motion-v';
 import { CmsRequests, type AboutItemResource } from '@/services/requests/CmsRequests';
 import { TeamRequests, type TeamGroup, type TeamMember } from '@/services/requests/TeamRequests';
-import { ViewRequests } from '@/services/requests/ViewRequests';
 import { cardStagger, sectionRise } from './anims';
 
 /*
@@ -31,19 +30,14 @@ import { cardStagger, sectionRise } from './anims';
 ---------------------------------------------*/
 const { t, locale } = useI18n();
 // Editable in the panel (Site → Home texts); falls back to the
-// bundled translation per string.
+// bundled translation per string. Both mission paragraphs come from
+// there — the first used to be a separate "About" view with its own
+// admin page, which put one paragraph block on two screens.
 const { text } = useHomeCopy();
 
 const { data: goalRows } = useQuery<AboutItemResource[]>({
   key: ['about-goals', locale],
   request: () => CmsRequests.aboutGoals(),
-  cache: true,
-  staleTime: 300,
-});
-
-const { data: aboutView } = useQuery({
-  key: ['view-about', locale],
-  request: () => ViewRequests.byName('about'),
   cache: true,
   staleTime: 300,
 });
@@ -85,12 +79,6 @@ const markAt = (i: number) => text(MARKS[i] ?? '');
 /*---------------------------------------------
 /  COMPUTED
 ---------------------------------------------*/
-/*
-  The CMS row wins; i18n is the fallback for an empty collection, which is
-  what a fresh volume looks like before anyone has written anything.
-*/
-const body = computed(() => aboutView.value?.[0]?.payload?.content || t('manifesto.body'));
-
 const goals = computed(() => {
   const rows = goalRows.value ?? [];
 
@@ -141,7 +129,7 @@ const figures = computed(() => {
       </motion.p>
 
       <motion.div v-bind="sectionRise(0.05)" class="manifesto__body">
-        <p class="lede">{{ body }}</p>
+        <p class="lede">{{ text('manifesto.first') }}</p>
         <p class="lede">{{ text('manifesto.second') }}</p>
       </motion.div>
 
