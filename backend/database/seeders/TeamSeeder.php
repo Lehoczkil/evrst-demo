@@ -28,17 +28,21 @@ class TeamSeeder extends Seeder
         'vaz-aerodinamika'  => ['en' => 'Structure & Aerodynamics','hu' => 'Váz-Aerodinamika'],
         'jog'               => ['en' => 'Legal',                   'hu' => 'Jog'],
         'webfejleszto'      => ['en' => 'Web developer',           'hu' => 'Webfejlesztő'],
+        'penzugy'           => ['en' => 'Accountant',              'hu' => 'Pénzügy'],
     ];
 
     /**
      * Roster from névjegyzék.xlsx (2026-05). Each row carries:
      *   positions[]          — every group the member belongs to
      *   main                 — primary org-chart position
-     *   discord_nick         — server nickname (display name)
+     *   discord_nick         — server nickname, as the guild displays it
      *   discord_username     — globally-unique Discord handle (e.g. "e.1415")
-     *   discord_id           — numeric snowflake; null until collected (only
-     *                          snowflakes resolve `<@id>` mentions / can be
-     *                          targeted by the future DM bot)
+     *   discord_id           — numeric snowflake. The one field the DM bot
+     *                          can address a person by, and what makes an
+     *                          `<@id>` mention a real ping rather than text.
+     *                          Collected from the guild by `discord:sync-ids`;
+     *                          a row still missing one gets the channel post
+     *                          but no private copy.
      *   degree               — {en, hu} qualification shown on the public
      *                          team page; omit when there is none on file
      *   email_private        — personal contact email from the spreadsheet
@@ -52,51 +56,75 @@ class TeamSeeder extends Seeder
     private const MEMBERS = [
         ['name' => 'Bihari Bertalan',        'positions' => ['csapat-menedzser'],                     'main' => 'csapat-menedzser',
             'role' => Perm::ROLE_ADMIN,
-            'discord_username' => 'szwego',           'discord_nick' => 'Berci',            'email_private' => 'biharibertalan@gmail.com'],
+            'discord_username' => 'szwego',        'discord_nick' => 'Berci',     'discord_id' => '331094266044743691',
+            'email_private' => 'biharibertalan@gmail.com'],
         ['name' => 'Klabacsek Bálint',       'positions' => ['csapat-menedzser'],                     'main' => 'csapat-menedzser',
             'role' => Perm::ROLE_ADMIN,
-            'discord_username' => 'e.1415',           'discord_nick' => 'Bálint',           'email_private' => 'klabacsekbalint@gmail.com'],
+            'discord_username' => 'e.1415',        'discord_nick' => 'Bálint',    'discord_id' => '506440416951009282',
+            'email_private' => 'klabacsekbalint@gmail.com'],
         ['name' => 'Bihari Balázs',          'positions' => ['marketing-dizajn', 'vaz-aerodinamika'], 'main' => 'projekt-menedzser',
             'role' => Perm::ROLE_ADMIN,
-            'discord_username' => 's_thedepraved',    'discord_nick' => 'Balázs',           'email_private' => 'balazs.bihari2@gmail.com'],
+            'discord_username' => 's_thedepraved', 'discord_nick' => 'Balázs',    'discord_id' => '251355441542594560',
+            'email_private' => 'balazs.bihari2@gmail.com'],
         ['name' => 'Kincses Márk',           'positions' => ['marketing-dizajn'],                     'main' => 'marketing-dizajn',
-            'discord_username' => 'kincsesmark3',     'discord_nick' => 'Márk',             'email_private' => 'kincsesmark3@gmail.com'],
+            'discord_username' => 'kincsesmark3',  'discord_nick' => 'Márk',      'discord_id' => '1026780470396080208',
+            'email_private' => 'kincsesmark3@gmail.com'],
         ['name' => 'Bába Kíra',              'positions' => ['elektronika'],                          'main' => 'elektronika',
-            'discord_username' => 'b.kira11',         'discord_nick' => 'Kíra :)',          'email_private' => 'babakira520@gmail.com'],
+            'discord_username' => 'b.kira11',      'discord_nick' => 'Kíra :)',   'discord_id' => '793936646256197632',
+            'email_private' => 'babakira520@gmail.com'],
         ['name' => 'Czirják Péter',          'positions' => ['hajtomu', 'vaz-aerodinamika'],          'main' => 'hajtomu',
             'role' => Perm::ROLE_MANAGER,
-            'discord_username' => 'retepeter1',       'discord_nick' => 'RetePeTerminator', 'email_private' => 'peterczirjak1998@gmail.com'],
+            'discord_username' => 'retepeter1',    'discord_nick' => 'Cz. Peti',  'discord_id' => '282255883201675274',
+            'email_private' => 'peterczirjak1998@gmail.com'],
         ['name' => 'Kürtösi Simon',          'positions' => ['elektronika'],                          'main' => 'projekt-menedzser',
             'role' => Perm::ROLE_ADMIN,
-            'discord_username' => 'djfighter',        'discord_nick' => 'Simon',            'email_private' => 'kurtosi.simon@gmail.com'],
+            'discord_username' => 'djfighter',     'discord_nick' => 'Simon',     'discord_id' => '417773416821686272',
+            'email_private' => 'kurtosi.simon@gmail.com'],
         ['name' => 'Tello-Pálfy Sebastián',  'positions' => ['hajtomu', 'vaz-aerodinamika'],          'main' => 'vaz-aerodinamika',
-            'discord_username' => 'sbstn_264876',     'discord_nick' => 'Sebastian',        'email_private' => 'sebastian.tellopalfy@gmail.com'],
+            'discord_username' => 'sbstn_264876',  'discord_nick' => 'Sebastian', 'discord_id' => '866566441880125441',
+            'email_private' => 'sebastian.tellopalfy@gmail.com'],
         ['name' => 'Kriston Zoltán',         'positions' => ['elektronika', 'szoftver'],              'main' => 'elektronika',
-            'discord_username' => 'k_zoli',           'discord_nick' => 'Zoli',             'email_private' => 'kristonzoli2002@gmail.com'],
+            'discord_username' => 'k_zoli',        'discord_nick' => 'Zoli',      'discord_id' => '373900181344878604',
+            'email_private' => 'kristonzoli2002@gmail.com'],
         ['name' => 'Horváth Márton Antal',   'positions' => ['elektronika', 'szoftver'],              'main' => 'elektronika',
-            'discord_username' => 'duckyducky',       'discord_nick' => 'Marci',            'email_private' => 'marton.horvath302@gmail.com'],
+            'discord_username' => 'duckyducky',    'discord_nick' => 'Marci',     'discord_id' => '315868518967148554',
+            'email_private' => 'marton.horvath302@gmail.com'],
         ['name' => 'Penc Máté',              'positions' => ['elektronika'],                          'main' => 'elektronika',
-            'discord_nick' => 'Máté',             'email_private' => 'pencmate56@gmail.com',
+            'discord_username' => 'mattaiusz',     'discord_nick' => 'Máté',      'discord_id' => '1406202241089671218',
+            'email_private' => 'pencmate56@gmail.com',
             'degree' => ['en' => 'Electrical engineer', 'hu' => 'Villamosmérnök']],
         ['name' => 'Obsitos Péter',          'positions' => ['vaz-aerodinamika'],                     'main' => 'vaz-aerodinamika',
-            'discord_username' => 'petter0655',       'discord_nick' => 'Obsitos Peti OP',  'email_private' => 'obsitospeti04@gmail.com'],
+            'discord_username' => 'petter0655',    'discord_nick' => 'Ob. Peti',  'discord_id' => '208132896966311947',
+            'email_private' => 'obsitospeti04@gmail.com'],
         ['name' => 'Laschek Ádám',           'positions' => ['marketing-dizajn', 'hajtomu'],          'main' => 'hajtomu',
-            'discord_username' => 'adamlasy',         'discord_nick' => 'Ádám',             'email_private' => 'adam.laschek@gmail.com'],
+            'discord_username' => 'adamlasy',      'discord_nick' => 'Ádám',      'discord_id' => '459017229338542090',
+            'email_private' => 'adam.laschek@gmail.com'],
         ['name' => 'Bába Csaba',             'positions' => ['hajtomu'],                              'main' => 'hajtomu',
-            'discord_username' => 'kgbcsabi',         'discord_nick' => 'Csabi',            'email_private' => 'baba.csabi@gmail.com'],
+            'discord_username' => 'kgbcsabi',      'discord_nick' => 'Csabi',     'discord_id' => '403922735870377994',
+            'email_private' => 'baba.csabi@gmail.com'],
         ['name' => 'Hernádi Andre Jozsef',   'positions' => ['hajtomu', 'vaz-aerodinamika'],          'main' => 'vaz-aerodinamika',
-            'discord_username' => 'andre_j3805',      'discord_nick' => 'Andre_J',          'email_private' => 'andrehernadi@gmail.com'],
+            'discord_username' => 'andre_j3805',   'discord_nick' => 'Andre_J',   'discord_id' => '738890843208810547',
+            'email_private' => 'andrehernadi@gmail.com'],
         ['name' => 'Nyári György',           'positions' => ['szoftver'],                             'main' => 'szoftver',
-            'discord_username' => 'gyurka',           'discord_nick' => 'Gyurka',           'email_private' => null],
+            'discord_username' => 'gyurka',        'discord_nick' => 'Gyurka',    'discord_id' => '297778915378987008',
+            'email_private' => null],
         ['name' => 'Mosberger Péter',        'positions' => ['jog'],                                  'main' => 'jog',
             'discord_id' => null,               'discord_nick' => null,               'email_private' => 'mosbergerpeti@gmail.com'],
         ['name' => 'Lehoczki László',        'positions' => ['webfejleszto'],                         'main' => 'webfejleszto',
             // Operates the panel and the deploy — needs Users, Roles and
             // Applications, all of which are gated on isAdmin().
             'role' => Perm::ROLE_ADMIN,
-            'discord_username' => 'lehoczkilaci',     'discord_nick' => 'lehoczkilaci',     'email_private' => 'lehoczkilaszlo2002@gmail.com'],
+            'discord_username' => 'lehoczkilaci',  'discord_nick' => 'Laci',      'discord_id' => '455719561254273024',
+            'email_private' => 'lehoczkilaszlo2002@gmail.com'],
         ['name' => 'Som Nemere',             'positions' => ['webfejleszto'],                         'main' => 'webfejleszto',
-            'discord_username' => 'somnenie',         'discord_nick' => 'Somnenie',         'email_private' => null],
+            'discord_username' => 'somnenie',      'discord_nick' => 'Ruslan',    'discord_id' => '694114758919716915',
+            'email_private' => null],
+        ['name' => 'Szarka Marcell',         'positions' => ['penzugy'],                              'main' => 'penzugy',
+            'discord_username' => 'marcell0202',   'discord_nick' => 'Sz. Marci', 'discord_id' => '259366941162995714',
+            'email_private' => 'szarkamarcell0402@gmail.com'],
+        ['name' => 'Tiboldi Csongor',        'positions' => ['elektronika', 'szoftver'],              'main' => 'szoftver',
+            'discord_username' => 'csoncso',       'discord_nick' => 'Csongor',   'discord_id' => '684427333863735330',
+            'email_private' => 'tiboldi.csongor@stud.uni-obuda.hu'],
     ];
 
     /**
@@ -125,6 +153,17 @@ class TeamSeeder extends Seeder
 
     public function run(): void
     {
+        // Snowflakes are collected at runtime — by `discord:sync-ids` or
+        // typed into the panel — and they are the one thing on these rows
+        // that the spreadsheet cannot regenerate. Carry them across the
+        // wipe, keyed by the handle they were collected against, so a
+        // reseed does not quietly turn every DM back off.
+        $collectedSnowflakes = TeamMember::withTrashed()
+            ->whereNotNull('discord_id')
+            ->whereNotNull('discord_username')
+            ->pluck('discord_id', 'discord_username')
+            ->all();
+
         // Re-seed idempotently: wipe existing rows so renames in this
         // seeder don't accumulate stale duplicates.
         TeamMember::query()->forceDelete();
@@ -200,7 +239,11 @@ class TeamSeeder extends Seeder
                 'email_private' => $info['email_private'] ?? null,
                 'discord_nick' => $info['discord_nick'] ?? null,
                 'discord_username' => $info['discord_username'] ?? null,
-                'discord_id' => $info['discord_id'] ?? null,
+                // A snowflake already collected for this handle wins over
+                // the seeder's null; an explicit one in MEMBERS wins over
+                // both.
+                'discord_id' => $info['discord_id']
+                    ?? ($collectedSnowflakes[$info['discord_username'] ?? ''] ?? null),
                 'degree' => $info['degree'] ?? null,
                 'user_id' => $user->id,
                 'position' => $i,

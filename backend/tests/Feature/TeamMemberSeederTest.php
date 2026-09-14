@@ -29,8 +29,11 @@ class TeamMemberSeederTest extends TestCase
         $roster = (new \ReflectionClass(TeamSeeder::class))->getConstant('MEMBERS');
         $this->assertGreaterThan(10, count($roster), 'the roster looks truncated');
 
+        $positions = (new \ReflectionClass(TeamSeeder::class))->getConstant('POSITIONS');
+        $this->assertGreaterThan(5, count($positions), 'the org chart looks truncated');
+
         $this->assertSame(count($roster), TeamMember::query()->count());
-        $this->assertSame(9, TeamMemberGroup::query()->count());
+        $this->assertSame(count($positions), TeamMemberGroup::query()->count());
 
         $manager = TeamMemberGroup::where('slug', 'csapat-menedzser')->firstOrFail();
         $managerNames = $manager->members()->pluck('name')->all();
@@ -61,6 +64,39 @@ class TeamMemberSeederTest extends TestCase
         $this->assertGreaterThan(0, $admins, 'an adminless roster cannot manage itself');
     }
 
+    public function test_seeded_snowflakes_are_well_formed_and_unique(): void
+    {
+        $this->seed(TeamSeeder::class);
+
+        $ids = TeamMember::whereNotNull('discord_id')->pluck('discord_id');
+
+        $this->assertGreaterThan(10, $ids->count(), 'the collected snowflakes look lost');
+        $this->assertSame($ids->count(), $ids->unique()->count(), 'a snowflake is on two rows');
+
+        foreach ($ids as $id) {
+            $this->assertMatchesRegularExpression('/^\d{17,20}$/', $id);
+        }
+    }
+
+    public function test_reseeding_keeps_snowflakes_collected_at_runtime(): void
+    {
+        $this->seed(TeamSeeder::class);
+
+        // Stand in for `discord:sync-ids` having run: a snowflake that
+        // exists nowhere in the seeder's own data.
+        $member = TeamMember::where('discord_username', 'e.1415')->firstOrFail();
+        $member->update(['discord_id' => '506440416951009282']);
+
+        // The seeder force-deletes the whole roster on every run, so
+        // without the carry-over this is where every DM would go quiet.
+        $this->seed(TeamSeeder::class);
+
+        $this->assertSame(
+            '506440416951009282',
+            TeamMember::where('discord_username', 'e.1415')->value('discord_id'),
+        );
+    }
+
     public function test_klabacsek_balint_has_expected_handles(): void
     {
         $this->seed(TeamSeeder::class);
@@ -68,7 +104,7 @@ class TeamMemberSeederTest extends TestCase
         $balint = TeamMember::where('name', 'Klabacsek Bálint')->firstOrFail();
 
         $this->assertSame('e.1415', $balint->discord_username);
-        $this->assertNull($balint->discord_id);
+        $this->assertSame('506440416951009282', $balint->discord_id);
         $this->assertSame('klabacsekbalint@gmail.com', $balint->email_private);
     }
 }
