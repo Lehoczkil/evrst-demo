@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Concerns\HandlesDiscordRateLimit;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -11,14 +12,16 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Single, generic Discord webhook dispatch. Replaces the ad-hoc
- * SendDiscordWebhook + SendDiscordEventWebhook duplication. Pass an
- * embed shape; the job posts it and silently no-ops when
- * DISCORD_WEBHOOK_URL is empty (dev-friendly).
+ * Single, generic Discord channel-webhook dispatch, replacing the two
+ * ad-hoc webhook jobs that came before it. Pass an embed shape; the job
+ * posts it and silently no-ops when DISCORD_WEBHOOK_URL is empty
+ * (dev-friendly).
+ *
+ * Dispatched only by {@see \App\Support\DiscordDelivery}.
  */
 class PostDiscordWebhook implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, HandlesDiscordRateLimit, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
@@ -63,6 +66,11 @@ class PostDiscordWebhook implements ShouldQueue
         ];
 
         $response = Http::asJson()->timeout(10)->post($webhook, $payload);
+
+        if ($this->isRateLimited($response)) {
+            $this->releaseForRateLimit($response);
+            return;
+        }
 
         if ($response->failed()) {
             throw new \RuntimeException('Discord webhook returned ' . $response->status() . ': ' . $response->body());

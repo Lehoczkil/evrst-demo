@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Concerns\HandlesDiscordRateLimit;
 use App\Services\DiscordBot;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,13 +12,16 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 /**
- * DM a single Discord user via the bot. No-op until the bot token is
- * populated and the recipient has a snowflake — the existing channel
- * webhook keeps carrying notifications until then.
+ * DM a single Discord user via the bot.
+ *
+ * No-ops until DISCORD_BOT_TOKEN is set and the recipient has a
+ * snowflake in `team_members.discord_id`. The channel webhook carries
+ * every one of these messages as well, so a member with no snowflake
+ * loses nothing but the private copy.
  */
 class SendDiscordDirectMessage implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, HandlesDiscordRateLimit, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
@@ -49,11 +53,31 @@ class SendDiscordDirectMessage implements ShouldQueue
             return;
         }
 
-        $channelId = $bot->openDirectMessageChannel($this->snowflake);
+        $channel = $bot->openDirectMessageChannelResponse($this->snowflake);
+        if (! $channel) return;
+
+        if ($this->isRateLimited($channel)) {
+            $this->releaseForRateLimit($channel);
+            return;
+        }
+
+        // A failed open is the recipient's own setting — DMs closed, or
+        // no server shared with the bot. Retrying cannot change either,
+        // and the channel post already carried the message.
+        if ($channel->failed()) return;
+
+        $channelId = $channel->json('id');
         if (! $channelId) return;
 
         $response = $bot->sendMessage($channelId, $this->content, $this->embed);
-        if ($response && $response->failed()) {
+        if (! $response) return;
+
+        if ($this->isRateLimited($response)) {
+            $this->releaseForRateLimit($response);
+            return;
+        }
+
+        if ($response->failed()) {
             throw new \RuntimeException('Discord DM returned ' . $response->status() . ': ' . $response->body());
         }
     }
