@@ -16,8 +16,13 @@ use App\Models\User;
 use Illuminate\Support\Str;
 
 /**
- * Centralised builders for the embed shapes we hand to PostDiscordWebhook.
- * Keeps the per-event copy + colour palette in one place.
+ * Centralised builders for the embed shapes {@see DiscordDelivery} hands
+ * to the channel webhook and the DM bot. Keeps the per-event copy +
+ * colour palette in one place.
+ *
+ * A builder whose message can reach someone by DM returns `dm_content`
+ * alongside `content`: the channel line identifies its subject with an
+ * @-mention, and in a DM that mention is noise.
  */
 class DiscordPayloads
 {
@@ -26,6 +31,19 @@ class DiscordPayloads
     private const COLOR_REJECTED    = 0xEF4444;
     private const COLOR_EVENT       = 0x0EA5E9;
     private const COLOR_TASK        = 0xA855F7;
+    private const COLOR_EVENT_EDIT  = 0x6366F1;
+    private const COLOR_EVENT_GONE  = 0x64748B;
+
+    /** Calendar-event columns an update announcement reports, in reading order. */
+    private const CALENDAR_FIELDS = [
+        'title' => 'Title',
+        'start_at' => 'Start',
+        'end_at' => 'End',
+        'all_day' => 'All day',
+        'location' => 'Location',
+        'project_id' => 'Project',
+        'description' => 'Description',
+    ];
 
     public static function adminUrl(string $path = ''): string
     {
@@ -146,43 +164,126 @@ class DiscordPayloads
         ];
     }
 
-    /** @return array{content: string, embed: array<string, mixed>, reference: string} */
-    public static function newCalendarEvent(CalendarEvent $event): array
+    /**
+     * Which columns of a calendar-event update are worth announcing.
+     * `color` and the timestamps are deliberately absent — nobody wants a
+     * DM because a card was recoloured.
+     *
+     * @param  array<string, mixed>  $changes  Eloquent's getChanges()
+     * @return array<int, string>
+     */
+    public static function calendarEventChangeLabels(array $changes): array
     {
-        $when = null;
-        if ($event->start_at) {
-            $when = $event->start_at->translatedFormat($event->all_day ? 'd M Y' : 'd M Y H:i');
-            if ($event->end_at) {
-                $sameDay = $event->start_at->isSameDay($event->end_at);
-                $endFmt = $event->all_day || $sameDay
-                    ? ($event->all_day ? 'd M Y' : 'H:i')
-                    : 'd M Y H:i';
-                if ($event->end_at->ne($event->start_at)) {
-                    $when .= ' — ' . $event->end_at->translatedFormat($endFmt);
-                }
-            }
+        return array_values(array_intersect_key(self::CALENDAR_FIELDS, $changes));
+    }
+
+    /**
+     * The human "when" line. Shared by the create / update / delete
+     * announcements so the three read as one thread about one event.
+     */
+    private static function calendarWhen(CalendarEvent $event): ?string
+    {
+        if (! $event->start_at) {
+            return null;
         }
+
+        $when = $event->start_at->translatedFormat($event->all_day ? 'd M Y' : 'd M Y H:i');
+
+        if (! $event->end_at || $event->end_at->eq($event->start_at)) {
+            return $when;
+        }
+
+        $sameDay = $event->start_at->isSameDay($event->end_at);
+        $endFmt = $event->all_day || $sameDay
+            ? ($event->all_day ? 'd M Y' : 'H:i')
+            : 'd M Y H:i';
+
+        return $when . ' — ' . $event->end_at->translatedFormat($endFmt);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private static function calendarFields(CalendarEvent $event): array
+    {
+        $when = self::calendarWhen($event);
 
         $projectName = null;
         if ($event->relationLoaded('project') && $event->project) {
             $projectName = CollectionResource::pickLocale($event->project->title);
         }
 
+        return array_values(array_filter([
+            $when ? ['name' => 'When', 'value' => $when, 'inline' => true] : null,
+            $event->location ? ['name' => 'Where', 'value' => (string) $event->location, 'inline' => true] : null,
+            $projectName ? ['name' => 'Project', 'value' => (string) $projectName, 'inline' => true] : null,
+        ]));
+    }
+
+    /** @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string} */
+    public static function newCalendarEvent(CalendarEvent $event): array
+    {
         return [
             'content' => '📅 New event added to the calendar',
+            'dm_content' => '📅 New event on the team calendar',
             'embed' => [
                 'title' => $event->title,
                 'description' => Str::limit((string) ($event->description ?? ''), 200) ?: null,
                 'url' => Calendar::getUrl(),
                 'color' => self::COLOR_EVENT,
-                'fields' => array_values(array_filter([
-                    $when ? ['name' => 'When', 'value' => $when, 'inline' => true] : null,
-                    $event->location ? ['name' => 'Where', 'value' => (string) $event->location, 'inline' => true] : null,
-                    $projectName ? ['name' => 'Project', 'value' => (string) $projectName, 'inline' => true] : null,
-                ])),
+                'fields' => self::calendarFields($event),
                 'timestamp' => optional($event->created_at)->toIso8601String(),
             ],
             'reference' => 'calendar-event:' . $event->id,
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $changed  Labels from {@see calendarEventChangeLabels()}
+     * @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string}
+     */
+    public static function calendarEventUpdated(CalendarEvent $event, array $changed = []): array
+    {
+        $fields = self::calendarFields($event);
+        if ($changed !== []) {
+            // Not inline: the whole point of this embed is that the reader
+            // already knows the event and only needs the delta.
+            $fields[] = ['name' => 'Changed', 'value' => implode(', ', $changed), 'inline' => false];
+        }
+
+        return [
+            'content' => '✏️ Calendar event updated',
+            'dm_content' => '✏️ An event on the team calendar changed',
+            'embed' => [
+                'title' => $event->title,
+                'description' => Str::limit((string) ($event->description ?? ''), 200) ?: null,
+                'url' => Calendar::getUrl(),
+                'color' => self::COLOR_EVENT_EDIT,
+                'fields' => $fields,
+                'timestamp' => now()->toIso8601String(),
+            ],
+            'reference' => 'calendar-event:update:' . $event->id,
+        ];
+    }
+
+    /**
+     * Built *before* the row is deleted — the embed still needs the
+     * event's own title and dates to be worth reading.
+     *
+     * @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string}
+     */
+    public static function calendarEventDeleted(CalendarEvent $event): array
+    {
+        return [
+            'content' => '🗑 Calendar event cancelled',
+            'dm_content' => '🗑 An event was removed from the team calendar',
+            'embed' => [
+                'title' => $event->title,
+                'description' => Str::limit((string) ($event->description ?? ''), 200) ?: null,
+                'url' => Calendar::getUrl(),
+                'color' => self::COLOR_EVENT_GONE,
+                'fields' => self::calendarFields($event),
+                'timestamp' => now()->toIso8601String(),
+            ],
+            'reference' => 'calendar-event:delete:' . $event->id,
         ];
     }
 
@@ -195,18 +296,31 @@ class DiscordPayloads
      */
     private static function mention(User $user): string
     {
-        $tm = $user->teamMember()->first();
-        $id = $tm?->discord_id;
+        // Relation property, not ->teamMember()->first(): it is cached
+        // per user, and the accept flow setRelation()s a member that is
+        // not in the database under that user id yet.
+        $tm = $user->teamMember;
         $nick = $tm?->discord_nick;
         $username = $tm?->discord_username;
 
-        $isSnowflake = $id && preg_match('/^\d{17,20}$/', $id) === 1;
-        if ($isSnowflake) {
+        if ($id = self::snowflakeFor($user)) {
             return $nick ? "<@{$id}> @{$nick}" : "<@{$id}>";
         }
         if ($nick) return "@{$nick}";
         if ($username) return "@{$username}";
         return $user->name;
+    }
+
+    /**
+     * The user's Discord snowflake, or null when there isn't a usable
+     * one. This is the gate on the DM path: the bot addresses people by
+     * snowflake and nothing else, so a handle is not a substitute.
+     */
+    public static function snowflakeFor(User $user): ?string
+    {
+        $id = (string) ($user->teamMember?->discord_id ?? '');
+
+        return preg_match('/^\d{17,20}$/', $id) === 1 ? $id : null;
     }
 
     /**
@@ -217,17 +331,18 @@ class DiscordPayloads
      */
     public static function wantsDiscordPing(User $user): bool
     {
-        $tm = $user->teamMember()->first();
+        $tm = $user->teamMember;
         return (bool) ($tm?->discord_id)
             || (bool) ($tm?->discord_nick)
             || (bool) ($tm?->discord_username);
     }
 
-    /** @return array{content: string, embed: array<string, mixed>, reference: string} */
+    /** @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string} */
     public static function taskAssignedPing(Task $task, User $assignee): array
     {
         return [
             'content' => '🛠 ' . self::mention($assignee) . " you've been assigned to a task",
+            'dm_content' => "🛠 You've been assigned to a task",
             'embed' => [
                 'title' => $task->title,
                 'description' => Str::limit((string) ($task->description ?? ''), 200) ?: null,
@@ -243,11 +358,12 @@ class DiscordPayloads
         ];
     }
 
-    /** @return array{content: string, embed: array<string, mixed>, reference: string} */
+    /** @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string} */
     public static function taskStatusChangedPing(Task $task, User $watcher, string $prev, string $next): array
     {
         return [
             'content' => '🔁 ' . self::mention($watcher) . ' task status changed',
+            'dm_content' => '🔁 A task you are on changed status',
             'embed' => [
                 'title' => $task->title,
                 'description' => Str::limit((string) ($task->description ?? ''), 200) ?: null,
@@ -263,13 +379,14 @@ class DiscordPayloads
         ];
     }
 
-    /** @return array{content: string, embed: array<string, mixed>, reference: string} */
+    /** @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string} */
     public static function taskCommentedPing(Task $task, User $watcher, TaskComment $comment): array
     {
         $author = $comment->author?->name ?? 'Someone';
 
         return [
             'content' => '💬 ' . self::mention($watcher) . ' new comment on a task you watch',
+            'dm_content' => '💬 New comment on a task you are on',
             'embed' => [
                 'title' => $task->title,
                 'description' => Str::limit((string) $comment->body, 200) ?: null,

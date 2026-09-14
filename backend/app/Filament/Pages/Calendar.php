@@ -4,11 +4,11 @@ namespace App\Filament\Pages;
 
 use App\Filament\Resources\Cms\AboutProjects\AboutProjectResource;
 use App\Filament\Resources\Tasks\TaskResource;
-use App\Jobs\PostDiscordWebhook;
 use App\Models\CalendarEvent;
 use App\Models\Cms\AboutProject;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\DiscordDelivery;
 use App\Support\DiscordPayloads;
 use BackedEnum;
 use Carbon\Carbon;
@@ -25,8 +25,13 @@ use Filament\Support\Icons\Heroicon;
  * Readable by anyone signed in; **writable by admins only**. Every public
  * Livewire method that mutates state (or opens a form that will) starts
  * with an abort_unless, because a Livewire endpoint is reachable directly
- * whatever the Blade chose to render — and creating an event also posts to
- * the Discord channel.
+ * whatever the Blade chose to render — and every write here announces
+ * itself to the whole team.
+ *
+ * Creating, changing and cancelling an event all fan out: one post to the
+ * channel, plus a DM to every rostered member holding a Discord snowflake
+ * ({@see DiscordDelivery::audience()}), minus whoever made the change —
+ * they just did it and do not need telling.
  */
 class Calendar extends Page
 {
@@ -396,15 +401,29 @@ class Calendar extends Page
             }
             $event->update($payload);
             Notification::make()->title(__('admin.calendar.modal.updated'))->success()->send();
+
+            // getChanges() is what actually moved, so re-saving an
+            // unchanged form announces nothing, and a colour-only edit
+            // is filtered out by the label map.
+            $changed = DiscordPayloads::calendarEventChangeLabels($event->getChanges());
+            if ($changed !== []) {
+                $event->loadMissing('project');
+                DiscordDelivery::announce(
+                    DiscordPayloads::calendarEventUpdated($event, $changed),
+                    DiscordDelivery::audience(auth()->id()),
+                    $event->project?->discord_webhook_url,
+                );
+            }
         } else {
             $event = CalendarEvent::create($payload);
             Notification::make()->title(__('admin.calendar.modal.created'))->success()->send();
 
             $event->loadMissing('project');
-            $webhookUrl = $event->project?->discord_webhook_url;
-
-            $discord = DiscordPayloads::newCalendarEvent($event);
-            PostDiscordWebhook::dispatch($discord['content'], $discord['embed'], $discord['reference'], $webhookUrl)->afterResponse();
+            DiscordDelivery::announce(
+                DiscordPayloads::newCalendarEvent($event),
+                DiscordDelivery::audience(auth()->id()),
+                $event->project?->discord_webhook_url,
+            );
         }
 
         $this->closeFormModal();
@@ -420,8 +439,17 @@ class Calendar extends Page
             $this->closeFormModal();
             return;
         }
+        // Built before the delete — the embed is only worth reading if it
+        // still carries the event's own title and dates.
+        $event->loadMissing('project');
+        $webhookUrl = $event->project?->discord_webhook_url;
+        $discord = DiscordPayloads::calendarEventDeleted($event);
+
         $event->delete();
         Notification::make()->title(__('admin.calendar.modal.deleted'))->warning()->send();
+
+        DiscordDelivery::announce($discord, DiscordDelivery::audience(auth()->id()), $webhookUrl);
+
         $this->closeFormModal();
     }
 }

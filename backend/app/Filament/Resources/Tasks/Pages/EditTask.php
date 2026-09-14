@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\Tasks\Pages;
 
 use App\Filament\Resources\Tasks\TaskResource;
-use App\Jobs\PostDiscordWebhook;
 use App\Models\Task;
 use App\Models\User;
 use App\Notifications\TaskAssigned;
 use App\Notifications\TaskStatusChanged;
+use App\Support\DiscordDelivery;
 use App\Support\DiscordPayloads;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -57,13 +57,12 @@ class EditTask extends EditRecord
         if (! empty($newlyAdded)) {
             $recipients = User::whereIn('id', $newlyAdded)
                 ->where('id', '!=', auth()->id())
+                ->with('teamMember')
                 ->get();
             if ($recipients->isNotEmpty()) {
                 Notification::send($recipients, new TaskAssigned($task));
                 foreach ($recipients as $assignee) {
-                    if (! DiscordPayloads::wantsDiscordPing($assignee)) continue;
-                    $payload = DiscordPayloads::taskAssignedPing($task, $assignee);
-                    PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+                    DiscordDelivery::toRecipient($assignee, DiscordPayloads::taskAssignedPing($task, $assignee));
                 }
             }
         }
@@ -78,14 +77,12 @@ class EditTask extends EditRecord
                     $task->status,
                 ));
                 foreach ($watchers as $watcher) {
-                    if (! DiscordPayloads::wantsDiscordPing($watcher)) continue;
-                    $payload = DiscordPayloads::taskStatusChangedPing(
+                    DiscordDelivery::toRecipient($watcher, DiscordPayloads::taskStatusChangedPing(
                         $task,
                         $watcher,
                         $this->statusBeforeSave,
                         $task->status,
-                    );
-                    PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+                    ));
                 }
             }
         }

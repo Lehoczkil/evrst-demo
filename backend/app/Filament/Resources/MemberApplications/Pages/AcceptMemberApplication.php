@@ -8,11 +8,11 @@ use App\Filament\Resources\TeamMembers\TeamMemberResource;
 use App\Filament\Resources\MemberApplications\MemberApplicationResource;
 use App\Filament\Schemas\MemberPositionFields;
 use App\Filament\Support\TempPasswordReport;
-use App\Jobs\PostDiscordWebhook;
 use App\Models\MemberApplication;
 use App\Models\TeamMember;
 use App\Models\Role;
 use App\Models\User;
+use App\Support\DiscordDelivery;
 use App\Support\DiscordPayloads;
 use App\Support\OrgEmail;
 use Filament\Actions\Action;
@@ -251,8 +251,7 @@ class AcceptMemberApplication extends Page implements HasForms
         $user->setRelation('teamMember', $member);
         $delivery = IssueTempPassword::deliver($user, $temp);
 
-        $payload = DiscordPayloads::applicationAccepted($this->record, auth()->user());
-        PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+        DiscordDelivery::toChannel(DiscordPayloads::applicationAccepted($this->record, auth()->user()));
 
         // The application is accepted either way — say what happened to the
         // credentials separately rather than folding it into one message.

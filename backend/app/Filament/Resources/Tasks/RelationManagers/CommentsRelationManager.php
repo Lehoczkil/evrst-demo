@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Tasks\RelationManagers;
 
-use App\Jobs\PostDiscordWebhook;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Notifications\TaskCommented;
+use App\Support\DiscordDelivery;
 use App\Support\DiscordPayloads;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -116,9 +116,7 @@ class CommentsRelationManager extends RelationManager
                         if ($watchers->isNotEmpty()) {
                             Notification::send($watchers, new TaskCommented($task, $record));
                             foreach ($watchers as $watcher) {
-                                if (! DiscordPayloads::wantsDiscordPing($watcher)) continue;
-                                $payload = DiscordPayloads::taskCommentedPing($task, $watcher, $record);
-                                PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+                                DiscordDelivery::toRecipient($watcher, DiscordPayloads::taskCommentedPing($task, $watcher, $record));
                             }
                         }
                     })

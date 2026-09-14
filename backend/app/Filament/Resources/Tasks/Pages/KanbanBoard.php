@@ -4,9 +4,9 @@ namespace App\Filament\Resources\Tasks\Pages;
 
 use App\Auth\Perm;
 use App\Filament\Resources\Tasks\TaskResource;
-use App\Jobs\PostDiscordWebhook;
 use App\Models\Task;
 use App\Notifications\TaskStatusChanged;
+use App\Support\DiscordDelivery;
 use App\Support\DiscordPayloads;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Resources\Pages\Page;
@@ -265,10 +265,12 @@ class KanbanBoard extends Page
             if ($watchers->isNotEmpty()) {
                 Notification::send($watchers, new TaskStatusChanged($task, $entry['previous'], $entry['next']));
                 foreach ($watchers as $watcher) {
-                    if (! DiscordPayloads::wantsDiscordPing($watcher)) continue;
-                    // Not $payload — that is this method's own parameter.
-                    $ping = DiscordPayloads::taskStatusChangedPing($task, $watcher, $entry['previous'], $entry['next']);
-                    PostDiscordWebhook::dispatch($ping['content'], $ping['embed'], $ping['reference'])->afterResponse();
+                    DiscordDelivery::toRecipient($watcher, DiscordPayloads::taskStatusChangedPing(
+                        $task,
+                        $watcher,
+                        $entry['previous'],
+                        $entry['next'],
+                    ));
                 }
             }
         }

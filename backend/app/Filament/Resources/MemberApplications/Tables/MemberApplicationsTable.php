@@ -4,10 +4,10 @@ namespace App\Filament\Resources\MemberApplications\Tables;
 
 use App\Auth\Perm;
 use App\Filament\Resources\MemberApplications\MemberApplicationResource;
-use App\Jobs\PostDiscordWebhook;
 use App\Models\MemberApplication;
 use App\Models\TeamMemberGroup;
 use App\Support\ApplicationForm;
+use App\Support\DiscordDelivery;
 use App\Support\DiscordPayloads;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -103,8 +103,7 @@ class MemberApplicationsTable
                             'reviewed_by' => auth()->id(),
                         ]));
                         $record->logActivity('rejected');
-                        $payload = DiscordPayloads::applicationRejected($record, auth()->user());
-                        PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+                        DiscordDelivery::toChannel(DiscordPayloads::applicationRejected($record, auth()->user()));
                         Notification::make()->title(__('admin.applications.rejected_msg'))->warning()->send();
                     }),
                 DeleteAction::make(),

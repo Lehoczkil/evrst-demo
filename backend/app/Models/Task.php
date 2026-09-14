@@ -353,7 +353,10 @@ class Task extends Model
      */
     public function watchers(?int $excludeUserId = null): \Illuminate\Support\Collection
     {
-        $this->loadMissing(['assignees', 'supervisor']);
+        // teamMember comes along because every consumer needs it: the
+        // notifications resolve deliveryEmail() from it and the Discord
+        // fan-out reads the handle and snowflake off it.
+        $this->loadMissing(['assignees.teamMember', 'supervisor.teamMember']);
         $users = $this->assignees->all();
         if ($this->supervisor) {
             $users[] = $this->supervisor;

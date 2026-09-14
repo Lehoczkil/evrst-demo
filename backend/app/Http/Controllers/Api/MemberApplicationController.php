@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Auth\Perm;
 use App\Http\Controllers\Controller;
-use App\Jobs\PostDiscordWebhook;
 use App\Models\MemberApplication;
 use App\Models\User;
 use App\Notifications\NewMemberApplication;
 use App\Support\ApplicationForm;
+use App\Support\DiscordDelivery;
 use App\Support\DiscordPayloads;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -48,8 +48,7 @@ class MemberApplicationController extends Controller
             Notification::send($recipients, new NewMemberApplication($application));
         }
 
-        $p = DiscordPayloads::newApplication($application);
-        PostDiscordWebhook::dispatch($p['content'], $p['embed'], $p['reference'])->afterResponse();
+        DiscordDelivery::toChannel(DiscordPayloads::newApplication($application));
 
         return response()->json(['id' => $application->id], 201);
     }

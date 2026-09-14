@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\Tasks\Pages;
 
 use App\Filament\Resources\Tasks\TaskResource;
-use App\Jobs\PostDiscordWebhook;
 use App\Models\Task;
 use App\Models\User;
 use App\Notifications\TaskAssigned;
+use App\Support\DiscordDelivery;
 use App\Support\DiscordPayloads;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Enums\Width;
@@ -36,15 +36,14 @@ class CreateTask extends CreateRecord
 
         $recipients = User::whereIn('id', $assigneeIds)
             ->where('id', '!=', auth()->id())
+            ->with('teamMember')
             ->get();
         if ($recipients->isEmpty()) return;
 
         Notification::send($recipients, new TaskAssigned($task));
 
         foreach ($recipients as $assignee) {
-            if (! DiscordPayloads::wantsDiscordPing($assignee)) continue;
-            $payload = DiscordPayloads::taskAssignedPing($task, $assignee);
-            PostDiscordWebhook::dispatch($payload['content'], $payload['embed'], $payload['reference'])->afterResponse();
+            DiscordDelivery::toRecipient($assignee, DiscordPayloads::taskAssignedPing($task, $assignee));
         }
     }
 }
