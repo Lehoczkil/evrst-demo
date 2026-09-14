@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\TeamMember;
 use App\Models\User;
 use App\Support\OrgEmail;
 use Illuminate\Console\Command;
@@ -135,7 +136,42 @@ class MailDoctor extends Command
             'Discord posts are silently skipped while this is empty',
         );
 
+        // The DM path fails open the same way, and in two places — the
+        // token, and the per-member snowflake it addresses people by.
+        // Both are "everything looks fine, nothing arrives". Advisory,
+        // not a failure: DMs are an addition to the channel post, and a
+        // green run here is permission to mail the roster, not to DM it.
+        $botToken = (bool) config('services.discord.bot_token');
+        $rows[] = $this->advisory(
+            'DISCORD_BOT_TOKEN',
+            $botToken ? 'set' : 'empty',
+            $botToken ? '' : 'private DMs are skipped; the channel post still goes out',
+        );
+
+        if ($botToken) {
+            $onRoster = TeamMember::whereNull('left_at')->count();
+            $withSnowflake = TeamMember::whereNull('left_at')->whereNotNull('discord_id')->count();
+
+            $rows[] = $this->advisory(
+                'discord_id coverage',
+                $withSnowflake . ' of ' . $onRoster . ' member(s)',
+                $withSnowflake === $onRoster ? '' : 'the rest get no DM — run `php artisan discord:sync-ids`',
+            );
+        }
+
         $this->table(['Setting', 'Value', '', 'Note'], $rows);
+    }
+
+    /**
+     * A row that reports without judging. Used for optional integrations
+     * — an unset one is a choice, not a misconfiguration, and must not
+     * turn the pre-flight red.
+     *
+     * @return array{0: string, 1: string, 2: string, 3: string}
+     */
+    private function advisory(string $label, string $value, string $note): array
+    {
+        return [$label, $value, $note === '' ? '<fg=green>✓</>' : '<fg=yellow>–</>', $note];
     }
 
     /**
