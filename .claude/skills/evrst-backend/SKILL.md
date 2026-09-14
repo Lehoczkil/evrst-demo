@@ -201,7 +201,7 @@ deployed instance would otherwise have no questions at all.
 `Api\MemberApplicationController@store`:
 1. Validates against `ApplicationForm::rules()` and creates a `member_applications` row.
 2. Sends `App\Notifications\NewMemberApplication` to `User::whereHas('role.permissions', key=notifications.see)` — i.e. Admins.
-3. Dispatches `App\Jobs\SendDiscordWebhook` to ping a Discord channel using `services.discord.webhook` (env `DISCORD_WEBHOOK_URL`). The job no-ops silently when the URL is empty so dev doesn't fail.
+3. Announces it to the Discord channel through `App\Support\DiscordDelivery::toChannel()`. No DM — an application is about someone who is not on the roster yet.
 
 Accept flow (`Filament/Resources/MemberApplications/Pages/AcceptMemberApplication`) creates:
 1. A `User` with role=Member, random `Str::password(12)`, `password_changed_at = null`.
@@ -277,14 +277,72 @@ The Filament TeamMember admin form exposes `discord_username` as a plain text in
 
 ## Discord delivery paths
 
-There are two outbound channels and only one is live today:
+**`App\Support\DiscordDelivery` is the single exit.** Nothing dispatches
+`PostDiscordWebhook` or `SendDiscordDirectMessage` directly any more — a grep
+for `::dispatch` outside that class should come back empty.
 
-- **Channel webhook (live).** `App\Jobs\SendDiscordWebhook` posts to `services.discord.webhook` (env `DISCORD_WEBHOOK_URL`). This is the **only** outbound path currently in use — fired for new member applications, new calendar events, and per-recipient task pings (assignment / status change / new comment from `CreateTask` / `EditTask` / `KanbanBoard` / `CommentsRelationManager`). The job no-ops when the URL is empty.
-- **Bot DM (scaffolded, dormant).** `App\Services\DiscordBot` wraps the Discord REST API; `isConfigured()` is false until `DISCORD_BOT_TOKEN` is set. `App\Jobs\SendDiscordDirectMessage::dispatch($snowflake, $content, $embed, $reference)` exists and is queueable, but silently no-ops when the bot isn't configured **or** the snowflake doesn't match the regex. **None of the existing dispatch sites use the DM job yet.** Once the team registers a bot and collects snowflakes into `team_members.discord_id`, swapping the per-recipient `PostDiscordWebhook::dispatch(...)` calls for `SendDiscordDirectMessage::dispatch(...)` is the entire migration.
+Two channels run **side by side**; neither replaces the other:
 
-`App\Support\DiscordPayloads::mention()` is the helper both paths use to render an `@`-mention. It only emits `<@id>` (a real ping) when `discord_id` matches `^\d{17,20}$`; otherwise it falls back to plaintext `@discord_nick`, then `@discord_username`, then `user.name` — so the channel never shows a broken `<@username>` literal. `wantsDiscordPing()` returns true when the user has any of nick / username / id.
+- **Channel webhook.** `App\Jobs\PostDiscordWebhook` → `services.discord.webhook` (`DISCORD_WEBHOOK_URL`). Fires for everything, whoever it is about. No-ops when the URL is empty.
+- **Bot DM.** `App\Jobs\SendDiscordDirectMessage` → `App\Services\DiscordBot`. Sends a private copy to each recipient who has a snowflake in `team_members.discord_id`. No-ops when `DISCORD_BOT_TOKEN` is empty or the snowflake fails `^\d{17,20}$`.
 
-`config/services.php` has both `discord.webhook` and `discord.bot_token` + `discord.api_base`. `.env.example` documents `DISCORD_BOT_TOKEN=` (empty default) and an optional `DISCORD_API_BASE` override. `phpunit.xml` forces `DISCORD_BOT_TOKEN=""` so tests can never accidentally hit Discord.
+A member with no snowflake still gets the channel post, so filling the column
+in is an **upgrade, not a migration** — nothing breaks part-way through.
+
+Three entry points:
+
+| | |
+| --- | --- |
+| `toRecipient($user, $payload)` | A message about one person: channel post (gated on `wantsDiscordPing()`) + DM to them. Tasks. |
+| `announce($payload, $recipients)` | A message about everyone: one channel post + a DM each, staggered a second apart because opening a DM channel is the tightest limit the bot meets. Calendar. |
+| `toChannel($payload)` | No individual recipient — applications, CMS events. |
+| `audience(?$excludeUserId)` | Rostered (`left_at` null), snowflake present, minus the actor. What `announce()` is fed. |
+
+**Payloads carry two content lines.** `DiscordPayloads` builders whose message
+can reach someone by DM return `dm_content` alongside `content`: the channel
+line identifies its subject with an `@`-mention, and in a DM that mention is
+noise. `DiscordDelivery` picks; `dm_content` falls back to `content` when
+absent. `mention()` only emits `<@id>` (a real ping) when `discord_id` matches
+the snowflake regex, else plaintext `@discord_nick` → `@discord_username` →
+`user.name`, so the channel never shows a broken `<@username>` literal.
+`snowflakeFor()` is the DM gate — a handle is not a substitute.
+
+**What goes where:**
+
+| Event | From | Reaches |
+| --- | --- | --- |
+| New member application | `Api\MemberApplicationController` | channel |
+| Application accepted / rejected | accept page, edit page, table row action | channel |
+| New CMS `Event` | `CreateEvent` | channel |
+| Calendar event **created / changed / cancelled** | `Pages\Calendar` | channel + DM to the whole roster |
+| Task assigned | `CreateTask`, `EditTask` (newly added only) | channel + DM per assignee |
+| Task status changed | `EditTask`, `KanbanBoard` | channel + DM per watcher |
+| Task commented | `CommentsRelationManager` | channel + DM per watcher |
+
+Calendar updates announce `getChanges()` filtered through
+`DiscordPayloads::CALENDAR_FIELDS`, so a re-save with no edits and a
+colour-only change both stay silent. The delete payload is built **before**
+`$event->delete()` — the embed still has to describe the event.
+
+**Rate limits.** `App\Concerns\HandlesDiscordRateLimit` — both jobs `release()`
+for the interval in Discord's `retry_after` / `Retry-After` instead of throwing,
+because the fixed backoff would burn one of three attempts on a guess. A failed
+DM-channel *open* (403: DMs closed, or no shared server) is not retried at all —
+retrying cannot change the recipient's privacy setting.
+
+**Collecting snowflakes.** `php artisan discord:sync-ids` reads the guild member
+list and matches it against `discord_username` (`--dry-run`, `--guild=`,
+`--nicks`). Needs `DISCORD_GUILD_ID` and the **Server Members** privileged
+intent enabled in the developer portal — that one endpoint requires it; sending
+DMs does not. The command refuses to point two roster rows at one account
+(`discord_id` is unique) and skips departed members. `mail:doctor` reports the
+bot token and snowflake coverage as advisory rows.
+
+`config/services.php` has `discord.webhook`, `discord.bot_token`,
+`discord.api_base`, `discord.guild_id`. `phpunit.xml` forces the token, webhook
+and guild id empty so tests can never hit Discord. Contract tests:
+`DiscordDualDeliveryTest`, `DiscordRateLimitTest`, `SyncDiscordIdsCommandTest`,
+`SendDiscordDirectMessageJobTest`, `CalendarEventDiscordRoutingTest`.
 
 ## Test infrastructure
 
@@ -293,7 +351,7 @@ The contract is **"no outbound notification, mail, or Discord traffic ever fires
 ```php
 Notification::fake();
 Mail::fake();
-Bus::fake();   // catches SendDiscordWebhook + SendDiscordDirectMessage dispatches
+Bus::fake();   // catches PostDiscordWebhook + SendDiscordDirectMessage dispatches
 Http::fake(); // catches anything that slipped through to the Discord REST API
 ```
 
