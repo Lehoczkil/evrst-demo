@@ -222,6 +222,7 @@ class Calendar extends Page
 
         if ($this->showTasks) {
             $tasks = Task::query()
+                ->visibleTo(auth()->user())
                 ->whereNotNull('due_date')
                 ->whereBetween('due_date', [$from->toDateString(), $to->toDateString()])
                 ->with(['assignees', 'supervisor'])

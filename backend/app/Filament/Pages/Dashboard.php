@@ -92,6 +92,22 @@ class Dashboard extends BaseDashboard
         ];
     }
 
+    /*
+     * A note on the two shared tiles below.
+     *
+     * `widgets:admin-stats` and `widgets:upcoming-schedule` are cached
+     * under one key for every viewer, and AppServiceProvider forgets those
+     * exact strings when the underlying records change. Scoping them per
+     * viewer would mean a key per user, which would either break that
+     * immediate invalidation or need a second version-stamp scheme.
+     *
+     * So private tasks are simply left out of both: they are not part of a
+     * team-wide summary by definition, and the owner still sees them where
+     * it matters — "my open tasks" below is keyed per user and already
+     * includes every task you are on, the calendar page is scoped rather
+     * than cached, and the board lists them.
+     */
+
     /** ───────────────────────  data tiles  ──────────────────────── */
 
     /** @return array{pending: int, open: int, events: int, team: int} */
@@ -99,7 +115,8 @@ class Dashboard extends BaseDashboard
     {
         [$pending, $open, $events, $team] = Cache::remember('widgets:admin-stats', 60, fn () => [
             MemberApplication::where('status', MemberApplication::STATUS_PENDING)->count(),
-            Task::whereIn('status', [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS])->count(),
+            Task::where('is_private', false)
+                ->whereIn('status', [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS])->count(),
             Event::whereNotNull('start_at')->where('start_at', '>=', now())->count(),
             User::whereHas('role')->count(),
         ]);
@@ -158,6 +175,7 @@ class Dashboard extends BaseDashboard
                 ]);
 
             $tasks = Task::query()
+                ->where('is_private', false)
                 ->whereNotNull('due_date')
                 ->whereBetween('due_date', [$from->toDateString(), $to->toDateString()])
                 ->whereIn('status', [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS, Task::STATUS_TESTING])

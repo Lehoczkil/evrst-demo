@@ -337,12 +337,15 @@ class DiscordPayloads
             || (bool) ($tm?->discord_username);
     }
 
-    /** @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string} */
+    /** @return array{content: string, dm_content: string, channel: bool, embed: array<string, mixed>, reference: string} */
     public static function taskAssignedPing(Task $task, User $assignee): array
     {
         return [
             'content' => '🛠 ' . self::mention($assignee) . " you've been assigned to a task",
             'dm_content' => "🛠 You've been assigned to a task",
+            // A private task must not have its title read out in a
+            // channel the whole server can see.
+            'channel' => ! $task->is_private,
             'embed' => [
                 'title' => $task->title,
                 'description' => Str::limit((string) ($task->description ?? ''), 200) ?: null,
@@ -358,12 +361,15 @@ class DiscordPayloads
         ];
     }
 
-    /** @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string} */
+    /** @return array{content: string, dm_content: string, channel: bool, embed: array<string, mixed>, reference: string} */
     public static function taskStatusChangedPing(Task $task, User $watcher, string $prev, string $next): array
     {
         return [
             'content' => '🔁 ' . self::mention($watcher) . ' task status changed',
             'dm_content' => '🔁 A task you are on changed status',
+            // A private task must not have its title read out in a
+            // channel the whole server can see.
+            'channel' => ! $task->is_private,
             'embed' => [
                 'title' => $task->title,
                 'description' => Str::limit((string) ($task->description ?? ''), 200) ?: null,
@@ -379,7 +385,7 @@ class DiscordPayloads
         ];
     }
 
-    /** @return array{content: string, dm_content: string, embed: array<string, mixed>, reference: string} */
+    /** @return array{content: string, dm_content: string, channel: bool, embed: array<string, mixed>, reference: string} */
     public static function taskCommentedPing(Task $task, User $watcher, TaskComment $comment): array
     {
         $author = $comment->author?->name ?? 'Someone';
@@ -387,6 +393,9 @@ class DiscordPayloads
         return [
             'content' => '💬 ' . self::mention($watcher) . ' new comment on a task you watch',
             'dm_content' => '💬 New comment on a task you are on',
+            // A private task must not have its title read out in a
+            // channel the whole server can see.
+            'channel' => ! $task->is_private,
             'embed' => [
                 'title' => $task->title,
                 'description' => Str::limit((string) $comment->body, 200) ?: null,

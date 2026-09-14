@@ -9,6 +9,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,6 +41,18 @@ class TasksTable
                     ->sortable()
                     ->weight('semibold')
                     ->wrap()->toggleable(),
+                // Only ever true on a row the viewer is already allowed to
+                // see, so this marks "not everyone can read this" rather
+                // than revealing anything.
+                TextColumn::make('is_private')
+                    ->label('')
+                    ->badge()
+                    ->color('warning')
+                    ->icon('heroicon-m-lock-closed')
+                    ->formatStateUsing(fn () => __('admin.tasks.private_badge'))
+                    ->visible(fn () => auth()->user()?->isAdmin() ?? false)
+                    ->placeholder('')
+                    ->state(fn (Task $record) => $record->is_private ?: null),
                 TextColumn::make('category')
                     ->label(__('admin.tasks.category'))
                     ->badge()
@@ -91,6 +104,10 @@ class TasksTable
             ->persistSearchInSession()
             ->persistSortInSession()
             ->filters([
+                Filter::make('only_private')
+                    ->label(__('admin.tasks.only_private'))
+                    ->query(fn ($query) => $query->where('is_private', true))
+                    ->visible(fn () => auth()->user()?->isAdmin() ?? false),
                 SelectFilter::make('status')
                     ->label(__('admin.common.status'))
                     ->options(fn () => collect(Task::statuses())->mapWithKeys(fn ($s) => [$s => __('admin.tasks.statuses.' . $s)])->all()),

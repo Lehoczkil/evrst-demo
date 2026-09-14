@@ -53,6 +53,17 @@ class TaskResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
+    /**
+     * A private task is off the board for everyone but the admins and the
+     * people on it. Filament resolves an edit-page record through this
+     * query too, so a direct /admin/tasks/{id}/edit to a task you cannot
+     * see is a 404 rather than a form.
+     */
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->visibleTo(auth()->user());
+    }
+
     public static function canViewAny(): bool { return auth()->check(); }
     public static function canCreate(): bool  { return auth()->user()?->can(Perm::TASKS_CREATE) ?? false; }
     /**

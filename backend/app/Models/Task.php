@@ -118,6 +118,7 @@ class Task extends Model
         'title',
         'description',
         'status',
+        'is_private',
         'due_date',
         'supervisor_id',
         'created_by',
@@ -129,6 +130,17 @@ class Task extends Model
 
     protected $casts = [
         'due_date' => 'date',
+        'is_private' => 'boolean',
+    ];
+
+    /**
+     * So a task that has never been saved reports what the column default
+     * will make it, rather than null. Every visibility check treats null
+     * as public anyway, but a model that cannot answer "am I private?"
+     * until it has been round-tripped is a trap.
+     */
+    protected $attributes = [
+        'is_private' => false,
     ];
 
     public function supervisor(): BelongsTo
@@ -222,6 +234,47 @@ class Task extends Model
 
         return $this->supervisor_id === $user->id
             || $this->assignees()->where('users.id', $user->id)->exists();
+    }
+
+    /**
+     * May this user see this task exists?
+     *
+     * A private task is off the board for everyone except the admins and
+     * the people actually on it — so an admin can hand one to a single
+     * person without the whole team reading it, and a private task with
+     * nobody on it is admin-only, which is the same thing by another
+     * route.
+     *
+     * Every place that lists tasks goes through {@see scopeVisibleTo()};
+     * this is the per-record form of the same rule, for the cases that
+     * already hold a model.
+     */
+    public function isVisibleTo(?User $user): bool
+    {
+        if (! $user) return false;
+        if (! $this->is_private) return true;
+
+        return $user->isAdmin() || $this->isOnTask($user);
+    }
+
+    /**
+     * The list form of {@see isVisibleTo()}. Applied by the resource, the
+     * kanban, the calendar overlay, the dashboard widgets and the parent
+     * picker — a private task must not leak through a count either.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<Task>  $query
+     */
+    public function scopeVisibleTo($query, ?User $user)
+    {
+        if ($user?->isAdmin()) return $query;
+
+        if (! $user) return $query->whereRaw('1 = 0');
+
+        return $query->where(function ($q) use ($user) {
+            $q->where('is_private', false)
+                ->orWhere('supervisor_id', $user->id)
+                ->orWhereHas('assignees', fn ($a) => $a->where('users.id', $user->id));
+        });
     }
 
     /**

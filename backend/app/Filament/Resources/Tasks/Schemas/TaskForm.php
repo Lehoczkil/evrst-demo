@@ -9,6 +9,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Cache;
@@ -67,6 +68,16 @@ class TaskForm
                         && count($record->allowedTransitionsFor(auth()->user())) <= 1)
                     ->dehydrated()
                     ->visibleOn('edit')
+                    ->columnSpan(['default' => 12, 'md' => 4]),
+                // Admin-only, and not merely hidden: a field Filament does
+                // not render is a field it does not dehydrate, so a manager
+                // saving a private task cannot flip it public by editing
+                // the form, and cannot make one private either.
+                Toggle::make('is_private')
+                    ->label(__('admin.tasks.is_private'))
+                    ->helperText(__('admin.tasks.is_private_help'))
+                    ->visible(fn () => auth()->user()?->isAdmin() ?? false)
+                    ->default(false)
                     ->columnSpan(['default' => 12, 'md' => 4]),
                 Textarea::make('description')
                     ->label(__('admin.common.description'))
@@ -132,7 +143,7 @@ class TaskForm
                 Select::make('parent_task_id')
                     ->label(__('admin.tasks.parent'))
                     ->options(function ($record) {
-                        $q = Task::query()->orderBy('title');
+                        $q = Task::query()->visibleTo(auth()->user())->orderBy('title');
                         if ($record) {
                             // Don't let a task pick itself or any descendant.
                             $q->where('id', '!=', $record->id);

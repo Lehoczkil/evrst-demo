@@ -84,6 +84,7 @@ class KanbanBoard extends Page
     public function getColumns(): array
     {
         $query = Task::with(['assignees', 'supervisor'])
+            ->visibleTo(auth()->user())
             ->withCount('children')
             ->orderBy('position')
             ->orderBy('id');
@@ -197,7 +198,9 @@ class KanbanBoard extends Page
             ->filter(fn ($id) => $id > 0)
             ->unique();
 
-        $tasks = Task::with('assignees')->findMany($ids)->keyBy('id');
+        // visibleTo as well as the board query: reorder() is a Livewire
+        // endpoint and takes whatever ids it is handed.
+        $tasks = Task::with('assignees')->visibleTo(auth()->user())->findMany($ids)->keyBy('id');
 
         DB::transaction(function () use ($payload, $allowedStatuses, $tasks, &$movedAcrossColumns, &$rejected, &$notMine) {
             foreach ($payload as $status => $cardIds) {

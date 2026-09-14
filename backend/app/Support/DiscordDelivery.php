@@ -27,7 +27,7 @@ class DiscordDelivery
     /**
      * A message about one person: the channel post plus a DM to them.
      *
-     * @param  array{content: string, dm_content?: string, embed: array<string, mixed>, reference: string}  $payload
+     * @param  array{content: string, dm_content?: string, channel?: bool, embed: array<string, mixed>, reference: string}  $payload
      */
     public static function toRecipient(User $user, array $payload, ?string $webhookUrl = null): void
     {
@@ -37,6 +37,9 @@ class DiscordDelivery
         if (DiscordPayloads::wantsDiscordPing($user)) {
             self::toChannel($payload, $webhookUrl);
         }
+
+        // Note the DM below is NOT gated on `channel`: a private subject is
+        // exactly the case where the private copy is the only one sent.
 
         self::dm($user, $payload);
     }
@@ -65,10 +68,17 @@ class DiscordDelivery
      * Channel only — for events that belong to the team as a whole and
      * have no individual recipient (a new application, a CMS event).
      *
-     * @param  array{content: string, embed: array<string, mixed>, reference: string}  $payload
+     * @param  array{content: string, channel?: bool, embed: array<string, mixed>, reference: string}  $payload
      */
     public static function toChannel(array $payload, ?string $webhookUrl = null): void
     {
+        // A payload whose subject is private never reaches the shared
+        // channel, whichever entry point asked. The builder decides, so no
+        // call site can forget to.
+        if (($payload['channel'] ?? true) === false) {
+            return;
+        }
+
         PostDiscordWebhook::dispatch(
             $payload['content'],
             $payload['embed'],
