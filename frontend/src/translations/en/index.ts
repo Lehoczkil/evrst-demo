@@ -103,6 +103,7 @@ export default {
     noPast: 'The log is still empty.',
   },
   team: {
+    partTime: 'Part-time',
     eyebrow: '{members} members · {groups} groups',
     title: 'The team',
     openPositions: 'Join us',

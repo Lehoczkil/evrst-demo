@@ -132,6 +132,11 @@ class TeamMemberForm
                     ->helperText(__('admin.team.is_public_help'))
                     ->default(true)
                     ->columnSpan(['default' => 1, 'md' => 6]),
+                Toggle::make('is_part_time')
+                    ->label(__('admin.team.is_part_time'))
+                    ->helperText(__('admin.team.is_part_time_help'))
+                    ->default(false)
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('position')
                     ->label(__('admin.sponsors.sort_order'))
                     ->integer()

@@ -39,6 +39,7 @@ class TeamController extends Controller
                     'name' => TeamMemberGroup::pickLocale($g->name, $lang),
                     'is_primary' => (bool) $g->pivot->is_primary,
                 ])->values()->all(),
+                'is_part_time' => (bool) $member->is_part_time,
                 'position' => $member->position,
             ];
         })->all();

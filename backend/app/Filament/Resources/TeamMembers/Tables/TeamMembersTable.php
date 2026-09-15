@@ -77,6 +77,15 @@ class TeamMembersTable
                     ->color('gray')
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
+                // Only the exception is worth ink: a full-time member is the
+                // default and saying so on every row is noise.
+                TextColumn::make('is_part_time')
+                    ->label(__('admin.team.is_part_time_col'))
+                    ->badge()
+                    ->color('warning')
+                    ->state(fn ($record) => $record->is_part_time ? __('admin.team.part_time_badge') : null)
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('degree')
                     ->label(__('admin.team.degree'))
                     ->state(fn ($record) => TeamMemberGroup::pickLocale($record->degree) ?? '—')
@@ -138,6 +147,15 @@ class TeamMembersTable
                             ->where('team_member_groups.id', $value)
                             ->where('team_member_team_member_group.is_primary', true));
                     }),
+                TernaryFilter::make('is_part_time')
+                    ->label(__('admin.team.part_time_filter'))
+                    ->placeholder(__('admin.team.part_time_filter_all'))
+                    ->trueLabel(__('admin.team.part_time_filter_part'))
+                    ->falseLabel(__('admin.team.part_time_filter_full'))
+                    ->queries(
+                        true: fn ($q) => $q->where('is_part_time', true),
+                        false: fn ($q) => $q->where('is_part_time', false),
+                    ),
                 TernaryFilter::make('left_at')
                     ->label(__('admin.team.alumni_filter'))
                     ->placeholder(__('admin.team.alumni_filter_all'))

@@ -14,6 +14,7 @@ export interface TeamMember {
   photo_path: string | null;
   photo_url: string | null;
   groups: TeamMemberGroupRef[];
+  is_part_time: boolean;
   position: number;
 }
 

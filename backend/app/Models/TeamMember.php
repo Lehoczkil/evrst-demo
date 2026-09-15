@@ -14,6 +14,11 @@ class TeamMember extends Model
 {
     use LogsActivity, SoftDeletes;
 
+    /** Everyone starts full-time; part-time is something someone sets. */
+    protected $attributes = [
+        'is_part_time' => false,
+    ];
+
     protected $fillable = [
         'user_id',
         'name',
@@ -28,6 +33,7 @@ class TeamMember extends Model
         'joined_at',
         'left_at',
         'is_public',
+        'is_part_time',
         'position',
         'meta',
     ];
@@ -39,6 +45,7 @@ class TeamMember extends Model
         'joined_at' => 'date',
         'left_at' => 'date',
         'is_public' => 'boolean',
+        'is_part_time' => 'boolean',
         'position' => 'integer',
     ];
 

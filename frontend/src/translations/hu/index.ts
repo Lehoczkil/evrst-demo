@@ -109,6 +109,7 @@ export default {
     noPast: 'A napló még üres.',
   },
   team: {
+    partTime: 'Részmunkaidős',
     eyebrow: '{members} tag · {groups} csoport',
     title: 'A csapat',
     openPositions: 'Csatlakozz',

@@ -127,6 +127,15 @@ const isLoading = computed(() => status.value === 'PENDING' && !members.value?.l
             <img v-if="photoFor(person)" :src="photoFor(person)" :alt="person.name" loading="lazy" />
             <span>
               {{ person.name }}
+              <!--
+                Mono-uppercase because this is DATA, not content — the
+                same voice as the counts and the group legends. The
+                degree below it stays in the body face because a job
+                title is something a person wrote about themselves.
+                Only part-time is marked: full-time is the default, and
+                labelling every row would be noise.
+              -->
+              <b v-if="person.is_part_time" class="tag">{{ t('team.partTime') }}</b>
               <small v-if="person.degree">{{ person.degree }}</small>
             </span>
           </li>
@@ -211,6 +220,24 @@ const isLoading = computed(() => status.value === 'PENDING' && !members.value?.l
     color: var(--on-paper-mid);
     font-size: 12.5px;
     letter-spacing: -0.005em;
+  }
+
+  /*
+    The data voice, in gold-on-paper — `--gold-700` rather than 600,
+    because this sits inside the one paper section and 600 is 2.1:1
+    there. Inline so it reads as a qualifier on the name, not as a
+    second line competing with the job title under it.
+  */
+  .tag {
+    margin-left: 8px;
+    color: var(--gold-700);
+    font-weight: 500;
+    font-size: 9.5px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    vertical-align: 1px;
   }
 }
 </style>
