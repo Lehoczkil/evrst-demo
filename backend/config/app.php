@@ -78,12 +78,22 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default timezone for your application, which
-    | will be used by the PHP date and date-time functions. The timezone
-    | is set to "UTC" by default as it is suitable for most use cases.
+    | will be used by the PHP date and date-time functions.
+    |
+    | Europe/Budapest, not Laravel's UTC default, because every datetime a
+    | person types into this panel is a local wall clock: "the meeting is at
+    | 20:00" means 20:00 here. Eloquent stores whatever string it is handed
+    | and reads it back in THIS timezone, so under UTC a 20:00 event became
+    | 20:00Z — two hours later than anyone meant. That skewed the dashboard
+    | countdown, which event counts as "next", and every whereBetween over a
+    | month or a week.
+    |
+    | The whole team is in one timezone; if that ever stops being true the
+    | fix is to store UTC and convert at the edges, not to move this back.
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'Europe/Budapest'),
 
     /*
     |--------------------------------------------------------------------------
