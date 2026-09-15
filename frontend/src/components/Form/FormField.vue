@@ -72,11 +72,11 @@ const describedBy = computed(() => [
   label {
     display: block;
     margin-bottom: 9px;
-    color: var(--text-low);
+    color: var(--text-mid);
     font-weight: 500;
-    font-size: 10.5px;
+    font-size: 12px;
     font-family: var(--font-mono);
-    letter-spacing: 0.15em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
   }
 
@@ -88,8 +88,8 @@ const describedBy = computed(() => [
 
 .field__help {
   margin-top: 9px;
-  color: var(--text-low);
-  font-size: 10.5px;
+  color: var(--text-mid);
+  font-size: 12px;
   font-family: var(--font-mono);
   letter-spacing: 0.05em;
 }
@@ -97,6 +97,6 @@ const describedBy = computed(() => [
 .field__error {
   margin-top: 9px;
   color: var(--error);
-  font-size: 13px;
+  font-size: 12px;
 }
 </style>

@@ -320,7 +320,7 @@ watch(schema, syncValues, { immediate: true });
   margin-bottom: clamp(40px, 5vw, 64px);
 
   h3 {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     font-size: var(--fs-h3);
   }
 }
