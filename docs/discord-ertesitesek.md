@@ -1,9 +1,19 @@
 # Discord értesítések — élesítési teendők
 
-Állapot: **a kód kész és mergelve van a `main`-re** (2026-09-14). Ez a lap
-arról szól, mi van még hátra ahhoz, hogy élesen is menjenek a privát
-üzenetek. Sorrendben, felülről lefelé — minden lépésnél ott van, mit kell
-látnod ahhoz, hogy továbbmehess.
+Ez a lap arról szól, mi van még hátra ahhoz, hogy élesen is menjenek a
+privát üzenetek. Sorrendben, felülről lefelé — minden lépésnél ott van,
+mit kell látnod ahhoz, hogy továbbmehess.
+
+**Hol tartunk (2026-09-15):**
+
+| Lépés | |
+| --- | --- |
+| 1. Push → deploy | ✅ kész |
+| 2. Env a szerverre | ✅ kész — a `--dry-run` lefutása bizonyítja, token és guild id nélkül 403 lenne |
+| 3. A három kilépett tag törlése | ✅ kész |
+| 4. Hiányzó handle-ök | ⏳ három még hiányzik |
+| 5. Snowflake-ek begyűjtése | ⏳ csak `--dry-run` futott, az éles még nem |
+| 6. Ellenőrzés | ⏳ |
 
 Kódoldali leírás (hogyan működik, hol van mi):
 [`../CLAUDE.md`](../CLAUDE.md) „Discord" bekezdései és
@@ -118,16 +128,36 @@ táblában sincs meg a `ruben.lazar@`, `gabor.kerek@`, `roland.bagi@` fiók.
 
 ## 4. Hiányzó Discord-handle-ök pótlása
 
+> **A seeder nem mérce.** A `TeamSeeder` élesen kötetenként egyszer fut
+> (`.seeded` marker), tehát amit oda beírunk, az egy már működő éles
+> adatbázisba **soha nem jut el**. Attól, hogy egy tagnak a seederben van
+> handle-je, élesen még üres lehet a mezője — és ez nem is látszik, amíg
+> a sync `no match`-et nem ír rá. Ezen a listán tehát **nem a seedert kell
+> nézni, hanem a panelt**: futtasd le előbb az 5. lépés `--dry-run`-ját,
+> és amit az `no match`-nek jelöl, azt pótold.
+
 A **Csapattagok → szerkesztés → Discord felhasználónév** mezőbe:
 
 | Tag | Handle |
 | --- | --- |
 | Szarka Marcell | `marcell0202` |
 | Tiboldi Csongor | `csoncso` |
+| Penc Máté | `mattaiusz` |
+| Stirling Andras | `stirlin6` |
+| Veres Dávid | `_red_leader` |
 
-Ha az éles névsorban van olyan tag, aki a seedben nincs benne, neki is
-kell a handle. A **Discord snowflake** mezőt hagyd üresen — a következő
-lépés tölti ki.
+A **Discord snowflake** mezőt hagyd üresen — a következő lépés tölti ki.
+
+Két dolog, ami elsőre adathibának néz ki, de nem az:
+
+- **A handle körüli szóköz nem baj.** A sync `trim()`-el, szóval egy
+  bemásolt ` marcell0202` is párosul. Kiszedni azért érdemes, mert a mező
+  más olvasói nem feltétlenül trimmelnek.
+- **Egy helyes handle is adhat `no match`-et**, ha az illető időközben
+  kilépett a Discord szerverről vagy átnevezte magát. Ilyenkor nem a
+  rosztert kell javítani, hanem megkérdezni az embert. (Laschek Ádám
+  pontosan ez volt 2026-09-15-én: az `adamlasy` handle jó volt, a fiók
+  aznap tűnt el a szerverről.)
 
 ---
 
@@ -191,10 +221,23 @@ fogadása szervertagoktól.*
 
 ## Ismert hiányok
 
-- **Mosberger Péternek** semmilyen Discord-adata nincs (se handle, se
-  snowflake). Amíg nem kerül be, csak a csatornaposztot látja.
+Állapot 2026-09-15, az éles `--dry-run` alapján: **23 tagból 21** kaphat
+privát üzenetet, miután a 4. lépés három handle-je bekerült.
+
+- **Dr. Mosberger Péternek** semmilyen Discord-adata nincs (se handle, se
+  snowflake), és a szerveren sincs hozzá illeszthető fiók — ő nincs bent a
+  Discordon. Amíg nem lép be, csak a csatornaposztot látja.
+- **Laschek Ádám** handle-je (`adamlasy`) helyes, de az a fiók 2026-09-15-én
+  kilépett a szerverről. Nem adathiba: vagy visszalép, vagy meg kell tudni
+  az új felhasználónevét.
 - **`szaboistvanphd`** (id `1447664454434033674`) bent van a szerveren, de
   nem tartozik hozzá roszter-sor. Konzulens? Mentor? Tisztázandó.
+
+A lista ellenőrzése egyetlen parancs, bármikor:
+
+```sh
+docker compose exec backend php artisan discord:sync-ids --dry-run
+```
 
 ---
 
