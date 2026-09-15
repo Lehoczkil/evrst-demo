@@ -11,6 +11,20 @@
 /* ---------- Tokens ------------------------------------------------- */
 
 :root {
+    /* ── Stacking ladder ──────────────────────────────────────────────
+       In-page tricks (a section lifted so its date picker can escape,
+       a picker panel above the action row) live in the tens. Overlays
+       live far above them, because an overlay is by definition on top
+       of the page and must not lose a race with a local hack.
+
+       This is not theoretical: `.fi-section:has(input:focus)` lifts a
+       section to 50 so a date picker can escape its stacking context,
+       and the delete-confirmation modal sat at 40 — so on any form with
+       a focused field the section painted OVER the open modal and its
+       backdrop-filter blurred it, leaving a sliver and a close button. */
+    --evrst-z-overlay-backdrop: 9998;
+    --evrst-z-overlay: 9999;
+    --evrst-z-editor: 10000;
     /* Dark (default) */
     --evrst-bg: #0a0c10;
     --evrst-bg-grid: rgba(255,255,255,.025);
@@ -789,7 +803,7 @@ html .fi-modal,
 html .fi-modal[data-fi-modal-id] {
     position: fixed !important;
     inset: 0 !important;
-    z-index: 40 !important;
+    z-index: var(--evrst-z-overlay) !important;
     transform: none !important;
     filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -800,7 +814,7 @@ html .fi-modal .fi-modal-window-ctn,
 html .fi-modal-window-ctn {
     position: fixed !important;
     inset: 0 !important;
-    z-index: 40 !important;
+    z-index: var(--evrst-z-overlay) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }
@@ -809,7 +823,7 @@ html .fi-modal-close-overlay {
     position: fixed !important;
     inset: 0 !important;
     background: rgba(0, 0, 0, 0.6) !important;
-    z-index: 39 !important;
+    z-index: var(--evrst-z-overlay-backdrop) !important;
 }
 html:not(.dark) .fi-modal .fi-modal-window,
 html:not(.dark) .fi-modal-window,
@@ -857,7 +871,7 @@ html .fi-fo-file-upload-editor {
     inset: 0 !important;
     width: 100vw !important;
     height: 100dvh !important;
-    z-index: 50 !important;
+    z-index: var(--evrst-z-editor) !important;
 }
 html .fi-fo-file-upload-editor-overlay {
     position: fixed !important;
