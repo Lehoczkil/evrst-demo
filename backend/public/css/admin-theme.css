@@ -819,6 +819,63 @@ html:not(.dark) .fi-modal-window-ctn .fi-modal-window {
         0 0 0 1px rgba(15,23,42,.25),
         0 24px 80px rgba(0,0,0,.18) !important;
 }
+
+/* ── The image editor is not a modal ──────────────────────────────────
+   FileUpload::imageEditor() renders its own overlay with its own class
+   names (`.fi-fo-file-upload-editor*`), NOT `.fi-modal` — so none of the
+   careful modal handling above applies to it, including the rule that
+   frees a fixed overlay from its ancestors' containing blocks.
+
+   Filament positions the editor correctly on its own: `position: fixed;
+   inset: 0; width: 100vw; height: 100dvh`. But a fixed element anchors to
+   the nearest ancestor that creates a containing block, and this theme
+   puts `backdrop-filter` on every section — so the editor anchored to the
+   form section's box and a 100vw-wide window starting at the section's
+   left edge ran off the right of the screen.
+
+   Same fix as the modal, keyed on the editor's own open state: Alpine's
+   `x-show` writes an inline `display: none` when it is closed and removes
+   it when it opens, and `x-cloak` is present until Alpine boots — so
+   "open" is "neither cloaked nor display:none". Both halves are needed:
+   without the x-cloak clause every page would strip its glass for the
+   moment before Alpine initialises. */
+html:has(.fi-fo-file-upload-editor:not([x-cloak]):not([style*="display: none"]))
+    *:has(.fi-fo-file-upload-editor:not([x-cloak]):not([style*="display: none"])) {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transform: none !important;
+    filter: none !important;
+    perspective: none !important;
+    contain: none !important;
+    will-change: auto !important;
+}
+
+/* Belt and braces: pin the editor to the viewport whatever an ancestor
+   turns out to be doing, and keep the window inside it. */
+html .fi-fo-file-upload-editor {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    z-index: 50 !important;
+}
+html .fi-fo-file-upload-editor-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+}
+html .fi-fo-file-upload-editor-window {
+    max-width: calc(100vw - 2rem) !important;
+    max-height: calc(100dvh - 2rem) !important;
+    overflow: auto !important;
+}
+/* The cropper canvas is sized from the image's natural dimensions, so a
+   phone screenshot opened on a phone was taller than the window it sits
+   in and pushed the Save button off the bottom. */
+html .fi-fo-file-upload-editor-image-ctn {
+    max-height: calc(100dvh - 12rem) !important;
+    overflow: hidden !important;
+}
+
 .fi-modal-header { border-bottom-color: var(--evrst-border) !important; }
 .fi-modal-footer { border-top-color: var(--evrst-border) !important; background: transparent !important; }
 
