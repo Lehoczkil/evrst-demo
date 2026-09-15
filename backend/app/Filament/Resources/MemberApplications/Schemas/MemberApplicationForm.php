@@ -61,6 +61,13 @@ class MemberApplicationForm
      * The answers as a definition list. Rendered rather than put in disabled
      * inputs: these are a record of what was submitted, not something an
      * admin edits — and the shape varies per submission.
+     *
+     * The class names are ours, styled in `admin-theme.css`, NOT Tailwind
+     * utilities. Utilities written here are built at runtime, so Tailwind's
+     * scanner never sees them and they are absent from the compiled CSS —
+     * `uppercase` does not appear in it once. That is why the question and
+     * the answer used to render identically: the `<dt>` was unstyled, and
+     * twenty-four lines of the same grey ran together.
      */
     private static function renderAnswers(?MemberApplication $record): string
     {
@@ -71,12 +78,12 @@ class MemberApplicationForm
         $rows = $record->answeredFields();
 
         if ($rows === []) {
-            return '<p class="text-sm text-gray-500 dark:text-gray-400">'
+            return '<p class="evrst-answers-empty">'
                 . e(__('admin.applications.answers_empty'))
                 . '</p>';
         }
 
-        $html = '<dl class="grid gap-4">';
+        $html = '<dl class="evrst-answers">';
 
         foreach ($rows as $row) {
             $value = is_array($row['value'])
@@ -86,14 +93,14 @@ class MemberApplicationForm
             $label = e($row['label']);
             if ($row['orphaned']) {
                 // Answered, then the question was removed from the form.
-                $label .= ' <span class="text-xs text-gray-400">('
+                $label .= ' <span class="evrst-answers-orphan">('
                     . e(__('admin.applications.answer_orphaned'))
                     . ')</span>';
             }
 
-            $html .= '<div>'
-                . '<dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">' . $label . '</dt>'
-                . '<dd class="mt-1 whitespace-pre-line text-sm text-gray-950 dark:text-white">' . e($value) . '</dd>'
+            $html .= '<div class="evrst-answers-row">'
+                . '<dt>' . $label . '</dt>'
+                . '<dd>' . e($value) . '</dd>'
                 . '</div>';
         }
 

@@ -1064,6 +1064,76 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
     border-radius: var(--evrst-r-md) !important;
 }
 
+/* ---------- Application answers ------------------------------------
+   A submission is a list of question/answer pairs, and it used to render
+   as twenty-four lines of identical grey: the markup carried Tailwind
+   utilities built at runtime in PHP, which Tailwind's scanner never sees,
+   so none of them exist in the compiled CSS (`uppercase` appears in it
+   zero times). The <dt> was simply unstyled.
+
+   Two jobs: tell a question from an answer at a glance, and stay compact
+   enough that a long submission is still one screen. So the question goes
+   in the panel's data voice — mono, uppercase, muted — and sits in a
+   column beside its answer rather than above it, which buys back half the
+   height. Below md they stack, because a 22% label column on a phone is
+   two words per line. */
+
+.evrst-answers {
+    display: flex;
+    flex-direction: column;
+}
+
+.evrst-answers-row {
+    display: grid;
+    grid-template-columns: minmax(170px, 22%) 1fr;
+    gap: 0 1.5rem;
+    padding: .6rem 0;
+    border-top: 1px solid var(--evrst-border);
+}
+.evrst-answers-row:first-child { border-top: 0; padding-top: 0; }
+
+.evrst-answers-row dt {
+    font-family: var(--evrst-mono);
+    font-size: var(--evrst-fs-label);
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    line-height: 1.5;
+    color: var(--evrst-text-dim);
+    /* A question can be a whole sentence; let it wrap in its column
+       instead of pushing the answer out of alignment. */
+    overflow-wrap: anywhere;
+}
+
+.evrst-answers-row dd {
+    margin: 0;
+    font-size: var(--evrst-fs-body);
+    line-height: 1.55;
+    color: var(--evrst-text);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.evrst-answers-orphan {
+    font-family: var(--evrst-mono);
+    font-size: var(--evrst-fs-micro);
+    letter-spacing: .06em;
+    text-transform: none;
+    color: var(--evrst-text-muted);
+}
+
+.evrst-answers-empty {
+    font-size: var(--evrst-fs-body);
+    color: var(--evrst-text-muted);
+}
+
+@media (max-width: 860px) {
+    .evrst-answers-row {
+        grid-template-columns: 1fr;
+        gap: .2rem;
+    }
+}
+
 /* ---------- Empty states ------------------------------------------ */
 
 .fi-ta-empty-state-icon-bg,
