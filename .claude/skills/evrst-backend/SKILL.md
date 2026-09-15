@@ -110,7 +110,20 @@ When a frontend consumer asks for the cleanest path → URL conversion: the valu
 
 ## Filament admin
 
-Sidebar nav groups (`AdminPanelProvider::navigationGroups`): `Site`, `About`, `Team`, `Tasks`, `Membership`. Two raw-data resources (`Collections`, `Resources`) are admin-only and **hidden from the sidebar** via `shouldRegisterNavigation()=false` — visit `/admin/collections` or `/admin/resources` directly when debugging.
+Sidebar nav groups (`AdminPanelProvider::navigationGroups`), in order:
+`PublicSite`, `Tasks`, `Team`, `Applications`, `Items`, `Creative`,
+`Oversight` — grouped by what someone came to the panel to do, not by which
+table the row lives in. The Dashboard is ungrouped and sits above them all.
+Labels come from `admin.nav.*`; within a group the order is `$navigationSort`
+in tens.
+
+The two raw-data resources (`Collections`, `Resources`) are admin-only and
+**hidden from the sidebar** via `shouldRegisterNavigation()=false` — they
+still declare a group because Filament wants one, but it is never rendered.
+Visit `/admin/collections` or `/admin/resources` directly when debugging.
+
+Adding a nav item means picking one of those seven groups; there is no
+`Site` / `About` / `Membership` / `Advanced` any more.
 
 Resources live under `app/Filament/Resources/`:
 - `Cms/Events`, `Cms/Sponsors`, `Cms/AboutGoals`, `Cms/AboutProjects`, `Cms/Mentors` — CMS content backed by the `resources` JSON-payload store (each binds to a fixed `collectionId`).

@@ -49,9 +49,9 @@ class BugReportResource extends Resource
         return $details;
     }
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Advanced';
+    protected static string|\UnitEnum|null $navigationGroup = 'Oversight';
 
-    protected static ?int $navigationSort = 90;
+    protected static ?int $navigationSort = 20;
 
     public static function getNavigationLabel(): string { return __('admin.resources.bug_report.p'); }
     public static function getModelLabel(): string { return __('admin.resources.bug_report.s'); }

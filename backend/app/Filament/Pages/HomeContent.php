@@ -58,9 +58,9 @@ class HomeContent extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Site';
+    protected static string|\UnitEnum|null $navigationGroup = 'PublicSite';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 10;
 
     /** Fixed id: this page edits one row, and it has to find it again. */
     protected const VIEW_RESOURCE_ID = 'c1d0e9a4-6f3b-4a21-9b7e-2f5a8c0d4e11';

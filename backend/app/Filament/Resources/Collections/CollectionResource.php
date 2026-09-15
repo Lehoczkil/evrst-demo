@@ -20,9 +20,9 @@ class CollectionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Advanced';
+    protected static string|\UnitEnum|null $navigationGroup = 'Oversight';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 90;
 
     public static function getNavigationLabel(): string { return __('admin.resources.collection.p'); }
     public static function getModelLabel(): string { return __('admin.resources.collection.s'); }

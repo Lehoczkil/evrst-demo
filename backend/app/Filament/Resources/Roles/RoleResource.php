@@ -21,13 +21,13 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Membership';
+    protected static string|\UnitEnum|null $navigationGroup = 'Team';
 
     public static function getNavigationLabel(): string { return __('admin.resources.role.p'); }
     public static function getModelLabel(): string { return __('admin.resources.role.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.role.p'); }
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 20;
 
     public static function canViewAny(): bool { return auth()->user()?->isAdmin() ?? false; }
     public static function canAccess(): bool { return static::canViewAny(); }

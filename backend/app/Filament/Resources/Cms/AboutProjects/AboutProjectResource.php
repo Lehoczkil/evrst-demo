@@ -44,13 +44,13 @@ class AboutProjectResource extends Resource
         return $details;
     }
 
-    protected static string|\UnitEnum|null $navigationGroup = 'About';
+    protected static string|\UnitEnum|null $navigationGroup = 'PublicSite';
 
     public static function getNavigationLabel(): string { return __('admin.resources.project.p'); }
     public static function getModelLabel(): string { return __('admin.resources.project.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.project.p'); }
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 40;
 
     public static function canViewAny(): bool { return true; }
     public static function canCreate(): bool { return auth()->user()?->can(Perm::PROJECTS_CREATE) ?? false; }

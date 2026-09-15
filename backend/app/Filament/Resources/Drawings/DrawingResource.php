@@ -34,9 +34,9 @@ class DrawingResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Site';
+    protected static string|\UnitEnum|null $navigationGroup = 'Creative';
 
-    protected static ?int $navigationSort = 60;
+    protected static ?int $navigationSort = 10;
 
     /** Any signed-in user may browse + create drawings. */
     public static function canViewAny(): bool { return auth()->check(); }

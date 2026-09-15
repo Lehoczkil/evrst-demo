@@ -6,12 +6,13 @@ return [
     ],
 
     'nav' => [
-        'site'       => 'Site',
-        'about'      => 'About',
-        'team'       => 'Team',
-        'tasks'      => 'Tasks',
-        'membership' => 'Membership',
-        'advanced'   => 'Advanced',
+        'public_site'  => 'Public site',
+        'tasks'        => 'Tasks',
+        'team'         => 'Team',
+        'applications' => 'Applications',
+        'items'        => 'Equipment',
+        'creative'     => 'Creative',
+        'oversight'    => 'Oversight',
     ],
 
     'resources' => [
@@ -579,9 +580,9 @@ return [
     ],
 
     'home_content' => [
-        'nav'            => 'Home texts',
-        'title'          => 'Home page texts',
-        'sub'            => 'The copy the SPA used to carry in its own message files — the hero and the rocket sheet. Everything else on the home page is already edited elsewhere.',
+        'nav'            => 'Content',
+        'title'          => 'Site content',
+        'sub'            => 'The home page\'s own copy: the hero, the scroll statements, both mission paragraphs, the rocket sheet, and the sponsor and join blocks. Events, sponsors, projects and goals have their own entries.',
         'hero'           => 'Hero',
         'hero_help'      => 'The first screen. Leave a field empty and the site keeps the text it ships with, so you can change one line without filling in the rest.',
         'hero_eyebrow'   => 'Eyebrow line',

@@ -45,9 +45,9 @@ class SponsorResource extends Resource
         return $details;
     }
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Site';
+    protected static string|\UnitEnum|null $navigationGroup = 'PublicSite';
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 30;
 
     public static function getNavigationLabel(): string { return __('admin.resources.sponsor.p'); }
     public static function getModelLabel(): string { return __('admin.resources.sponsor.s'); }

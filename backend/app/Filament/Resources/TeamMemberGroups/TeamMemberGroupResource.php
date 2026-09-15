@@ -48,7 +48,7 @@ class TeamMemberGroupResource extends Resource
     public static function getModelLabel(): string { return __('admin.resources.position.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.position.p'); }
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 10;
 
     public static function canViewAny(): bool { return auth()->check(); }
     public static function canCreate(): bool { return auth()->user()?->isAdmin() ?? false; }

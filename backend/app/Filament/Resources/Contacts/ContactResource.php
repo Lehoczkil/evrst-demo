@@ -29,7 +29,7 @@ class ContactResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Team';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 60;
 
     public static function getNavigationLabel(): string { return __('admin.resources.contact.p'); }
     public static function getModelLabel(): string { return __('admin.resources.contact.s'); }

@@ -76,13 +76,16 @@ class AdminPanelProvider extends PanelProvider
             // group named "Site". Keying by the raw English string
             // makes the match locale-independent while the label
             // closure stays free to translate.
+            // Grouped by what someone came here to do, not by which table
+            // the row lives in. The order is the order they appear in.
             ->navigationGroups([
-                'Site'       => NavigationGroup::make()->label(fn () => __('admin.nav.site')),
-                'About'      => NavigationGroup::make()->label(fn () => __('admin.nav.about')),
-                'Team'       => NavigationGroup::make()->label(fn () => __('admin.nav.team')),
-                'Tasks'      => NavigationGroup::make()->label(fn () => __('admin.nav.tasks')),
-                'Membership' => NavigationGroup::make()->label(fn () => __('admin.nav.membership')),
-                'Advanced'   => NavigationGroup::make()->label(fn () => __('admin.nav.advanced')),
+                'PublicSite'   => NavigationGroup::make()->label(fn () => __('admin.nav.public_site')),
+                'Tasks'        => NavigationGroup::make()->label(fn () => __('admin.nav.tasks')),
+                'Team'         => NavigationGroup::make()->label(fn () => __('admin.nav.team')),
+                'Applications' => NavigationGroup::make()->label(fn () => __('admin.nav.applications')),
+                'Items'        => NavigationGroup::make()->label(fn () => __('admin.nav.items')),
+                'Creative'     => NavigationGroup::make()->label(fn () => __('admin.nav.creative')),
+                'Oversight'    => NavigationGroup::make()->label(fn () => __('admin.nav.oversight')),
             ])
             ->databaseNotifications(fn () => auth()->user()?->can(Perm::NOTIFICATIONS_SEE) ?? false)
             // 30 s polling on every open tab, every user, was the largest

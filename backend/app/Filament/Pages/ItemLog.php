@@ -32,9 +32,9 @@ class ItemLog extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Advanced';
+    protected static string|\UnitEnum|null $navigationGroup = 'Items';
 
-    protected static ?int $navigationSort = 82;
+    protected static ?int $navigationSort = 30;
 
     protected static ?string $slug = 'item-log';
 

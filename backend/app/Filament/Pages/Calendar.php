@@ -49,7 +49,7 @@ class Calendar extends Page
         return __('admin.calendar.title');
     }
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 10;
 
     protected string $view = 'filament.pages.calendar';
 

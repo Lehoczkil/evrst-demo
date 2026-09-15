@@ -41,7 +41,7 @@ class MemberApplicationResource extends Resource
         return $details;
     }
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Membership';
+    protected static string|\UnitEnum|null $navigationGroup = 'Applications';
 
     public static function getNavigationLabel(): string { return __('admin.resources.application.p'); }
     public static function getModelLabel(): string { return __('admin.resources.application.s'); }

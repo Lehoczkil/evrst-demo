@@ -20,13 +20,13 @@ class ActivityLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Membership';
+    protected static string|\UnitEnum|null $navigationGroup = 'Oversight';
 
     public static function getNavigationLabel(): string { return __('admin.resources.activity_log.p'); }
     public static function getModelLabel(): string { return __('admin.resources.activity_log.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.activity_log.p'); }
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 10;
 
     public static function canViewAny(): bool { return auth()->user()?->isAdmin() ?? false; }
     public static function canAccess(): bool { return static::canViewAny(); }

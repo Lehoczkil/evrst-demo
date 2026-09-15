@@ -27,13 +27,13 @@ class ResourceResource extends Resource
         return $record->resourceLabel();
     }
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Advanced';
+    protected static string|\UnitEnum|null $navigationGroup = 'Oversight';
 
     public static function getNavigationLabel(): string { return __('admin.resources.all_resources.p'); }
     public static function getModelLabel(): string { return __('admin.resources.all_resources.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.all_resources.p'); }
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 91;
 
     public static function canViewAny(): bool { return auth()->user()?->isAdmin() ?? false; }
     public static function canCreate(): bool { return static::canViewAny(); }

@@ -51,7 +51,7 @@ class TaskResource extends Resource
     public static function getModelLabel(): string { return __('admin.resources.task.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.task.p'); }
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 20;
 
     /**
      * A private task is off the board for everyone but the admins and the

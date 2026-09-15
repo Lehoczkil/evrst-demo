@@ -23,9 +23,9 @@ class OnshapeModelResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Site';
+    protected static string|\UnitEnum|null $navigationGroup = 'Creative';
 
-    protected static ?int $navigationSort = 70;
+    protected static ?int $navigationSort = 20;
 
     public static function getNavigationLabel(): string { return __('admin.resources.onshape_model.p'); }
     public static function getModelLabel(): string { return __('admin.resources.onshape_model.s'); }

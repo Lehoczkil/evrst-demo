@@ -58,7 +58,7 @@ class TeamMemberResource extends Resource
     public static function getModelLabel(): string { return __('admin.resources.team_member.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.team_member.p'); }
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 30;
 
     public static function canViewAny(): bool { return true; }
     public static function canCreate(): bool { return auth()->user()?->can(Perm::TEAM_CREATE) ?? false; }

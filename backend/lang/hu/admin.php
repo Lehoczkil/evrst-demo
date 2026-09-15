@@ -6,12 +6,13 @@ return [
     ],
 
     'nav' => [
-        'site'       => 'Oldal',
-        'about'      => 'Rólunk',
-        'team'       => 'Csapat',
-        'tasks'      => 'Feladatok',
-        'membership' => 'Tagság',
-        'advanced'   => 'Haladó',
+        'public_site'  => 'Publikus oldal',
+        'tasks'        => 'Feladatok',
+        'team'         => 'Csapat',
+        'applications' => 'Jelentkezések',
+        'items'        => 'Eszközök',
+        'creative'     => 'Kreatívok',
+        'oversight'    => 'Felügyelet',
     ],
 
     'resources' => [
@@ -579,9 +580,9 @@ return [
     ],
 
     'home_content' => [
-        'nav'            => 'Főoldal szövegei',
-        'title'          => 'Főoldal szövegei',
-        'sub'            => 'Azok a szövegek, amiket eddig a SPA saját fordításfájljai vittek — a hero és a rakéta-adatlap. A főoldal többi része már eddig is máshol volt szerkeszthető.',
+        'nav'            => 'Tartalom',
+        'title'          => 'Tartalom',
+        'sub'            => 'A főoldal saját szövegei: a hero, a görgetős állítások, a küldetés két bekezdése, a rakéta-adatlap, a támogatói és csatlakozási blokk. Az események, támogatók, projektek és célok külön menüpontokban vannak.',
         'hero'           => 'Hero',
         'hero_help'      => 'Az első képernyő. Ha egy mezőt üresen hagysz, az oldal a beépített szöveget használja — így egyetlen sort is át tudsz írni anélkül, hogy a többit kitöltenéd.',
         'hero_eyebrow'   => 'Felső sor',

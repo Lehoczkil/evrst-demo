@@ -35,13 +35,13 @@ class AboutGoalResource extends Resource
         return (string) ($record->title ?? __('admin.resources.goal.s'));
     }
 
-    protected static string|\UnitEnum|null $navigationGroup = 'About';
+    protected static string|\UnitEnum|null $navigationGroup = 'PublicSite';
 
     public static function getNavigationLabel(): string { return __('admin.resources.goal.p'); }
     public static function getModelLabel(): string { return __('admin.resources.goal.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.goal.p'); }
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 50;
 
     public static function canViewAny(): bool { return true; }
     public static function canCreate(): bool { return auth()->user()?->can(Perm::GOALS_CREATE) ?? false; }

@@ -24,9 +24,9 @@ class ItemResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Advanced';
+    protected static string|\UnitEnum|null $navigationGroup = 'Items';
 
-    protected static ?int $navigationSort = 80;
+    protected static ?int $navigationSort = 10;
 
     public static function getNavigationLabel(): string { return __('admin.resources.item.p'); }
     public static function getModelLabel(): string { return __('admin.resources.item.s'); }

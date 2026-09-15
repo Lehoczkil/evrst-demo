@@ -22,13 +22,13 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Membership';
+    protected static string|\UnitEnum|null $navigationGroup = 'Team';
 
     public static function getNavigationLabel(): string { return __('admin.resources.user.p'); }
     public static function getModelLabel(): string { return __('admin.resources.user.s'); }
     public static function getPluralModelLabel(): string { return __('admin.resources.user.p'); }
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 40;
 
     public static function canViewAny(): bool
     {

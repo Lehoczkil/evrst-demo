@@ -32,9 +32,9 @@ class ApplicationFormSectionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleGroup;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Membership';
+    protected static string|\UnitEnum|null $navigationGroup = 'Applications';
 
-    protected static ?int $navigationSort = 13;
+    protected static ?int $navigationSort = 30;
 
     public static function getNavigationLabel(): string { return __('admin.resources.application_form_section.p'); }
     public static function getModelLabel(): string { return __('admin.resources.application_form_section.s'); }

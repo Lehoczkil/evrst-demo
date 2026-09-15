@@ -32,9 +32,9 @@ class ItemManagement extends Page implements HasTable
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Advanced';
+    protected static string|\UnitEnum|null $navigationGroup = 'Items';
 
-    protected static ?int $navigationSort = 81;
+    protected static ?int $navigationSort = 20;
 
     protected string $view = 'filament.pages.item-management';
 
