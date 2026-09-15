@@ -149,4 +149,48 @@ class ImageTransformTest extends TestCase
     {
         $this->assertNotEmpty($this->cachedFiles(), 'Expected at least one cached image variant');
     }
+
+    /**
+     * A 503 KB PNG that happens to be 50 megapixels wants ~213 MB once GD
+     * expands it, and blowing memory_limit is a FATAL error — the catch
+     * around the transform never runs. So the size is checked from the
+     * header first and an oversized file is streamed as-is.
+     */
+    public function test_an_image_too_large_to_decode_is_served_as_is(): void
+    {
+        // Small on disk, enormous in pixels: exactly the shape that killed
+        // the sponsor logo. Built by hand so the test does not need a
+        // 200 MB fixture.
+        $path = 'sponsors/huge.png';
+        Storage::disk('public')->put($path, $this->hugeButTinyPng());
+
+        // 12000 x 12000 is 144 megapixels — over the budget at any
+        // memory_limit worth deploying, so no need to squeeze the limit.
+        $response = $this->get('/api/img?path=' . $path . '&w=200&f=webp');
+
+        $response->assertOk();
+        $this->assertSame('image/png', $response->headers->get('content-type'));
+
+        $meta = $this->get('/api/img/meta?path=' . $path);
+        $meta->assertOk();
+        $meta->assertJsonPath('lqip', null);
+        $this->assertGreaterThan(0, $meta->json('width'));
+    }
+
+    /**
+     * A valid PNG header declaring huge dimensions with almost no data.
+     * getimagesize() reads the IHDR and reports the declared size, which is
+     * all the guard looks at.
+     */
+    private function hugeButTinyPng(): string
+    {
+        $ihdr = pack('NN', 12000, 12000) . pack('C5', 8, 6, 0, 0, 0);
+        $chunk = fn (string $type, string $data) => pack('N', strlen($data)) . $type . $data
+            . pack('N', crc32($type . $data));
+
+        return "\x89PNG\r\n\x1a\n"
+            . $chunk('IHDR', $ihdr)
+            . $chunk('IDAT', gzcompress(str_repeat("\0", 64)))
+            . $chunk('IEND', '');
+    }
 }

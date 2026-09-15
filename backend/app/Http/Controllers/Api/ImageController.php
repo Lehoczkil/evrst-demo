@@ -108,6 +108,17 @@ class ImageController extends Controller
         $cachePath = $disk->path($cacheRelative);
 
         if (! is_file($cachePath)) {
+            // Checked before the try, not inside it: a memory exhaustion
+            // here would be fatal and the catch below would never run.
+            if ($this->tooLargeToDecode($source)) {
+                Log::warning('image too large to transform, serving original', [
+                    'path' => $path,
+                    'pixels' => @getimagesize($source) ? (@getimagesize($source)[0] * @getimagesize($source)[1]) : null,
+                ]);
+
+                return $this->streamOriginal($source);
+            }
+
             try {
                 $this->renderToCache($source, $cachePath, $width, $height, $fit, $format, $quality);
             } catch (\Throwable $e) {
@@ -149,6 +160,23 @@ class ImageController extends Controller
             if (is_array($cached) && isset($cached['width'], $cached['height'])) {
                 return response()->json($cached);
             }
+        }
+
+        // Same reasoning as the transform: the header gives the dimensions
+        // for free, and the LQIP is the only part that needs a decode. A
+        // placeholder is worth less than a working page.
+        if ($this->tooLargeToDecode($source)) {
+            $size = @getimagesize($source);
+            $payload = [
+                'width' => (int) ($size[0] ?? 0),
+                'height' => (int) ($size[1] ?? 0),
+                'lqip' => null,
+            ];
+
+            $this->ensureDirectory(dirname($cachePath));
+            file_put_contents($cachePath, json_encode($payload));
+
+            return response()->json($payload);
         }
 
         try {
@@ -288,6 +316,59 @@ class ImageController extends Controller
             'height' => $height,
             'lqip' => 'data:image/webp;base64,' . base64_encode((string) $lqip),
         ];
+    }
+
+    /**
+     * Would decoding this file blow the memory limit?
+     *
+     * GD expands an image to raw truecolour — about four bytes a pixel —
+     * so a 503 KB PNG that happens to be 50 megapixels wants ~213 MB. And
+     * a memory exhaustion is a FATAL error, not an exception: the
+     * try/catch around the transform never runs, the worker dies, and the
+     * caller gets a 500 instead of the fallback the catch was written to
+     * provide. That is exactly how one sponsor logo turned into a broken
+     * image on the public site.
+     *
+     * So the size is read from the file HEADER, which costs nothing, and
+     * anything over budget is served as-is rather than decoded.
+     */
+    private function tooLargeToDecode(string $source): bool
+    {
+        $size = @getimagesize($source);
+        if (! is_array($size) || ! isset($size[0], $size[1])) {
+            // Unreadable header: let the decoder decide, it has a catch.
+            return false;
+        }
+
+        $pixels = (int) $size[0] * (int) $size[1];
+
+        return $pixels > self::maxDecodablePixels();
+    }
+
+    /**
+     * Four bytes a pixel for the source, and the transform needs room for
+     * an output canvas and the encoder on top — so budget a third of the
+     * limit for the source bitmap. A missing or unlimited memory_limit
+     * falls back to a figure that is safe on the smallest box we deploy to.
+     */
+    private static function maxDecodablePixels(): int
+    {
+        $limit = trim((string) ini_get('memory_limit'));
+
+        if ($limit === '' || $limit === '-1') {
+            return 24_000_000;
+        }
+
+        $unit = strtolower(substr($limit, -1));
+        $bytes = (int) $limit;
+        $bytes *= match ($unit) {
+            'g' => 1024 ** 3,
+            'm' => 1024 ** 2,
+            'k' => 1024,
+            default => 1,
+        };
+
+        return max(4_000_000, (int) ($bytes / 3 / 4));
     }
 
     private function streamOriginal(string $source): BinaryFileResponse
