@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use Database\Seeders\RoleSeeder;
-use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -60,9 +60,7 @@ class FormGridSpansTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider formPagesProvider
-     */
+    #[DataProvider('formPagesProvider')]
     public function test_no_field_is_wider_than_the_grid_it_sits_in(string $url): void
     {
         $this->actingAs($this->makeAdmin());

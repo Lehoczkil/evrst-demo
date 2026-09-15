@@ -37,9 +37,23 @@
     --evrst-border: rgba(255,255,255,.08);
     --evrst-border-strong: rgba(255,255,255,.16);
     --evrst-border-amber: rgba(251,191,36,.45);
-    --evrst-text: #e8ebf2;
-    --evrst-text-muted: #9aa3b3;
-    --evrst-text-dim: #6b7383;
+    --evrst-text: #eef1f7;
+    /* Measured against --evrst-surface-solid: muted 9.97:1, dim 6.27:1.
+       The old dim (#6b7383) was 3.87:1 — under AA for anything at body
+       size, and it was carrying breadcrumbs and sidebar labels at 10px. */
+    --evrst-text-muted: #b6bfd0;
+    --evrst-text-dim: #8e97a8;
+
+    /* ── Type scale ───────────────────────────────────────────────────
+       There were five sizes between 0.6rem and 0.72rem doing the same
+       job — the mono uppercase "data voice" of labels, table heads and
+       badges — which is not a scale, it is drift. Four steps, and the
+       smallest is 12px because below that uppercase mono with .12em
+       tracking stops being readable and starts being texture. */
+    --evrst-fs-micro: 0.75rem;
+    --evrst-fs-label: 0.8rem;
+    --evrst-fs-meta: 0.875rem;
+    --evrst-fs-body: 0.95rem;
     --evrst-accent: #fbbf24;
     --evrst-accent-text: #1a1306;
     --evrst-accent-soft: rgba(251,191,36,.12);
@@ -200,7 +214,7 @@ html:not(.dark) .fi-body::before {
 .fi-global-search-field input,
 .fi-global-search-field input::placeholder {
     font-family: var(--evrst-mono);
-    font-size: 0.72rem;
+    font-size: var(--evrst-fs-meta);
     letter-spacing: .04em;
 }
 .fi-global-search-field input::placeholder {
@@ -294,7 +308,7 @@ html:not(.dark) .fi-body::before {
 .fi-sidebar-group-label,
 .fi-sidebar-group-button {
     font-family: var(--evrst-mono);
-    font-size: 0.6rem !important;
+    font-size: var(--evrst-fs-micro) !important;
     font-weight: 600 !important;
     letter-spacing: .14em !important;
     text-transform: uppercase;
@@ -328,7 +342,7 @@ html:not(.dark) .fi-body::before {
     color: var(--evrst-text-muted) !important;
     transition: all .12s ease;
     gap: .65rem !important;
-    font-size: 0.825rem !important;
+    font-size: var(--evrst-fs-body) !important;
 }
 .fi-sidebar-item-btn:hover {
     background: rgba(255,255,255,.03) !important;
@@ -372,7 +386,7 @@ html:not(.dark) .fi-body::before {
     display: inline-grid;
     place-items: center;
     color: var(--evrst-text-dim);
-    font-size: 0.6rem;
+    font-size: var(--evrst-fs-micro);
     font-weight: 600;
     background: transparent;
     margin-left: auto;
@@ -437,7 +451,7 @@ html:not(.dark) .fi-body::before {
 .fi-breadcrumbs,
 .fi-breadcrumbs * {
     font-family: var(--evrst-mono);
-    font-size: 0.7rem !important;
+    font-size: var(--evrst-fs-label) !important;
     color: var(--evrst-text-dim) !important;
     letter-spacing: .04em;
 }
@@ -474,7 +488,7 @@ tr.fi-ta-group-header-row {
     border-bottom: 1px solid var(--evrst-border) !important;
     color: var(--evrst-text-muted) !important;
     font-family: var(--evrst-mono) !important;
-    font-size: 0.62rem !important;
+    font-size: var(--evrst-fs-label) !important;
     letter-spacing: .14em !important;
     text-transform: uppercase;
 }
@@ -552,7 +566,7 @@ html:not(.dark) tr.fi-ta-group-header {
 .fi-ta-header-cell,
 .fi-ta th {
     font-family: var(--evrst-mono);
-    font-size: 0.62rem !important;
+    font-size: var(--evrst-fs-label) !important;
     letter-spacing: .12em !important;
     text-transform: uppercase;
     color: var(--evrst-text-muted) !important;
@@ -612,13 +626,54 @@ html:not(.dark) tr.fi-ta-group-header {
     border-bottom-color: var(--evrst-accent) !important;
     box-shadow: 0 3px 0 -1px var(--evrst-accent-soft) !important;
 }
-.fi-fo-field-wrp-label {
+/* `.fi-fo-field-wrp-label` is what this rule used to target, and this
+   version of Filament does not emit it — the label is
+   `.fi-fo-field-label` / `-label-content`, verified against the rendered
+   HTML of three form pages. So every form label in the panel was
+   unstyled: default size, default colour, none of the data voice the
+   rest of the panel speaks. Both names are listed; the old one costs
+   nothing and covers a version that does use it. */
+.fi-fo-field-wrp-label,
+.fi-fo-field-label,
+.fi-fo-field-label-content {
     font-family: var(--evrst-mono);
-    font-size: 0.62rem !important;
-    letter-spacing: .12em;
+    font-size: var(--evrst-fs-label) !important;
+    font-weight: 600 !important;
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--evrst-text-muted) !important;
 }
+
+/* Section headings on a form page. Same story: the theme styled
+   `.fi-fo-section-heading`, the markup says `.fi-section-header-heading`. */
+.fi-section-header-heading {
+    font-size: 1.05rem !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.01em;
+    color: var(--evrst-text) !important;
+}
+.fi-section-header-description {
+    font-size: var(--evrst-fs-meta) !important;
+    color: var(--evrst-text-muted) !important;
+    line-height: 1.5;
+}
+
+/* The value a reviewer is actually here to read. Filament's default is
+   14px; on the application review page that is a paragraph of someone's
+   answer set smaller than the UI around it. */
+.fi-input,
+.fi-fo-text-input .fi-input,
+.fi-input-wrp textarea {
+    font-size: var(--evrst-fs-body) !important;
+    line-height: 1.55 !important;
+    color: var(--evrst-text) !important;
+}
+
+/* Room to read. The label / value pairs were tight enough that a long
+   answer ran into the next question. */
+.fi-fo-field-label-col { margin-bottom: .3rem; }
+.fi-sc-has-gap { gap: 1.35rem !important; }
+.fi-section-content { padding-block: .25rem; }
 
 /* iOS Safari zooms the whole page in whenever a focused field renders
    its text below 16px, and Filament's inputs are text-sm (14px) — so on
@@ -649,7 +704,7 @@ html:not(.dark) tr.fi-ta-group-header {
 .fi-badge {
     border-radius: 999px !important;
     font-family: var(--evrst-mono);
-    font-size: 0.62rem !important;
+    font-size: var(--evrst-fs-label) !important;
     letter-spacing: .08em;
     text-transform: uppercase;
     border: 1px solid var(--evrst-border) !important;
@@ -1399,7 +1454,7 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
         width: 100%;
     }
     .evrst-countdown .evrst-countdown-event {
-        font-size: 0.8rem !important;
+        font-size: var(--evrst-fs-meta) !important;
     }
 }
 .evrst-countdown::after {
@@ -1411,7 +1466,7 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 }
 .evrst-countdown .evrst-countdown-label {
     font-family: var(--evrst-mono);
-    font-size: 0.65rem;
+    font-size: var(--evrst-fs-label);
     letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--evrst-text-dim);
@@ -1449,7 +1504,7 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 }
 .evrst-countdown .evrst-countdown-digits .sep { color: var(--evrst-text-dim); font-weight: 400; }
 .evrst-countdown .evrst-countdown-digits .unit {
-    font-size: 0.7rem;
+    font-size: var(--evrst-fs-label);
     color: var(--evrst-text-muted);
     align-self: flex-end;
     padding-bottom: .55rem;
@@ -1469,7 +1524,7 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 }
 .evrst-countdown .evrst-countdown-sub {
     font-family: var(--evrst-mono);
-    font-size: 0.65rem;
+    font-size: var(--evrst-fs-label);
     letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--evrst-text-muted);
@@ -1511,7 +1566,7 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 .evrst-tile:hover { border-color: var(--evrst-border-strong); }
 .evrst-tile-heading {
     font-family: var(--evrst-mono);
-    font-size: 0.65rem;
+    font-size: var(--evrst-fs-label);
     font-weight: 600;
     letter-spacing: .14em;
     text-transform: uppercase;
@@ -1537,7 +1592,7 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 }
 .evrst-tile-delta {
     font-family: var(--evrst-mono);
-    font-size: 0.7rem;
+    font-size: var(--evrst-fs-label);
     font-weight: 500;
     letter-spacing: .04em;
 }
@@ -1545,7 +1600,7 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 .evrst-tile-delta.evrst-amber { color: var(--evrst-accent); }
 .evrst-tile-empty {
     color: var(--evrst-text-muted);
-    font-size: 0.825rem;
+    font-size: var(--evrst-fs-body);
     margin: 0;
 }
 .evrst-tile-rows {
@@ -1558,15 +1613,15 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
     gap: .65rem;
     padding: .55rem 0;
     border-bottom: 1px solid var(--evrst-border);
-    font-size: 0.825rem;
+    font-size: var(--evrst-fs-body);
     color: var(--evrst-text);
     text-decoration: none;
     transition: color .12s ease;
     min-width: 0;
 }
 @media (max-width: 720px) {
-    .evrst-tile-row { font-size: 0.78rem; gap: .5rem; }
-    .evrst-tile-row-meta { font-size: 0.6rem !important; }
+    .evrst-tile-row { font-size: var(--evrst-fs-meta); gap: .5rem; }
+    .evrst-tile-row-meta { font-size: var(--evrst-fs-micro) !important; }
 }
 .evrst-tile-row:last-child { border-bottom: 0; }
 .evrst-tile-row:hover { color: var(--evrst-accent); }
@@ -1583,12 +1638,12 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 }
 .evrst-tile-row-target {
     font-family: var(--evrst-mono);
-    font-size: 0.72rem;
+    font-size: var(--evrst-fs-meta);
     color: var(--evrst-accent);
 }
 .evrst-tile-row-meta {
     font-family: var(--evrst-mono);
-    font-size: 0.65rem;
+    font-size: var(--evrst-fs-label);
     letter-spacing: .08em;
     color: var(--evrst-text-muted);
     margin-left: auto;
@@ -1624,7 +1679,7 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
     color: var(--evrst-text);
     padding: .55rem .75rem;
     border-radius: var(--evrst-r-md);
-    font-size: 0.825rem;
+    font-size: var(--evrst-fs-body);
     text-decoration: none;
     display: flex;
     align-items: center;
