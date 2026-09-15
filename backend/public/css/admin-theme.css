@@ -1023,9 +1023,19 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
 
 /* ---------- Action menus / dropdowns ------------------------------ */
 
+/* Opaque, not glass. `backdrop-filter` is declared below and does add
+   depth where the compositor honours it — but it is not reliable inside a
+   stacking context the panel does not control, and when it silently does
+   nothing a translucent panel leaves the table underneath perfectly
+   legible THROUGH it. The filters panel is the worst case: four labels
+   and four selects over a dense table, with row text reading straight
+   through the field names.
+   Same conclusion the date-time picker panel reached a few rules down —
+   a popover has to be readable on its own, and blur is a finish, not a
+   background. */
 .fi-dropdown-panel,
 .fi-dropdown-list {
-    background: var(--evrst-glass-strong) !important;
+    background: var(--evrst-surface-solid) !important;
     backdrop-filter: var(--evrst-blur);
     -webkit-backdrop-filter: var(--evrst-blur);
     border: 1px solid var(--evrst-border) !important;
@@ -1033,6 +1043,18 @@ html:not(.dark) [id*="evrst-help"] .fi-modal-window {
     box-shadow: 0 12px 40px rgba(0,0,0,.4) !important;
 }
 .fi-dropdown-list-item:hover { background: var(--evrst-surface-raised) !important; }
+
+/* The table filters live in a dropdown panel and are the densest thing
+   that ever appears in one. */
+.fi-ta-filters,
+.fi-ta-filters-form {
+    background: transparent !important;
+}
+.fi-dropdown-panel:has(.fi-ta-filters),
+.fi-dropdown-panel:has(.fi-ta-filters-form) {
+    background: var(--evrst-surface-solid) !important;
+    box-shadow: 0 16px 56px rgba(0,0,0,.6) !important;
+}
 
 /* Date / time picker panel — Filament v4 renders an x-float anchored
    `<div class="fi-fo-date-time-picker-panel">` inside the field. Alpine
