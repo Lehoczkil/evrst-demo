@@ -29,13 +29,13 @@ class MemberApplicationForm
                     ->label(__('admin.common.name'))
                     ->required()
                     ->maxLength(255)
-                    ->columnSpan(['default' => 12, 'md' => 5]),
+                    ->columnSpan(['default' => 1, 'md' => 5]),
                 TextInput::make('email')
                     ->label(__('admin.common.email'))
                     ->required()
                     ->email()
                     ->maxLength(255)
-                    ->columnSpan(['default' => 12, 'md' => 5]),
+                    ->columnSpan(['default' => 1, 'md' => 5]),
                 Select::make('status')
                     ->label(__('admin.common.status'))
                     ->options([
@@ -46,7 +46,7 @@ class MemberApplicationForm
                     ->disabled()
                     ->dehydrated(false)
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.application_status'))
-                    ->columnSpan(['default' => 12, 'md' => 2]),
+                    ->columnSpan(['default' => 1, 'md' => 2]),
                 Section::make(__('admin.applications.answers'))
                     ->description(__('admin.applications.answers_help'))
                     ->columnSpanFull()
@@ -54,7 +54,7 @@ class MemberApplicationForm
                         Text::make(fn (?MemberApplication $record) => new HtmlString(self::renderAnswers($record))),
                     ]),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 
     /**

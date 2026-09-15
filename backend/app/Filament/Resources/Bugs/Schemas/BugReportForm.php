@@ -45,14 +45,14 @@ class BugReportForm
                                 BugReport::SEVERITY_CRITICAL => __('admin.bugs.severities.critical'),
                             ])
                             ->default(BugReport::SEVERITY_MEDIUM)
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         TextInput::make('page_url')
                             ->label(__('admin.bugs.page_url'))
                             ->placeholder(__('admin.bugs.page_url_placeholder'))
                             ->maxLength(500)
-                            ->columnSpan(['default' => 12, 'md' => 8]),
+                            ->columnSpan(['default' => 1, 'md' => 8]),
                     ])
-                    ->columns(12),
+                    ->columns(['default' => 1, 'md' => 12]),
 
                 Section::make(__('admin.bugs.section_evidence'))
                     ->components([
@@ -103,20 +103,20 @@ class BugReportForm
                                 BugReport::STATUS_CLOSED      => __('admin.bugs.statuses.closed'),
                                 BugReport::STATUS_WONT_FIX    => __('admin.bugs.statuses.wont_fix'),
                             ])
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         Select::make('assignee_id')
                             ->label(__('admin.bugs.assignee'))
                             ->relationship('assignee', 'name')
                             ->searchable()
                             ->preload()
-                            ->columnSpan(['default' => 12, 'md' => 8]),
+                            ->columnSpan(['default' => 1, 'md' => 8]),
                         Textarea::make('admin_notes')
                             ->label(__('admin.bugs.admin_notes'))
                             ->rows(3)
                             ->maxLength(5000)
                             ->columnSpanFull(),
                     ])
-                    ->columns(12),
+                    ->columns(['default' => 1, 'md' => 12]),
 
                 // Reporter is auto-stamped on create; never editable.
                 Hidden::make('reporter_id')

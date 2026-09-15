@@ -160,7 +160,7 @@ class HomeContent extends Page
             ->components([
                 Section::make(__('admin.home_content.hero'))
                     ->description(__('admin.home_content.hero_help'))
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->components([
                         ...self::pair('hero.eyebrow', 120),
                         ...self::pair('hero.title1', 60),
@@ -187,7 +187,7 @@ class HomeContent extends Page
 
                 Section::make(__('admin.home_content.manifesto'))
                     ->description(__('admin.home_content.manifesto_help'))
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->components([
                         ...self::pair('manifesto.first', 600, textarea: true),
                         ...self::pair('manifesto.second', 300, textarea: true),
@@ -195,7 +195,7 @@ class HomeContent extends Page
                             ->label(__('admin.home_content.manifesto_founded'))
                             ->helperText(__('admin.home_content.founded_help'))
                             ->maxLength(12)
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         ...self::pair('manifesto.mark1', 80),
                         ...self::pair('manifesto.mark2', 80),
                         ...self::pair('manifesto.mark3', 80),
@@ -203,7 +203,7 @@ class HomeContent extends Page
 
                 Section::make(__('admin.home_content.rocket'))
                     ->description(__('admin.home_content.rocket_help'))
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->components([
                         ...self::pair('rocket.eyebrow', 60),
                         ...self::pair('rocket.title', 60),
@@ -211,11 +211,11 @@ class HomeContent extends Page
                         TextInput::make('rocket_dimHeight')
                             ->label(__('admin.home_content.dim_height'))
                             ->maxLength(40)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         TextInput::make('rocket_dimDiameter')
                             ->label(__('admin.home_content.dim_diameter'))
                             ->maxLength(40)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                     ]),
 
                 Section::make(__('admin.home_content.specs'))
@@ -226,19 +226,19 @@ class HomeContent extends Page
                             ->addActionLabel(__('admin.home_content.specs_add'))
                             ->reorderable()
                             ->defaultItems(0)
-                            ->columns(12)
+                            ->columns(['default' => 1, 'md' => 12])
                             ->schema([
-                                TextInput::make('label_en')->label(__('admin.home_content.spec_label') . ' (EN)')->maxLength(60)->columnSpan(['default' => 12, 'md' => 4]),
-                                TextInput::make('label_hu')->label(__('admin.home_content.spec_label') . ' (HU)')->maxLength(60)->columnSpan(['default' => 12, 'md' => 4]),
-                                TextInput::make('value')->label(__('admin.home_content.spec_value'))->maxLength(40)->columnSpan(['default' => 12, 'md' => 4]),
-                                TextInput::make('unit_en')->label(__('admin.home_content.spec_unit') . ' (EN)')->maxLength(30)->columnSpan(['default' => 6, 'md' => 3]),
-                                TextInput::make('unit_hu')->label(__('admin.home_content.spec_unit') . ' (HU)')->maxLength(30)->columnSpan(['default' => 6, 'md' => 3]),
+                                TextInput::make('label_en')->label(__('admin.home_content.spec_label') . ' (EN)')->maxLength(60)->columnSpan(['default' => 1, 'md' => 4]),
+                                TextInput::make('label_hu')->label(__('admin.home_content.spec_label') . ' (HU)')->maxLength(60)->columnSpan(['default' => 1, 'md' => 4]),
+                                TextInput::make('value')->label(__('admin.home_content.spec_value'))->maxLength(40)->columnSpan(['default' => 1, 'md' => 4]),
+                                TextInput::make('unit_en')->label(__('admin.home_content.spec_unit') . ' (EN)')->maxLength(30)->columnSpan(['default' => 1, 'md' => 3]),
+                                TextInput::make('unit_hu')->label(__('admin.home_content.spec_unit') . ' (HU)')->maxLength(30)->columnSpan(['default' => 1, 'md' => 3]),
                             ]),
                     ]),
 
                 Section::make(__('admin.home_content.sponsors'))
                     ->description(__('admin.home_content.sponsors_help'))
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->components([
                         ...self::pair('sponsors.pitchTitle', 120),
                         ...self::pair('sponsors.pitchBody', 400, textarea: true),
@@ -247,7 +247,7 @@ class HomeContent extends Page
 
                 Section::make(__('admin.home_content.join'))
                     ->description(__('admin.home_content.join_help'))
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->components([
                         ...self::pair('join.eyebrow', 80),
                         ...self::pair('join.title', 80),
@@ -258,7 +258,7 @@ class HomeContent extends Page
 
                 Section::make(__('admin.home_content.contact'))
                     ->description(__('admin.home_content.contact_help'))
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->components([
                         ...self::pair('contact.address', 200),
                     ]),
@@ -285,7 +285,7 @@ class HomeContent extends Page
             : TextInput::make("{$name}_" . strtolower($lang)))
             ->label("{$label} ({$lang})")
             ->maxLength($max)
-            ->columnSpan(['default' => 12, 'md' => 6]);
+            ->columnSpan(['default' => 1, 'md' => 6]);
 
         return [$make('EN'), $make('HU')];
     }

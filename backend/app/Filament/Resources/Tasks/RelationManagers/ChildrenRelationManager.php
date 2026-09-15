@@ -81,7 +81,7 @@ class ChildrenRelationManager extends RelationManager
                     ->label(__('admin.common.title'))
                     ->required()
                     ->maxLength(180)
-                    ->columnSpan(['default' => 12, 'md' => 8]),
+                    ->columnSpan(['default' => 1, 'md' => 8]),
                 Select::make('priority')
                     ->label(__('admin.tasks.priority'))
                     ->options(fn () => collect(Task::priorities())
@@ -90,7 +90,7 @@ class ChildrenRelationManager extends RelationManager
                     ->default(Task::PRIORITY_NORMAL)
                     ->required()
                     ->native(false)
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 Textarea::make('description')
                     ->label(__('admin.common.description'))
                     ->required()
@@ -107,7 +107,7 @@ class ChildrenRelationManager extends RelationManager
                     ))
                     ->searchable()
                     ->preload()
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Select::make('assignees')
                     ->label(__('admin.tasks.assignees'))
                     ->required()
@@ -116,12 +116,12 @@ class ChildrenRelationManager extends RelationManager
                     ->minItems(1)
                     ->preload()
                     ->searchable()
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 DatePicker::make('due_date')
                     ->label(__('admin.tasks.due_date'))
                     ->required()
                     ->displayFormat('d M Y')
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Select::make('category')
                     ->label(__('admin.tasks.category'))
                     ->options(fn () => collect(Task::categories())
@@ -130,9 +130,9 @@ class ChildrenRelationManager extends RelationManager
                     ->searchable()
                     ->native(false)
                     ->placeholder(__('admin.tasks.no_category'))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 
     public function table(Table $table): Table

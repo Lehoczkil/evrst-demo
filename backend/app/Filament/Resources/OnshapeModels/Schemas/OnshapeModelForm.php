@@ -21,14 +21,14 @@ class OnshapeModelForm
                             ->label(__('admin.common.title'))
                             ->required()
                             ->maxLength(200)
-                            ->columnSpan(['default' => 12, 'md' => 8]),
+                            ->columnSpan(['default' => 1, 'md' => 8]),
                         Textarea::make('description')
                             ->label(__('admin.common.description'))
                             ->rows(2)
                             ->maxLength(2000)
                             ->columnSpanFull(),
                     ])
-                    ->columns(12),
+                    ->columns(['default' => 1, 'md' => 12]),
 
                 Section::make(__('admin.onshape.section_link'))
                     ->description(__('admin.onshape.paste_help'))
@@ -51,18 +51,18 @@ class OnshapeModelForm
                             ->label(__('admin.onshape.document_id'))
                             ->required()
                             ->maxLength(64)
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         TextInput::make('workspace_id')
                             ->label(__('admin.onshape.workspace_id'))
                             ->required()
                             ->maxLength(64)
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         TextInput::make('element_id')
                             ->label(__('admin.onshape.element_id'))
                             ->maxLength(64)
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                     ])
-                    ->columns(12),
+                    ->columns(['default' => 1, 'md' => 12]),
 
                 Section::make(__('admin.onshape.section_preview'))
                     ->visible(fn ($record) => $record !== null)
@@ -71,7 +71,7 @@ class OnshapeModelForm
                             ->viewData(fn ($record) => ['model' => $record])
                             ->columnSpanFull(),
                     ])
-                    ->columns(12),
+                    ->columns(['default' => 1, 'md' => 12]),
 
                 Hidden::make('user_id')
                     ->default(fn () => auth()->id())

@@ -21,7 +21,7 @@ class ApplicationFormFieldForm
         return $schema
             ->components([
                 Section::make(__('admin.application_form.section_question'))
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->columnSpanFull()
                     ->components([
                         Select::make('section_id')
@@ -32,7 +32,7 @@ class ApplicationFormFieldForm
                                 ]))
                             ->required()
                             ->native(false)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         Select::make('type')
                             ->label(__('admin.application_form.type'))
                             ->options(fn () => collect(ApplicationFormField::types())
@@ -47,33 +47,33 @@ class ApplicationFormFieldForm
                             ->helperText(fn (?ApplicationFormField $record) => $record?->is_system
                                 ? __('admin.application_form.system_locked')
                                 : null)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         TextInput::make('label_en')
                             ->label(__('admin.application_form.label') . ' (EN)')
                             ->required()
                             ->maxLength(255)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         TextInput::make('label_hu')
                             ->label(__('admin.application_form.label') . ' (HU)')
                             ->required()
                             ->maxLength(255)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         TextInput::make('help_en')
                             ->label(__('admin.application_form.help') . ' (EN)')
                             ->maxLength(255)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         TextInput::make('help_hu')
                             ->label(__('admin.application_form.help') . ' (HU)')
                             ->maxLength(255)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         TextInput::make('placeholder_en')
                             ->label(__('admin.application_form.placeholder') . ' (EN)')
                             ->maxLength(255)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         TextInput::make('placeholder_hu')
                             ->label(__('admin.application_form.placeholder') . ' (HU)')
                             ->maxLength(255)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                     ]),
 
                 Section::make(__('admin.application_form.section_options'))
@@ -84,7 +84,7 @@ class ApplicationFormFieldForm
                         Repeater::make('options')
                             ->label(__('admin.application_form.options'))
                             ->hiddenLabel()
-                            ->columns(12)
+                            ->columns(['default' => 1, 'md' => 12])
                             ->reorderable()
                             ->defaultItems(1)
                             ->schema([
@@ -93,20 +93,20 @@ class ApplicationFormFieldForm
                                     ->required()
                                     ->maxLength(120)
                                     ->helperText(__('admin.application_form.option_value_help'))
-                                    ->columnSpan(['default' => 12, 'md' => 4]),
+                                    ->columnSpan(['default' => 1, 'md' => 4]),
                                 TextInput::make('label.en')
                                     ->label(__('admin.application_form.option_label') . ' (EN)')
                                     ->maxLength(255)
-                                    ->columnSpan(['default' => 12, 'md' => 4]),
+                                    ->columnSpan(['default' => 1, 'md' => 4]),
                                 TextInput::make('label.hu')
                                     ->label(__('admin.application_form.option_label') . ' (HU)')
                                     ->maxLength(255)
-                                    ->columnSpan(['default' => 12, 'md' => 4]),
+                                    ->columnSpan(['default' => 1, 'md' => 4]),
                             ]),
                     ]),
 
                 Section::make(__('admin.application_form.section_behaviour'))
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->columnSpanFull()
                     ->components([
                         TextInput::make('key')
@@ -126,7 +126,7 @@ class ApplicationFormFieldForm
                                 ? __('admin.application_form.key_locked')
                                 : __('admin.application_form.key_help'))
                             ->default(fn (callable $get) => Str::camel((string) $get('label_en')))
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         TextInput::make('max_length')
                             ->label(__('admin.application_form.max_length'))
                             ->numeric()
@@ -137,7 +137,7 @@ class ApplicationFormFieldForm
                                 default => '255',
                             })
                             ->helperText(__('admin.application_form.max_length_help'))
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         TextInput::make('position')
                             ->label(__('admin.common.sort'))
                             ->integer()
@@ -145,17 +145,17 @@ class ApplicationFormFieldForm
                             ->step(1)
                             ->helperText(__('admin.common.sort_help'))
                             ->default(0)
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         Toggle::make('is_required')
                             ->label(__('admin.application_form.required'))
                             ->helperText(__('admin.application_form.required_help'))
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         Toggle::make('is_active')
                             ->label(__('admin.application_form.active'))
                             ->default(true)
                             ->helperText(__('admin.application_form.active_help'))
                             ->disabled(fn (?ApplicationFormField $record) => $record?->is_system ?? false)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         Textarea::make('system_note')
                             ->label('')
                             ->visible(fn (?ApplicationFormField $record) => $record?->is_system ?? false)
@@ -166,6 +166,6 @@ class ApplicationFormFieldForm
                             ->columnSpanFull(),
                     ]),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 }

@@ -19,7 +19,7 @@ class UserForm
                     ->label(__('admin.common.name'))
                     ->required()
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('email')
                     ->label(__('admin.users.login_email'))
                     ->required()
@@ -28,7 +28,7 @@ class UserForm
                     ->maxLength(180)
                     ->placeholder(fn () => OrgEmail::forName('Lehoczki László'))
                     ->helperText(__('admin.users.login_email_help'))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Select::make('role_id')
                     ->label(__('admin.common.role'))
                     ->required()
@@ -39,7 +39,7 @@ class UserForm
                     ))
                     ->native(false)
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.user_role'))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('password')
                     ->label(__('admin.users.password'))
                     ->password()
@@ -50,8 +50,8 @@ class UserForm
                     ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
                     ->helperText(__('admin.users.password_help'))
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.user_password'))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 }

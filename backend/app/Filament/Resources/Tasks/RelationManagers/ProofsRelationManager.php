@@ -87,12 +87,12 @@ class ProofsRelationManager extends RelationManager
                     ->required()
                     ->live()
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.proof_kind'))
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 TextInput::make('title')
                     ->label(__('admin.common.title'))
                     ->required()
                     ->maxLength(200)
-                    ->columnSpan(['default' => 12, 'md' => 8]),
+                    ->columnSpan(['default' => 1, 'md' => 8]),
                 Textarea::make('body')
                     ->label(__('admin.tasks.proof_notes'))
                     ->rows(3)
@@ -129,7 +129,7 @@ class ProofsRelationManager extends RelationManager
                     ->preserveFilenames(false)
                     ->columnSpan(12),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 
     public function table(Table $table): Table

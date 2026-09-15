@@ -24,8 +24,8 @@ class MemberPositionFields
      */
     public static function components(array $columnSpans = []): array
     {
-        $positionsSpan = $columnSpans['positions'] ?? ['default' => 12, 'md' => 6];
-        $mainSpan = $columnSpans['main'] ?? ['default' => 12, 'md' => 6];
+        $positionsSpan = $columnSpans['positions'] ?? ['default' => 1, 'md' => 6];
+        $mainSpan = $columnSpans['main'] ?? ['default' => 1, 'md' => 6];
 
         return [
             Select::make('group_ids')

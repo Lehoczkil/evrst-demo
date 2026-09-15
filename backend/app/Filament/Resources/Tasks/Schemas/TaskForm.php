@@ -38,14 +38,14 @@ class TaskForm
             ->components([
                 Section::make(__('admin.tasks.section_details'))
                     ->columnSpanFull()
-                    ->columns(12)
+                    ->columns(['default' => 1, 'md' => 12])
                     ->components([
                 TextInput::make('title')
                     ->label(__('admin.common.title'))
                     ->required()
                     ->maxLength(180)
                     ->disabled(fn ($record) => self::definitionLocked($record))
-                    ->columnSpan(['default' => 12, 'md' => 8]),
+                    ->columnSpan(['default' => 1, 'md' => 8]),
                 // Status select narrows to the moves $user is allowed to
                 // make from the current row's status. On create the task
                 // always starts as TODO, so the field is hidden then.
@@ -68,7 +68,7 @@ class TaskForm
                         && count($record->allowedTransitionsFor(auth()->user())) <= 1)
                     ->dehydrated()
                     ->visibleOn('edit')
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 // Admin-only, and not merely hidden: a field Filament does
                 // not render is a field it does not dehydrate, so a manager
                 // saving a private task cannot flip it public by editing
@@ -78,7 +78,7 @@ class TaskForm
                     ->helperText(__('admin.tasks.is_private_help'))
                     ->visible(fn () => auth()->user()?->isAdmin() ?? false)
                     ->default(false)
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 Textarea::make('description')
                     ->label(__('admin.common.description'))
                     ->required()
@@ -101,7 +101,7 @@ class TaskForm
                     ->preload()
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_supervisor'))
                     ->disabled(fn ($record) => self::definitionLocked($record))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Select::make('assignees')
                     ->label(__('admin.tasks.assignees'))
                     ->required()
@@ -112,14 +112,14 @@ class TaskForm
                     ->searchable()
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_assignees'))
                     ->disabled(fn ($record) => self::definitionLocked($record))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 DatePicker::make('due_date')
                     ->label(__('admin.tasks.due_date'))
                     ->required()
                     ->displayFormat('d M Y')
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.task_due_date'))
                     ->disabled(fn ($record) => self::definitionLocked($record))
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 Select::make('priority')
                     ->label(__('admin.tasks.priority'))
                     ->options(fn () => collect(Task::priorities())
@@ -129,7 +129,7 @@ class TaskForm
                     ->required()
                     ->native(false)
                     ->disabled(fn ($record) => self::definitionLocked($record))
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 Select::make('category')
                     ->label(__('admin.tasks.category'))
                     ->options(fn () => collect(Task::categories())
@@ -139,7 +139,7 @@ class TaskForm
                     ->native(false)
                     ->placeholder(__('admin.tasks.no_category'))
                     ->disabled(fn ($record) => self::definitionLocked($record))
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 Select::make('parent_task_id')
                     ->label(__('admin.tasks.parent'))
                     ->options(function ($record) {
@@ -155,7 +155,7 @@ class TaskForm
                     ->placeholder(__('admin.tasks.no_parent'))
                     ->helperText(__('admin.tasks.parent_help'))
                     ->disabled(fn ($record) => self::definitionLocked($record))
-                    ->columnSpan(['default' => 12, 'md' => 8]),
+                    ->columnSpan(['default' => 1, 'md' => 8]),
                 TextInput::make('position')
                     ->label(__('admin.tasks.position'))
                     ->integer()
@@ -164,7 +164,7 @@ class TaskForm
                     ->helperText(__('admin.common.sort_help'))
                     ->default(0)
                     ->disabled(fn ($record) => self::definitionLocked($record))
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                     ]),
             ]);
     }

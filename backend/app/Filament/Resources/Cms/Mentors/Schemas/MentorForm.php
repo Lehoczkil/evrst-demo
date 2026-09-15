@@ -17,12 +17,12 @@ class MentorForm
                     ->label(__('admin.common.name'))
                     ->required()
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('email')
                     ->label(__('admin.common.email'))
                     ->email()
                     ->maxLength(180)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('position')
                     ->label(__('admin.sponsors.sort_order'))
                     ->integer()
@@ -30,7 +30,7 @@ class MentorForm
                     ->step(1)
                     ->helperText(__('admin.common.sort_help'))
                     ->default(0)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 FileUpload::make('photo')
                     ->label(__('admin.team.photo'))
                     ->acceptedFileTypes(Uploads::PHONE_IMAGE_TYPES)
@@ -40,6 +40,6 @@ class MentorForm
                     ->disk('public')
                     ->columnSpanFull(),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 }

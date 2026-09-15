@@ -57,18 +57,18 @@ class ApplicationFormSectionResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->columns(12)
+            ->columns(['default' => 1, 'md' => 12])
             ->components([
                 TextInput::make('title_en')
                     ->label(__('admin.application_form.section_title') . ' (EN)')
                     ->required()
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('title_hu')
                     ->label(__('admin.application_form.section_title') . ' (HU)')
                     ->required()
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 /*
                   The SPA renders this under the section heading
                   (JoinUsPage.vue) and ApplicationForm::schema() has always
@@ -81,12 +81,12 @@ class ApplicationFormSectionResource extends Resource
                     ->label(__('admin.application_form.section_description') . ' (EN)')
                     ->rows(2)
                     ->maxLength(500)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Textarea::make('description_hu')
                     ->label(__('admin.application_form.section_description') . ' (HU)')
                     ->rows(2)
                     ->maxLength(500)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('key')
                     ->label(__('admin.application_form.key'))
                     ->required()
@@ -94,7 +94,7 @@ class ApplicationFormSectionResource extends Resource
                     ->rule('regex:/^[a-z][a-z0-9\-]*$/')
                     ->validationMessages(['regex' => __('admin.application_form.section_key_invalid')])
                     ->unique(ignoreRecord: true)
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 TextInput::make('position')
                     ->label(__('admin.common.sort'))
                     ->integer()
@@ -102,11 +102,11 @@ class ApplicationFormSectionResource extends Resource
                     ->step(1)
                     ->helperText(__('admin.common.sort_help'))
                     ->default(0)
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 Toggle::make('is_active')
                     ->label(__('admin.application_form.active'))
                     ->default(true)
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
             ]);
     }
 

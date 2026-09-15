@@ -18,7 +18,7 @@ class AboutProjectForm
                     ->label(__('admin.common.title'))
                     ->required()
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 8]),
+                    ->columnSpan(['default' => 1, 'md' => 8]),
                 TextInput::make('position')
                     ->label(__('admin.sponsors.sort_order'))
                     ->integer()
@@ -26,18 +26,18 @@ class AboutProjectForm
                     ->step(1)
                     ->helperText(__('admin.common.sort_help'))
                     ->default(0)
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 DateTimePicker::make('start_at')
                     ->label(__('admin.events.start_at'))
                     ->seconds(false)
                     ->displayFormat('d M Y H:i')
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 DateTimePicker::make('end_at')
                     ->label(__('admin.events.end_at'))
                     ->seconds(false)
                     ->displayFormat('d M Y H:i')
                     ->after('start_at')
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 /*
                   Per-vehicle facts the SPA used to keep in its message
                   files and match to a project by its POSITION in the
@@ -53,24 +53,24 @@ class AboutProjectForm
                     ])
                     ->native(false)
                     ->helperText(__('admin.cms.project_state_help'))
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 TextInput::make('years')
                     ->label(__('admin.cms.project_years'))
                     ->maxLength(40)
                     ->placeholder('2024 — 2025')
                     ->helperText(__('admin.cms.project_years_help'))
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
                 TextInput::make('apogee_en')
                     ->label(__('admin.cms.project_apogee') . ' (EN)')
                     ->maxLength(80)
                     ->placeholder('Apogee reached · 640 m')
                     ->helperText(__('admin.cms.project_apogee_help'))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('apogee_hu')
                     ->label(__('admin.cms.project_apogee') . ' (HU)')
                     ->maxLength(80)
                     ->placeholder('Elért csúcsmagasság · 640 m')
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('discord_webhook_url')
                     ->label(__('admin.cms.project_webhook'))
                     ->url()
@@ -82,13 +82,13 @@ class AboutProjectForm
                     ->label(__('admin.common.description') . ' (EN)')
                     ->rows(4)
                     ->maxLength(500)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Textarea::make('description_hu')
                     ->label(__('admin.common.description') . ' (HU)')
                     ->rows(4)
                     ->maxLength(500)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 }

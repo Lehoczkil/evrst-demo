@@ -18,17 +18,17 @@ class SponsorForm
                     ->label(__('admin.common.name'))
                     ->required()
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('url')
                     ->label(__('admin.common.website'))
                     ->url()
                     ->placeholder('https://example.com')
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('year')
                     ->label(__('admin.common.year'))
                     ->numeric()
                     ->placeholder('e.g. 2025')
-                    ->columnSpan(['default' => 6, 'md' => 3]),
+                    ->columnSpan(['default' => 1, 'md' => 3]),
                 TextInput::make('position')
                     ->label(__('admin.sponsors.sort_order'))
                     ->integer()
@@ -37,17 +37,17 @@ class SponsorForm
                     ->helperText(__('admin.common.sort_help'))
                     ->default(0)
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.sponsor_position'))
-                    ->columnSpan(['default' => 6, 'md' => 3]),
+                    ->columnSpan(['default' => 1, 'md' => 3]),
                 Textarea::make('description_en')
                     ->label(__('admin.common.description') . ' (EN)')
                     ->rows(3)
                     ->maxLength(500)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Textarea::make('description_hu')
                     ->label(__('admin.common.description') . ' (HU)')
                     ->rows(3)
                     ->maxLength(500)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 FileUpload::make('logo')
                     ->label(__('admin.sponsors.logo'))
                     // iPhone Safari uploads as image/heic and Android sometimes as
@@ -68,6 +68,6 @@ class SponsorForm
                     ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.sponsor_logo'))
                     ->columnSpanFull(),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 }

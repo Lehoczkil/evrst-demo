@@ -25,12 +25,12 @@ class TeamMemberGroupForm
                             $set('slug', Str::slug($state));
                         }
                     })
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('name_hu')
                     ->label(__('admin.common.name') . ' (HU)')
                     ->required()
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('slug')
                     ->label(__('admin.team.group_slug'))
                     ->required()
@@ -38,7 +38,7 @@ class TeamMemberGroupForm
                     ->alphaDash()
                     ->helperText(__('admin.team.group_slug_help'))
                     ->unique(table: 'team_member_groups', column: 'slug', ignoreRecord: true)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Select::make('parent_id')
                     ->label(__('admin.team.group_parent'))
                     ->options(fn ($record) => TeamMemberGroup::query()
@@ -49,7 +49,7 @@ class TeamMemberGroupForm
                         ->all())
                     ->searchable()
                     ->placeholder('—')
-                    ->columnSpan(['default' => 12, 'md' => 3]),
+                    ->columnSpan(['default' => 1, 'md' => 3]),
                 TextInput::make('position')
                     ->label(__('admin.sponsors.sort_order'))
                     ->integer()
@@ -57,12 +57,12 @@ class TeamMemberGroupForm
                     ->step(1)
                     ->helperText(__('admin.common.sort_help'))
                     ->default(0)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Toggle::make('is_public')
                     ->label(__('admin.team.group_public'))
                     ->default(true)
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 }

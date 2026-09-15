@@ -24,12 +24,12 @@ class EventForm
                             ->label(__('admin.common.title') . ' (EN)')
                             ->required()
                             ->maxLength(180)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         TextInput::make('title_hu')
                             ->label(__('admin.common.title') . ' (HU)')
                             ->required()
                             ->maxLength(180)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         Select::make('status')
                             ->label(__('admin.common.status'))
                             ->options([
@@ -39,7 +39,7 @@ class EventForm
                             ->default('DRAFT')
                             ->required()
                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.event_status'))
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         DateTimePicker::make('start_at')
                             ->label(__('admin.events.start_at'))
                             ->seconds(false)
@@ -54,7 +54,7 @@ class EventForm
                             ->minDate(fn (string $operation) => $operation === 'create' ? now() : null)
                             ->after(fn (string $operation) => $operation === 'create' ? now()->subMinute() : null)
                             ->hintIcon('heroicon-o-question-mark-circle', tooltip: __('admin.help.fields.event_date_range'))
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         DateTimePicker::make('end_at')
                             ->label(__('admin.events.end_at'))
                             ->seconds(false)
@@ -62,7 +62,7 @@ class EventForm
                             ->after('start_at')
                             ->after(fn (string $operation) => $operation === 'create' ? now() : null)
                             ->minDate(fn (Get $get) => $get('start_at') ?: now())
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                         TextInput::make('position')
                             ->label(__('admin.common.sort'))
                             ->integer()
@@ -70,20 +70,20 @@ class EventForm
                             ->step(1)
                             ->helperText(__('admin.common.sort_help'))
                             ->default(0)
-                            ->columnSpan(['default' => 12, 'md' => 4]),
+                            ->columnSpan(['default' => 1, 'md' => 4]),
                     ])
-                    ->columns(12),
+                    ->columns(['default' => 1, 'md' => 12]),
 
                 Section::make(__('admin.events.content'))
                     ->components([
                         Textarea::make('content_en')
                             ->label(__('admin.events.content') . ' (EN)')
                             ->rows(5)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         Textarea::make('content_hu')
                             ->label(__('admin.events.content') . ' (HU)')
                             ->rows(5)
-                            ->columnSpan(['default' => 12, 'md' => 6]),
+                            ->columnSpan(['default' => 1, 'md' => 6]),
                         FileUpload::make('image')
                             ->label(__('admin.events.image'))
                             ->acceptedFileTypes(Uploads::PHONE_IMAGE_TYPES)
@@ -93,7 +93,7 @@ class EventForm
                             ->disk('public')
                             ->columnSpanFull(),
                     ])
-                    ->columns(12),
+                    ->columns(['default' => 1, 'md' => 12]),
             ]);
     }
 }

@@ -30,8 +30,8 @@ class ContactGroupForm
                     ->numeric()
                     ->default(0)
                     ->minValue(0)
-                    ->columnSpan(['default' => 12, 'md' => 4]),
+                    ->columnSpan(['default' => 1, 'md' => 4]),
             ])
-            ->columns(12);
+            ->columns(['default' => 1, 'md' => 12]);
     }
 }

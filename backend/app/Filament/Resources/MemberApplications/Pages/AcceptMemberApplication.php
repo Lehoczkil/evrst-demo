@@ -109,7 +109,7 @@ class AcceptMemberApplication extends Page implements HasForms
                         }
                         $set('email', OrgEmail::uniqueForName((string) $state));
                     })
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('email')
                     ->label(__('admin.applications.org_email'))
                     ->required()
@@ -120,7 +120,7 @@ class AcceptMemberApplication extends Page implements HasForms
                     ->live(onBlur: true)
                     ->afterStateUpdated(fn (callable $set) => $set('email_is_custom', true))
                     ->helperText(__('admin.applications.org_email_help'))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 Hidden::make('email_is_custom')
                     ->default(false)
                     ->dehydrated(false),
@@ -130,7 +130,7 @@ class AcceptMemberApplication extends Page implements HasForms
                     ->email()
                     ->maxLength(180)
                     ->helperText(__('admin.applications.email_help'))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 /*
                   The role the new account gets. Every accepted application
                   used to be hardcoded to Member with nothing on screen
@@ -159,18 +159,18 @@ class AcceptMemberApplication extends Page implements HasForms
                     ->placeholder(__('admin.applications.role_placeholder'))
                     ->native(false)
                     ->helperText(__('admin.applications.role_help'))
-                    ->columnSpan(['default' => 12, 'md' => 6]),
+                    ->columnSpan(['default' => 1, 'md' => 6]),
                 TextInput::make('degree_en')
                     ->label(__('admin.team.degree') . ' (EN)')
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 3]),
+                    ->columnSpan(['default' => 1, 'md' => 3]),
                 TextInput::make('degree_hu')
                     ->label(__('admin.team.degree') . ' (HU)')
                     ->maxLength(120)
-                    ->columnSpan(['default' => 12, 'md' => 3]),
+                    ->columnSpan(['default' => 1, 'md' => 3]),
                 ...MemberPositionFields::components(),
             ])
-            ->columns(12)
+            ->columns(['default' => 1, 'md' => 12])
             ->statePath('data');
     }
 
