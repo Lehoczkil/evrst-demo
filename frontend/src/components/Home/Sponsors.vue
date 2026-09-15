@@ -50,7 +50,7 @@ const logoFor = (logo: string | undefined) => {
     return logo;
   }
 
-  return imgUrl(path, { width: 200, format: 'webp', fit: 'contain' });
+  return imgUrl(path, { width: 840, format: 'webp', fit: 'contain' });
 };
 /*---------------------------------------------
 /  COMPUTED
@@ -206,9 +206,15 @@ const eyebrow = computed(() => t('sponsors.eyebrow', { count: rows.value.length 
     letter-spacing: -0.025em;
   }
 
+  /*
+    Sized against the NAME, not against the image. A sponsor without a
+    logo gets its name set in display type filling most of the cell, so a
+    200x64 mark beside it read as an afterthought. Scales with the
+    viewport the same way `b` above does.
+  */
   img {
-    max-width: 200px;
-    max-height: 64px;
+    max-width: min(100%, 420px);
+    max-height: clamp(76px, 9vw, 132px);
     object-fit: contain;
     object-position: left center;
   }

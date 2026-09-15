@@ -58,6 +58,15 @@ class SponsorForm
                     ->acceptedFileTypes(Uploads::PHONE_IMAGE_TYPES)
                     ->getUploadedFileNameForStorageUsing(Uploads::storedName(...))
                     ->maxSize(8192)
+                    // maxSize caps the BYTES, not the pixels, and the two
+                    // are only loosely related: the logo that broke the
+                    // public site was 503 KB and ~50 megapixels, which GD
+                    // cannot decode inside any sane memory limit. Resizing
+                    // on the way in means /api/img never meets one again.
+                    ->imageResizeMode('contain')
+                    ->imageResizeUpscale(false)
+                    ->imageResizeTargetWidth('1600')
+                    ->imageResizeTargetHeight('1600')
                     ->openable()
                     ->downloadable()
                     ->directory('sponsors')
